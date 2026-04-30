@@ -160,9 +160,30 @@
         <field name="name">freight.sea.quotation.list</field>
         <field name="model">freight.sea.quotation</field>
         <field name="mode">primary</field>
-        <field name="inherit_id" ref="sale.view_order_tree" />
+        <field name="inherit_id" ref="sale.view_quotation_tree" />
         <field name="arch" type="xml">
             <data />
+        </field>
+    </record>
+
+    <record id="view_sea_quotation_search" model="ir.ui.view">
+        <field name="name">freight.sea.quotation.search</field>
+        <field name="model">freight.sea.quotation</field>
+        <field name="arch" type="xml">
+            <search string="Sea Quotation">
+                <field name="name" string="Quotation Number"/>
+                <field name="partner_id"/>
+                <field name="user_id" string="Salesperson"/>
+                <field name="team_id"/>
+                <field name="state"/>
+                <field name="quotation_type"/>
+                <field name="freight_type"/>
+                <separator/>
+                <filter name="my_quotation" string="My Quotations" domain="[('user_id', '=', uid)]"/>
+                <filter name="filter_draft_sent" string="Quotation" domain="[('state', 'in', ['draft', 'sent'])]"/>
+                <filter name="filter_sale" string="Sales Order" domain="[('state', '=', 'sale')]"/>
+                <filter name="filter_cancel" string="Cancelled" domain="[('state', '=', 'cancel')]"/>
+            </search>
         </field>
     </record>
 
@@ -170,6 +191,9 @@
         <field name="name">Sea Quotation</field>
         <field name="res_model">freight.sea.quotation</field>
         <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_sea_quotation_list"/>
         <field name="views" eval="[(ref('view_sea_quotation_list'), 'list'), (ref('view_sea_quotation_form'), 'form')]"/>
+        <field name="search_view_id" ref="view_sea_quotation_search"/>
+        <field name="context">{'search_default_my_quotation': 1}</field>
     </record>
 </odoo>
