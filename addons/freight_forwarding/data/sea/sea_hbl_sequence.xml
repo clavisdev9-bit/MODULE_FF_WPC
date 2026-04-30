@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="seq_freight_sea_hbl_bl_no" model="ir.sequence">
+            <field name="name">Sea Jobsheet BL Number</field>
+            <field name="code">freight.sea.hbl.bl_no</field>
+            <field name="prefix"></field>
+            <field name="padding">3</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_freight_sea_hbl_job_no" model="ir.sequence">
+            <field name="name">Sea Jobsheet Job Number</field>
+            <field name="code">freight.sea.hbl.job_no</field>
+            <field name="prefix"></field>
+            <field name="padding">3</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_sea_quotation_form" model="ir.ui.view">
+        <field name="name">freight.sea.quotation.form</field>
+        <field name="model">freight.sea.quotation</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="sale.view_order_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="quotation_type" />
+                <field name="freight_type" />
+                <field name="validity_date" />
+                <field name="quotation_title" />
+            </xpath>
+
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="email" />
+                <field name="phone" />
+                <field name="contact_person" />
+                <field name="salesman_id" />
+            </xpath>
+
+            <xpath expr="//group[@name='order_details']" position="replace">
+                <group>
+                    <field name="currency_id" />
+                    <field name="currency_rate" />
+                    <field name="pricelist_id" />
+                    <field name="payment_term_id" />
+                    <field name="service_level" />
+                    <field name="pricelist_id" readonly="state in ['cancel', 'sale']"
+                        groups="!product.group_product_pricelist" />
+                    <field name="delivery_type_id" />
+                    <field name="effective_date" />
+                    <field name="expiry_date" />
+                    <field name="reference_number" />
+                    <field name="commodity_id" />
+                </group>
+            </xpath>
+
+            <xpath expr="//group[@name='sale_header']" position="after">
+                <group string="Address">
+                    <group>
+                        <span>Source</span>
+                        <div class="o_address_format">
+                            <field name="source_street" placeholder="Street..."
+                                class="o_address_street" />
+                            <field name="source_street2" placeholder="Street 2..."
+                                class="o_address_street" />
+                            <field name="source_city" placeholder="City"
+                                class="o_address_city" />
+                            <field name="source_state_id" placeholder="State"
+                                class="o_address_state" />
+                            <field name="source_zip" placeholder="ZIP"
+                                class="o_address_zip" />
+                            <field name="source_country_id" placeholder="Country"
+                                class="o_address_country" />
+                        </div>
+                    </group>
+                    <group name="studio_group_7a4382">
+                        <span>Destination</span>
+                        <div class="o_address_format" name="studio_div_8cbbbf">
+                            <field name="destination_street" placeholder="Street..."
+                                class="o_address_street" />
+                            <field name="destination_street2" placeholder="Street 2..."
+                                class="o_address_street" />
+                            <field name="destination_city" placeholder="City"
+                                class="o_address_city" />
+                            <field name="destination_state_id" placeholder="State"
+                                class="o_address_state" />
+                            <field name="destination_zip" placeholder="ZIP"
+                                class="o_address_zip" />
+                            <field name="destination_country_id" placeholder="Country"
+                                class="o_address_country" />
+                        </div>
+                    </group>
+                </group>
+
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button
+                    name="action_convert_to_booking_direct"
+                    type="object"
+                    string="Convert to Sea Booking"
+                    class="oe_highlight"
+                />
+            </xpath>
+
+            <xpath expr="//page[@name='customer_signature']" position="after">
+                <page string="Extra Info">
+                    <group>
+                        <group>
+                            <field name="description_of_goods" />
+                            <field name="quantity" />
+                            <field name="has_insurance" />
+                            <field name="insurance_id" invisible="has_insurance == False" />
+                        </group>
+                        <group>
+                            <field name="actual_weight" />
+                            <field name="volume" />
+                            <field name="chargeable_weight" />
+                        </group>
+                    </group>
+                </page>
+
+                <page string="Dimension">
+                    <group>
+                        <group>
+                            <field name="loose_quantity" />
+                            <field name="pcs" />
+                            <field name="uom_id" />
+                        </group>
+                        <group>
+                            <field name="length" />
+                            <field name="width" />
+                            <field name="height" />
+                            <field name="dimension" />
+                        </group>
+                    </group>
+                </page>
+
+                <page string="Shipment Info">
+                    <group>
+                        <group string="Routing Information">
+                            <field name="port_of_loading_id" />
+                            <field name="port_of_discharge_id" />
+                            <field name="via_port_id" />
+                            <field name="shipping_line_id" />
+                            <field name="est_transit_time_days" string="Est. Transit Time" />
+                            <field name="est_transit_time_note" placeholder="Remark (optional)" />
+                            <field name="frequency" />
+                            <field name="note" widget="text" />
+                        </group>
+                        <group string="Commercial Information">
+                            <field name="origin_id" />
+                            <field name="destination_id" />
+                            <field name="via2_id" />
+                            <field name="via3_id" />
+                            <field name="frt_collect" />
+                        </group>
+                    </group>
+                </page>
+
+                <page string="Header &amp; Footer">
+                    <group>
+                        <field name="header" />
+                        <field name="special_instruction" />
+                        <field name="footer" />
+                    </group>
+                </page>
+
+                <page string="Cargo Info">
+                    <field name="cargo_info_ids" />
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sea_quotation_list" model="ir.ui.view">
+        <field name="name">freight.sea.quotation.list</field>
+        <field name="model">freight.sea.quotation</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="sale.view_order_tree" />
+        <field name="arch" type="xml">
+            <data />
+        </field>
+    </record>
+
+    <record id="action_freight_sea_quotation" model="ir.actions.act_window">
+        <field name="name">Sea Quotation</field>
+        <field name="res_model">freight.sea.quotation</field>
+        <field name="view_mode">list,form</field>
+        <field name="views" eval="[(ref('view_sea_quotation_list'), 'list'), (ref('view_sea_quotation_form'), 'form')]"/>
+    </record>
+</odoo>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_air_sales_activity_tracking" name="Activity Tracking"
+        parent="menu_sub_parent_air_sales"
+        action="action_freight_air_mawb"
+        sequence="10" />
+
+    <menuitem id="menu_air_sales_freight_quotation" name="Freight Quotation"
+        parent="menu_sub_parent_air_sales"
+        action="action_freight_sea_quotation"
+        sequence="20" />
+
+    <menuitem id="menu_sub_parent_air_sales_rate_enquiry" name="Rate Enquiry"
+        parent="menu_sub_parent_air_sales"
+        sequence="30" />
+
+    <menuitem id="menu_air_sales_rate_airline_surcharge" name="Airline Surcharge"
+        parent="menu_sub_parent_air_sales_rate_enquiry"
+        action="action_freight_airline"
+        sequence="10" />
+
+    <menuitem id="menu_air_sales_rate_airline_cost_enquiry" name="Airline Cost Enquiry"
+        parent="menu_sub_parent_air_sales_rate_enquiry"
+        action="action_freight_air_mawb"
+        sequence="20" />
+
+    <menuitem id="menu_air_sales_rate_cost_rate" name="Cost Rate"
+        parent="menu_sub_parent_air_sales_rate_enquiry"
+        action="action_freight_air_mawb"
+        sequence="30" />
+
+    <menuitem id="menu_sub_parent_air_sales_report" name="Report"
+        parent="menu_sub_parent_air_sales"
+        sequence="40" />
+
+    <menuitem id="menu_air_sales_report_airline_cost" name="Airline Cost"
+        parent="menu_sub_parent_air_sales_report"
+        action="action_freight_airline"
+        sequence="10" />
+
+    <menuitem id="menu_air_sales_report_agent_quotation" name="Agent Quotation"
+        parent="menu_sub_parent_air_sales_report"
+        action="action_freight_sea_quotation"
+        sequence="20" />
+
+    <menuitem id="menu_air_sales_report_customer_freight_quotation" name="Customer Freight Quotation"
+        parent="menu_sub_parent_air_sales_report"
+        action="action_freight_sea_quotation"
+        sequence="30" />
+
+    <menuitem id="menu_air_sales_report_customer_by_customer" name="Customer Freight Quotation By Customer"
+        parent="menu_sub_parent_air_sales_report"
+        action="action_freight_air_mawb"
+        sequence="40" />
+
+    <menuitem id="menu_air_sales_report_customer_by_salesman" name="Customer Freight Quotation By Salesman"
+        parent="menu_sub_parent_air_sales_report"
+        action="action_freight_air_mawb"
+        sequence="50" />
+
+    <menuitem id="menu_air_sales_report_iata_rate" name="IATA Rate"
+        parent="menu_sub_parent_air_sales_report"
+        action="action_freight_air_mawb"
+        sequence="60" />
+</odoo>

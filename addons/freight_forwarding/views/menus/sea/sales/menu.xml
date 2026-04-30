@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sea_sales_freight_quotation" name="Freight Quotation"
+        parent="menu_sub_parent_sea_sales"
+        action="action_freight_sea_quotation"  
+        sequence="10" />
+
+    <!-- <menuitem id="menu_sea_sales_sea_booking" name="Sea Booking"
+        parent="menu_sub_parent_sea_sales"
+        action="action_sea_booking"
+        sequence="20" /> -->
+
+    <menuitem id="menu_sea_sales_activity_log" name="Sales Activity Log"
+        parent="menu_sub_parent_sea_sales"
+        action="action_sea_sales_activity_log_quotation"
+        sequence="30" />
+
+    <menuitem id="menu_sub_parent_sea_sales_rate_enquiry" name="Rate Enquiry"
+        parent="menu_sub_parent_sea_sales"
+        sequence="40" />
+
+    <menuitem id="menu_sea_sales_rate_bb_rate" name="BB Rate"
+        parent="menu_sub_parent_sea_sales_rate_enquiry"
+        action="action_sea_sales_rate_bb_rate"
+        sequence="10" />
+
+    <menuitem id="menu_sea_sales_rate_customer_charge" name="Customer Charge Enquiry"
+        parent="menu_sub_parent_sea_sales_rate_enquiry"
+        action="action_sea_sales_rate_cust_charge"
+        sequence="20" />
+
+    <menuitem id="menu_sea_sales_rate_cost_rate" name="Cost Rate"
+        parent="menu_sub_parent_sea_sales_rate_enquiry"
+        action="action_sea_sales_rate_cost_rate"
+        sequence="30" />
+
+    <menuitem id="menu_sea_sales_rate_fcl_rate" name="FCL Rate"
+        parent="menu_sub_parent_sea_sales_rate_enquiry"
+        action="action_sea_sales_rate_fcl_rate"
+        sequence="40" />
+
+    <menuitem id="menu_sea_sales_rate_lcl_rate" name="LCL Rate"
+        parent="menu_sub_parent_sea_sales_rate_enquiry"
+        action="action_sea_sales_rate_lcl_rate"
+        sequence="50" />
+
+    <menuitem id="menu_sea_sales_rate_nomination_tariff" name="Nomination Tariff"
+        parent="menu_sub_parent_sea_sales_rate_enquiry"
+        action="action_sea_sales_rate_nomination_tariff"
+        sequence="60" />
+
+    <menuitem id="menu_sea_sales_rate_update_shipping_cost" name="Update Shipping Cost"
+        parent="menu_sub_parent_sea_sales_rate_enquiry"
+        action="action_sea_sales_rate_update_shipping"
+        sequence="70" />
+
+    <menuitem id="menu_sea_sales_rate_vendor_cost_rate" name="Vendor Cost Rate"
+        parent="menu_sub_parent_sea_sales_rate_enquiry"
+        action="action_sea_sales_rate_vendor_cost_rate"
+        sequence="80" />
+
+    <menuitem id="menu_sub_parent_sea_sales_statistical_analysis" name="Statistical Analysis"
+        parent="menu_sub_parent_sea_sales"
+        sequence="50" />
+
+    <menuitem id="menu_sea_sales_stat_ad_hoc" name="Ad-Hoc Enquiry"
+        parent="menu_sub_parent_sea_sales_statistical_analysis"
+        action="action_freight_air_mawb"
+        sequence="10" />
+</odoo>

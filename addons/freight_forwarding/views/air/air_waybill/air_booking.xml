@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_air_booking_list" model="ir.ui.view">
+        <field name="name">freight.air.booking.list</field>
+        <field name="model">freight.air.booking</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="booking_no"/>
+                <field name="booking_type"/>
+                <field name="job_no"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_air_booking_form" model="ir.ui.view">
+        <field name="name">freight.air.booking.form</field>
+        <field name="model">freight.air.booking</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <!-- MAIN -->
+                    <h1 class="oe_title">
+                        <field name="booking_no"/>
+                    </h1>
+                    <group>
+                        <field name="booking_type" widget="radio"
+                            options="{&quot;horizontal&quot;:true}" />
+                    </group>
+                    
+                    <group>
+                        <group>
+                            <field name="job_no"/>
+                            <field name="customer_id"/>
+                            <field name="nomination_cargo"/>
+                            <field name="booking_from_id"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="customer_ref"/>
+                            <field name="shipper_id"/>
+                            <field name="consignee_id"/>
+                        </group>
+                        <group>
+                            <field name="coloader_id"/>
+                            <field name="overseas_agent_id"/>
+                            <field name="overseas_agent_id_ref"/>
+                            <field name="departure_airport_id"/>
+                            <field name="destination_airport_id"/>
+                            <field name="origin_country_id"/>
+                            <field name="wt_val" widget="radio" options="{&quot;horizontal&quot;:true}"/>
+                            <field name="other" widget="radio" options="{&quot;horizontal&quot;:true}"/>
+                        </group>
+                    </group>
+                    <separator/>
+
+                    <!-- FLIGHT -->
+                    <group string="Flight Details">
+                        <group>
+                            <field name="first_flight_to"/>
+                            <field name="first_flight_by"/>
+                            <field name="first_flight_on"/>
+                        </group>
+                        <group>
+                            <field name="second_flight_to"/>
+                            <field name="second_flight_by"/>
+                            <field name="second_flight_on"/>
+                        </group>
+
+                        <separator/>
+
+                        <group>
+                            <field name="third_flight_to"/>
+                            <field name="third_flight_by"/>
+                            <field name="third_flight_on"/>
+                        </group>
+                        <group>
+                            <field name="fourth_flight_to"/>
+                            <field name="fourth_flight_by"/>
+                            <field name="fourth_flight_on"/>
+                        </group>
+
+                        <separator/>
+
+                        <group>
+                            <field name="service_level"/>
+                            <field name="pcs"/>
+                            <field name="uom_id"/>
+                        </group>
+                        <group>
+                            <field name="gross_weight"/>
+                            <field name="charge_weight"/>
+                            <field name="commodity_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" />
+                    </group>
+
+                    <notebook>
+                        <page string="Dimension">
+                            <group>
+                                <group>
+                                    <field name="loose_quantity" />
+                                    <field name="pcs" />
+                                </group>
+                                <group>
+                                    <field name="length" />
+                                    <field name="width" />
+                                    <field name="height" />
+                                    <field name="dimension" />
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Pickup Info">
+                            <group>
+                                <field name="pickup_no" />
+                                <field name="pickup_date" />
+                                <field name="transport_company_id" />
+                            </group>
+
+                            <separator/>
+
+                            <group>
+                                <group>
+                                    <field name="collect_from_id" />
+                                    <field name="collect_from_address" />
+                                    <field name="collect_from_phone" />
+                                </group>
+                                <group>
+                                    <field name="delivery_from_id" />
+                                    <field name="delivery_from_address" />
+                                    <field name="delivery_from_phone" />
+                                </group>
+                            </group>
+
+                            <separator />
+
+                            <group>
+                                <field name="status" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_air_booking" model="ir.actions.act_window">
+        <field name="name">Air Bookings</field>
+        <field name="res_model">freight.air.booking</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

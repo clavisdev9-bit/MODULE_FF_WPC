@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_customer" model="ir.actions.act_window">
+        <field name="name">Customer</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Customer')]</field>
+    </record>
+
+    <record id="action_freight_shipper" model="ir.actions.act_window">
+        <field name="name">Shipper</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Shipper')]</field>
+    </record>
+
+    <record id="action_freight_consignee" model="ir.actions.act_window">
+        <field name="name">Consignee</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Consignee')]</field>
+    </record>
+
+    <record id="action_freight_overseas_agent" model="ir.actions.act_window">
+        <field name="name">Overseas Agent</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Overseas Agent')]</field>
+    </record>
+
+    <record id="action_freight_coloader" model="ir.actions.act_window">
+        <field name="name">Co-loader</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Co-loader')]</field>
+    </record>
+</odoo>

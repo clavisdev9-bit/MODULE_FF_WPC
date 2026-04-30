@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_vat_code" model="ir.actions.act_window">
+        <field name="name">VAT Code</field>
+        <field name="res_model">account.tax</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+</odoo>

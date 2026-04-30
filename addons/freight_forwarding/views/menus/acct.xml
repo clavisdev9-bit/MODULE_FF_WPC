@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_acct_partner" name="Partners"
+        parent="menu_parent_acct"
+        sequence="5" />
+    <menuitem id="menu_area" name="Area"
+        parent="menu_parent_acct"
+        action="action_freight_area"
+        sequence="10" />
+    <menuitem id="menu_charge_code" name="Charge Code"
+        parent="menu_parent_acct"
+        action="action_freight_charge_code"
+        sequence="20" />
+    <menuitem id="menu_division" name="Division"
+        parent="menu_parent_acct"
+        action="action_freight_division"
+        sequence="30" />
+    <menuitem id="menu_payment_term" name="Payment Term"
+        parent="menu_parent_acct"
+        action="action_freight_payment_term"
+        sequence="40" />
+    <menuitem id="menu_vat_code" name="VAT Code"
+        parent="menu_parent_acct"
+        action="action_freight_vat_code"
+        sequence="50" />
+    <!-- <menuitem id="menu_vendor" name="Vendor"
+        parent="menu_sub_parent_acct_partner"
+        action="action_freight_vendor"
+        sequence="10" />
+    <menuitem id="menu_billing_party" name="Billing Party"
+        parent="menu_sub_parent_acct_partner"
+        action="action_freight_billing_party"
+        sequence="20" /> -->
+</odoo>

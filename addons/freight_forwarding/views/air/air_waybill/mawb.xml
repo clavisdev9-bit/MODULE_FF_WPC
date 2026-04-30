@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_air_mawb_list" model="ir.ui.view">
+        <field name="name">freight.air.mawb.list</field>
+        <field name="model">freight.air.mawb</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="mawb_no" />
+                <field name="quotation_id" />
+                <field name="booking_id" />
+                <field name="job_no" />
+                <field name="job_date" />
+                <field name="customer_id" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_air_mawb_form" model="ir.ui.view">
+        <field name="name">freight.air.mawb.form</field>
+        <field name="model">freight.air.mawb</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1 class="oe_title">
+                        <field name="mawb_no" />
+                    </h1>
+
+                    <group>
+                        <group>
+                            <field name="quotation_id" />
+                            <field name="booking_id" />
+                            <field name="job_no" />
+                            <field name="job_date" />
+                            <field name="customer_id" />
+                            <field name="customer_ref" />
+                            <field name="credit_term_id" />
+                            <field name="nomination_cargo" />
+                            <field name="shipper_id" />
+                            <field name="shipper_address" />
+                        </group>
+                        <group>
+                            <field name="consignee_id" />
+                            <field name="consignee_address" />
+                            <field name="consignee_account_no" />
+                            <field name="notify_id" />
+                            <field name="notify_address" />
+                            <field name="overseas_agent_id" />
+                            <field name="agent_id" />
+                            <field name="iata_account_no" />
+                            <field name="awb_file" filename="awb_filename" />
+                            <field name="awb_filename" invisible="1" />
+                            <field name="note" />
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="extra_info_ids"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Shipment Info">
+                            <group>
+                                <field name="departure_airport_id"/>
+                            </group>
+
+                            <separator />
+
+                            <group>
+                                <group>
+                                    <field name="first_carrier_to_id"/>
+                                    <field name="first_carrier_by_id"/>
+                                    <field name="first_carrier_date"/>
+                                    <field name="first_carrier_eta"/>
+                                </group>
+                                <group>
+                                    <field name="second_carrier_to_id"/>
+                                    <field name="second_carrier_by_id"/>
+                                    <field name="second_carrier_date"/>
+                                    <field name="second_carrier_eta"/>
+                                </group>
+                            </group>
+
+                            <separator/>
+
+                            <group>
+                                <group>
+                                    <field name="third_carrier_to_id"/>
+                                    <field name="third_carrier_by_id"/>
+                                    <field name="third_carrier_date"/>
+                                    <field name="third_carrier_eta"/>
+                                </group>
+                                <group>
+                                    <field name="fourth_carrier_to_id"/>
+                                    <field name="fourth_carrier_by_id"/>
+                                    <field name="fourth_carrier_date"/>
+                                    <field name="fourth_carrier_eta"/>
+                                </group>
+                            </group>
+
+                            <separator/>
+
+                            <group>
+                                <field name="destination_airport_id"/>
+                                <field name="currency_id"/>
+                            </group>
+
+                            <separator />
+
+                            <group>
+                                <group>
+                                    <field name="weight_value"/>
+                                    <field name="billing_party_id"/>
+                                </group>
+                                <group>
+                                    <field name="other_value"/>
+                                    <field name="other_billing_party_id"/>
+                                    <field name="currency_code"/>
+                                    <field name="currency_rate"/>
+                                </group>
+                            </group>
+
+                            <separator/>
+
+                            <group>
+                                <group>
+                                    <field name="declared_value_for_carriage"/>
+                                    <field name="customs_currency_id"/>
+                                    <field name="custom_local_amount"/>
+                                    <field name="ship_mode"/>
+                                </group>
+                                <group>
+                                    <field name="insurance_currency_id"/>
+                                    <field name="insurance_amount"/>
+                                    <field name="insurance_local_amount"/>
+                                    <field name="dg_cargo"/>
+                                </group>
+                            </group>
+
+                            <separator/>
+
+                            <group>
+                                <group>
+                                    <field name="handling_information"/>
+                                    <field name="accounting_information"/>
+                                </group>
+                                <group>
+                                    <field name="coloader_id"/>
+                                    <field name="permit_no"/>
+                                    <field name="print_dimension"/>
+                                    <field name="delivery_type_id"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Custom Permit">
+                            <group>
+                                <field name="custom_permit_ids"
+                                    context="{'from_mawb_inline': True}"
+                                    nolabel="1">
+                                    <list>
+                                        <field name="no_document"/>
+                                        <field name="date"/>
+                                        <field name="status"/>
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+
+                        <page string="Package Details">
+                            <group>
+                                <field name="package_details_ids"
+                                    context="{'from_mawb_inline': True}"
+                                    nolabel="1">
+                                    <list>
+                                        <field name="package_type"/>
+                                        <field name="types_of_cargo"/>
+                                        <field name="quantity"/>
+                                        <field name="gross_weight"/>
+                                        <field name="total_volume"/>
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Document List">
+                            <group>
+                                <field name="document_list_ids"
+                                    context="{'from_mawb_inline': True}"
+                                    nolabel="1">
+                                    <list>
+                                        <field name="no_document"/>
+                                        <field name="date"/>
+                                        <field name="status"/>
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_air_mawb" model="ir.actions.act_window">
+        <field name="name">Air MAWB</field>
+        <field name="res_model">freight.air.mawb</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

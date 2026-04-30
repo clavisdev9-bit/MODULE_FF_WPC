@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Invoice Views -->
+    <record id="view_sea_hbl_invoice_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.invoice.list</field>
+        <field name="model">freight.sea.hbl.invoice</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="no_document" />
+                <field name="date" />
+                <field name="invoice_reference" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_invoice_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.invoice.form</field>
+        <field name="model">freight.sea.hbl.invoice</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                        <field name="no_document" />
+                        <field name="description" />
+                    </group>
+                    <group>
+                        <field name="date" />
+                        <field name="document" filename="document_filename" />
+                        <field name="document_filename" invisible="1" />
+                    </group>
+                    <group>
+                        <field name="invoice_reference" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Debit Note Views -->
+    <record id="view_sea_hbl_debit_note_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.debit.note.list</field>
+        <field name="model">freight.sea.hbl.debit.note</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="no_document" />
+                <field name="date" />
+                <field name="debit_note_reference" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_debit_note_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.debit.note.form</field>
+        <field name="model">freight.sea.hbl.debit.note</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                        <field name="no_document" />
+                        <field name="description" />
+                    </group>
+                    <group>
+                        <field name="date" />
+                        <field name="document" filename="document_filename" />
+                        <field name="document_filename" invisible="1" />
+                    </group>
+                    <group>
+                        <field name="debit_note_reference" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Credit Note Views -->
+    <record id="view_sea_hbl_credit_note_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.credit.note.list</field>
+        <field name="model">freight.sea.hbl.credit.note</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="no_document" />
+                <field name="date" />
+                <field name="credit_note_reference" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_credit_note_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.credit.note.form</field>
+        <field name="model">freight.sea.hbl.credit.note</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                        <field name="no_document" />
+                        <field name="description" />
+                    </group>
+                    <group>
+                        <field name="date" />
+                        <field name="document" filename="document_filename" />
+                        <field name="document_filename" invisible="1" />
+                    </group>
+                    <group>
+                        <field name="credit_note_reference" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Provision Cost Views -->
+    <record id="view_sea_hbl_provision_cost_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.provision.cost.list</field>
+        <field name="model">freight.sea.hbl.provision.cost</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="no_document" />
+                <field name="date" />
+                <field name="provision_cost_reference" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_provision_cost_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.provision.cost.form</field>
+        <field name="model">freight.sea.hbl.provision.cost</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                        <field name="no_document" />
+                        <field name="description" />
+                    </group>
+                    <group>
+                        <field name="date" />
+                        <field name="document" filename="document_filename" />
+                        <field name="document_filename" invisible="1" />
+                    </group>
+                    <group>
+                        <field name="provision_cost_reference" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vendor Invoice Views -->
+    <record id="view_sea_hbl_vendor_invoice_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.vendor.invoice.list</field>
+        <field name="model">freight.sea.hbl.vendor.invoice</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="no_document" />
+                <field name="date" />
+                <field name="vendor_invoice_reference" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_vendor_invoice_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.vendor.invoice.form</field>
+        <field name="model">freight.sea.hbl.vendor.invoice</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                        <field name="no_document" />
+                        <field name="description" />
+                    </group>
+                    <group>
+                        <field name="date" />
+                        <field name="document" filename="document_filename" />
+                        <field name="document_filename" invisible="1" />
+                    </group>
+                    <group>
+                        <field name="vendor_invoice_reference" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vendor Debit Note Views -->
+    <record id="view_sea_hbl_vendor_debit_note_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.vendor.debit.note.list</field>
+        <field name="model">freight.sea.hbl.vendor.debit.note</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="no_document" />
+                <field name="date" />
+                <field name="vendor_debit_note_reference" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_vendor_debit_note_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.vendor.debit.note.form</field>
+        <field name="model">freight.sea.hbl.vendor.debit.note</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                        <field name="no_document" />
+                        <field name="description" />
+                    </group>
+                    <group>
+                        <field name="date" />
+                        <field name="document" filename="document_filename" />
+                        <field name="document_filename" invisible="1" />
+                    </group>
+                    <group>
+                        <field name="vendor_debit_note_reference" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vendor Credit Note Views -->
+    <record id="view_sea_hbl_vendor_credit_note_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.vendor.credit.note.list</field>
+        <field name="model">freight.sea.hbl.vendor.credit.note</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="no_document" />
+                <field name="date" />
+                <field name="vendor_credit_note_reference" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_vendor_credit_note_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.vendor.credit.note.form</field>
+        <field name="model">freight.sea.hbl.vendor.credit.note</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                        <field name="no_document" />
+                        <field name="description" />
+                    </group>
+                    <group>
+                        <field name="date" />
+                        <field name="document" filename="document_filename" />
+                        <field name="document_filename" invisible="1" />
+                    </group>
+                    <group>
+                        <field name="vendor_credit_note_reference" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Cash Purchase Views -->
+    <record id="view_sea_hbl_cash_purchase_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.cash.purchase.list</field>
+        <field name="model">freight.sea.hbl.cash.purchase</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="no_document" />
+                <field name="date" />
+                <field name="cash_purchase_reference" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_cash_purchase_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.cash.purchase.form</field>
+        <field name="model">freight.sea.hbl.cash.purchase</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                        <field name="no_document" />
+                        <field name="description" />
+                    </group>
+                    <group>
+                        <field name="date" />
+                        <field name="document" filename="document_filename" />
+                        <field name="document_filename" invisible="1" />
+                    </group>
+                    <group>
+                        <field name="cash_purchase_reference" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

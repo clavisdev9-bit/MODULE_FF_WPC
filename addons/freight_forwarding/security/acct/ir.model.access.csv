@@ -1,0 +1,2 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_freight_area,access.freight.area,model_freight_area,base.group_user,1,1,1,1

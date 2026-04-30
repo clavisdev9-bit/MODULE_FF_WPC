@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_sea_hbl_sales_order_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.sales.order.list</field>
+        <field name="model">freight.sea.hbl.sales.order</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sales_order_id" />
+                <field name="vendor" />
+                <field name="currency" />
+                <field name="amount" sum="Total" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_sales_order_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.sales.order.form</field>
+        <field name="model">freight.sea.hbl.sales.order</field>
+        <field name="arch" type="xml">
+            <form string="Sea Jobsheet Sales Order">
+                <sheet>
+                    <group>
+                        <field name="hbl_id" />
+                    </group>
+                    <group>
+                        <field name="sales_order_id" />
+                        <field name="vendor" />
+                        <field name="currency" />
+                        <field name="amount" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

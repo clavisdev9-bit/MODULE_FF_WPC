@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_air_extra_info_list" model="ir.ui.view">
+        <field name="name">freight.air.extra.info.list</field>
+        <field name="model">freight.air.extra.info</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="mawb_id"/>
+                <field name="do_number"/>
+                <field name="do_date"/>
+                <field name="do_supplier"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_air_extra_info_form" model="ir.ui.view">
+        <field name="name">freight.air.extra.info.form</field>
+        <field name="model">freight.air.extra.info</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="mawb_id"/>
+                            <field name="do_number"/>
+                            <field name="do_date"/>
+                            <field name="do_date_collecting"/>
+                            <field name="do_transit"/>
+                            <field name="do_mode_transport"/>
+                        </group>
+                        <group>
+                            <field name="do_quote_reference"/>
+                            <field name="do_peb_number"/>
+                            <field name="do_npe_date"/>
+                            <field name="do_po_number"/>
+                            <field name="do_supplier"/>
+                            <field name="do_product_name"/>
+                            <field name="do_serial_number_doc_number"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_air_extra_info" model="ir.actions.act_window">
+        <field name="name">Extra Info</field>
+        <field name="res_model">freight.air.extra.info</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

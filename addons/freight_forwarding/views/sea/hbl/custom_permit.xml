@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_sea_hbl_custom_permit_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.custom.permit.list</field>
+        <field name="model">freight.sea.hbl.custom.permit</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="hbl_id"/>
+                <field name="no_document"/>
+                <field name="date"/>
+                <field name="status"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_custom_permit_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.custom.permit.form</field>
+        <field name="model">freight.sea.hbl.custom.permit</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" type="object" string="Approve" class="oe_highlight" invisible="status != 'draft'"/>
+                    <button name="action_process" type="object" string="Process" class="oe_highlight" invisible="status != 'approve'"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="status == 'cancel'"/>
+                    <button name="action_draft" type="object" string="Set to Draft" invisible="status == 'draft'"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,approve,process,cancel"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="hbl_id"/>
+                            <field name="no_document"/>
+                            <field name="description"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="document" filename="document_filename"/>
+                            <field name="document_filename" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sea_hbl_custom_permit" model="ir.actions.act_window">
+        <field name="name">Custom Permit</field>
+        <field name="res_model">freight.sea.hbl.custom.permit</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

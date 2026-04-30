@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_sea_sales_rate_bb_rate" model="ir.actions.act_window">
+        <field name="name">BB Rate</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "bb rate")]</field>
+    </record>
+    <record id="action_sea_sales_activity_log_quotation" model="ir.actions.act_window">
+        <field name="name">Sales Activity Log</field>
+        <field name="res_model">mail.activity</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("res_model", "=", "freight.sea.quotation")]</field>
+    </record>
+
+    <record id="action_sea_sales_rate_cust_charge" model="ir.actions.act_window">
+        <field name="name">Customer Charge Enquiry</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "Customer Charge Enquiry")]</field>
+    </record>
+
+    <record id="action_sea_sales_rate_cost_rate" model="ir.actions.act_window">
+        <field name="name">Cost Rate</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "cost rate")]</field>
+    </record>
+
+    <record id="action_sea_sales_rate_fcl_rate" model="ir.actions.act_window">
+        <field name="name">FCL Rate</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "fcl rate")]</field>
+    </record>
+
+    <record id="action_sea_sales_rate_lcl_rate" model="ir.actions.act_window">
+        <field name="name">LCL Rate</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "lcl rate")]</field>
+    </record>
+
+    <record id="action_sea_sales_rate_nomination_tariff" model="ir.actions.act_window">
+        <field name="name">Nomination Tariff</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "nomination tariff")]</field>
+    </record>
+
+    <record id="action_sea_sales_rate_update_shipping" model="ir.actions.act_window">
+        <field name="name">Update Shipping Cost</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "update shipping")]</field>
+    </record>
+
+    <record id="action_sea_sales_rate_vendor_cost_rate" model="ir.actions.act_window">
+        <field name="name">Vendor Cost Rate</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "Vendor Cost Rate")]</field>
+    </record>
+</odoo>

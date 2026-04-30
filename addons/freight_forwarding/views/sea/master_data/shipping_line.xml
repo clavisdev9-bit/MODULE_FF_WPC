@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_shipping_line_list" model="ir.ui.view">
+        <field name="name">freight.shipping.line.list</field>
+        <field name="model">freight.shipping.line</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code" />
+                <field name="name" />
+                <field name="shipping_line_identifier" />
+                <field name="shipping_line_ref_no" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_shipping_line_form" model="ir.ui.view">
+        <field name="name">freight.shipping.line.form</field>
+        <field name="model">freight.shipping.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="code" />
+                        <field name="name" />
+                        <field name="shipping_line_identifier" />
+                        <field name="shipping_line_ref_no" />
+                        <field name="active" widget="boolean_toggle" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_shipping_line" model="ir.actions.act_window">
+        <field name="name">Shipping Line</field>
+        <field name="res_model">freight.shipping.line</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

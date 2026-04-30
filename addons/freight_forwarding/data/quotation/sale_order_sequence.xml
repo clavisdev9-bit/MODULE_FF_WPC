@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <function model="ir.sequence" name="write">
+        <function model="ir.sequence" name="search">
+            <value eval="[('code', '=', 'sale.order')]"/>
+        </function>
+        <value eval="{'prefix': 'WPC/SO/%(year)s/', 'padding': 5}"/>
+    </function>
+</odoo>

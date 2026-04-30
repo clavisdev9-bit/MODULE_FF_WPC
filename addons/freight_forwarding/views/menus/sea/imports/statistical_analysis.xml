@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_sea_import_statistical_analysis" name="Statistical Analysis"
+        parent="menu_sub_parent_sea_import"
+        sequence="60" />
+
+    <menuitem id="menu_sea_import_stat_ad_hoc" name="Ad-Hoc Enquiry"
+        parent="menu_sub_parent_sea_import_statistical_analysis"
+        action="action_freight_air_mawb"
+        sequence="10" />
+
+    <menuitem id="menu_sea_import_stat_verification" name="Verification"
+        parent="menu_sub_parent_sea_import_statistical_analysis"
+        action="action_freight_air_mawb"
+        sequence="20" />
+
+    <menuitem id="menu_sea_import_stat_transhipment" name="Transhipment Enquiry"
+        parent="menu_sub_parent_sea_import_statistical_analysis"
+        action="action_freight_air_mawb"
+        sequence="30" />
+</odoo>

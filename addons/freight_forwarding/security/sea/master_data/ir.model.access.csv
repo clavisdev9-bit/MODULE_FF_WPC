@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_freight_vessel_user,Freight Vessel User,model_freight_vessel,base.group_user,1,0,0,0
+access_freight_vessel_admin,Freight Vessel Admin,model_freight_vessel,base.group_system,1,1,1,1
+access_freight_footer_remark_user,Freight Footer Remark User,model_freight_footer_remark,base.group_user,1,1,1,0
+access_freight_footer_remark_admin,Freight Footer Remark Admin,model_freight_footer_remark,base.group_system,1,1,1,1
+access_freight_instruction_user,Freight Instruction User,model_freight_instruction,base.group_user,1,1,1,0
+access_freight_instruction_admin,Freight Instruction Admin,model_freight_instruction,base.group_system,1,1,1,1

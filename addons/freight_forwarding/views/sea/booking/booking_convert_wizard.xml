@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Convert to Sea Booking Wizard Form -->
+        <record
+            id="view_sea_booking_convert_wizard_form"
+            model="ir.ui.view"
+        >
+            <field name="name">Convert to Sea Booking Wizard Form</field>
+            <field name="model">freight.sea.booking.convert.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Convert Quotation to Sea Booking">
+                    <group>
+                        <group>
+                            <field name="quotation_id" readonly="1" />
+                            <field name="customer_id" readonly="1" />
+                            <field name="delivery_type_id" readonly="1" />
+                            <field name="origin_port_id" readonly="1" />
+                            <field name="destination_port_id" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="currency_id" readonly="1" />
+                            <field name="destination_country_id" readonly="1" />
+                            <field name="origin_country_id" readonly="1" />
+                            <field name="payment_term_id" readonly="1" />
+                            <field name="salesman_id" readonly="1" />
+                        </group>
+                    </group>
+
+                    <separator string="Required Information" />
+                    <group>
+                        <group>
+                            <field
+                                name="type"
+                                required="1"
+                                widget="radio"
+                                options="{'horizontal': true}"
+                            />
+                            <field name="vessel_id" required="1" />
+                            <field name="voyage_no" required="1" />
+                        </group>
+                        <group>
+                            <field name="etd" />
+                            <field name="eta" />
+                            <field name="bl_no" />
+                            <field name="customer_code" />
+                        </group>
+                    </group>
+
+                    <separator string="Optional Information" />
+                    <group>
+                        <group>
+                            <field name="contact_person" />
+                            <field name="phone" />
+                            <field name="email" widget="email" />
+                        </group>
+                        <group>
+                            <field name="import_job_no" />
+                            <field name="nomination_cargo" />
+                            <field name="railing" />
+                        </group>
+                    </group>
+
+                    <footer>
+                        <button
+                            name="action_convert_to_booking"
+                            type="object"
+                            string="Convert to Booking"
+                            class="btn-primary"
+                        />
+                        <button
+                            string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"
+                        />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Convert to Sea Booking Action -->
+        <record id="action_sea_booking_convert" model="ir.actions.act_window">
+            <field name="name">Convert to Sea Booking</field>
+            <field name="res_model">freight.sea.booking.convert.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_sea_booking_convert_wizard_form" />
+        </record>
+    </data>
+</odoo>

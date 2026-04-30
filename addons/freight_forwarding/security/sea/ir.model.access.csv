@@ -1,0 +1,9 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_freight_sea_quotation,access.freight.sea.quotation,model_freight_sea_quotation,base.group_user,1,1,1,1
+access_freight_sea_quotation_cargo_info,access.freight.sea.quotation.cargo.info,model_freight_sea_quotation_cargo_info,base.group_user,1,1,1,1
+access_freight_sea_booking_items_line,access.freight.sea.booking.items.line,model_freight_sea_booking_items_line,base.group_user,1,1,1,1
+access_freight_sea_hbl_items_line,access.freight.sea.hbl.items.line,model_freight_sea_hbl_items_line,base.group_user,1,1,1,1
+access_freight_sea_hbl,access.freight.sea.hbl,model_freight_sea_hbl,base.group_user,1,1,1,1
+access_freight_sea_hbl_cargo_info,access.freight.sea.hbl.cargo.info,model_freight_sea_hbl_cargo_info,base.group_user,1,1,1,1
+access_freight_sea_hbl_shipment_info,access.freight.sea.hbl.shipment.info,model_freight_sea_hbl_shipment_info,base.group_user,1,1,1,1
+access_freight_sea_hbl_vessel_details,access.freight.sea.hbl.vessel.details,model_freight_sea_hbl_vessel_details,base.group_user,1,1,1,1

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_notify_party" model="ir.actions.act_window">
+        <field name="name">Notify Party</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Notify Party')]</field>
+    </record>
+
+    <record id="action_freight_ship_owner" model="ir.actions.act_window">
+        <field name="name">Ship Owner</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Ship Owner')]</field>
+    </record>
+
+    <record id="action_freight_do_supplier" model="ir.actions.act_window">
+        <field name="name">D/O Supplier</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'D/O Supplier')]</field>
+    </record>
+</odoo>

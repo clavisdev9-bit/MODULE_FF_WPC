@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_vessel_form" model="ir.ui.view">
+        <field name="name">Freight Vessel Form</field>
+        <field name="model">freight.vessel</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="code" />
+                        <field name="name" required="1" />
+                        <field name="imo_number" />
+                        <field name="flag" />
+                        <field name="active" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_freight_vessel_list" model="ir.ui.view">
+        <field name="name">Freight Vessel List</field>
+        <field name="model">freight.vessel</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code" />
+                <field name="name" />
+                <field name="imo_number" />
+                <field name="flag" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_vessel_search" model="ir.ui.view">
+        <field name="name">Freight Vessel Search</field>
+        <field name="model">freight.vessel</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="code" string="Vessel Code" />
+                <field name="name" string="Vessel Name" />
+                <field name="imo_number" />
+                <filter name="active" string="Active" domain="[('active', '=', True)]" />
+                <filter name="inactive" string="Inactive" domain="[('active', '=', False)]" />
+            </search>
+        </field>
+    </record>
+
+    <record id="action_freight_vessel" model="ir.actions.act_window">
+        <field name="name">Vessel</field>
+        <field name="res_model">freight.vessel</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_vessel_search" />
+    </record>
+</odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="quotation_paperformat" model="report.paperformat">
+        <field name="name">Quotation A4</field>
+        <field name="default">False</field>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">65</field>
+        <field name="margin_bottom">22</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line">False</field>
+        <field name="header_spacing">4</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="quotation_report" model="ir.actions.report">
+        <field name="name">Quotation Report</field>
+        <field name="model">freight.sea.quotation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">freight_forwarding.quotation_report_template</field>
+        <field name="paperformat_id" ref="quotation_paperformat" />
+        <field name="binding_model_id" ref="freight_forwarding.model_freight_sea_quotation" />
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

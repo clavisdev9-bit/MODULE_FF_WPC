@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_air_import_consol_awb_entry" name="Consol AWB Entry"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_booking"
+        sequence="10" />
+
+    <menuitem id="menu_air_import_awb_entry" name="AWB Entry"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_mawb"
+        sequence="20" />
+
+    <menuitem id="menu_air_import_domestic_job" name="Domestic Job"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_mawb"
+        sequence="30" />
+
+    <menuitem id="menu_air_import_land_job" name="Land Job"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_mawb"
+        sequence="40" />
+
+    <menuitem id="menu_air_import_delivery_order" name="Delivery Order"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_extra_info"
+        sequence="50" />
+
+    <menuitem id="menu_air_import_proof_of_delivery" name="Proof of Delivery"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_mawb"
+        sequence="60" />
+
+    <menuitem id="menu_sub_parent_air_import_purchasing" name="Purchasing"
+        parent="menu_sub_parent_air_import"
+        sequence="70" />
+
+    <menuitem id="menu_air_import_purchase_order" name="Purchase Order"
+        parent="menu_sub_parent_air_import_purchasing"
+        action="action_freight_air_mawb"
+        sequence="10" />
+
+    <menuitem id="menu_air_import_provision_cost" name="Provision Cost"
+        parent="menu_sub_parent_air_import_purchasing"
+        action="action_freight_air_mawb"
+        sequence="20" />
+
+    <menuitem id="menu_air_import_vendor_invoice" name="Vendor Invoice"
+        parent="menu_sub_parent_air_import_purchasing"
+        action="action_freight_air_mawb"
+        sequence="30" />
+
+    <menuitem id="menu_air_import_vendor_debit_note" name="Vendor Debit Note"
+        parent="menu_sub_parent_air_import_purchasing"
+        action="action_freight_air_mawb"
+        sequence="40" />
+
+    <menuitem id="menu_air_import_vendor_credit_note" name="Vendor Credit Note"
+        parent="menu_sub_parent_air_import_purchasing"
+        action="action_freight_air_mawb"
+        sequence="50" />
+
+    <menuitem id="menu_air_import_cash_purchase" name="Cash Purchase"
+        parent="menu_sub_parent_air_import_purchasing"
+        action="action_freight_air_mawb"
+        sequence="60" />
+
+    <menuitem id="menu_sub_parent_air_import_invoicing" name="Invoicing"
+        parent="menu_sub_parent_air_import"
+        sequence="80" />
+
+    <menuitem id="menu_air_import_invoice" name="Invoice"
+        parent="menu_sub_parent_air_import_invoicing"
+        action="action_freight_air_mawb"
+        sequence="10" />
+
+    <menuitem id="menu_air_import_debit_note" name="Debit Note"
+        parent="menu_sub_parent_air_import_invoicing"
+        action="action_freight_air_mawb"
+        sequence="20" />
+
+    <menuitem id="menu_air_import_credit_note" name="Credit Note"
+        parent="menu_sub_parent_air_import_invoicing"
+        action="action_freight_air_mawb"
+        sequence="30" />
+
+    <menuitem id="menu_air_import_invoice_tax" name="Invoice Tax"
+        parent="menu_sub_parent_air_import_invoicing"
+        action="action_freight_air_mawb"
+        sequence="40" />
+
+    <menuitem id="menu_air_import_cash_receipt" name="Cash Receipt"
+        parent="menu_sub_parent_air_import_invoicing"
+        action="action_freight_air_mawb"
+        sequence="50" />
+
+    <menuitem id="menu_sub_parent_air_import_statistical_analysis" name="Statistical Analysis"
+        parent="menu_sub_parent_air_import"
+        sequence="90" />
+
+    <menuitem id="menu_air_import_transhipment_enquiry" name="Transhipment Enquiry"
+        parent="menu_sub_parent_air_import_statistical_analysis"
+        action="action_freight_air_mawb"
+        sequence="10" />
+
+    <menuitem id="menu_air_import_ad_hoc_enquiry" name="Ad-Hoc Enquiry"
+        parent="menu_sub_parent_air_import_statistical_analysis"
+        action="action_freight_air_mawb"
+        sequence="20" />
+
+    <menuitem id="menu_air_import_verification" name="Verification"
+        parent="menu_sub_parent_air_import_statistical_analysis"
+        action="action_freight_air_mawb"
+        sequence="30" />
+
+    <menuitem id="menu_sub_parent_air_import_report" name="Report"
+        parent="menu_sub_parent_air_import"
+        sequence="100" />
+
+    <menuitem id="menu_air_import_report_awb" name="AWB"
+        parent="menu_sub_parent_air_import_report"
+        action="action_freight_air_mawb"
+        sequence="10" />
+
+    <menuitem id="menu_air_import_report_delivery_order" name="Delivery Order"
+        parent="menu_sub_parent_air_import_report"
+        action="action_freight_air_extra_info"
+        sequence="20" />
+
+    <menuitem id="menu_air_import_report_invoicing" name="Invoicing"
+        parent="menu_sub_parent_air_import_report"
+        action="action_freight_air_mawb"
+        sequence="30" />
+
+    <menuitem id="menu_air_import_report_management" name="Management Report"
+        parent="menu_sub_parent_air_import_report"
+        action="action_freight_air_mawb"
+        sequence="40" />
+</odoo>

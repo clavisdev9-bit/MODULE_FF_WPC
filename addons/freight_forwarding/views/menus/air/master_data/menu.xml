@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_airport" name="Airport"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airport"
+        sequence="10" />
+
+    <menuitem id="menu_airline" name="Airline"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airline"
+        sequence="20" />
+
+    <menuitem id="menu_handling_charge" name="Handling Charge"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_charge_code"
+        sequence="30" />
+
+    <menuitem id="menu_coloader" name="Coloader"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_coloader"
+        sequence="40" />
+
+    <menuitem id="menu_consignee" name="Consignee"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_consignee"
+        sequence="50" />
+
+    <menuitem id="menu_overseas_agent" name="Overseas Agent"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_overseas_agent"
+        sequence="60" />
+
+    <menuitem id="menu_shipper" name="Shipper"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_shipper"
+        sequence="70" />
+
+    <menuitem id="menu_master_transport" name="Transport"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_transport_company"
+        sequence="80" />
+
+    <menuitem id="menu_master_warehouse" name="Warehouse"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_warehouse"
+        sequence="90" />
+
+    <menuitem id="menu_business_party_type" name="Business Party Type"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_tag"
+        sequence="100" />
+
+    <menuitem id="menu_declaration" name="Declaration"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airport"
+        sequence="110" />
+
+    <menuitem id="menu_commodity" name="Commodity"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_commodity"
+        sequence="120" />
+
+    <menuitem id="menu_city" name="City"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_city"
+        sequence="130" />
+
+    <menuitem id="menu_country" name="Country"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_country"
+        sequence="140" />
+
+    <menuitem id="menu_district" name="District"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airport"
+        sequence="150" />
+
+    <menuitem id="menu_delivery_type" name="Delivery Type"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_delivery_type"
+        sequence="160" />
+
+    <menuitem id="menu_incoterms" name="Incoterms"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_incoterms"
+        sequence="170" />
+
+    <menuitem id="menu_master_local_area" name="Local Area"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_area"
+        sequence="180" />
+
+    <menuitem id="menu_permit" name="Permit"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_air_custom_permit"
+        sequence="190" />
+
+    <menuitem id="menu_salesman" name="Salesman"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airport"
+        sequence="200" />
+
+    <menuitem id="menu_term_condition" name="Term &amp; Condition"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airport"
+        sequence="210" />
+
+    <menuitem id="menu_uom" name="Unit Of Measurement"
+        parent="menu_sub_parent_air_master_data"
+        action="uom.product_uom_form_action"
+        sequence="220" />
+
+    <menuitem id="menu_cargo_class" name="Cargo Class"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airport"
+        sequence="230" />
+
+    <menuitem id="menu_container_type" name="Container Type"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_container_type"
+        sequence="240" />
+
+    <menuitem id="menu_dg_class_code" name="DG Class Code"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airport"
+        sequence="250" />
+
+    <menuitem id="menu_shipping_line" name="Shipping Line"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_airport"
+        sequence="260" />
+
+    <menuitem id="menu_footer_remark" name="Footer/Remark"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_footer_remark"
+        sequence="290" />
+
+    <menuitem id="menu_master_quotation_type" name="Quotation Type"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_quotation_type"
+        sequence="300" />
+</odoo>

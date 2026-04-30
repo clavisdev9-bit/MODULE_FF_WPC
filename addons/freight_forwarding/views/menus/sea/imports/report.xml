@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_sea_import_report" name="Report"
+        parent="menu_sub_parent_sea_import"
+        sequence="70" />
+
+    <menuitem id="menu_sea_import_report_bl_preparation" name="B/L Preparation"
+        parent="menu_sub_parent_sea_import_report"
+        action="action_sea_hbl"
+        sequence="10" />
+
+    <menuitem id="menu_sea_import_report_delivery_instruction" name="Delivery Instruction"
+        parent="menu_sub_parent_sea_import_report"
+        action="action_sea_hbl"
+        sequence="20" />
+
+    <menuitem id="menu_sea_import_report_delivery_order" name="Delivery Order"
+        parent="menu_sub_parent_sea_import_report"
+        action="action_freight_sea_delivery_order"
+        sequence="30" />
+
+    <menuitem id="menu_sea_import_report_invoicing" name="Invoicing"
+        parent="menu_sub_parent_sea_import_report"
+        action="action_freight_sea_invoice"
+        sequence="40" />
+
+    <menuitem id="menu_sea_import_report_purchasing" name="Purchasing"
+        parent="menu_sub_parent_sea_import_report"
+        action="action_sea_hbl"
+        sequence="50" />
+</odoo>

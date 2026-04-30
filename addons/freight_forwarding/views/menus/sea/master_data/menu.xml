@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sea_master_business_party_type" name="Business Party Type"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_contact"
+        sequence="10" />
+
+    <menuitem id="menu_sea_master_carrier" name="Carrier"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_carrier"
+        sequence="20" />
+
+    <menuitem id="menu_sea_master_charge_table" name="Charge Table"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_sea_charge_table"
+        sequence="30" />
+
+    <menuitem id="menu_sea_master_city" name="City"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_city"
+        sequence="40" />
+
+    <menuitem id="menu_sea_master_coloader" name="Coloader"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_air_mawb"
+        sequence="50" />
+
+    <menuitem id="menu_sea_master_coloader_cost" name="Coloader Cost"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_sea_coloader_cost"
+        sequence="60" />
+
+    <menuitem id="menu_sea_master_commodity" name="Commodity"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_commodity"
+        sequence="70" />
+
+    <menuitem id="menu_sea_master_consignee" name="Consignee"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_air_mawb"
+        sequence="80" />
+
+    <menuitem id="menu_sea_master_cost_table" name="Cost Table"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_sea_cost_table"
+        sequence="90" />
+
+    <menuitem id="menu_sea_master_country" name="Country"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_country"
+        sequence="100" />
+
+    <menuitem id="menu_sea_master_delivery_type" name="Delivery Type"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_delivery_type"
+        sequence="110" />
+
+    <menuitem id="menu_sea_master_district" name="District"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_city"
+        sequence="120" />
+
+    <menuitem id="menu_sea_master_footer_remark" name="Footer/Remark"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_footer_remark"
+        sequence="130" />
+
+    <menuitem id="menu_sea_master_incoterms" name="Incoterms"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_incoterm"
+        sequence="140" />
+
+    <menuitem id="menu_sea_master_instruction" name="Instruction"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_instruction"
+        sequence="150" />
+
+    <menuitem id="menu_sea_master_local_area" name="Local Area"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_area"
+        sequence="160" />
+
+    <menuitem id="menu_sea_master_location" name="Location"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_location"
+        sequence="170" />
+
+    <menuitem id="menu_sea_master_overseas_agent" name="Overseas Agent"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_air_mawb"
+        sequence="180" />
+
+    <menuitem id="menu_sea_master_permit" name="Permit"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_sea_permit"
+        sequence="190" />
+
+    <menuitem id="menu_sea_master_port" name="Port"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_port"
+        sequence="200" />
+
+    <menuitem id="menu_sea_master_quotation_type" name="Quotation Type"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_quotation_type"
+        sequence="210" />
+
+    <menuitem id="menu_sea_master_salesman" name="Salesman"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_salesman"
+        sequence="220" />
+
+    <menuitem id="menu_sea_master_shipper" name="Shipper"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_air_mawb"
+        sequence="230" />
+
+    <menuitem id="menu_sea_master_shipping_line" name="Shipping Line"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_shipping_line"
+        sequence="240" />
+
+    <menuitem id="menu_sea_master_transport" name="Transport"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_air_mawb"
+        sequence="250" />
+
+    <menuitem id="menu_sea_master_term_condition" name="Term &amp; Condition"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_air_mawb"
+        sequence="260" />
+
+    <menuitem id="menu_sea_master_uom" name="Unit Of Measurement"
+        parent="menu_sub_parent_sea_master_data"
+        action="uom.product_uom_form_action"
+        sequence="270" />
+
+    <menuitem id="menu_sea_master_vendor_cost" name="Vendor Cost"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_sea_vendor_cost"
+        sequence="280" />
+
+    <menuitem id="menu_sea_master_vessel" name="Vessel"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_vessel"
+        sequence="290" />
+
+    <menuitem id="menu_sea_master_warehouse" name="Warehouse"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_warehouse"
+        sequence="300" />
+</odoo>

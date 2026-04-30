@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Sea Booking Form View -->
+        <record id="view_sea_booking_form" model="ir.ui.view">
+            <field name="name">Sea Booking Form</field>
+            <field name="model">freight.sea.booking</field>
+            <field name="arch" type="xml">
+                <form string="Sea Booking">
+                    <sheet>
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
+                        <group string="Header Information">
+                            <group>
+                                <field name="type"/>
+                                <field name="name" readonly="1" />
+                                <field name="booking_date" />
+                                <field name="bl_no" />
+                                <field name="job_no" />
+                                <field name="nomination_cargo" />
+                            </group>
+                            <group>
+                                <field name="freight_type"/>
+                                <field name="job_date" />
+                                <field name="import_job_no" />
+                                <field name="railing" />
+                                <field name="company_id" />
+                                <field name="currency_id"/>
+                            </group>
+                        </group>
+
+                        <group string="Customer &amp; Contact Data">
+                            <group>
+                                <field name="customer_id"/>
+                                <field name="customer_code" />
+                                <field name="contact_person" />
+                                <field name="phone" />
+                                <field name="customer_reference" />
+                            </group>
+                            <group>
+                                <field name="email" widget="email" />
+                                <field name="payment_term_id" />
+                                <field name="salesman_id" />
+                                <field name="quotation_id" readonly="1" />
+                            </group>
+                        </group>
+
+                        <group string="Shipment Details">
+                            <group>
+                                <field name="origin_port_id" />
+                                <field name="destination_port_id" />
+                                <field name="etd" />
+                                <field name="eta" />
+                                <field name="destination_country_id" />
+                                <field name="origin_country_id" />
+                                <field name="delivery_type_id" />
+                            </group>
+                            <group string="Vessel Information">
+                                <field name="pod_port_id" />
+                                <field name="vessel_id" />
+                                <field name="voyage_no" />
+                                <field name="eta_jkt" />
+                                <field name="sea_job_no" />
+                                <field name="transit_days" />
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page string="Extra Info">
+                                <field name="extra_info_ids" nolabel="1" />
+                            </page>
+                            <page string="B/L Info">
+                                <group>
+                                    <field name="sea_bl_info_ids" nolabel="1" />
+                                </group>
+                                <div class="d-flex">
+                                    <button name="action_add_notify_party"
+                                        type="object"
+                                        string="Add Notify Party"
+                                        class="btn-primary me-2" />
+                                    <button name="action_view_notify_party"
+                                        type="object"
+                                        string="View Notify Party"
+                                        class="btn-secondary" />
+                                </div>
+                            </page>
+                            <page string="Shipment Info">
+                                <field name="shipment_info_ids" nolabel="1" />
+                            </page>
+                            <page string="Vessel Details">
+                                <field name="vessel_details_ids" nolabel="1" />
+                            </page>
+                            <page string="Pickup Info">
+                                <field name="pickup_info_ids" nolabel="1" />
+                            </page>
+                            <page string="Detail Cargo">
+                                <field name="detail_cargo_ids" nolabel="1" />
+                            </page>
+                            <page string="Purchase Line">
+                                <field name="purchase_line_ids" nolabel="1" />
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sea Booking List View -->
+        <record id="view_sea_booking_list" model="ir.ui.view">
+            <field name="name">Sea Booking list</field>
+            <field name="model">freight.sea.booking</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name" />
+                    <field name="quotation_id" />
+                    <field name="customer_id" />
+                    <field name="freight_type" />
+                    <field name="type" />
+                    <field name="vessel_id" />
+                    <field name="etd" />
+                    <field name="eta" />
+                </list>
+            </field>
+        </record>
+
+        <!-- Sea Booking Search View -->
+        <record id="view_sea_booking_search" model="ir.ui.view">
+            <field name="name">Sea Booking Search</field>
+            <field name="model">freight.sea.booking</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" string="Booking No." />
+                    <field name="customer_id" />
+                    <field name="vessel_id" />
+                    <field name="freight_type" />
+                    <field name="type" />
+                    <separator />
+                    <filter name="filter_import" string="Import" domain="[('type', '=', 'Import')]" />
+                    <filter name="filter_export" string="Export" domain="[('type', '=', 'Export')]" />
+                    <filter name="filter_fc" string="Full Container"
+                        domain="[('freight_type', '=', 'fcl')]" />
+                    <filter name="filter_lc" string="Less Than Container"
+                        domain="[('freight_type', 'in', ['lcl', 'consol'])]" />
+                    <filter name="filter_fcl" string="FCL" domain="[('freight_type', '=', 'fcl')]" />
+                    <filter name="filter_lcl" string="LCL" domain="[('freight_type', '=', 'lcl')]" />
+                    <filter name="filter_consol" string="Consol"
+                        domain="[('freight_type', '=', 'consol')]" />
+                </search>
+            </field>
+        </record>
+
+        <!-- Sea Booking Action -->
+        <record id="action_sea_booking" model="ir.actions.act_window">
+            <field name="name">Sea Booking</field>
+            <field name="res_model">freight.sea.booking</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_sea_booking_search" />
+            <field name="context">{"search_default_type": "Import"}</field>
+        </record>
+
+        <record id="action_sea_booking_import_fcl" model="ir.actions.act_window">
+            <field name="name">Import FCL Shipment</field>
+            <field name="res_model">freight.sea.booking</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_sea_booking_search" />
+            <field name="domain">[('type', '=', 'Import'), ('freight_type', '=', 'fcl')]</field>
+        </record>
+
+        <record id="action_sea_booking_import_lcl" model="ir.actions.act_window">
+            <field name="name">Import LCL Shipment</field>
+            <field name="res_model">freight.sea.booking</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_sea_booking_search" />
+            <field name="domain">[('type', '=', 'Import'), ('freight_type', '=', 'lcl')]</field>
+        </record>
+
+        <record id="action_sea_booking_import_consol" model="ir.actions.act_window">
+            <field name="name">Import Consol Shipment</field>
+            <field name="res_model">freight.sea.booking</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_sea_booking_search" />
+            <field name="domain">[('type', '=', 'Import'), ('freight_type', '=', 'consol')]</field>
+        </record>
+
+        <record id="action_sea_booking_export_fcl" model="ir.actions.act_window">
+            <field name="name">Export FCL Booking</field>
+            <field name="res_model">freight.sea.booking</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_sea_booking_search" />
+            <field name="domain">[('type', '=', 'Export'), ('freight_type', '=', 'fcl')]</field>
+        </record>
+
+        <record id="action_sea_booking_export_lcl" model="ir.actions.act_window">
+            <field name="name">Export LCL Booking</field>
+            <field name="res_model">freight.sea.booking</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_sea_booking_search" />
+            <field name="domain">[('type', '=', 'Export'), ('freight_type', '=', 'lcl')]</field>
+        </record>
+
+        <record id="action_sea_booking_export_consol" model="ir.actions.act_window">
+            <field name="name">Export Consol Booking</field>
+            <field name="res_model">freight.sea.booking</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_sea_booking_search" />
+            <field name="domain">[('type', '=', 'Export'), ('freight_type', '=', 'consol')]</field>
+        </record>
+
+        <!-- Sea Booking Extra Info Views -->
+        <record id="view_sea_booking_extra_info_list" model="ir.ui.view">
+            <field name="name">Sea Booking Extra Info List</field>
+            <field name="model">freight.sea.booking.extra.info</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="do_date" />
+                    <field name="do_date_collecting" />
+                    <field name="do_transit" />
+                    <field name="do_mode_transport" />
+                    <field name="do_quote_reference" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_extra_info_form" model="ir.ui.view">
+            <field name="name">Sea Booking Extra Info Form</field>
+            <field name="model">freight.sea.booking.extra.info</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="booking_id" readonly="1" />
+                                <field name="do_date" />
+                                <field name="do_date_collecting" />
+                                <field name="do_transit" />
+                                <field name="do_mode_transport" />
+                                <field name="do_quote_reference" />
+                            </group>
+                            <group>
+                                <field name="do_peb_number" />
+                                <field name="do_npe_date" />
+                                <field name="do_po_number" />
+                                <field name="do_supplier_id" />
+                                <field name="do_product_name" />
+                                <field name="do_serial_number_doc_number" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sea Booking B/L Info Views -->
+        <record id="view_sea_booking_bl_info_list" model="ir.ui.view">
+            <field name="name">Sea Booking B/L Info List</field>
+            <field name="model">freight.sea.booking.bl.info</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="shipper_id" />
+                    <field name="consignee_id" />
+                    <field name="notify_party_id" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_bl_info_form" model="ir.ui.view">
+            <field name="name">Sea Booking B/L Info Form</field>
+            <field name="model">freight.sea.booking.bl.info</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="shipper_id" widget="res_partner_many2one"
+                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                        <field name="shipper_address" readonly="1" nolabel="0" />
+
+                        <field name="consignee_id" widget="res_partner_many2one"
+                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                        <field name="consignee_address" readonly="1" nolabel="0" />
+
+                        <field name="notify_party_id" widget="res_partner_many2one"
+                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                        <field name="notify_party_address" readonly="1" nolabel="0" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sea Booking Shipment Info Views -->
+        <record id="view_sea_booking_shipment_info_list" model="ir.ui.view">
+            <field name="name">Sea Booking Shipment Info List</field>
+            <field name="model">freight.sea.booking.shipment.info</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="shipment_type_id" />
+                    <field name="shipping_line_id" />
+                    <field name="container_type" />
+                    <field name="container_no" />
+                    <field name="seal_no" />
+                    <field name="quantity" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_shipment_info_form" model="ir.ui.view">
+            <field name="name">Sea Booking Shipment Info Form</field>
+            <field name="model">freight.sea.booking.shipment.info</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="shipment_type_id" />
+                                <field name="shipping_line_id" />
+                                <field name="shipping_line_code" readonly="1" />
+                                <field name="shipping_line_name" readonly="1" />
+                                <field name="container_type" />
+                                <field name="container_no" />
+                            </group>
+                            <group>
+                                <field name="shipping_line_identifier" readonly="1" />
+                                <field name="shipping_line_ref_no" readonly="1" />
+                                <field name="seal_no" />
+                                <field name="quantity" />
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Vessel Schedule">
+                                <field name="vessel_schedule_ids" nolabel="1" />
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sea Booking Vessel Details Views -->
+        <record id="view_sea_booking_vessel_details_list" model="ir.ui.view">
+            <field name="name">Sea Booking Vessel Details List</field>
+            <field name="model">freight.sea.booking.vessel.details</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="vessel_id" />
+                    <field name="voyage_no" />
+                    <field name="etd" />
+                    <field name="eta" />
+                    <field name="port_of_call" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_vessel_details_form" model="ir.ui.view">
+            <field name="name">Sea Booking Vessel Details Form</field>
+            <field name="model">freight.sea.booking.vessel.details</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="vessel_id" />
+                            <field name="voyage_no" />
+                            <field name="etd" />
+                        </group>
+                        <group>
+                            <field name="eta" />
+                            <field name="port_of_call" />
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sea Booking Pickup Info Views -->
+        <record id="view_sea_booking_pickup_info_list" model="ir.ui.view">
+            <field name="name">Sea Booking Pickup Info List</field>
+            <field name="model">freight.sea.booking.pickup.info</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="pickup_location_id" />
+                    <field name="pickup_date" />
+                    <field name="contact_person" />
+                    <field name="phone" />
+                    <field name="reference" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_pickup_info_form" model="ir.ui.view">
+            <field name="name">Sea Booking Pickup Info Form</field>
+            <field name="model">freight.sea.booking.pickup.info</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="pickup_location_id" />
+                            <field name="pickup_date" />
+                            <field name="contact_person" />
+                        </group>
+                        <group>
+                            <field name="phone" />
+                            <field name="reference" />
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sea Booking Detail Cargo Views -->
+        <record id="view_sea_booking_detail_cargo_list" model="ir.ui.view">
+            <field name="name">Sea Booking Detail Cargo List</field>
+            <field name="model">freight.sea.booking.detail.cargo</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="commodity_id" />
+                    <field name="quantity" />
+                    <field name="unit" />
+                    <field name="description" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_detail_cargo_form" model="ir.ui.view">
+            <field name="name">Sea Booking Detail Cargo Form</field>
+            <field name="model">freight.sea.booking.detail.cargo</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="commodity_id" />
+                            <field name="quantity" />
+                        </group>
+                        <group>
+                            <field name="unit" />
+                            <field name="description" />
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sea Booking Purchase Line Views -->
+        <record id="view_sea_booking_purchase_line_list" model="ir.ui.view">
+            <field name="name">Sea Booking Purchase Line List</field>
+            <field name="model">freight.sea.booking.purchase.line</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="purchase_order_id" />
+                    <field name="supplier_id" />
+                    <field name="service_type" />
+                    <field name="amount" />
+                    <field name="currency_id" />
+                </list>
+            </field>
+        </record>
+
+        <!-- Sea Booking Notify Party Views -->
+        <record id="view_sea_booking_notify_party_list" model="ir.ui.view">
+            <field name="name">Sea Booking Notify Party List</field>
+            <field name="model">freight.sea.booking.notify.party</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="booking_id" />
+                    <field name="notify_name_id" />
+                    <field name="notify_code" />
+                    <field name="also_notify_name_id" />
+                    <field name="also_notify_code" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_notify_party_form" model="ir.ui.view">
+            <field name="name">Sea Booking Notify Party Form</field>
+            <field name="model">freight.sea.booking.notify.party</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="booking_id" readonly="1" />
+                        </group>
+                        <group string="Notify Party">
+                            <field name="notify_name_id" />
+                            <field name="notify_code" />
+                            <field name="notify_address" />
+                        </group>
+                        <group string="Also Notify Party">
+                            <field name="also_notify_name_id" />
+                            <field name="also_notify_code" />
+                            <field name="also_notify_address" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Sea Booking Vessel Schedule Views -->
+        <record id="view_sea_booking_vessel_schedule_list" model="ir.ui.view">
+            <field name="name">Sea Booking Vessel Schedule List</field>
+            <field name="model">freight.sea.booking.vessel.schedule</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="vessel_id" />
+                    <field name="name" />
+                    <field name="voyage_no" />
+                    <field name="arrival" />
+                    <field name="berthing" />
+                    <field name="departure" />
+                    <field name="terminal_id" />
+                    <field name="status" />
+                    <field name="open_stack" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_vessel_schedule_form" model="ir.ui.view">
+            <field name="name">Sea Booking Vessel Schedule Form</field>
+            <field name="model">freight.sea.booking.vessel.schedule</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="vessel_id" />
+                                <field name="name" />
+                                <field name="voyage_no" />
+                                <field name="arrival" />
+                                <field name="berthing" />
+                                <field name="departure" />
+                            </group>
+                            <group>
+                                <field name="closing" />
+                                <field name="terminal_id" />
+                                <field name="status" />
+                                <field name="open_stack" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_purchase_line_form" model="ir.ui.view">
+            <field name="name">Sea Booking Purchase Line Form</field>
+            <field name="model">freight.sea.booking.purchase.line</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="purchase_order_id" />
+                            <field name="supplier_id" />
+                            <field name="service_type" />
+                        </group>
+                        <group>
+                            <field name="amount" />
+                            <field name="currency_id" />
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

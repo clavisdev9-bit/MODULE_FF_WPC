@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_sea_export_purchasing" name="Purchasing"
+        parent="menu_sub_parent_sea_export"
+        sequence="40" />
+
+    <menuitem id="menu_sea_export_provision_cost" name="Provision Cost"
+        parent="menu_sub_parent_sea_export_purchasing"
+        action="action_freight_sea_provision_cost"
+        sequence="10" />
+
+    <menuitem id="menu_sea_export_vendor_invoice" name="Vendor Invoice"
+        parent="menu_sub_parent_sea_export_purchasing"
+        action="action_freight_sea_purchase_order"
+        sequence="20" />
+
+    <menuitem id="menu_sea_export_vendor_debit_note" name="Vendor Debit Note"
+        parent="menu_sub_parent_sea_export_purchasing"
+        action="action_freight_sea_vendor_payment"
+        sequence="30" />
+
+    <menuitem id="menu_sea_export_vendor_credit_note" name="Vendor Credit Note"
+        parent="menu_sub_parent_sea_export_purchasing"
+        action="action_freight_sea_vendor_debit_note"
+        sequence="40" />
+
+    <menuitem id="menu_sea_export_cash_purchase" name="Cash Purchase"
+        parent="menu_sub_parent_sea_export_purchasing"
+        action="action_freight_sea_expenses"
+        sequence="50" />
+
+    <menuitem id="menu_sea_export_cash_advance" name="Cash Advance"
+        parent="menu_sub_parent_sea_export_purchasing"
+        action="action_freight_sea_expenses"
+        sequence="60" />
+
+    <menuitem id="menu_sea_export_purchase_order" name="Purchase Order"
+        parent="menu_sub_parent_sea_export_purchasing"
+        action="action_freight_sea_purchase_order"
+        sequence="70" />
+</odoo>

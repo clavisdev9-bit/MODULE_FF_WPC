@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_sea_import_booking" name="Booking"
+        parent="menu_sub_parent_sea_import"
+        sequence="10" />
+
+    <menuitem id="menu_sea_import_booking_fcl" name="FCL Booking"
+        parent="menu_sub_parent_sea_import_booking"
+        action="action_sea_booking_import_fcl"
+        sequence="10" />
+
+    <menuitem id="menu_sea_import_booking_lcl" name="LCL Booking"
+        parent="menu_sub_parent_sea_import_booking"
+        action="action_sea_booking_import_lcl"
+        sequence="20" />
+
+    <menuitem id="menu_sea_import_booking_consol" name="Consol Booking"
+        parent="menu_sub_parent_sea_import_booking"
+        action="action_sea_booking_import_consol"
+        sequence="30" />
+</odoo>

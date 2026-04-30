@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="view_sea_booking_vessel_details_list" model="ir.ui.view">
+            <field name="name">Sea Booking Vessel Details List</field>
+            <field name="model">freight.sea.booking.vessel.details</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="principle_agent_id" />
+                    <field name="warehouse_id" />
+                    <field name="close_date" />
+                    <field name="yard_id" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_vessel_details_form" model="ir.ui.view">
+            <field name="name">Sea Booking Vessel Details Form</field>
+            <field name="model">freight.sea.booking.vessel.details</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group string="Booking &amp; Agent Information">
+                            <field name="principle_agent_id" />
+                            <field name="shipping_agent_id" />
+                            <field name="scn_code" />
+                        </group>
+
+                        <group string="Stuffing Warehouse &amp; SMK">
+                            <group>
+                                <field name="warehouse_id" />
+                                <field name="warehouse_address" />
+                            </group>
+                            <group>
+                                <field name="smk_code1" />
+                                <field name="smk_code2" />
+                            </group>
+                        </group>
+
+                        <group string="Scheduling &amp; Receipt Details">
+                            <group>
+                                <field name="close_date" />
+                                <field name="cargo_receipt_date" />
+                                <field name="stuffing_date" />
+                                <field name="contact_id" />
+                            </group>
+                        </group>
+
+                        <group string="Yard &amp; Depot Details">
+                            <group string="Yard Information">
+                                <field name="yard_id" />
+                                <field name="yard_code" />
+                                <field name="yard_address" />
+                            </group>
+                            <group string="Depot Information">
+                                <field name="depot_id" />
+                                <field name="depot_code" />
+                                <field name="depot_address" />
+                            </group>
+                            <field name="depot_instruction" />
+                        </group>
+                        
+                        <group string="General Instructions">
+                            <field name="general_instruction" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_sea_import_job" name="Import Job"
+        parent="menu_sub_parent_sea_import"
+        sequence="35" />
+
+    <menuitem id="menu_sea_import_job_fcl" name="Import Job FCL"
+        parent="menu_sub_parent_sea_import_job"
+        action="action_sea_hbl_import_fcl"
+        sequence="10" />
+
+    <menuitem id="menu_sea_import_job_lcl" name="Import Job LCL"
+        parent="menu_sub_parent_sea_import_job"
+        action="action_sea_hbl_import_lcl"
+        sequence="20" />
+
+    <menuitem id="menu_sea_import_job_consol" name="Import Job Consol"
+        parent="menu_sub_parent_sea_import_job"
+        action="action_sea_hbl_import_consol"
+        sequence="30" />
+</odoo>

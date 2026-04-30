@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_quotation_type_list" model="ir.ui.view">
+        <field name="name">freight.quotation.type.list</field>
+        <field name="model">freight.quotation.type</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" />
+                <field name="code" />
+                <field name="description" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_quotation_type_form" model="ir.ui.view">
+        <field name="name">freight.quotation.type.form</field>
+        <field name="model">freight.quotation.type</field>
+        <field name="arch" type="xml">
+            <form string="Quotation Type">
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="code" />
+                    </group>
+                    <group>
+                        <field name="description" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_quotation_type" model="ir.actions.act_window">
+        <field name="name">Quotation Type</field>
+        <field name="res_model">freight.quotation.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

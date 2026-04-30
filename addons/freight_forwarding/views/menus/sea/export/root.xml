@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sea_export_vessel_schedule" name="Vessel Schedule"
+        parent="menu_sub_parent_sea_export"
+        action="action_freight_sea_vessel_schedule"
+        sequence="10" />
+</odoo>

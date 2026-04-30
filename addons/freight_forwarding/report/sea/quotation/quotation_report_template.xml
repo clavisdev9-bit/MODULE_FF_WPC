@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="quotation_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
+                    <style>
+
+                        .font-sm { font-size: 14px; }
+                        .font-md { font-size: 15px; }
+                        .font-base { font-size: 16px; }
+                        .font-lg { font-size: 18px; }
+
+                        .table-ait { width: 100%; border-collapse: collapse; margin-top: 6px;
+                        margin-bottom: 8px; table-layout: fixed; }
+                        .table-ait td, .table-ait th { border: 1px solid #000; padding: 3px 4px;
+                        vertical-align: top; }
+
+                        .header-gray { font-weight: bold; color: #000; text-align: center; }
+                        .text-bold { font-weight: bold; }
+                        .text-right { text-align: right; }
+                        .text-center { text-align: center; }
+                        .text-left { text-align: left; }
+
+                        .table-sm th, .table-sm td { border-top: none !important; }
+
+
+                        .table-outline { border: 1px solid #000; border-collapse: collapse;
+                        margin-top: 0px; margin-bottom: 8px; }
+
+                        .quote-details-table {
+                        width: 100%;
+                        table-layout: fixed;
+                        border-collapse: collapse;
+                        }
+                        .quote-details-table th,
+                        .quote-details-table td {
+                        padding: 8px 10px !important;
+                        vertical-align: top;
+                        overflow-wrap: break-word;
+                        }
+                        .quote-details-table thead th {
+                        border-bottom: 1px solid #000 !important;
+                        }
+                        .quote-details-table .col-num {
+                        white-space: nowrap;
+                        }
+                        .loose-cargo-table {
+                        width: 100%;
+                        border: 1px solid #000 !important;
+                        border-collapse: collapse;
+                        margin-top: 0px;
+                        margin-bottom: 8px;
+                        }
+                        .loose-cargo-table th,
+                        .loose-cargo-table td {
+                        border: 1px solid #000 !important;
+                        padding: 7px 8px !important;
+                        vertical-align: top;
+                        }
+
+                        .keep-together {
+                        page-break-inside: avoid;
+                        break-inside: avoid-page;
+                        }
+
+                        @media print {
+                        #total table,
+                        #total table tr,
+                        #total table td,
+                        #total table th {
+                        border: none !important;
+                        }
+                        }
+                    </style>
+
+                    <div class="header">
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+                            <tr>
+                                <td style="width: 50%; vertical-align: top; padding: 0;">
+                                    <img t-att-src="doc.get_report_logo_src()"
+                                        alt="WPC Logistics"
+                                        style="max-height: 130px; width: auto; display: block;" />
+                                </td>
+                                <td style="width: 50%; vertical-align: top; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif; color: #000; font-size: 15px; padding: 0;">
+                                    <strong style="font-size: 18px; color: #085294;">WPC MAIN OFFICE - INDONESIA</strong>
+                                    <br />Jl. Kesehatan Raya No. 54 B Tanah Abang IV, Jakarta 10160
+                                    <br />Phone: +62 21 3450605
+                                    <br />Fax: +62 21 3458307
+                                    <br />Email: inquiry@wpclogistics.com
+                                    <br />https://wpclogistics.com/
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table
+                            style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-family: 'Arial', sans-serif; font-weight: bold; font-size: 16px;">
+                            <tr>
+                                <td style="padding: 4px; color: #000;"> Air Freight (LSE) from <span
+                                        t-if="doc.origin_id" t-field="doc.origin_id" />
+            <span
+                                        t-else="">Origin TBD</span> to <span
+                                        t-if="doc.destination_id" t-field="doc.destination_id" />
+            <span
+                                        t-else="">Destination TBD</span>
+                                </td>
+                                <td
+                                    style="padding: 4px; color: #000; text-align: right; white-space: nowrap; width: 1%;">
+                                    Page <span class="page" /> of <span class="topage" />
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table
+                            style="width: 100%; margin-top: 8px; margin-bottom: 8px; border-collapse: collapse; font-family: 'Arial', sans-serif;">
+                            <tr>
+                                <!-- Kolom kiri: data customer -->
+                                <td
+                                    style="vertical-align: top; padding: 5px; font-size: 16px; width: 58%;">
+                                    <span t-field="doc.partner_id.name" />
+                                    <t t-if="doc.partner_id.street">
+                                        <br />
+                                        <span t-field="doc.partner_id.street" />
+                                    </t>
+                                    <t t-if="doc.partner_id.street2">
+                                        <br />
+                                        <span t-field="doc.partner_id.street2" />
+                                    </t>
+                                    <t t-if="doc.partner_id.city or doc.partner_id.zip">
+                                        <br />
+                                        <t t-if="doc.partner_id.city">
+                                            <span t-field="doc.partner_id.city" />
+                                        </t>
+                                        <t t-if="doc.partner_id.zip">
+                                            <span t-field="doc.partner_id.zip" />
+                                        </t>
+                                    </t>
+                                    <t t-if="doc.partner_id.country_id">
+                                        <br />
+                                        <span t-field="doc.partner_id.country_id" />
+                                    </t>
+                                </td>
+
+                                <!-- Kolom kanan: tabel quote -->
+                                <td style="vertical-align: top; width: 42%; padding-left: 0;">
+                                    <table class="table-ait"
+                                        style="width: 100%; margin-bottom: 0; border: 1px solid #000; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                                        <tr>
+                                            <td class="header-gray" style="width: 32%; border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px; white-space: nowrap;">QUOTE NO.</td>
+                                            <td style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px;">
+                                                <span t-field="doc.name" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="header-gray" style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px; white-space: nowrap;">DATE</td>
+                                            <td style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px;">
+                                                <span t-field="doc.date_order"
+                                                    t-options="{&quot;widget&quot;: &quot;date&quot;}" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="page font-base"
+                        style="font-family: 'Arial', sans-serif; color: #000;">
+
+                        <table class="table-ait text-left mb-0">
+                            <tr class="text-left header-gray">
+                                <td width="30%">Quote No</td>
+                                <td width="20%">Service Level</td>
+                                <td width="25%">Valid From</td>
+                                <td width="25%">Valid To</td>
+                            </tr>
+                            <tr class="text-left">
+                                <td>
+                                    <span t-field="doc.name" />
+                                </td>
+                                <td>
+                                    <span t-field="doc.service_level" />
+                                </td>
+                                <td>
+                                    <span t-field="doc.effective_date"
+                                        t-options="{&quot;widget&quot;: &quot;date&quot;}" />
+                                </td>
+                                <td>
+                                    <span t-field="doc.expiry_date"
+                                        t-options="{&quot;widget&quot;: &quot;date&quot;}" />
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="text-bold mb-1"
+                            style="border-bottom: 1px solid #000 !important; margin-top: 5px;">Shipment
+                            Information</div>
+                        <div class="font-sm mb-1">This Quotation applies to the following shipment:</div>
+
+                        <!-- Consolidated Shipment Information table -->
+                        <table class="table-ait table-outline w-100 mb-0 text-left">
+                            <colgroup>
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                                <col style="width:8.33%" />
+                            </colgroup>
+                            <tr class="header-gray text-left">
+                                <td colspan="6">CUSTOMER REFERENCE</td>
+                                <td colspan="3">PICKUP CODE ORIGIN</td>
+                                <td colspan="3">PICKUP CODE DESTINATION</td>
+                            </tr>
+                            <tr>
+                                <td colspan="6">
+                                    <span t-field="doc.client_order_ref" />
+                                </td>
+                                <td colspan="3">
+                                    <span t-field="doc.origin_id.code" />
+                                </td>
+                                <td colspan="3">
+                                    <span t-field="doc.destination_id.code" />
+                                </td>
+                            </tr>
+                            <tr class="header-gray text-left">
+                                <td colspan="3">Weight</td>
+                                <td colspan="3">Volume</td>
+                                <td colspan="3">Chargeable</td>
+                                <td colspan="3">Incoterm</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3"><span t-field="doc.actual_weight" /> KG</td>
+                                <td colspan="3"><span t-field="doc.volume" /> M3</td>
+                                <td colspan="3"><span t-field="doc.chargeable_weight" /> KG</td>
+                                <td colspan="3">
+                                    <span t-field="doc.incoterm" />
+                                </td>
+                            </tr>
+                            <tr class="header-gray text-left">
+                                <td colspan="3">Customs Entries</td>
+                                <td colspan="3">Entry / Invoice Lines</td>
+                                <td colspan="3">Value of Goods</td>
+                                <td colspan="3">Insurance Value</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">Not Specified</td>
+                                <td colspan="3">Not Specified</td>
+                                <td colspan="3">
+                                    <span t-field="doc.description_of_goods" />
+                                </td>
+                                <td colspan="3">
+                                    <span t-field="doc.insurance_id" />
+                                </td>
+                            </tr>
+                            <tr class="header-gray text-left">
+                                <td colspan="6">Pickup Address</td>
+                                <td colspan="6">Delivery Address</td>
+                            </tr>
+                            <tr>
+                                <td colspan="6">
+                                    <span t-field="doc.source_street"
+                                        t-if="doc.source_street" />
+                                    <br />
+                                    <span t-field="doc.source_city"
+                                        t-if="doc.source_city" />
+                                    <span t-field="doc.source_country_id"
+                                        t-if="doc.source_country_id" />
+                                    <t t-if="not doc.source_street">
+                                        <span class="text-muted">TBA</span>
+                                    </t>
+                                </td>
+                                <td colspan="6">
+                                    <span t-field="doc.destination_street"
+                                        t-if="doc.destination_street" />
+                                    <br />
+                                    <span t-field="doc.destination_city"
+                                        t-if="doc.destination_city" />
+                                    <span t-field="doc.destination_country_id"
+                                        t-if="doc.destination_country_id" />
+                                </td>
+                            </tr>
+                        </table>
+
+                        <t t-set="valid_cargo"
+                            t-value="doc.cargo_info_ids.filtered(lambda p: p.quantity)" />
+                        <table class="loose-cargo-table w-100 mb-0">
+                            <tr class="header-gray text-left">
+                                <td colspan="3" class="px-2">Loose Cargo Information</td>
+                            </tr>
+                            <t t-foreach="valid_cargo" t-as="pack">
+                                <tr class="text-left">
+                                    <td width="15%" class="px-2">
+                                        <span t-field="pack.quantity" />
+                                    </td>
+                                    <td width="25%" class="px-2">
+                                        <span t-field="pack.size_package" />
+                                    </td>
+                                    <td class="px-2">
+                                        <span t-field="pack.length" /> x <span
+                                            t-field="pack.width" /> x <span
+                                            t-field="pack.height" /> CM </td>
+                                </tr>
+                            </t>
+                            <tr t-if="not valid_cargo">
+                                <td colspan="3" class="px-2">No cargo details specified.</td>
+                            </tr>
+                        </table>
+
+                        <t t-set="display_discount"
+                            t-value="any(l.discount for l in doc.order_line)" />
+                        <t t-set="current_subtotal" t-value="0" />
+                        <t t-set="current_section" t-value="False" />
+
+                        <div class="text-bold mb-1" style="margin-top:25px; !important; mt-3;">Quotation
+                            Details</div>
+
+                        <t t-if="display_discount">
+                            <colgroup>
+                                <col style="width: 46%;" />
+                                <col style="width: 9%;" />
+                                <col style="width: 12%;" />
+                                <col style="width: 8%;" />
+                                <col style="width: 10%;" />
+                                <col style="width: 15%;" />
+                            </colgroup>
+                        </t>
+                        <t t-else="">
+                            <colgroup>
+                                <col style="width: 54%;" />
+                                <col style="width: 9%;" />
+                                <col style="width: 13%;" />
+                                <col style="width: 11%;" />
+                                <col style="width: 13%;" />
+                            </colgroup>
+                        </t>
+                        <table class="quote-details-table w-100 mb-0 font-base">
+                            <thead>
+                                <tr>
+                                    <th name="th_description" class="text-left">Description</th>
+                                    <th name="th_quantity" class="text-center col-num">Quantity</th>
+                                    <th name="th_priceunit" class="text-center col-num">Unit Price</th>
+                                    <th name="th_discount" t-if="display_discount"
+                                        class="text-right col-num">
+                                        <span>Disc.%</span>
+                                    </th>
+                                    <th name="th_taxes" class="text-center col-num">Taxes</th>
+                                    <th name="th_subtotal" class="text-center col-num">
+                                        <span>Total Price</span>
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody class="sale_tbody">
+                                <t t-foreach="doc.order_line" t-as="line">
+                                    <t t-set="current_subtotal"
+                                        t-value="current_subtotal + line.price_subtotal" />
+
+                                    <t t-if="not line.display_type">
+                                        <tr>
+                                            <td name="td_name" class="px-2">
+                                                <span t-field="line.name" />
+                                            </td>
+                                            <td name="td_quantity" class="text-right px-2 col-num">
+                                                <span t-field="line.product_uom_qty" />
+                                            </td>
+                                            <td name="td_priceunit" class="text-right px-2 col-num">
+                                                <span t-field="line.price_unit" />
+                                            </td>
+                                            <td t-if="display_discount"
+                                                class="text-right px-2 col-num">
+                                                <span t-field="line.discount" />
+                                            </td>
+                                            <td name="td_taxes" class="text-right px-2 col-num">
+                                                <span t-field="line.tax_id" />
+                                            </td>
+                                            <td name="td_subtotal"
+                                                class="text-right o_price_total px-2 col-num">
+                                                <span t-field="line.price_total" />
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                    <t t-if="line.display_type == 'line_section'">
+                                        <t t-set="current_section" t-value="line" />
+                                        <t t-set="current_subtotal" t-value="0" />
+
+                                        <tr class="text-bold">
+                                            <td name="td_section_line" colspan="99" class="px-2">
+                                                <span t-field="line.name" />
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                    <t t-if="line.display_type == 'line_note'">
+                                        <tr class="font-sm text-muted">
+                                            <td name="td_note_line" colspan="99" class="px-2">
+                                                <span t-field="line.name" />
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                    <t
+                                        t-if="current_section and (line_last or doc.order_line[line_index+1].display_type == 'line_section') and not line.display_type">
+                                        <tr class="text-right text-bold"
+                                            style="border-top: 1px solid #ccc !important;">
+                                            <td colspan="99" class="px-2">
+                                                <span class="mr-2">Section Subtotal: </span>
+                                                <span t-esc="current_subtotal"
+                                                    t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: doc.currency_id}" />
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <div class="clearfix keep-together" name="so_total_summary">
+                            <div id="total" name="total" style="width: 100%; margin-top: 8px;">
+                                <table
+                                    class="table table-sm table-borderless mb-0 quote-total-table"
+                                    style="width: 42%; margin-left: auto;">
+                                    <tr>
+                                        <td name="td_amount_untaxed_label" class="text-right">
+                                            <strong>Subtotal (Untaxed)</strong>
+                                        </td>
+                                        <td name="td_amount_untaxed" class="text-right">
+                                            <span t-field="doc.amount_untaxed" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">
+                                            <strong>Taxes</strong>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="doc.amount_tax" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td name="td_amount_total_label" class="text-right">
+                                            <strong>Total</strong>
+                                        </td>
+                                        <td name="td_amount_total" class="text-right">
+                                            <span t-field="doc.amount_total" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="keep-together" style="margin-top: 8px;">
+                            <div class="mt-2 mb-2 font-sm" style="padding: 4px; border: 1px solid #000 !important; padding: 8px;">
+                                <div class="header-gray p-1"
+                                    style="border-bottom: 1px solid #000 !important; padding: 8px;">QUOTATION
+                                    ADDITIONAL CONDITIONS</div>
+                                <div class="p-2" style="padding: 8px;">
+                                    <div t-if="doc.note"
+                                        t-field="doc.note" />
+                                    <div t-else="">
+                                        <ul style="padding-left: 15px; margin: 0;">
+                                            <li>All rates are based on current valid pricing and
+                                                exchange rates.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 text-muted font-sm" style="margin-top: 8px;">
+                                Please note that this Quotation is only applicable to the shipment
+                                defined under "Shipment Information".
+                            </div>
+                            <div class="mt-1 text-muted font-sm">
+                                Any foreign currency conversions have been undertaken using current
+                                exchange rates.
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
+
+    

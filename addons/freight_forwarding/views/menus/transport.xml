@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_transport_partner" name="Partners"
+        parent="menu_parent_transport"
+        sequence="10" />
+    <menuitem id="menu_transport_company" name="Transport Company"
+        parent="menu_sub_parent_transport_partner"
+        action="action_freight_transport_company"
+        sequence="10" />
+    <menuitem id="menu_warehouse" name="Warehouse"
+        parent="menu_sub_parent_transport_partner"
+        action="action_freight_warehouse"
+        sequence="20" />
+    <menuitem id="menu_yard" name="Yard"
+        parent="menu_sub_parent_transport_partner"
+        action="action_freight_yard"
+        sequence="30" />
+    <menuitem id="menu_depot" name="Depot"
+        parent="menu_sub_parent_transport_partner"
+        action="action_freight_depot"
+        sequence="40" />
+</odoo>

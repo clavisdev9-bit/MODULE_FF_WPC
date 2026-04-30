@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_sea_vessel_schedule" model="ir.actions.act_window">
+        <field name="name">Vessel Schedule</field>
+        <field name="res_model">freight.sea.booking.vessel.schedule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_freight_sea_provision_cost" model="ir.actions.act_window">
+        <field name="name">Provision Cost</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "Provision Cost")]</field>
+    </record>
+
+    <record id="action_freight_sea_purchase_order" model="ir.actions.act_window">
+        <field name="name">Purchase Order</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+    <record id="action_freight_sea_vendor_payment" model="ir.actions.act_window">
+        <field name="name">Vendor Payment</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("partner_type", "=", "supplier")]</field>
+    </record>
+
+    <record id="action_freight_sea_vendor_debit_note" model="ir.actions.act_window">
+        <field name="name">Vendor Debit Note</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("move_type", "=", "in_invoice")]</field>
+    </record>
+
+    <record id="action_freight_sea_vendor_credit_note" model="ir.actions.act_window">
+        <field name="name">Vendor Credit Note</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("move_type", "=", "in_refund")]</field>
+    </record>
+
+    <record id="action_freight_sea_expenses" model="ir.actions.act_window">
+        <field name="name">Expenses</field>
+        <field name="res_model">hr.expense</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+    <record id="action_freight_sea_invoice" model="ir.actions.act_window">
+        <field name="name">Invoice</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("move_type", "=", "out_invoice")]</field>
+    </record>
+
+    <record id="action_freight_sea_debit_note" model="ir.actions.act_window">
+        <field name="name">Debit Note</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("move_type", "=", "out_invoice")]</field>
+    </record>
+
+    <record id="action_freight_sea_credit_note" model="ir.actions.act_window">
+        <field name="name">Credit Note</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("move_type", "=", "out_refund")]</field>
+    </record>
+
+    <record id="action_freight_sea_invoice_tax" model="ir.actions.act_window">
+        <field name="name">Invoice Tax</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("move_type", "=", "out_invoice")]</field>
+    </record>
+
+    <record id="action_freight_sea_delivery_order" model="ir.actions.act_window">
+        <field name="name">Delivery Order</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[]</field>
+    </record>
+
+    
+</odoo>

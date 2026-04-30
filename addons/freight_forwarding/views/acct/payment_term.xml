@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_payment_term" model="ir.actions.act_window">
+        <field name="name">Payment Term</field>
+        <field name="res_model">account.payment.term</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+</odoo>

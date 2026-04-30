@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_warehouse" model="ir.actions.act_window">
+        <field name="name">Warehouse</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Warehouse')]</field>
+    </record>
+
+    <record id="action_freight_yard" model="ir.actions.act_window">
+        <field name="name">Yard</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Yard')]</field>
+    </record>
+
+    <record id="action_freight_depot" model="ir.actions.act_window">
+        <field name="name">Depot</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Depot')]</field>
+    </record>
+
+    <record id="action_freight_transport_company" model="ir.actions.act_window">
+        <field name="name">Transport Company</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Transport Company')]</field>
+    </record>
+</odoo>

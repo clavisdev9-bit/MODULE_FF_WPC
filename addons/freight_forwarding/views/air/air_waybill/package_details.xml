@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_air_package_details_list" model="ir.ui.view">
+        <field name="name">freight.air.mawb.package.details.list</field>
+        <field name="model">freight.air.mawb.package.details</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="mawb_id"/>
+                <field name="package_type"/>
+                <field name="types_of_cargo"/>
+                <field name="quantity"/>
+                <field name="gross_weight"/>
+                <field name="total_volume"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_air_package_details_form" model="ir.ui.view">
+        <field name="name">freight.air.mawb.package.details.form</field>
+        <field name="model">freight.air.mawb.package.details</field>
+        <field name="arch" type="xml">
+            <form string="MAWB Package Details">
+                <sheet>
+                    <group>
+                        <field name="mawb_id"
+                            invisible="context.get('from_mawb_inline')"
+                            required="not context.get('from_mawb_inline')"
+                            readonly="context.get('from_mawb_inline')" />
+                        <field name="package_type" widget="radio" options="{&quot;horizontal&quot;: true}"/>
+                    </group>
+
+                    <group>
+                        <group string="Box / Pallet / Load">
+                            <field name="size_package"/>
+                            <field name="container_no"/>
+                            <field name="stamp_no"/>
+                            <field name="container_box_type_id"/>
+                        </group>
+                        <group string="Qty &amp; Type">
+                            <field name="types_of_cargo"/>
+                            <field name="quantity"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Dimension">
+                            <field name="length"/>
+                            <field name="width"/>
+                            <field name="height"/>
+                        </group>
+                        <group string="Weight &amp; Volume">
+                            <field name="gross_weight"/>
+                            <field name="net_weight"/>
+                            <field name="volume"/>
+                            <field name="total_volume"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Environmental Condition">
+                            <field name="harmonize"/>
+                            <field name="temperature"/>
+                            <field name="ventilation"/>
+                            <field name="humidity"/>
+                        </group>
+                        <group string="Dangerous Goods">
+                            <field name="has_dangerous_goods"/>
+                        </group>
+                    </group>
+
+                    <group invisible="has_dangerous_goods == False">
+                        <group string="Regulatory Classification">
+                            <field name="imdg_code"/>
+                            <field name="class_number"/>
+                            <field name="packing_group"/>
+                            <field name="a_number"/>
+                        </group>
+                        <group string="Safety and Handling">
+                            <field name="flash_point"/>
+                            <field name="material_description"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="freight_items_line" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_air_package_details" model="ir.actions.act_window">
+        <field name="name">MAWB Package Details</field>
+        <field name="res_model">freight.air.mawb.package.details</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_container_type_list" model="ir.ui.view">
+        <field name="name">freight.container.type.list</field>
+        <field name="model">freight.container.type</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_container_type_form" model="ir.ui.view">
+        <field name="name">freight.container.type.form</field>
+        <field name="model">freight.container.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="size_code"/>
+                            <field name="iso_size"/>
+                            <field name="no_of_teu"/>
+                        </group>
+                        <group>
+                            <field name="max_cubic_foot"/>
+                            <field name="max_volume_m3"/>
+                            <field name="max_weight_kg"/>
+                            <field name="temperature_flag"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_container_type" model="ir.actions.act_window">
+        <field name="name">Container Type</field>
+        <field name="res_model">freight.container.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

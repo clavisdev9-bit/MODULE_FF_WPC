@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- <menuitem id="menu_delivery_type" name="Delivery Type"
+        parent="menu_parent_others"
+        action="action_freight_delivery_type"
+        sequence="80" /> -->
+    <menuitem id="menu_commodity" name="Commodity"
+        parent="menu_parent_others"
+        action="action_freight_commodity"
+        sequence="90" />
+    <!-- <menuitem id="menu_uom" name="Unit of Measure"
+        parent="menu_parent_others"
+        action="uom.product_uom_form_action"
+        sequence="100" /> -->
+</odoo>

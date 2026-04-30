@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="view_sea_booking_extra_info_list" model="ir.ui.view">
+            <field name="name">Sea Booking Extra Info List</field>
+            <field name="model">freight.sea.booking.extra.info</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="do_date" />
+                    <field name="do_date_collecting" />
+                    <field name="do_transit" />
+                    <field name="do_mode_transport" />
+                    <field name="do_quote_reference" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_extra_info_form" model="ir.ui.view">
+            <field name="name">Sea Booking Extra Info Form</field>
+            <field name="model">freight.sea.booking.extra.info</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="booking_id" readonly="1" />
+                                <field name="do_date" />
+                                <field name="do_date_collecting" />
+                                <field name="do_transit" />
+                                <field name="do_mode_transport" />
+                                <field name="do_quote_reference" />
+                            </group>
+                            <group>
+                                <field name="do_peb_number" />
+                                <field name="do_npe_date" />
+                                <field name="do_po_number" />
+                                <field name="do_supplier_id" />
+                                <field name="do_product_name" />
+                                <field name="do_serial_number_doc_number" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

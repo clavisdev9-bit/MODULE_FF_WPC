@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_sea_cost_table" model="ir.actions.act_window">
+        <field name="name">Cost Table</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "Cost Table")]
+        </field>
+    </record>
+
+    <record id="action_freight_sea_coloader_cost" model="ir.actions.act_window">
+        <field name="name">Coloader Cost</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "Coloader Cost")]
+        </field>
+    </record>
+
+    <record id="action_freight_sea_charge_table" model="ir.actions.act_window">
+        <field name="name">Charge Table</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "Charge Table")]
+        </field>
+    </record>
+
+    <record id="action_freight_sea_vendor_cost" model="ir.actions.act_window">
+        <field name="name">Vendor Cost</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[("product_tag_ids.name", "ilike", "Vendor Cost")]
+        </field>
+    </record>
+</odoo>

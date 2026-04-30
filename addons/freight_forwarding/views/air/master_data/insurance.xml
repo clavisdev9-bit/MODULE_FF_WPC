@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_insurance_list" model="ir.ui.view">
+        <field name="name">freight.insurance.list</field>
+        <field name="model">freight.insurance</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_freight_insurance_form" model="ir.ui.view">
+        <field name="name">freight.insurance.form</field>
+        <field name="model">freight.insurance</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="code"/>
+                        <field name="name"/>
+                        <field name="active" widget="boolean_toggle"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_freight_insurance" model="ir.actions.act_window">
+        <field name="name">Insurance</field>
+        <field name="res_model">freight.insurance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

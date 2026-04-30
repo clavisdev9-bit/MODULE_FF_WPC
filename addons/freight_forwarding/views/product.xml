@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_charge_code" model="ir.actions.act_window">
+        <field name="name">Charge Code</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('product_tag_ids', '=', 'Charge Code')]</field>
+        <field name="context">{'search_default_goods': 0}</field>
+    </record>
+</odoo>

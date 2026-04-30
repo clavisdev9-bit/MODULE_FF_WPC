@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_sea_export_job" name="Export Job"
+        parent="menu_sub_parent_sea_export"
+        sequence="30" />
+
+    <menuitem id="menu_sea_export_job_fcl" name="Export Job FCL"
+        parent="menu_sub_parent_sea_export_job"
+        action="action_sea_hbl_export_fcl"
+        sequence="10" />
+
+    <menuitem id="menu_sea_export_job_lcl" name="Export Job LCL"
+        parent="menu_sub_parent_sea_export_job"
+        action="action_sea_hbl_export_lcl"
+        sequence="20" />
+
+    <menuitem id="menu_sea_export_job_consol" name="Export Job Consol"
+        parent="menu_sub_parent_sea_export_job"
+        action="action_sea_hbl_export_consol"
+        sequence="30" />
+</odoo>

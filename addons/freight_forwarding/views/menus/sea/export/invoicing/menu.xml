@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sub_parent_sea_export_invoicing" name="Invoicing"
+        parent="menu_sub_parent_sea_export"
+        sequence="50" />
+
+    <menuitem id="menu_sea_export_invoice" name="Invoice"
+        parent="menu_sub_parent_sea_export_invoicing"
+        action="action_freight_sea_invoice"
+        sequence="10" />
+
+    <menuitem id="menu_sea_export_debit_note" name="Debit Note"
+        parent="menu_sub_parent_sea_export_invoicing"
+        action="action_freight_sea_invoice"
+        sequence="20" />
+
+    <menuitem id="menu_sea_export_credit_note" name="Credit Note"
+        parent="menu_sub_parent_sea_export_invoicing"
+        action="action_freight_sea_credit_note"
+        sequence="30" />
+
+    <menuitem id="menu_sea_export_invoice_tax" name="Invoice Tax"
+        parent="menu_sub_parent_sea_export_invoicing"
+        action="action_freight_sea_invoice_tax"
+        sequence="40" />
+
+    <menuitem id="menu_sea_export_cash_receipt" name="Cash Receipt"
+        parent="menu_sub_parent_sea_export_invoicing"
+        action="action_freight_sea_expenses"
+        sequence="50" />
+
+    <menuitem id="menu_sea_export_proforma_invoice" name="Proforma Invoice"
+        parent="menu_sub_parent_sea_export_invoicing"
+        action="action_freight_sea_invoice"
+        sequence="60" />
+</odoo>

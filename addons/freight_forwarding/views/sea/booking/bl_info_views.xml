@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="view_sea_booking_bl_info_list" model="ir.ui.view">
+            <field name="name">Sea Booking B/L Info List</field>
+            <field name="model">freight.sea.booking.bl.info</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="shipper_id" />
+                    <field name="consignee_id" />
+                    <field name="notify_party_id" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_bl_info_form" model="ir.ui.view">
+            <field name="name">Sea Booking B/L Info Form</field>
+            <field name="model">freight.sea.booking.bl.info</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="shipper_id" widget="res_partner_many2one"
+                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                        <field name="shipper_address" readonly="1" nolabel="0" />
+
+                        <field name="consignee_id" widget="res_partner_many2one"
+                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                        <field name="consignee_address" readonly="1" nolabel="0" />
+
+                        <field name="notify_party_id" widget="res_partner_many2one"
+                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                        <field name="notify_party_address" readonly="1" nolabel="0" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_notify_party_list" model="ir.ui.view">
+            <field name="name">Sea Booking Notify Party List</field>
+            <field name="model">freight.sea.booking.notify.party</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="booking_id" />
+                    <field name="notify_name_id" />
+                    <field name="notify_code" />
+                    <field name="also_notify_name_id" />
+                    <field name="also_notify_code" />
+                </list>
+            </field>
+        </record>
+
+        <record id="view_sea_booking_notify_party_form" model="ir.ui.view">
+            <field name="name">Sea Booking Notify Party Form</field>
+            <field name="model">freight.sea.booking.notify.party</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="booking_id" readonly="1" />
+                        </group>
+                        <group string="Notify Party">
+                            <field name="notify_name_id" />
+                            <field name="notify_code" />
+                            <field name="notify_address" />
+                        </group>
+                        <group string="Also Notify Party">
+                            <field name="also_notify_name_id" />
+                            <field name="also_notify_code" />
+                            <field name="also_notify_address" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

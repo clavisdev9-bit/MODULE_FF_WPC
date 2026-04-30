@@ -1,0 +1,12 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_freight_delivery_type,freight.delivery.type,model_freight_delivery_type,,1,1,1,1
+access_freight_container_type,freight.container.type,model_freight_container_type,,1,1,1,1
+access_freight_cargo_type,freight.cargo.type,model_freight_cargo_type,,1,1,1,1
+access_freight_pickup,freight.pickup,model_freight_pickup,,1,1,1,1
+access_freight_commodity,freight.commodity,model_freight_commodity,,1,1,1,1
+access_freight_insurance,freight.insurance,model_freight_insurance,,1,1,1,1
+access_freight_port,freight.port,model_freight_port,,1,1,1,1
+access_freight_carrier,freight.carrier,model_freight_carrier,,1,1,1,1
+access_freight_shipping_line,freight.shipping.line,model_freight_shipping_line,base.group_user,1,1,1,1
+access_freight_location,freight.location,model_freight_location,base.group_user,1,1,1,1
+access_freight_incoterm,freight.incoterm,model_freight_incoterm,base.group_user,1,1,1,1

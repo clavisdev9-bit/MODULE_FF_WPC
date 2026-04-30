@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_air_waybill_master" name="Air Waybill Master"
+        parent="menu_sub_parent_air_waybill"
+        action="action_freight_air_mawb"
+        sequence="20" />
+
+    <menuitem id="menu_air_waybill_stock_enquiry" name="Air Waybill Stock Enquiry"
+        parent="menu_sub_parent_air_waybill"
+        action="action_freight_air_booking"
+        sequence="30" />
+
+    <menuitem id="menu_sub_parent_air_waybill_transaction" name="Air Waybill Transaction"
+        parent="menu_sub_parent_air_waybill"
+        sequence="40" />
+
+    <menuitem id="menu_air_waybill_transaction_receipt" name="Receipt"
+        parent="menu_sub_parent_air_waybill_transaction"
+        action="action_freight_air_waybill_transaction_receipt"
+        sequence="10" />
+
+    <menuitem id="menu_air_waybill_transaction_release" name="Release"
+        parent="menu_sub_parent_air_waybill_transaction"
+        action="action_freight_air_waybill_transaction_release"
+        sequence="20" />
+
+    <menuitem id="menu_air_waybill_transaction_reservation" name="Reservation"
+        parent="menu_sub_parent_air_waybill_transaction"
+        action="action_freight_air_waybill_transaction_reservation"
+        sequence="30" />
+
+    <menuitem id="menu_air_waybill_transaction_issue_to_agent" name="Issue To Agent"
+        parent="menu_sub_parent_air_waybill_transaction"
+        action="action_freight_air_waybill_transaction_issue_to_agent"
+        sequence="40" />
+
+    <menuitem id="menu_air_waybill_transaction_return_from_agent" name="Return From Agent"
+        parent="menu_sub_parent_air_waybill_transaction"
+        action="action_freight_air_waybill_transaction_return_from_agent"
+        sequence="50" />
+
+    <menuitem id="menu_air_waybill_transaction_cancellation" name="Cancellation"
+        parent="menu_sub_parent_air_waybill_transaction"
+        action="action_freight_air_waybill_transaction_cancellation"
+        sequence="60" />
+
+    <menuitem id="menu_air_waybill_transaction_lost" name="Lost"
+        parent="menu_sub_parent_air_waybill_transaction"
+        action="action_freight_air_waybill_transaction_lost"
+        sequence="70" />
+
+    <menuitem id="menu_sub_parent_air_waybill_report" name="Report"
+        parent="menu_sub_parent_air_waybill"
+        sequence="50" />
+
+    <menuitem id="menu_air_waybill_report_code" name="AWB Code"
+        parent="menu_sub_parent_air_waybill_report"
+        action="action_freight_airline"
+        sequence="10" />
+
+    <menuitem id="menu_air_waybill_report_master" name="AWB Master"
+        parent="menu_sub_parent_air_waybill_report"
+        action="action_freight_air_mawb"
+        sequence="20" />
+
+    <menuitem id="menu_air_waybill_report_transaction" name="AWB Transaction"
+        parent="menu_sub_parent_air_waybill_report"
+        action="action_freight_air_waybill_transaction_receipt"
+        sequence="30" />
+</odoo>

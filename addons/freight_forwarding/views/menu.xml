@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Root -->
+    <menuitem id="menu_parent_root"
+        name="Freight Forwarding"
+        web_icon="freight_forwarding,static/description/icon.png" />
+
+    <!-- Top-Level Menus -->
+    <menuitem id="menu_parent_quotation" name="Quotation"
+        parent="menu_parent_root"
+        sequence="10" />
+
+    <menuitem id="menu_parent_acct" name="Account"
+        parent="menu_parent_root"
+        sequence="20" />
+
+    <menuitem id="menu_parent_air" name="Air"
+        parent="menu_parent_root"
+        sequence="30" />
+
+    <menuitem id="menu_sub_parent_air_master_data" name="Master Data"
+        parent="menu_parent_air"
+        sequence="10" />
+
+    <menuitem id="menu_sub_parent_air_waybill" name="Air Waybill"
+        parent="menu_parent_air"
+        sequence="20" />
+
+    <menuitem id="menu_sub_parent_air_sales" name="Sales"
+        parent="menu_parent_air"
+        sequence="30" />
+
+    <menuitem id="menu_sub_parent_air_import" name="Import"
+        parent="menu_parent_air"
+        sequence="40" />
+
+    <menuitem id="menu_sub_parent_air_export" name="Export"
+        parent="menu_parent_air"
+        sequence="50" />
+
+    <menuitem id="menu_parent_sea" name="Sea"
+        parent="menu_parent_root"
+        sequence="40" />
+
+    <menuitem id="menu_sub_parent_sea_master_data" name="Master Data"
+        parent="menu_parent_sea"
+        sequence="10" />
+
+    <menuitem id="menu_sub_parent_sea_sales" name="Sales"
+        parent="menu_parent_sea"
+        sequence="20" />
+
+    <menuitem id="menu_sub_parent_sea_import" name="Import"
+        parent="menu_parent_sea"
+        sequence="30" />
+
+    <menuitem id="menu_sub_parent_sea_export" name="Export"
+        parent="menu_parent_sea"
+        sequence="40" />
+
+    <menuitem id="menu_parent_transport" name="Transport"
+        parent="menu_parent_root"
+        sequence="50" />
+
+    <menuitem id="menu_parent_others" name="Others"
+        parent="menu_parent_root"
+        sequence="70" />
+
+    <menuitem id="menu_parent_partner" name="Partners"
+        parent="menu_parent_root"
+        sequence="80" />
+</odoo>

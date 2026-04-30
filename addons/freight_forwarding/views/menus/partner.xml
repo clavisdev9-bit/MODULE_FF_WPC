@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<menuitem id="menu_sub_parent_partner_setup" name="Setup"
+		parent="menu_parent_partner"
+		sequence="10" />
+
+	<menuitem id="menu_contact" name="Contact"
+		parent="menu_sub_parent_partner_setup"
+		action="action_freight_contact"
+		sequence="10" />
+	<menuitem id="menu_tag" name="Tag"
+		parent="menu_sub_parent_partner_setup"
+		action="action_freight_tag"
+		sequence="20" />
+</odoo>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_sea_hbl_cargo_info_list" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.cargo.info.list</field>
+        <field name="model">freight.sea.hbl.cargo.info</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="hbl_id"/>
+                <field name="package_type"/>
+                <field name="size_package"/>
+                <field name="types_of_cargo"/>
+                <field name="quantity"/>
+                <field name="gross_weight"/>
+                <field name="volume"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sea_hbl_cargo_info_form" model="ir.ui.view">
+        <field name="name">freight.sea.hbl.cargo.info.form</field>
+        <field name="model">freight.sea.hbl.cargo.info</field>
+        <field name="arch" type="xml">
+            <form string="Sea Jobsheet Cargo Info">
+                <sheet>
+                    <group>
+                        <field name="hbl_id"/>
+                    </group>
+
+                    <group>
+                        <group string="Box / Pallet / Load">
+                            <field name="package_type" widget="radio" options="{&quot;horizontal&quot;:true}"/>
+                            <field name="size_package"/>
+                            <field name="container_no"/>
+                            <field name="stamp_no"/>
+                            <field name="container_box_type_id"/>
+                        </group>
+                        <group string="Qty &amp; Type">
+                            <field name="types_of_cargo"/>
+                            <field name="quantity"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Dimension">
+                            <field name="length"/>
+                            <field name="width"/>
+                            <field name="height"/>
+                        </group>
+                        <group string="Weight &amp; Volume">
+                            <field name="gross_weight"/>
+                            <field name="net_weight"/>
+                            <field name="volume"/>
+                            <field name="total_volume"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Environmental Condition">
+                            <field name="harmonize"/>
+                            <field name="temperature"/>
+                            <field name="ventilation"/>
+                            <field name="humidity"/>
+                        </group>
+                        <group string="Dangerous Goods">
+                            <field name="has_dangerous_goods"/>
+                        </group>
+                    </group>
+
+                    <group invisible="has_dangerous_goods == False">
+                        <group string="Regulatory Classification">
+                            <field name="imdg_code"/>
+                            <field name="class_number"/>
+                            <field name="packing_group"/>
+                            <field name="a_number"/>
+                        </group>
+                        <group string="Safety and Handling">
+                            <field name="flash_point"/>
+                            <field name="material_description"/>
+                        </group>
+                    </group>
+
+                    <group string="Freight Items">
+                        <field name="freight_items_line"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
