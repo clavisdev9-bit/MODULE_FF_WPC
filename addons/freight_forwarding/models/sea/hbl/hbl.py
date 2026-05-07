@@ -71,7 +71,7 @@ class SeaHBL(models.Model):
         string="Terms of Payment"
     )
     salesman_id = fields.Many2one(
-        "res.users",
+        "hr.employee",
         string="Salesman"
     )
     export_sales_team_id = fields.Many2one(

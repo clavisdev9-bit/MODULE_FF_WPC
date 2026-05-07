@@ -51,9 +51,9 @@ class SeaBooking(models.Model):
         string="Terms of Payment",
     )
     salesman_id = fields.Many2one(
-        "res.partner", 
+        "hr.employee",
         string="Salesman",
-        domain="[('category_id.name', '=', 'Salesman')]"
+        domain="[('category_id.name', '=', 'Salesman')]",
     )
     quotation_id = fields.Many2one(
         "freight.sea.quotation",
