@@ -13,7 +13,10 @@
         'base', 
         'sale_management',
         'purchase',
-        'contacts'
+        'contacts',
+        'stock',
+        'hr',
+        'account',
     ],
     'data': [
     # Security
