@@ -47,7 +47,6 @@ class SeaQuotation(models.Model):
         "write_date",
         "picking_policy",
         "effective_date",
-        "transportation_method",
         "quotation_type",
         "freight_type",
     )
