@@ -25,7 +25,6 @@ class SeaCargoInfoMixin(models.AbstractModel):
     package_type_id = fields.Many2one(
         "stock.package.type",
         string="Package Type",
-        required=True,
     )
 
     seal_no = fields.Integer(string="Seal No.")

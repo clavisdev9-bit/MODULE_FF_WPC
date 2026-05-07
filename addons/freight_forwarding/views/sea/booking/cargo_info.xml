@@ -28,18 +28,18 @@
 
                         <group>
                             <group string="Box / Pallet / Load">
-                                <field name="package_type_id" />
-                                <field name="container_no" />
-                                <field name="seal_no" />
-                                <field name="container_type_id" />
+                                <field name="package_type_id" invisible="uom == 'container'" />
+                                <field name="container_no" invisible="uom == 'box'" />
+                                <field name="seal_no" invisible="uom == 'box'" />
+                                <field name="container_type_id" invisible="uom == 'box'" />
                             </group>
-                            <group string="Qty &amp; Type">
+                            <group string="Qty &amp; Type" invisible="uom == 'box'">
                                 <field name="types_of_cargo" />
                                 <field name="quantity" />
                             </group>
                         </group>
 
-                        <group>
+                        <group invisible="uom == 'container'">
                             <group string="Dimension">
                                 <field name="length" />
                                 <field name="width" />
