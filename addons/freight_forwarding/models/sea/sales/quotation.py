@@ -364,7 +364,7 @@ class SeaQuotation(models.Model):
             "cargo_origin_country_id": origin_country.id if origin_country else False,
             "phone": self.phone,
             "email": self.email,
-            "salesman_id": self.user_id.id,
+            "salesman_id": self.salesman_id.id,
             "payment_term_id": self.payment_term_id.id,
             "freight_type": self.freight_type,
             "type": booking_type,

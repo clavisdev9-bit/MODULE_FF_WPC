@@ -21,7 +21,7 @@ class SeaBookingConvertWizard(models.TransientModel):
     contact_person = fields.Char(string="Contact Person")
     phone = fields.Char(string="Phone")
     email = fields.Char(string="Email")
-    salesman_id = fields.Many2one("res.partner", string="Salesman")
+    salesman_id = fields.Many2one("hr.employee", string="Salesman")
     payment_term_id = fields.Many2one("account.payment.term", string="Terms Payment")
 
     # Require user input
@@ -114,7 +114,7 @@ class SeaBookingConvertWizard(models.TransientModel):
                     "contact_person": quotation.contact_person,
                     "phone": quotation.phone,
                     "email": quotation.email,
-                    "salesman_id": quotation.user_id.id,
+                    "salesman_id": quotation.salesman_id.id,
                     "payment_term_id": quotation.payment_term_id.id,
                 }
             )
