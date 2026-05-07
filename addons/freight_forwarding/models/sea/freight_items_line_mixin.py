@@ -6,7 +6,7 @@ class SeaFreightItemsLineMixin(models.AbstractModel):
     _description = "Sea Freight Items Line Mixin"
 
     # Item details
-    article = fields.Char(string="Article")
+    description_of_packages_and_goods = fields.Text(string="Description Of Packages And Goods")
     type = fields.Char(string="Type")
     cant = fields.Integer(string="Cant.")
 

@@ -39,6 +39,7 @@
     # Sea Quotation (moved from old quotation folder)
     'views/sea/sales/quotation_type.xml',
     'views/sea/sales/quotation.xml',
+    'views/sea/cargo_info.xml',
     'views/sea/sales/cargo_info.xml',
     'views/sea/sales/rate_enquiry_actions.xml',
     'views/sea/booking/booking.xml',
@@ -47,7 +48,7 @@
     'views/sea/booking/shipment_info_views.xml',
     'views/sea/booking/vessel_details_views.xml',
     'views/sea/booking/pickup_info_views.xml',
-    'views/sea/booking/cargo_info_views.xml',
+    'views/sea/booking/cargo_info.xml',
     'views/sea/booking/purchase_line_views.xml',
     'views/sea/booking/booking_convert_wizard.xml',
     'views/sea/hbl/cargo_info.xml',

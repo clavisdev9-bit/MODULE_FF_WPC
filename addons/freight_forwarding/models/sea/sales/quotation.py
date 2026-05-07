@@ -147,9 +147,16 @@ class SeaQuotation(models.Model):
     )
     quotation_title = fields.Char(string="Quotation Title")
     contact_person = fields.Char(
-        related="partner_id.child_ids.name",
-        string="Contact Person"
+        string="Contact Person",
+        compute="_compute_contact_person",
+        store=False,
     )
+
+    @api.depends("partner_id.child_ids")
+    def _compute_contact_person(self):
+        for rec in self:
+            children = rec.partner_id.child_ids if rec.partner_id else self.env['res.partner']
+            rec.contact_person = children[0].name if children else False
     salesman_id = fields.Many2one(
         "hr.employee",
         string="Salesman",
@@ -225,7 +232,7 @@ class SeaQuotation(models.Model):
 
     # Extra Info
     description_of_goods = fields.Char(string="Description of Goods")
-    quantity = fields.Float(string="Quantity")
+    quantity = fields.Integer(string="Quantity")
     actual_weight = fields.Float(string="Actual Weight (Kg)")
     volume = fields.Float(string="Volume (Kg)")
     chargeable_weight = fields.Float(string="Chargeable Weight (Kg)")
@@ -258,16 +265,18 @@ class SeaQuotation(models.Model):
 
     via_port_id = fields.Many2one("freight.port", string="Via Port")
 
-    origin_id = fields.Many2one("freight.location", string="Origin")
+    origin_id = fields.Many2one("res.country.state", string="Origin")
 
-    destination_id = fields.Many2one("freight.location", string="Destination")
+    destination_id = fields.Many2one("res.country.state", string="Destination")
 
     via2_id = fields.Many2one("freight.port", string="Via2")
 
     via3_id = fields.Many2one("freight.port", string="Via3")
 
     shipping_line_id = fields.Many2one(
-        "freight.carrier", string="Shipping Line"
+        "res.partner", 
+        string="Shipping Line",
+        domain="[('category_id.name', '=', 'Shipping Line')]"
     )
 
     est_transit_time_days = fields.Integer(string="Est. Transit Time (Days)", default=0)
@@ -295,11 +304,11 @@ class SeaQuotation(models.Model):
     def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
         return {
             "booking_id": booking.id,
-            "package_type": cargo_info.package_type,
-            "size_package": cargo_info.size_package.id,
+            "uom": cargo_info.uom,
+            "package_type": cargo_info.package_type.id,
             "container_no": cargo_info.container_no,
-            "stamp_no": cargo_info.stamp_no,
-            "container_box_type_id": cargo_info.container_box_type_id.id,
+            "seal_no": cargo_info.seal_no,
+            "container_type_id": cargo_info.container_type_id.id,
             "types_of_cargo": cargo_info.types_of_cargo.id,
             "quantity": cargo_info.quantity,
             "length": cargo_info.length,
@@ -385,6 +394,39 @@ class SeaQuotation(models.Model):
         "quotation_id",
         string="Cargo Info",
     )
+
+    # activity_type_id = fields.Many2one(
+    #     "mail.activity.type",
+    #     string="Activity Type",
+    #     compute="_compute_activity_info",
+    #     store=False,
+    # )
+
+    # activity_type_icon = fields.Char(
+    #     string="Activity Type Icon",
+    #     compute="_compute_activity_info",
+    #     store=False,
+    # )
+
+    # activity_summary = fields.Char(
+    #     string="Activity Summary",
+    #     compute="_compute_activity_info",
+    #     store=False,
+    # )
+
+    # @api.depends("activity_ids")
+    # def _compute_activity_info(self):
+    #     for rec in self:
+    #         activities = rec.activity_ids.sorted(key=lambda a: a.date_deadline) if rec.activity_ids else self.env["mail.activity"]
+    #         if activities:
+    #             act = activities[0]
+    #             rec.activity_type_id = act.activity_type_id or False
+    #             rec.activity_type_icon = getattr(act, "icon", False) or False
+    #             rec.activity_summary = getattr(act, "summary", False) or False
+    #         else:
+    #             rec.activity_type_id = False
+    #             rec.activity_type_icon = False
+    #             rec.activity_summary = False
 
     def get_report_logo_src(self):
         logo_path = get_module_resource(

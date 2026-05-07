@@ -400,7 +400,7 @@
                                                         <strong>Summary Qty:</strong>
                                                         <span
                                                             t-esc="sum(line.quantity for line in cargo)" />
-                                                        <span t-field="cargo1.size_package" />
+                                                        <span t-field="cargo1.package_type" />
                                                     </div>
                                                 </div>
                                             </td>
@@ -416,9 +416,9 @@
                                                     <!-- Container type description -->
                                                     <div>
                                                         <t
-                                                            t-if="cargo1 and cargo1.container_box_type_id">
+                                                            t-if="cargo1 and cargo1.container_type_id">
                                                             <span
-                                                                t-field="cargo1.container_box_type_id.name" />
+                                                                t-field="cargo1.container_type_id.name" />
                                                         </t>
                                                     </div>
 
@@ -429,7 +429,7 @@
                                             <span
                                                             t-esc="total_qty" />
                                             <t t-if="cargo1">
-                                                            <span t-field="cargo1.size_package" />
+                                                            <span t-field="cargo1.package_type" />
                                                         </t>
                                                         = <span t-esc="total_qty" /> PCS OF <t
                                                             t-if="doc.shipment_info_ids and doc.shipment_info_ids[0].commodity_id.name">

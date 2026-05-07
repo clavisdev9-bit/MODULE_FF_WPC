@@ -58,11 +58,11 @@ class SeaBookingConvertWizard(models.TransientModel):
     def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
         return {
             "booking_id": booking.id,
-            "package_type": cargo_info.package_type,
-            "size_package": cargo_info.size_package.id,
+            "uom": cargo_info.uom,
+            "package_type": cargo_info.package_type.id,
             "container_no": cargo_info.container_no,
-            "stamp_no": cargo_info.stamp_no,
-            "container_box_type_id": cargo_info.container_box_type_id.id,
+            "seal_no": cargo_info.seal_no,
+            "container_type_id": cargo_info.container_type_id.id,
             "types_of_cargo": cargo_info.types_of_cargo.id,
             "quantity": cargo_info.quantity,
             "length": cargo_info.length,

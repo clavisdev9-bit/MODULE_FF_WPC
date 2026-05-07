@@ -300,7 +300,7 @@
                                         <span t-field="pack.quantity" />
                                     </td>
                                     <td width="25%" class="px-2">
-                                        <span t-field="pack.size_package" />
+                                        <span t-field="pack.package_type" />
                                     </td>
                                     <td class="px-2">
                                         <span t-field="pack.length" /> x <span

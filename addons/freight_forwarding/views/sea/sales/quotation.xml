@@ -86,23 +86,23 @@
                 />
             </xpath>
 
-            <xpath expr="//page[@name='customer_signature']" position="after">
-                <page string="Extra Info">
+            <xpath expr="//page[@name='other_information']" position="inside">
+                <group string="Extra Info">
                     <group>
-                        <group>
-                            <field name="description_of_goods" />
-                            <field name="quantity" />
-                            <field name="has_insurance" />
-                            <field name="insurance_id" invisible="has_insurance == False" />
-                        </group>
-                        <group>
-                            <field name="actual_weight" />
-                            <field name="volume" />
-                            <field name="chargeable_weight" />
-                        </group>
+                        <field name="description_of_goods" />
+                        <field name="quantity" />
+                        <field name="has_insurance" />
+                        <field name="insurance_id" invisible="has_insurance == False" />
                     </group>
-                </page>
+                    <group>
+                        <field name="actual_weight" />
+                        <field name="volume" />
+                        <field name="chargeable_weight" />
+                    </group>
+                </group>
+            </xpath>
 
+            <xpath expr="//page[@name='customer_signature']" position="after">
                 <page string="Dimension">
                     <group>
                         <group>
@@ -126,7 +126,11 @@
                             <field name="port_of_discharge_id" />
                             <field name="via_port_id" />
                             <field name="shipping_line_id" />
-                            <field name="est_transit_time_days" string="Est. Transit Time" />
+                            <label for="est_transit_time_days" string="Est. Transit Time"/>
+                            <div class="o_row">
+                                <field name="est_transit_time_days" nolabel="1" class="oe_inline"/>
+                                <span class="oe_inline">Days</span>
+                            </div>
                             <field name="est_transit_time_note" placeholder="Remark (optional)" />
                             <field name="frequency" />
                             <field name="note" widget="text" />

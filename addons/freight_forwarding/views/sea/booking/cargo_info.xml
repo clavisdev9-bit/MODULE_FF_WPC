@@ -6,12 +6,9 @@
             <field name="model">freight.sea.booking.cargo.info</field>
             <field name="arch" type="xml">
                 <list>
-                    <field name="package_type" />
-                    <field name="size_package" />
-                    <field name="container_no" />
-                    <field name="quantity" />
-                    <field name="gross_weight" />
-                    <field name="volume" />
+                    <field name="uom" />
+                    <field name="package_type_id" />
+                    <field name="types_of_cargo" />
                 </list>
             </field>
         </record>
@@ -19,22 +16,22 @@
         <record id="view_sea_booking_detail_cargo_form" model="ir.ui.view">
             <field name="name">Sea Booking Cargo Info Form</field>
             <field name="model">freight.sea.booking.cargo.info</field>
+            <field name="inherit_id" eval="False" />
             <field name="arch" type="xml">
-                <form>
+                <form string="Sea Booking Cargo Info">
                     <sheet>
-                        <!-- <group>
-                            <field name="booking_id"/>
-                            <field name="quotation_id"/>
-                            <field name="package_type" widget="radio"
-                                options="{&quot;horizontal&quot;:true}" />
-                        </group> -->
+                        <group>
+                            <field name="booking_id" />
+                            <field name="quotation_id" />
+                            <field name="uom" widget="radio" options="{&quot;horizontal&quot;:true}" />
+                        </group>
 
                         <group>
                             <group string="Box / Pallet / Load">
-                                <field name="size_package"/>
-                                <field name="container_no"/>
-                                <field name="stamp_no"/>
-                                <field name="container_box_type_id" />
+                                <field name="package_type_id" />
+                                <field name="container_no" />
+                                <field name="seal_no" />
+                                <field name="container_type_id" />
                             </group>
                             <group string="Qty &amp; Type">
                                 <field name="types_of_cargo" />
@@ -51,7 +48,8 @@
                             <group string="Weight &amp; Volume">
                                 <field name="gross_weight" />
                                 <field name="net_weight" />
-                                <field name="volume" />
+                                <field name="volume_manual" />
+                                <field name="volume" readonly="not volume_manual" />
                                 <field name="total_volume" />
                             </group>
                         </group>
@@ -68,7 +66,7 @@
                             </group>
                         </group>
 
-                        <group invisible="has_dangerous_goods == False">
+                        <group name="dangerous_goods_group" invisible="has_dangerous_goods == False">
                             <group string="Regulatory Classification">
                                 <field name="imdg_code" />
                                 <field name="class_number" />
