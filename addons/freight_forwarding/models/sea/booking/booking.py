@@ -53,7 +53,6 @@ class SeaBooking(models.Model):
     salesman_id = fields.Many2one(
         "hr.employee",
         string="Salesman",
-        domain="[('category_id.name', '=', 'Salesman')]",
     )
     quotation_id = fields.Many2one(
         "freight.sea.quotation",
