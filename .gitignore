@@ -3,3 +3,9 @@ __pycache__/
 *.pyo
 .odoo_dev/
 .claude*
+
+# Only track freight_forwarding addon
+/addons/currency_rate_update/
+/addons/custom1/
+/addons/custom2/
+/addons/web_responsive/
