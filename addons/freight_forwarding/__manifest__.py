@@ -14,6 +14,7 @@
         'account',
         'contacts',
         'hr',
+        'hr_expense',
         'purchase',
         'sale_management',
         'stock',
