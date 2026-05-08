@@ -11,6 +11,7 @@
     'license': 'LGPL-3',
     'depends': [
         'base',
+        'base_address_extended',
         'account',
         'contacts',
         'hr',
