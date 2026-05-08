@@ -51,8 +51,8 @@ class SeaQuotation(models.Model):
         "freight_type",
     )
 
-    def init(self):
-        self.sudo().search([])._sync_sale_order_rows()
+    # def init(self):
+    #     self.sudo().search([])._sync_sale_order_rows()
 
     def _sync_sale_order_rows(self):
         ids = self.ids
