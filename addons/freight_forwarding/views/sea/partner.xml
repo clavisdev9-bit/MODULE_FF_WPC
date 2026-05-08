@@ -20,4 +20,11 @@
         <field name="view_mode">kanban,list,form</field>
         <field name="domain">[('category_id.name', '=', 'D/O Supplier')]</field>
     </record>
+
+    <record id="action_freight_shipping_line_partner" model="ir.actions.act_window">
+        <field name="name">Shipping Line</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Shipping Line')]</field>
+    </record>
 </odoo>

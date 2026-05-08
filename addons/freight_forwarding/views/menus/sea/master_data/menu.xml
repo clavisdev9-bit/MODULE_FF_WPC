@@ -22,7 +22,7 @@
 
     <menuitem id="menu_sea_master_coloader" name="Coloader"
         parent="menu_sub_parent_sea_master_data"
-        action="action_freight_air_mawb"
+        action="action_freight_coloader"
         sequence="50" />
 
     <menuitem id="menu_sea_master_coloader_cost" name="Coloader Cost"
@@ -37,7 +37,7 @@
 
     <menuitem id="menu_sea_master_consignee" name="Consignee"
         parent="menu_sub_parent_sea_master_data"
-        action="action_freight_air_mawb"
+        action="action_freight_consignee"
         sequence="80" />
 
     <menuitem id="menu_sea_master_cost_table" name="Cost Table"
@@ -87,7 +87,7 @@
 
     <menuitem id="menu_sea_master_overseas_agent" name="Overseas Agent"
         parent="menu_sub_parent_sea_master_data"
-        action="action_freight_air_mawb"
+        action="action_freight_overseas_agent"
         sequence="180" />
 
     <menuitem id="menu_sea_master_permit" name="Permit"
@@ -112,17 +112,17 @@
 
     <menuitem id="menu_sea_master_shipper" name="Shipper"
         parent="menu_sub_parent_sea_master_data"
-        action="action_freight_air_mawb"
+        action="action_freight_shipper"
         sequence="230" />
 
     <menuitem id="menu_sea_master_shipping_line" name="Shipping Line"
         parent="menu_sub_parent_sea_master_data"
-        action="action_freight_shipping_line"
+        action="action_freight_shipping_line_partner"
         sequence="240" />
 
     <menuitem id="menu_sea_master_transport" name="Transport"
         parent="menu_sub_parent_sea_master_data"
-        action="action_freight_air_mawb"
+        action="action_freight_transport_company"
         sequence="250" />
 
     <menuitem id="menu_sea_master_term_condition" name="Term &amp; Condition"
