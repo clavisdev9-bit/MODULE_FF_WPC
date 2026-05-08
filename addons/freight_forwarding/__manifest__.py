@@ -10,13 +10,13 @@
     'website': '',
     'license': 'LGPL-3',
     'depends': [
-        'base', 
-        'sale_management',
-        'purchase',
-        'contacts',
-        'stock',
-        'hr',
+        'base',
         'account',
+        'contacts',
+        'hr',
+        'purchase',
+        'sale_management',
+        'stock',
     ],
     'data': [
     # Security
