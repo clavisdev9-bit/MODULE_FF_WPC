@@ -107,6 +107,7 @@
     'views/sea/master_data/product_cost_menu_actions.xml',
     'views/sea/master_data/footer_remark.xml',
     'views/sea/master_data/instruction.xml',
+    'views/sea/master_data/terms_and_condition.xml',
 
     # Menu
     'views/menu.xml',

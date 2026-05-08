@@ -386,6 +386,15 @@ class SeaQuotation(models.Model):
     header = fields.Char(string="Header")
     special_instruction = fields.Text(string="Special Instruction")
     footer = fields.Char(string="Footer")
+    
+    # Terms and Condition
+    terms_and_condition_id = fields.Many2one(
+        "freight.terms.conditions",
+        string="Terms and Condition",
+    )
+    description = fields.Text(
+        related="terms_and_condition_id.description",
+        string="Description")
 
     # Cargo Info
     cargo_info_ids = fields.One2many(

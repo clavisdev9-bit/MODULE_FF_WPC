@@ -75,10 +75,10 @@
         action="action_freight_instruction"
         sequence="150" />
 
-    <menuitem id="menu_sea_master_local_area" name="Local Area"
+    <!-- <menuitem id="menu_sea_master_local_area" name="Local Area"
         parent="menu_sub_parent_sea_master_data"
         action="action_freight_area"
-        sequence="160" />
+        sequence="160" /> -->
 
     <menuitem id="menu_sea_master_location" name="Location"
         parent="menu_sub_parent_sea_master_data"
@@ -127,7 +127,7 @@
 
     <menuitem id="menu_sea_master_term_condition" name="Term &amp; Condition"
         parent="menu_sub_parent_sea_master_data"
-        action="action_freight_air_mawb"
+        action="action_freight_terms_conditions"
         sequence="260" />
 
     <menuitem id="menu_sea_master_uom" name="Unit Of Measurement"

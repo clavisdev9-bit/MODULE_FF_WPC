@@ -5,3 +5,4 @@ from . import location
 from . import vessel
 from . import footer_remark
 from . import instruction
+from . import terms_and_condition

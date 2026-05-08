@@ -5,3 +5,5 @@ access_freight_footer_remark_user,Freight Footer Remark User,model_freight_foote
 access_freight_footer_remark_admin,Freight Footer Remark Admin,model_freight_footer_remark,base.group_system,1,1,1,1
 access_freight_instruction_user,Freight Instruction User,model_freight_instruction,base.group_user,1,1,1,0
 access_freight_instruction_admin,Freight Instruction Admin,model_freight_instruction,base.group_system,1,1,1,1
+access_freight_terms_conditions_user,Freight Terms and Condition User,model_freight_terms_conditions,base.group_user,1,1,1,0
+access_freight_terms_conditions_admin,Freight Terms and Condition Admin,model_freight_terms_conditions,base.group_system,1,1,1,1
