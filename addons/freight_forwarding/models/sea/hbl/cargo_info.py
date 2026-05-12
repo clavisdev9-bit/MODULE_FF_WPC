@@ -19,14 +19,14 @@ class SeaHBLCargoInfo(models.Model):
         readonly=True,
     )
     type = fields.Selection(
-        related="hbl_id.type",
+        related="hbl_id.freight_type",
         string="Type",
         store=True,
         readonly=True,
     )
     freight_type = fields.Selection(
-        related="hbl_id.freight_type",
-        string="Freight Type",
+        related="hbl_id.container_type",
+        string="Container Type",
         store=True,
         readonly=True,
     )

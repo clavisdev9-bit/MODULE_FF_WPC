@@ -25,7 +25,7 @@ class SeaBookingConvertWizard(models.TransientModel):
     payment_term_id = fields.Many2one("account.payment.term", string="Terms Payment")
 
     # Require user input
-    type = fields.Selection(
+    freight_type = fields.Selection(
         selection=[
             ("Import", "Import"),
             ("Export", "Export"),
@@ -148,8 +148,8 @@ class SeaBookingConvertWizard(models.TransientModel):
                 "email": self.email,
                 "salesman_id": self.salesman_id.id,
                 "payment_term_id": self.payment_term_id.id,
-                "freight_type": quotation.freight_type,
-                "type": self.type,
+                "container_type": quotation.container_type,
+                "freight_type": self.freight_type,
                 "vessel_id": self.vessel_id.id,
                 "voyage_no": self.voyage_no,
                 "etd": self.etd,

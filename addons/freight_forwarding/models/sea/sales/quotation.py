@@ -47,12 +47,73 @@ class SeaQuotation(models.Model):
         "write_date",
         "picking_policy",
         "effective_date",
-        "quotation_type",
-        "freight_type",
+        # "quotation_type",
+        "container_type",
     )
 
-    # def init(self):
-    #     self.sudo().search([])._sync_sale_order_rows()
+    # Tambahin field ini buat narik data Booking yang terkait
+    booking_ids = fields.One2many(
+        "freight.sea.booking", "quotation_id", string="Sea Bookings"
+    )
+
+    # Field buat ngitung jumlah booking (buat nampilin angka di tombol)
+    booking_count = fields.Integer(
+        string="Booking Count", compute="_compute_booking_count"
+    )
+
+    # Field buat ngitung jumlah HBL (indirect melalui booking)
+    hbl_count = fields.Integer(
+        string="Jobsheet Count", compute="_compute_hbl_count"
+    )
+
+    @api.depends("booking_ids")
+    def _compute_booking_count(self):
+        for rec in self:
+            rec.booking_count = len(rec.booking_ids)
+
+    @api.depends("booking_ids.hbl_ids")
+    def _compute_hbl_count(self):
+        for rec in self:
+            # Count HBL dari booking (export flow) + HBL langsung dari quotation (import flow)
+            booking_hbls = sum(len(booking.hbl_ids) for booking in rec.booking_ids)
+            direct_hbls = self.env["freight.sea.hbl"].search_count(
+                [("quotation_id", "=", rec.id)]
+            )
+            rec.hbl_count = booking_hbls + direct_hbls
+
+    # Fungsi pas smart button diklik
+    def action_view_bookings(self):
+        self.ensure_one()
+        bookings = self.booking_ids
+
+        # Buka form booking terkait
+        return {
+            "name": "Sea Booking",
+            "type": "ir.actions.act_window",
+            "res_model": "freight.sea.booking",
+            # Karena constraint lu 1 Quotation = 1 Booking, kita langsung buka form-nya
+            "view_mode": "form" if len(bookings) == 1 else "list,form",
+            "domain": [("id", "in", bookings.ids)],
+            "res_id": bookings.id if len(bookings) == 1 else False,
+            "context": dict(self.env.context, default_quotation_id=self.id),
+        }
+
+    def action_view_hbls(self):
+        self.ensure_one()
+        # Search HBL dari booking (export flow) OR langsung dari quotation (import flow)
+        hbls = self.env["freight.sea.hbl"].search(
+            ["|", ("booking_id.quotation_id", "=", self.id), ("quotation_id", "=", self.id)]
+        )
+
+        return {
+            "name": "Sea Jobsheet",
+            "type": "ir.actions.act_window",
+            "res_model": "freight.sea.hbl",
+            "view_mode": "form" if len(hbls) == 1 else "list,form",
+            "domain": [("id", "in", hbls.ids)],
+            "res_id": hbls.id if len(hbls) == 1 else False,
+            "context": dict(self.env.context),
+        }
 
     def _sync_sale_order_rows(self):
         ids = self.ids
@@ -109,6 +170,129 @@ class SeaQuotation(models.Model):
             self.env.cr.execute("DELETE FROM sale_order WHERE id = ANY(%s)", [ids])
         return result
 
+    @api.depends("partner_id.child_ids")
+    def _compute_contact_person(self):
+        for rec in self:
+            children = (
+                rec.partner_id.child_ids if rec.partner_id else self.env["res.partner"]
+            )
+            rec.contact_person = children[0].name if children else False
+
+    @api.constrains("est_transit_time_days")
+    def _check_est_transit_time_days(self):
+        for record in self:
+            if record.est_transit_time_days < 0:
+                raise ValidationError("Est. Transit Time (Days) cannot be negative.")
+
+    def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
+        return {
+            "booking_id": booking.id,
+            "uom": cargo_info.uom,
+            "package_type": cargo_info.package_type.id,
+            "container_no": cargo_info.container_no,
+            "seal_no": cargo_info.seal_no,
+            "container_type_id": cargo_info.container_type_id.id,
+            "types_of_cargo": cargo_info.types_of_cargo.id,
+            "quantity": cargo_info.quantity,
+            "length": cargo_info.length,
+            "width": cargo_info.width,
+            "height": cargo_info.height,
+            "gross_weight": cargo_info.gross_weight,
+            "net_weight": cargo_info.net_weight,
+            "volume": cargo_info.volume,
+            "total_volume": cargo_info.total_volume,
+            "harmonize": cargo_info.harmonize,
+            "temperature": cargo_info.temperature,
+            "ventilation": cargo_info.ventilation,
+            "humidity": cargo_info.humidity,
+            "has_dangerous_goods": cargo_info.has_dangerous_goods,
+            "imdg_code": cargo_info.imdg_code,
+            "class_number": cargo_info.class_number,
+            "packing_group": cargo_info.packing_group,
+            "a_number": cargo_info.a_number,
+            "flash_point": cargo_info.flash_point,
+            "material_description": cargo_info.material_description,
+        }
+
+    def _copy_cargo_info_to_booking(self, booking):
+        booking_detail_model = self.env["freight.sea.booking.cargo.info"]
+
+        for cargo_info in self.cargo_info_ids:
+            booking_detail_model.create(
+                self._prepare_booking_cargo_info_vals(cargo_info, booking)
+            )
+
+    def action_convert_to_booking_direct(self):
+        self.ensure_one()
+
+        destination_country = (
+            self.destination_country_id or self.destination_id.country_id
+        )
+        origin_country = self.source_country_id or self.origin_id.country_id
+
+        booking_no = self.env["ir.sequence"].next_by_code("freight.sea.booking")
+
+        # booking_type = "Export" if self.quotation_type == "export" else "Import"
+
+        booking_vals = {
+            "name": booking_no,
+            "quotation_id": self.id,
+            "partner_id": self.partner_id.id,
+            "delivery_type_id": self.delivery_type_id.id,
+            "port_of_loading_id": self.port_of_loading_id.id,
+            "port_of_discharge_id": self.port_of_discharge_id.id,
+            "destination_country_id": (
+                destination_country.id if destination_country else False
+            ),
+            "origin_country_id": origin_country.id if origin_country else False,
+            "phone": self.phone,
+            "email": self.email,
+            "salesman_id": self.salesman_id.id,
+            "payment_term_id": self.payment_term_id.id,
+            "container_type": self.container_type,
+            "freight_type": self.freight_type,
+            "booking_date": fields.Datetime.now(),
+            "job_date": fields.Date.today(),
+        }
+
+        booking = self.env["freight.sea.booking"].create(booking_vals)
+        self._copy_cargo_info_to_booking(booking)
+
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "freight.sea.booking",
+            "res_id": booking.id,
+            "view_mode": "form",
+            "target": "current",
+        }
+
+    def action_convert_to_jobsheet_direct(self):
+        """Convert import quotation directly to jobsheet (HBL) without booking"""
+        self.ensure_one()
+
+        freight_type = "Export" if self.freight_type == "export" else "Import"
+        
+        # Create HBL directly linked to quotation (for import flow)
+        hbl = self.env["freight.sea.hbl"].create(
+            {
+                "quotation_id": self.id,
+                "freight_type": freight_type,
+                "container_type": self.container_type,
+                "customer_id": self.partner_id.id,
+                "term_payment": self.payment_term_id.id,
+                "job_date": fields.Date.today(),
+            }
+        )
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Sea Jobsheet",
+            "res_model": "freight.sea.hbl",
+            "res_id": hbl.id,
+            "view_mode": "form",
+            "target": "current",
+        }
+
     transaction_ids = fields.Many2many(
         "payment.transaction",
         "freight_sea_quotation_transaction_rel",
@@ -127,7 +311,7 @@ class SeaQuotation(models.Model):
     )
 
     # Left Side
-    quotation_type = fields.Selection(
+    freight_type = fields.Selection(
         selection=[
             ("export", "Export"),
             ("import", "Import"),
@@ -135,13 +319,13 @@ class SeaQuotation(models.Model):
         string="Quotation Type",
         required=True,
     )
-    freight_type = fields.Selection(
+    container_type = fields.Selection(
         selection=[
             ("fcl", "FCL"),
             ("lcl", "LCL"),
             ("consol", "Consol"),
         ],
-        string="Freight Type",
+        string="Container Type",
         required=True,
     )
     quotation_title = fields.Char(string="Quotation Title")
@@ -151,11 +335,6 @@ class SeaQuotation(models.Model):
         store=False,
     )
 
-    @api.depends("partner_id.child_ids")
-    def _compute_contact_person(self):
-        for rec in self:
-            children = rec.partner_id.child_ids if rec.partner_id else self.env['res.partner']
-            rec.contact_person = children[0].name if children else False
     salesman_id = fields.Many2one(
         "hr.employee",
         string="Salesman",
@@ -294,99 +473,11 @@ class SeaQuotation(models.Model):
     )
     note = fields.Text(string="Note")
 
-    @api.constrains("est_transit_time_days")
-    def _check_est_transit_time_days(self):
-        for record in self:
-            if record.est_transit_time_days < 0:
-                raise ValidationError("Est. Transit Time (Days) cannot be negative.")
-
-    def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
-        return {
-            "booking_id": booking.id,
-            "uom": cargo_info.uom,
-            "package_type": cargo_info.package_type.id,
-            "container_no": cargo_info.container_no,
-            "seal_no": cargo_info.seal_no,
-            "container_type_id": cargo_info.container_type_id.id,
-            "types_of_cargo": cargo_info.types_of_cargo.id,
-            "quantity": cargo_info.quantity,
-            "length": cargo_info.length,
-            "width": cargo_info.width,
-            "height": cargo_info.height,
-            "gross_weight": cargo_info.gross_weight,
-            "net_weight": cargo_info.net_weight,
-            "volume": cargo_info.volume,
-            "total_volume": cargo_info.total_volume,
-            "harmonize": cargo_info.harmonize,
-            "temperature": cargo_info.temperature,
-            "ventilation": cargo_info.ventilation,
-            "humidity": cargo_info.humidity,
-            "has_dangerous_goods": cargo_info.has_dangerous_goods,
-            "imdg_code": cargo_info.imdg_code,
-            "class_number": cargo_info.class_number,
-            "packing_group": cargo_info.packing_group,
-            "a_number": cargo_info.a_number,
-            "flash_point": cargo_info.flash_point,
-            "material_description": cargo_info.material_description,
-        }
-
-    def _copy_cargo_info_to_booking(self, booking):
-        booking_detail_model = self.env["freight.sea.booking.cargo.info"]
-
-        for cargo_info in self.cargo_info_ids:
-            booking_detail_model.create(
-                self._prepare_booking_cargo_info_vals(cargo_info, booking)
-            )
-
-    def action_convert_to_booking_direct(self):
-        self.ensure_one()
-
-        destination_country = (
-            self.destination_country_id or self.destination_id.country_id
-        )
-        origin_country = self.source_country_id or self.origin_id.country_id
-
-        booking_no = self.env["ir.sequence"].next_by_code(
-            "freight.sea.booking"
-        ) or fields.Date.today().strftime("WPCS%d%m-001")
-
-        booking_type = "Export" if self.quotation_type == "export" else "Import"
-
-        booking_vals = {
-            "name": booking_no,
-            "quotation_id": self.id,
-            "customer_id": self.partner_id.id,
-            "delivery_type_id": self.delivery_type_id.id,
-            "origin_port_id": self.port_of_loading_id.id,
-            "destination_port_id": self.port_of_discharge_id.id,
-            "destination_country_id": destination_country.id if destination_country else False,
-            "cargo_origin_country_id": origin_country.id if origin_country else False,
-            "phone": self.phone,
-            "email": self.email,
-            "salesman_id": self.salesman_id.id,
-            "payment_term_id": self.payment_term_id.id,
-            "freight_type": self.freight_type,
-            "type": booking_type,
-            "booking_date": fields.Datetime.now(),
-            "job_date": fields.Date.today(),
-        }
-
-        booking = self.env["freight.sea.booking"].create(booking_vals)
-        self._copy_cargo_info_to_booking(booking)
-
-        return {
-            "type": "ir.actions.act_window",
-            "res_model": "freight.sea.booking",
-            "res_id": booking.id,
-            "view_mode": "form",
-            "target": "current",
-        }
-
     # Header & Footer
     header = fields.Char(string="Header")
     special_instruction = fields.Text(string="Special Instruction")
     footer = fields.Char(string="Footer")
-    
+
     # Terms and Condition
     terms_and_condition_id = fields.Many2one(
         "freight.terms.conditions",

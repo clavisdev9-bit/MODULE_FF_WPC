@@ -6,8 +6,9 @@
         <field name="arch" type="xml">
             <list>
                 <field name="hbl_no"/>
-                <field name="type"/>
                 <field name="freight_type"/>
+                <field name="container_type"/>
+                <field name="quotation_id"/>
                 <field name="booking_id"/>
                 <field name="customer_id"/>
                 <field name="job_no"/>
@@ -22,13 +23,33 @@
         <field name="arch" type="xml">
             <form string="Sea Jobsheet">
                 <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button name="action_view_quotation"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-file-text-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Quotation</span>
+                            </div>
+                        </button>
+                        <button name="action_view_booking"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-ship"
+                            invisible="booking_count == 0">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Booking</span>
+                            </div>
+                        </button>
+                    </div>
                     <h1>
                         <field name="hbl_no" readonly="1" />
                     </h1>
                     <group string="Header Information">
                         <group>
-                            <field name="type"/>
                             <field name="freight_type"/>
+                            <field name="container_type"/>
+                            <field name="quotation_id"/>
                             <field name="booking_id"/>
                             <field name="job_no" readonly="1"/>
                             <field name="job_date"/>
@@ -139,14 +160,14 @@
                 <field name="hbl_no" string="Jobsheet No."/>
                 <field name="booking_id"/>
                 <field name="customer_id"/>
-                <field name="type"/>
                 <field name="freight_type"/>
+                <field name="container_type"/>
                 <separator/>
-                <filter name="filter_import" string="Import" domain="[('type', '=', 'Import')]"/>
-                <filter name="filter_export" string="Export" domain="[('type', '=', 'Export')]"/>
-                <filter name="filter_fcl" string="FCL" domain="[('freight_type', '=', 'fcl')]"/>
-                <filter name="filter_lcl" string="LCL" domain="[('freight_type', '=', 'lcl')]"/>
-                <filter name="filter_consol" string="Consol" domain="[('freight_type', '=', 'consol')]"/>
+                <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'Import')]"/>
+                <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'Export')]"/>
+                <filter name="filter_fcl" string="FCL" domain="[('container_type', '=', 'fcl')]"/>
+                <filter name="filter_lcl" string="LCL" domain="[('container_type', '=', 'lcl')]"/>
+                <filter name="filter_consol" string="Consol" domain="[('container_type', '=', 'consol')]"/>
             </search>
         </field>
     </record>

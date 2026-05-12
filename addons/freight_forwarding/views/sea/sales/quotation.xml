@@ -6,9 +6,30 @@
         <field name="mode">primary</field>
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_bookings"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-ship"
+                    invisible="booking_count == 0">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Booking</span>
+                    </div>
+                </button>
+                <button name="action_view_hbls"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-file-text-o"
+                    invisible="hbl_count == 0">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Jobsheet</span>
+                    </div>
+                </button>
+            </xpath>
+            
             <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="quotation_type" />
                 <field name="freight_type" />
+                <field name="container_type" />
                 <field name="validity_date" />
                 <field name="quotation_title" />
             </xpath>
@@ -79,10 +100,18 @@
 
             <xpath expr="//header" position="inside">
                 <button
+                    name="action_convert_to_jobsheet_direct"
+                    type="object"
+                    string="Convert to Jobsheet"
+                    class="oe_highlight"
+                    invisible="freight_type != 'import' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
+                />
+                <button
                     name="action_convert_to_booking_direct"
                     type="object"
-                    string="Convert to Sea Booking"
+                    string="Convert to Booking"
                     class="oe_highlight"
+                    invisible="freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
                 />
             </xpath>
 
@@ -187,8 +216,8 @@
                 <field name="user_id" string="Salesperson"/>
                 <field name="team_id"/>
                 <field name="state"/>
-                <field name="quotation_type"/>
                 <field name="freight_type"/>
+                <field name="container_type"/>
                 <separator/>
                 <filter name="my_quotation" string="My Quotations" domain="[('user_id', '=', uid)]"/>
                 <filter name="filter_draft_sent" string="Quotation" domain="[('state', 'in', ['draft', 'sent'])]"/>

@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 class SeaBooking(models.Model):
     _name = "freight.sea.booking"
@@ -13,23 +13,73 @@ class SeaBooking(models.Model):
         )
     ]
 
+    # Field relasi narik data Jobsheet (HBL) yang terkait sama Booking ini
+    hbl_ids = fields.One2many("freight.sea.hbl", "booking_id", string="Sea Jobsheets")
+
+    # Field count buat trigger sembunyi/tampil tombol
+    hbl_count = fields.Integer(string="Jobsheet Count", compute="_compute_hbl_count")
+
+    # Field buat show quotation (one-to-one relationship)
+    quotation_count = fields.Integer(
+        string="Quotation Count", compute="_compute_quotation_count"
+    )
+
+    @api.depends("hbl_ids")
+    def _compute_hbl_count(self):
+        for rec in self:
+            rec.hbl_count = len(rec.hbl_ids)
+
+    @api.depends("quotation_id")
+    def _compute_quotation_count(self):
+        for rec in self:
+            rec.quotation_count = 1 if rec.quotation_id else 0
+
+    # Fungsi pas tombol Jobsheet di klik
+    def action_view_hbl(self):
+        self.ensure_one()
+        hbls = self.hbl_ids
+
+        return {
+            "name": "Sea Jobsheet",
+            "type": "ir.actions.act_window",
+            "res_model": "freight.sea.hbl",
+            "view_mode": "form" if len(hbls) == 1 else "list,form",
+            "domain": [("id", "in", hbls.ids)],
+            "res_id": hbls.id if len(hbls) == 1 else False,
+            "context": dict(self.env.context, default_booking_id=self.id),
+        }
+
+    def action_view_quotation(self):
+        self.ensure_one()
+        if not self.quotation_id:
+            return False
+
+        return {
+            "name": "Sea Quotation",
+            "type": "ir.actions.act_window",
+            "res_model": "freight.sea.quotation",
+            "res_id": self.quotation_id.id,
+            "view_mode": "form",
+            "context": dict(self.env.context),
+        }
+
     # Header Information
-    type = fields.Selection(
+    freight_type = fields.Selection(
         selection=[
-            ("Import", "Import"),
-            ("Export", "Export"),
+            ("import", "Import"),
+            ("export", "Export"),
         ],
         string="Type",
-        required=True,
+        # required=True,
     )
     name = fields.Char(string="Booking No.", required=True, copy=False)
     booking_date = fields.Datetime(string="Date & Time")
     bl_no = fields.Char(string="B/L No.")
     job_no = fields.Char(string="Job No.")
     nomination_cargo = fields.Boolean(string="Nomination Cargo")
-    freight_type = fields.Selection(
+    container_type = fields.Selection(
         selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
-        string="Freight Type",
+        string="Container Type",
         required=True,
     )
     job_date = fields.Date(string="Job Date")
@@ -37,18 +87,17 @@ class SeaBooking(models.Model):
     railing = fields.Boolean(string="Railing")
 
     # Customer & Contact Data
-    customer_id = fields.Many2one(
-        "res.partner", 
+    partner_id = fields.Many2one(
+        "res.partner",
         string="Customer Name",
-        domain="[('category_id.name', '=', 'Customer')]",
-        required=True
+        required=True,
     )
     customer_reference = fields.Char(string="Customer Reference")
-    phone = fields.Char(related="customer_id.phone", string="Phone Number")
-    email = fields.Char(related="customer_id.email", string="Email Address")
+    phone = fields.Char(related="partner_id.phone", string="Phone Number")
+    email = fields.Char(related="partner_id.email", string="Email Address")
     payment_term_id = fields.Many2one(
         "account.payment.term",
-        string="Terms of Payment",
+        string="Payment Terms",
     )
     salesman_id = fields.Many2one(
         "hr.employee",
@@ -62,18 +111,18 @@ class SeaBooking(models.Model):
     )
 
     # Shipment Details
-    origin_port_id = fields.Many2one(
-        "freight.port", string="Origin Port Code (POL)"
+    port_of_loading_id = fields.Many2one(
+        "freight.port", string="Origin Port (POL)"
     )
-    destination_port_id = fields.Many2one(
-        "freight.port", string="Destination Port Code (POD)"
+    port_of_discharge_id = fields.Many2one(
+        "freight.port", string="Destination Port (POD)"
     )
     etd = fields.Date(string="ETD (Departure)")
     eta = fields.Date(string="ETA (Arrival)")
     destination_country_id = fields.Many2one(
         "res.country", string="Destination Country"
     )
-    cargo_origin_country_id = fields.Many2one(
+    origin_country_id = fields.Many2one(
         "res.country", string="Cargo Origin Country (Optional)"
     )
     delivery_type_id = fields.Many2one(
@@ -234,14 +283,17 @@ class SeaBooking(models.Model):
         if existing_hbl:
             hbl = existing_hbl
         else:
+            freight_type = "Export" if self.freight_type == "export" else "Import"
             hbl = self.env["freight.sea.hbl"].create(
                 {
                     "booking_id": self.id,
-                    "type": self.type,
-                    "freight_type": self.freight_type,
-                    "customer_id": self.customer_id.id,
+                    "freight_type": freight_type,
+                    "container_type": self.container_type,
+                    "customer_id": self.partner_id.id,
                     "term_payment": self.payment_term_id.id,
                     "job_date": self.job_date,
+                    "job_no": self.job_no,
+                    "salesman_id": self.salesman_id.id if self.salesman_id else False,
                 }
             )
 

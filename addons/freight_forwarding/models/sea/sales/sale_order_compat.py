@@ -4,20 +4,20 @@ from odoo import fields, models
 class SaleOrderCompat(models.Model):
     _inherit = "sale.order"
 
-    quotation_type = fields.Selection(
+    freight_type = fields.Selection(
         selection=[
             ("export", "Export"),
             ("import", "Import"),
         ],
-        string="Quotation Type",
+        string="Type",
     )
-    freight_type = fields.Selection(
+    container_type = fields.Selection(
         selection=[
             ("fcl", "FCL"),
             ("lcl", "LCL"),
             ("consol", "Consol"),
         ],
-        string="Freight Type",
+        string="Container Type",
     )
 
     transportation_method = fields.Selection(

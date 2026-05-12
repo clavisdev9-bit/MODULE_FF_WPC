@@ -11,23 +11,43 @@
                         <button name="action_convert_to_hbl"
                             type="object"
                             string="Convert to Jobsheet"
-                            class="oe_highlight"/>
+                            class="oe_highlight"
+                            invisible="hbl_count &gt; 0"
+                        />
                     </header>
                     <sheet>
+                        <div name="button_box" class="oe_button_box">
+                            <button name="action_view_quotation"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o">
+                                <div class="o_stat_info">
+                                    <span class="o_stat_text">Quotation</span>
+                                </div>
+                            </button>
+                            <button name="action_view_hbl"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                invisible="hbl_count == 0">
+                                <div class="o_stat_info">
+                                    <span class="o_stat_text">Jobsheet</span>
+                                </div>
+                            </button>
+                        </div>
                         <h1>
                             <field name="name" readonly="1" />
                         </h1>
                         <group string="Header Information">
                             <group>
-                                <field name="type"/>
-                                <field name="name" readonly="1" />
+                                <field name="freight_type"/>
                                 <field name="booking_date" />
                                 <field name="bl_no" />
                                 <field name="job_no" />
                                 <field name="nomination_cargo" />
                             </group>
                             <group>
-                                <field name="freight_type"/>
+                                <field name="container_type"/>
                                 <field name="job_date" />
                                 <field name="import_job_no" />
                                 <field name="railing" />
@@ -36,7 +56,7 @@
 
                         <group string="Customer &amp; Contact Data">
                             <group>
-                                <field name="customer_id"/>
+                                <field name="partner_id"/>
                                 <field name="customer_reference" />
                                 <field name="phone" />
                                 <field name="email" widget="email" />
@@ -50,12 +70,12 @@
 
                         <group string="Shipment Details">
                             <group>
-                                <field name="origin_port_id" />
-                                <field name="destination_port_id" />
+                                <field name="port_of_loading_id" />
+                                <field name="port_of_discharge_id" />
                                 <field name="etd" />
                                 <field name="eta" />
                                 <field name="destination_country_id" />
-                                <field name="cargo_origin_country_id" />
+                                <field name="origin_country_id" />
                                 <field name="delivery_type_id" />
                             </group>
                             <group string="Vessel Information">
@@ -114,9 +134,9 @@
                 <list>
                     <field name="name" />
                     <field name="quotation_id" />
-                    <field name="customer_id" />
+                    <field name="partner_id" />
+                    <field name="container_type" />
                     <field name="freight_type" />
-                    <field name="type" />
                     <field name="vessel_id" />
                     <field name="etd" />
                     <field name="eta" />
@@ -131,21 +151,21 @@
             <field name="arch" type="xml">
                 <search>
                     <field name="name" string="Booking No." />
-                    <field name="customer_id" />
+                    <field name="partner_id" />
                     <field name="vessel_id" />
+                    <field name="container_type" />
                     <field name="freight_type" />
-                    <field name="type" />
                     <separator />
-                    <filter name="filter_import" string="Import" domain="[('type', '=', 'Import')]" />
-                    <filter name="filter_export" string="Export" domain="[('type', '=', 'Export')]" />
+                    <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'import')]" />
+                    <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'export')]" />
                     <filter name="filter_fc" string="Full Container"
-                        domain="[('freight_type', '=', 'fcl')]" />
+                        domain="[('container_type', '=', 'fcl')]" />
                     <filter name="filter_lc" string="Less Than Container"
-                        domain="[('freight_type', 'in', ['lcl', 'consol'])]" />
-                    <filter name="filter_fcl" string="FCL" domain="[('freight_type', '=', 'fcl')]" />
-                    <filter name="filter_lcl" string="LCL" domain="[('freight_type', '=', 'lcl')]" />
+                        domain="[('container_type', 'in', ['lcl', 'consol'])]" />
+                    <filter name="filter_fcl" string="FCL" domain="[('container_type', '=', 'fcl')]" />
+                    <filter name="filter_lcl" string="LCL" domain="[('container_type', '=', 'lcl')]" />
                     <filter name="filter_consol" string="Consol"
-                        domain="[('freight_type', '=', 'consol')]" />
+                        domain="[('container_type', '=', 'consol')]" />
                 </search>
             </field>
         </record>

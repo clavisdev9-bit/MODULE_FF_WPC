@@ -10,11 +10,65 @@ class SeaHBL(models.Model):
         "freight.sea.booking",
         string="Booking",
         ondelete="cascade",
-        required=True,
+        required=False,
     )
 
+    # Direct relasi ke quotation (untuk import flow tanpa booking)
+    quotation_id = fields.Many2one(
+        "freight.sea.quotation",
+        string="Quotation",
+        required=False,
+        ondelete="cascade",
+    )
+
+    # Counter fields untuk smart buttons
+    quotation_count = fields.Integer(
+        string="Quotation Count", compute="_compute_quotation_count"
+    )
+    booking_count = fields.Integer(
+        string="Booking Count", compute="_compute_booking_count"
+    )
+
+    @api.depends("quotation_id")
+    def _compute_quotation_count(self):
+        for rec in self:
+            rec.quotation_count = 1 if rec.quotation_id else 0
+
+    @api.depends("booking_id")
+    def _compute_booking_count(self):
+        for rec in self:
+            rec.booking_count = 1 if rec.booking_id else 0
+
+    def action_view_quotation(self):
+        self.ensure_one()
+        if not self.quotation_id:
+            return False
+
+        return {
+            "name": "Sea Quotation",
+            "type": "ir.actions.act_window",
+            "res_model": "freight.sea.quotation",
+            "res_id": self.quotation_id.id,
+            "view_mode": "form",
+            "context": dict(self.env.context),
+        }
+
+    def action_view_booking(self):
+        self.ensure_one()
+        if not self.booking_id:
+            return False
+
+        return {
+            "name": "Sea Booking",
+            "type": "ir.actions.act_window",
+            "res_model": "freight.sea.booking",
+            "res_id": self.booking_id.id,
+            "view_mode": "form",
+            "context": dict(self.env.context),
+        }
+
     # Header Information
-    type = fields.Selection(
+    freight_type = fields.Selection(
         selection=[
             ("Import", "Import"),
             ("Export", "Export"),
@@ -22,9 +76,9 @@ class SeaHBL(models.Model):
         string="Type",
         required=True,
     )
-    freight_type = fields.Selection(
+    container_type = fields.Selection(
         selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
-        string="Freight Type",
+        string="Container Type",
         required=True,
     )
     job_no = fields.Char(string="Job No.")
