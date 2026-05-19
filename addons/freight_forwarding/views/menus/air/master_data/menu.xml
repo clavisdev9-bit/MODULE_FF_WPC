@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <menuitem id="menu_airport" name="Airport"
+    <!-- <menuitem id="menu_airport" name="Airport"
         parent="menu_sub_parent_air_master_data"
         action="action_freight_airport"
         sequence="10" />
@@ -138,5 +138,5 @@
     <menuitem id="menu_master_quotation_type" name="Quotation Type"
         parent="menu_sub_parent_air_master_data"
         action="action_freight_quotation_type"
-        sequence="300" />
+        sequence="300" /> -->
 </odoo>

@@ -271,7 +271,7 @@ class SeaQuotation(models.Model):
         self.ensure_one()
 
         freight_type = "Export" if self.freight_type == "export" else "Import"
-        
+
         # Create HBL directly linked to quotation (for import flow)
         hbl = self.env["freight.sea.hbl"].create(
             {
