@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data noupdate="1">
+		<record id="state_jp_jp-13_adachi_ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Adachi Ku</field>
+		</record>
+		<record id="state_jp_jp-13_akiruno-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Akiruno-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_akishima-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Akishima-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_arakawa_ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Arakawa Ku</field>
+		</record>
+		<record id="state_jp_jp-13_bunkyō-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Bunkyō-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_chiyoda-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Chiyoda-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_chōfu" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">ChōFu</field>
+		</record>
+		<record id="state_jp_jp-13_chōfu-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">ChōFu-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_chūō_ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Chūō Ku</field>
+		</record>
+		<record id="state_jp_jp-13_edogawa_ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Edogawa Ku</field>
+		</record>
+		<record id="state_jp_jp-13_fuchū-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Fuchū-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_fussa" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Fussa</field>
+		</record>
+		<record id="state_jp_jp-13_hachiōji" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">HachiōJi</field>
+		</record>
+		<record id="state_jp_jp-13_hamura-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Hamura-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_higashi-murayama-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Higashi-Murayama-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_higashikurume-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Higashikurume-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_higashimurayama" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Higashimurayama</field>
+		</record>
+		<record id="state_jp_jp-13_higashiyamato" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Higashiyamato</field>
+		</record>
+		<record id="state_jp_jp-13_higashiyamato-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Higashiyamato-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_hino" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Hino</field>
+		</record>
+		<record id="state_jp_jp-13_hino-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Hino-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_inagi-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Inagi-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_itabashi-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Itabashi-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_itsukaichi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Itsukaichi</field>
+		</record>
+		<record id="state_jp_jp-13_kamirenjaku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Kamirenjaku</field>
+		</record>
+		<record id="state_jp_jp-13_katsushika_ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Katsushika Ku</field>
+		</record>
+		<record id="state_jp_jp-13_kita-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Kita-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_kiyose-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Kiyose-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_kodaira-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Kodaira-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_koganei-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Koganei-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_kokubunji" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Kokubunji</field>
+		</record>
+		<record id="state_jp_jp-13_kokubunji-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Kokubunji-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_komae-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Komae-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_kōtō-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">KōTō-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_kunitachi-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Kunitachi-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_machida" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Machida</field>
+		</record>
+		<record id="state_jp_jp-13_machida-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Machida-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_meguro-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Meguro-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_minato-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Minato-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_mitaka-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Mitaka-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_musashimurayama-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Musashimurayama-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_musashino" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Musashino</field>
+		</record>
+		<record id="state_jp_jp-13_musashino-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Musashino-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_nakano-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Nakano-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_nerima-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Nerima-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_nishi-tokyo-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Nishi-Tokyo-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_nishitōkyō-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">NishitōKyō-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_ōme" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">ŌMe</field>
+		</record>
+		<record id="state_jp_jp-13_ōme-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">ŌMe-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_ōta-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">ŌTa-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_setagaya-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Setagaya-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_shibuya-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Shibuya-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_shinagawa-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Shinagawa-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_shinjuku-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Shinjuku-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_suginami-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Suginami-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_sumida-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Sumida-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_tachikawa-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Tachikawa-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_taitō-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Taitō-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_tama-shi" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Tama-Shi</field>
+		</record>
+		<record id="state_jp_jp-13_tanashichō" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Tanashichō</field>
+		</record>
+		<record id="state_jp_jp-13_tokyo" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Tokyo</field>
+		</record>
+		<record id="state_jp_jp-13_toshima-ku" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Toshima-Ku</field>
+		</record>
+		<record id="state_jp_jp-13_urayasu" model="res.city">
+			<field name="state_id" ref="base.state_jp_jp-13"></field>
+			<field name="country_id" ref="base.jp"></field>
+			<field name="name">Urayasu</field>
+		</record>
+	</data>
+</odoo>
