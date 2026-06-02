@@ -163,8 +163,8 @@
                 <field name="freight_type"/>
                 <field name="container_type"/>
                 <separator/>
-                <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'Import')]"/>
-                <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'Export')]"/>
+                <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'import')]"/>
+                <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'export')]"/>
                 <filter name="filter_fcl" string="FCL" domain="[('container_type', '=', 'fcl')]"/>
                 <filter name="filter_lcl" string="LCL" domain="[('container_type', '=', 'lcl')]"/>
                 <filter name="filter_consol" string="Consol" domain="[('container_type', '=', 'consol')]"/>
@@ -184,7 +184,7 @@
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search"/>
-        <field name="domain">[('type', '=', 'Import'), ('freight_type', '=', 'fcl')]</field>
+        <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'fcl')]</field>
     </record>
 
     <record id="action_sea_hbl_import_lcl" model="ir.actions.act_window">
@@ -192,7 +192,7 @@
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search"/>
-        <field name="domain">[('type', '=', 'Import'), ('freight_type', '=', 'lcl')]</field>
+        <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'lcl')]</field>
     </record>
 
     <record id="action_sea_hbl_import_consol" model="ir.actions.act_window">
@@ -200,7 +200,7 @@
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search"/>
-        <field name="domain">[('type', '=', 'Import'), ('freight_type', '=', 'consol')]</field>
+        <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'consol')]</field>
     </record>
 
     <record id="action_sea_hbl_export_fcl" model="ir.actions.act_window">
@@ -208,7 +208,7 @@
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search"/>
-        <field name="domain">[('type', '=', 'Export'), ('freight_type', '=', 'fcl')]</field>
+        <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'fcl')]</field>
     </record>
 
     <record id="action_sea_hbl_export_lcl" model="ir.actions.act_window">
@@ -216,7 +216,7 @@
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search"/>
-        <field name="domain">[('type', '=', 'Export'), ('freight_type', '=', 'lcl')]</field>
+        <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'lcl')]</field>
     </record>
 
     <record id="action_sea_hbl_export_consol" model="ir.actions.act_window">
@@ -224,6 +224,6 @@
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search"/>
-        <field name="domain">[('type', '=', 'Export'), ('freight_type', '=', 'consol')]</field>
+        <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'consol')]</field>
     </record>
 </odoo>
