@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_freight_sea_quotation_items_line_form" model="ir.ui.view">
+        <field name="name">freight.sea.quotation.items.line.form</field>
+        <field name="model">freight.sea.quotation.items.line</field>
+        <field name="arch" type="xml">
+            <form string="Freight Items Line">
+                <sheet>
+                    <group>
+                        <field name="quotation_cargo_info_id" />
+                    </group>
+                    <group>
+                        <field name="description_of_packages_and_goods" />
+                    </group>
+                    <group>
+                        <group>
+                            <field name="type" />
+                            <field name="length" />
+                            <field name="width" />
+                            <field name="height" />
+                        </group>
+                        <group>
+                            <field name="cant" />
+                            <field name="volume" />
+                            <field name="gross_weight" />
+                        </group>
+                        
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_freight_sea_quotation_items_line_list" model="ir.ui.view">
+        <field name="name">freight.sea.quotation.items.line.list</field>
+        <field name="model">freight.sea.quotation.items.line</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="description_of_packages_and_goods" />
+                <field name="type" />
+                <field name="cant" />
+                <field name="length" />
+                <field name="width" />
+                <field name="height" />
+                <field name="volume" />
+                <field name="gross_weight" />
+            </list>
+        </field>
+    </record>
+</odoo>

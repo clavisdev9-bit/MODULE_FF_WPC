@@ -45,6 +45,7 @@
         "views/sea/sales/quotation.xml",
         "views/sea/cargo_info.xml",
         "views/sea/sales/cargo_info.xml",
+        "views/sea/sales/freight_items_line.xml",
         "views/sea/sales/rate_enquiry_actions.xml",
         "views/sea/booking/booking.xml",
         "views/sea/booking/extra_info_views.xml",
