@@ -11,6 +11,17 @@ class SeaQuotation(models.Model):
     _inherit = "sale.order"
     _description = "Sea Quotation"
     _rec_name = "name"
+    
+    # Override tasks_ids field from sale_project to prevent dependency errors
+    # Sea quotations don't have order lines and don't support project integration
+    tasks_ids = fields.Many2many(
+        "project.task",
+        "sale_task_rel",
+        "sale_order_id", 
+        "task_id",
+        string="Tasks",
+    )
+    
     _SALE_ORDER_SYNC_COLUMNS = (
         "campaign_id",
         "source_id",
@@ -65,14 +76,6 @@ class SeaQuotation(models.Model):
     hbl_count = fields.Integer(
         string="Jobsheet Count", compute="_compute_hbl_count"
     )
-
-    # Override _compute_tasks_ids from sale_project to prevent incompatibility error
-    # Sea quotations don't use project tasks, so we skip computation
-    @api.depends("line_ids")
-    def _compute_tasks_ids(self):
-        """Skip tasks computation for sea quotations to avoid model inconsistency errors"""
-        for rec in self:
-            rec.tasks_ids = False
 
     @api.depends("booking_ids")
     def _compute_booking_count(self):
