@@ -66,6 +66,10 @@ class SeaQuotation(models.Model):
         string="Jobsheet Count", compute="_compute_hbl_count"
     )
 
+    def _compute_tasks_ids(self):
+        for rec in self:
+            rec.tasks_ids = False
+
     @api.depends("booking_ids")
     def _compute_booking_count(self):
         for rec in self:
