@@ -1,0 +1,38 @@
+id,name
+base.state_id_ac,Aceh
+base.state_id_su,Sumatra Utara
+base.state_id_sb,Sumatra Barat
+base.state_id_ri,Riau
+base.state_id_ja,Jambi
+base.state_id_ss,Sumatra Selatan
+base.state_id_be,Bengkulu
+base.state_id_la,Lampung
+base.state_id_bb,Bangka Belitung
+base.state_id_kr,Kepulauan Riau
+base.state_id_jk,Jakarta
+base.state_id_jb,Jawa Barat
+base.state_id_jt,Jawa Tengah
+base.state_id_yo,Yogyakarta
+base.state_id_ji,Jawa Timur
+base.state_id_bt,Banten
+base.state_id_ba,Bali
+base.state_id_nb,Nusa Tenggara Barat
+base.state_id_nt,Nusa Tenggara Timur
+base.state_id_kb,Kalimantan Barat
+base.state_id_kt,Kalimantan Tengah
+base.state_id_ks,Kalimantan Selatan
+base.state_id_ki,Kalimantan Timur
+base.state_id_ku,Kalimantan Utara
+base.state_id_sa,Sulawesi Utara
+base.state_id_st,Sulawesi Tengah
+base.state_id_sn,Sulawesi Selatan
+base.state_id_sg,Sulawesi Tenggara
+base.state_id_go,Gorontalo
+base.state_id_sr,Sulawesi Barat
+base.state_id_ma,Maluku
+base.state_id_mu,Maluku Utara
+base.state_id_pa,Papua
+base.state_id_pb,Papua Barat
+base.state_id_ps,Papua Selatan
+base.state_id_pt,Papua Tengah
+base.state_id_pp,Papua Pegunungan

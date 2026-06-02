@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_res_city_all,res_city_all,model_res_city,base.group_user,1,1,1,1
+access_res_subdistrict_all,res_subdistrict_all,model_res_subdistrict,base.group_user,1,1,1,1
+access_res_village_all,res_village_all,model_res_village,base.group_user,1,1,1,1

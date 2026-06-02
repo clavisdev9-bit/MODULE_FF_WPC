@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_country_state_search" model="ir.ui.view">
+            <field name="name">res.country.state.search</field>
+            <field name="model">res.country.state</field>
+            <field name="inherit_id" ref="base.view_country_state_search"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='country_id']" position="after">
+                    <field name="city_ids"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="view_country_state_tree" model="ir.ui.view">
+            <field name="name">res.country.state.list</field>
+            <field name="model">res.country.state</field>
+            <field name="inherit_id" ref="base.view_country_state_tree"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//list" position="attributes">
+                    <attribute name="editable"/>
+                </xpath>
+                <xpath expr="//field[@name='country_id']" position="after">
+                    <field name="city_ids"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="view_country_state_form" model="ir.ui.view">
+            <field name="name">res.country.state.form</field>
+            <field name="model">res.country.state</field>
+            <field name="inherit_id" ref="base.view_country_state_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//group" position="after">
+                    <notebook>
+                        <page string="Kabupaten / Kota">
+                            <field name="city_ids"/>
+                        </page>
+                    </notebook>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="base.action_country_state" model="ir.actions.act_window">
+            <field name="name">State</field>
+            <field name="domain">[]</field>
+        </record>
+
+        <record id="contacts.menu_country_state_partner" model="ir.ui.menu">
+            <field name="name">State</field>
+        </record>
+
+        <record id="contacts.menu_country_group" model="ir.ui.menu">
+            <field name="sequence">0</field>
+        </record>
+
+    </data>
+</odoo>
