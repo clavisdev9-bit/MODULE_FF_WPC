@@ -449,9 +449,9 @@ class SeaQuotation(models.Model):
 
     via_port_id = fields.Many2one("freight.port", string="Via Port")
 
-    origin_id = fields.Many2one("res.country.state", string="Origin")
+    origin_id = fields.Many2one("res.city", string="Origin")
 
-    destination_id = fields.Many2one("res.country.state", string="Destination")
+    destination_id = fields.Many2one("res.city", string="Destination")
 
     via2_id = fields.Many2one("freight.port", string="Via2")
 
