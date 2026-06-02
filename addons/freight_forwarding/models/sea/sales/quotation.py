@@ -69,6 +69,8 @@ class SeaQuotation(models.Model):
     def _compute_tasks_ids(self):
         for rec in self:
             rec.tasks_ids = False
+            rec.tasks_count = 0
+            rec.closed_task_count = 0
 
     @api.depends("booking_ids")
     def _compute_booking_count(self):
