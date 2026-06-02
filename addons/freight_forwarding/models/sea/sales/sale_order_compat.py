@@ -4,33 +4,6 @@ from odoo import api, fields, models
 class SaleOrderCompat(models.Model):
     _inherit = "sale.order"
 
-    # Override _compute_tasks_ids to handle freight models that don't have order lines
-    # This method is originally from sale_project addon
-    @api.depends("line_ids.product_id")
-    def _compute_tasks_ids(self):
-        """
-        Override sale_project's _compute_tasks_ids method.
-        For freight models that don't have line_ids field, skip computation.
-        """
-        # List of freight models that shouldn't compute tasks
-        freight_models = {'freight.sea.quotation', 'freight.air.quotation'}
-        
-        # Check if current recordset is a freight model
-        if self and self[0]._name in freight_models:
-            # For freight models, set empty tasks and return
-            for rec in self:
-                rec.tasks_ids = False
-            return
-        
-        # For regular sale orders, try to use parent computation
-        try:
-            # Call the parent's implementation from sale_project
-            super()._compute_tasks_ids()
-        except (AttributeError, TypeError, KeyError):
-            # If parent fails, set empty tasks for all records
-            for rec in self:
-                rec.tasks_ids = False
-
     freight_type = fields.Selection(
         selection=[
             ("export", "Export"),
