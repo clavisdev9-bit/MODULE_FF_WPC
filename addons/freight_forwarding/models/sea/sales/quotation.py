@@ -11,17 +11,6 @@ class SeaQuotation(models.Model):
     _inherit = "sale.order"
     _description = "Sea Quotation"
     _rec_name = "name"
-    
-    # Override tasks_ids field from sale_project to prevent dependency errors
-    # Sea quotations don't have order lines and don't support project integration
-    tasks_ids = fields.Many2many(
-        "project.task",
-        "sale_task_rel",
-        "sale_order_id", 
-        "task_id",
-        string="Tasks",
-    )
-    
     _SALE_ORDER_SYNC_COLUMNS = (
         "campaign_id",
         "source_id",
