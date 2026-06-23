@@ -6,7 +6,7 @@ class SeaShipmentInfoMixin(models.AbstractModel):
     _description = "Sea Shipment Info Mixin"
 
     # Shipment Details
-    shipment_type_id = fields.Many2one("freight.delivery.type", string="Shipment Type")
+    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
     place_of_receipt_id = fields.Many2one("res.country.state", string="Place of Receipt")
     place_of_delivery_id = fields.Many2one("res.country.state", string="Place of Delivery")
     port_of_loading_id = fields.Many2one("freight.port", string="Port of Loading")

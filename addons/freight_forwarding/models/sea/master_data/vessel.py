@@ -14,5 +14,5 @@ class FreightVessel(models.Model):
     name = fields.Char(string="Vessel Name", required=True)
     voyage_no = fields.Char(string="Voyage No.")
     imo_number = fields.Char(string="IMO Number")
-    flag = fields.Char(string="Flag")
+    flag = fields.Many2one("res.country", string="Flag")
     active = fields.Boolean(string="Active", default=True)

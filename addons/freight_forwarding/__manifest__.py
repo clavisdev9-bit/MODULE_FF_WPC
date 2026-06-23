@@ -103,6 +103,7 @@
         "views/sea/master_data/vessel.xml",
         "views/sea/master_data/location.xml",
         "views/sea/master_data/incoterm.xml",
+        "views/sea/master_data/shipment_type.xml",
         "views/sea/master_data/permit.xml",
         "views/sea/master_data/salesman.xml",
         "views/sea/master_data/product_cost_menu_actions.xml",

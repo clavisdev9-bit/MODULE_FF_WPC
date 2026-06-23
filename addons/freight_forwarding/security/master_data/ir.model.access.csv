@@ -1,5 +1,6 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 access_freight_delivery_type,freight.delivery.type,model_freight_delivery_type,,1,1,1,1
+access_freight_shipment_type,freight.shipment.type,model_freight_shipment_type,,1,1,1,1
 access_freight_container_type,freight.container.type,model_freight_container_type,,1,1,1,1
 access_freight_cargo_type,freight.cargo.type,model_freight_cargo_type,,1,1,1,1
 access_freight_pickup,freight.pickup,model_freight_pickup,,1,1,1,1

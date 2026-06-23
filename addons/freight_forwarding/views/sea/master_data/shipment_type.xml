@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_shipment_type" model="ir.actions.act_window">
+        <field name="name">Shipment Type</field>
+        <field name="res_model">freight.shipment.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

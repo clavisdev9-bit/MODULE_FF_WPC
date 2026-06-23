@@ -34,6 +34,16 @@ class SeaBooking(models.Model):
         for rec in self:
             rec.quotation_count = 1 if rec.quotation_id else 0
 
+    @api.onchange("port_of_loading_id")
+    def _onchange_port_of_loading_id(self):
+        for rec in self:
+            rec.origin_country_id = rec.port_of_loading_id.country_id
+
+    @api.onchange("port_of_discharge_id")
+    def _onchange_port_of_discharge_id(self):
+        for rec in self:
+            rec.destination_country_id = rec.port_of_discharge_id.country_id
+
     # Fungsi pas tombol Jobsheet di klik
     def action_view_hbl(self):
         self.ensure_one()
@@ -112,10 +122,10 @@ class SeaBooking(models.Model):
 
     # Shipment Details
     port_of_loading_id = fields.Many2one(
-        "freight.port", string="Origin Port (POL)"
+        "freight.port", string="Origin Port (POL)", required=True
     )
     port_of_discharge_id = fields.Many2one(
-        "freight.port", string="Destination Port (POD)"
+        "freight.port", string="Destination Port (POD)", required=True
     )
     etd = fields.Date(string="ETD (Departure)")
     eta = fields.Date(string="ETA (Arrival)")
@@ -128,10 +138,11 @@ class SeaBooking(models.Model):
     delivery_type_id = fields.Many2one(
         "freight.delivery.type", string="Delivery Type", required=True
     )
+    commodity_id = fields.Many2one("freight.commodity", string="Commodity")
 
     # Vessel Information
     pod_port_id = fields.Many2one("freight.port", string="Port of Discharge")
-    vessel_id = fields.Many2one("freight.vessel", string="Vessel Name")
+    vessel_id = fields.Many2one("freight.vessel", string="Vessel Name", required=True)
     voyage_no = fields.Char(string="Voyage No.")
     eta_jkt = fields.Date(string="ETA on JKT")
 
@@ -175,6 +186,41 @@ class SeaBooking(models.Model):
         "freight.sea.booking.extra.info",
         "booking_id",
         string="Extra Info",
+    )
+
+    # B/L Info (One2One - fields langsung di booking)
+    shipper_id = fields.Many2one(
+        "res.partner",
+        string="Shipper",
+        domain="[('category_id.name', '=', 'Shipper')]",
+    )
+    shipper_address = fields.Char(
+        string="Shipper Address",
+        related="shipper_id.contact_address",
+        readonly=True,
+        store=False,
+    )
+    consignee_id = fields.Many2one(
+        "res.partner",
+        string="Consignee",
+        domain="[('category_id.name', '=', 'Consignee')]",
+    )
+    consignee_address = fields.Char(
+        string="Consignee Address",
+        related="consignee_id.contact_address",
+        readonly=True,
+        store=False,
+    )
+    notify_party_id = fields.Many2one(
+        "res.partner",
+        string="Notify Party",
+        domain="[('category_id.name', '=', 'Notify Party')]",
+    )
+    notify_party_address = fields.Char(
+        string="Notify Party Address",
+        related="notify_party_id.contact_address",
+        readonly=True,
+        store=False,
     )
 
     def action_add_notify_party(self):

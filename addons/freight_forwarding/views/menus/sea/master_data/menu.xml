@@ -15,6 +15,11 @@
         action="action_freight_sea_charge_table"
         sequence="30" />
 
+    <menuitem id="menu_sea_master_container_type" name="Container Type"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_container_type"
+        sequence="35" />
+
     <menuitem id="menu_sea_master_city" name="City"
         parent="menu_sub_parent_sea_master_data"
         action="action_freight_city"
@@ -119,6 +124,11 @@
         parent="menu_sub_parent_sea_master_data"
         action="action_freight_shipping_line_partner"
         sequence="240" />
+
+    <menuitem id="menu_sea_master_shipment_type" name="Shipment Type"
+        parent="menu_sub_parent_sea_master_data"
+        action="action_freight_shipment_type"
+        sequence="245" />
 
     <menuitem id="menu_sea_master_transport" name="Transport"
         parent="menu_sub_parent_sea_master_data"

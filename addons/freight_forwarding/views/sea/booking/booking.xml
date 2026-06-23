@@ -45,6 +45,7 @@
                                 <field name="bl_no" />
                                 <field name="job_no" />
                                 <field name="nomination_cargo" />
+                                <field name="commodity_id" />
                             </group>
                             <group>
                                 <field name="container_type"/>
@@ -70,8 +71,8 @@
 
                         <group string="Shipment Details">
                             <group>
-                                <field name="port_of_loading_id" />
-                                <field name="port_of_discharge_id" />
+                                <field name="port_of_loading_id" required="1" />
+                                <field name="port_of_discharge_id" required="1" />
                                 <field name="etd" />
                                 <field name="eta" />
                                 <field name="destination_country_id" />
@@ -80,7 +81,7 @@
                             </group>
                             <group string="Vessel Information">
                                 <field name="pod_port_id" />
-                                <field name="vessel_id" />
+                                <field name="vessel_id" required="1" />
                                 <field name="voyage_no" />
                                 <field name="eta_jkt" />
                             </group>
@@ -92,9 +93,25 @@
                             </page>
                             <page string="B/L Info">
                                 <group>
-                                    <field name="sea_bl_info_ids" nolabel="1" />
+                                    <group string="Shipper">
+                                        <field name="shipper_id" widget="res_partner_many2one"
+                                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                                        <field name="shipper_address" readonly="1" nolabel="0" />
+                                    </group>
+                                    <group string="Consignee">
+                                        <field name="consignee_id" widget="res_partner_many2one"
+                                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                                        <field name="consignee_address" readonly="1" nolabel="0" />
+                                    </group>
                                 </group>
-                                <div class="d-flex">
+                                <group>
+                                    <group string="Notify Party">
+                                        <field name="notify_party_id" widget="res_partner_many2one"
+                                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                                        <field name="notify_party_address" readonly="1" nolabel="0" />
+                                    </group>
+                                </group>
+                                <div class="d-flex mt-2">
                                     <button name="action_add_notify_party"
                                         type="object"
                                         string="Add Notify Party"
