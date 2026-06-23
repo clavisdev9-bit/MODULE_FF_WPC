@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "1.0",
+    "version": "1.1",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
