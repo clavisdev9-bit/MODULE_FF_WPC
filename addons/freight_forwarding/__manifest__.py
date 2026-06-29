@@ -40,6 +40,11 @@
         "views/transport/partner.xml",
         "views/acct/partner.xml",
         "views/product.xml",
+        # Report
+        "report/sea/quotation/quotation_report_template.xml",
+        "report/sea/quotation/quotation_report.xml",
+        "report/sea/hbl/hbl_report_template.xml",
+        "report/sea/hbl/hbl_report.xml",
         # Sea Quotation (moved from old quotation folder)
         "views/sea/sales/quotation_type.xml",
         "views/sea/sales/quotation.xml",
@@ -65,8 +70,6 @@
         "views/sea/hbl/tax_refund_doc_views.xml",
         "views/sea/hbl/document_list_views.xml",
         "views/sea/hbl/hbl.xml",
-        "report/sea/hbl/hbl_report_template.xml",
-        "report/sea/hbl/hbl_report.xml",
         "views/sea/import/purchasing.xml",
         # Acct
         "views/acct/area.xml",

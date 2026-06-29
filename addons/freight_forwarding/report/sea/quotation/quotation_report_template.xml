@@ -223,10 +223,10 @@
                                     <span t-field="doc.client_order_ref" />
                                 </td>
                                 <td colspan="3">
-                                    <span t-field="doc.origin_id.code" />
+                                    <span t-field="doc.origin_id" />
                                 </td>
                                 <td colspan="3">
-                                    <span t-field="doc.destination_id.code" />
+                                    <span t-field="doc.destination_id" />
                                 </td>
                             </tr>
                             <tr class="header-gray text-left">
