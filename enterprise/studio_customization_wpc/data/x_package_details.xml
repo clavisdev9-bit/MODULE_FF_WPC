@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_package_details_8" model="x_package_details">
+    <field name="x_studio_package_type">Container / Box</field>
+    <field name="x_studio_container_number">13</field>
+    <field name="x_studio_stamp_number">4</field>
+    <field name="x_studio_net_weight">16</field>
+    <field name="x_studio_volume">14</field>
+    <field name="x_studio_total_volume">30</field>
+    <field name="x_studio_gross_weight">15</field>
+    <field name="x_studio_dangerous_goods" eval="True"/>
+    <field name="x_studio_air_mawb" ref="x_air_mawb_12"/>
+  </record>
+  <record id="x_package_details_9" model="x_package_details">
+    <field name="x_studio_package_type">Container / Box</field>
+    <field name="x_studio_container_number">20</field>
+    <field name="x_studio_stamp_number">8687</field>
+    <field name="x_studio_types_of_cargo" ref="x_cargo_type_1"/>
+    <field name="x_studio_qty">2</field>
+    <field name="x_studio_dangerous_goods" eval="True"/>
+    <field name="x_studio_air_mawb" ref="x_air_mawb_12"/>
+  </record>
+</odoo>

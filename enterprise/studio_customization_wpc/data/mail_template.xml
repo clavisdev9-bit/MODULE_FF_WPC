@@ -1,0 +1,1190 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="account_online_synchronization.email_template_sync_reminder" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;">
+                    <tr>
+                        <td align="center">
+                            <table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+                                <tbody>
+                                    <!-- CONTENT -->
+                                    <tr>
+                                        <td align="center" style="min-width: 590px;">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tr>
+                                                    <td valign="top" style="font-size: 13px;">
+                                                        <div>
+                                                            Hello,<br/><br/>
+                                                            The connection between <b><a t-att-href="object.get_base_url()" t-out="object.get_base_url() or ''">https://yourcompany.odoo.com</a></b> and <t t-out="object.account_online_link_id.name or ''">Belfius</t> <t t-if="not object.expiring_synchronization_due_day">expired.</t><t t-else="">expires in <t t-out="object.expiring_synchronization_due_day or ''">10</t> days.</t><br/>
+                                                            <div style="margin: 16px 0px 16px 0px;">
+                                                                <a t-attf-href="{{ website_url }}/renew_consent/{{ object.id }}?access_token={{object.access_token}}" style="background-color: #4caf50; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                                                    Renew Consent
+                                                                </a>
+                                                            </div>
+                                                            Security Tip: Check that the domain name you are redirected to is: <b><a t-att-href="object.get_base_url()" t-out="object.get_base_url() or ''">https://yourcompany.odoo.com</a></b>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align:center;">
+                                                        <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- POWERED BY -->
+                    <tr>
+                        <td align="center" style="min-width: 590px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+                                <tr>
+                                    <td style="text-align: center; font-size: 13px;">
+                                        Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" style="color: #875A7B;">Odoo</a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; color: #454748; padding: 8px; border-collapse:separate;">
+                                <tr>
+                                    <td style="text-align: center; font-size: 11px;">
+                                        PS: This is an automated email sent by Odoo Accounting to remind you before a bank sync consent expiration.
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            ]]></field>
+    <field name="email_from">{{ object.company_id.email_formatted or user.email_formatted }}</field>
+    <field name="email_to">{{ object.renewal_contact_email }}</field>
+    <field name="model_id" ref="account.model_account_journal"/>
+    <field name="name">Bank connection expiration reminder</field>
+    <field name="subject">Your bank connection is expiring soon</field>
+  </record>
+  <record id="account.email_template_edi_credit_note" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear
+        <t t-if="object.partner_id.parent_id">
+            <t t-out="object.partner_id.name or ''">Brandon Freeman</t> (<t t-out="object.partner_id.parent_id.name or ''">Azure Interior</t>),
+        </t>
+        <t t-else="">
+            <t t-out="object.partner_id.name or ''">Brandon Freeman</t>,
+        </t>
+        <br/><br/>
+        Here is your
+        <t t-if="object.name">
+            credit note <span style="font-weight:bold;" t-out="object.name or ''">RINV/2021/05/0001</span>
+        </t>
+        <t t-else="">
+            credit note
+        </t>
+        <t t-if="object.invoice_origin">
+            (with reference: <t t-out="object.invoice_origin or ''">SUB003</t>)
+        </t>
+        amounting in <span style="font-weight:bold;" t-out="format_amount(object.amount_total, object.currency_id) or ''">$ 143,750.00</span>
+        from <t t-out="object.company_id.name or ''">YourCompany</t>.
+        <br/><br/>
+        Do not hesitate to contact us if you have any questions.
+        <t t-if="not is_html_empty(object.invoice_user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.invoice_user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+    </p>
+</div>
+            ]]></field>
+    <field name="email_from">{{ (object.invoice_user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="account.model_account_move"/>
+    <field name="name">Credit Note: Sending</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="subject">{{ object.company_id.name }} Credit Note (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="account_reports.email_template_customer_statement" model="mail.template" forcecreate="1">
+    <field name="auto_delete" eval="False"/>
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+                <p style="margin: 0px; padding: 0px;">
+                    <t t-if="object.id != object.commercial_partner_id.id">Dear <t t-out="object.name or ''"/> (<t t-out="object.commercial_partner_id.name or ''"/>),</t>
+                    <t t-else="">Dear <t t-out="object.name or ''"/>,</t>
+                    <br/>
+                    Please find enclosed the statement of your account.
+                    <br/>
+                    Do not hesitate to contact us if you have any questions.
+                    <br/>
+                    Sincerely,
+                    <br/>
+	                <t t-out="object._get_followup_responsible().name if is_html_empty(object._get_followup_responsible().signature) else object._get_followup_responsible().signature"/>
+                </p>
+            </div>
+        ]]></field>
+    <field name="email_from">{{ object._get_followup_responsible().email_formatted }}</field>
+    <field name="lang">{{ object.lang }}</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="name">Customer Statement</field>
+    <field name="subject">{{ (object.company_id or object._get_followup_responsible().company_id).name }} Statement - {{ object.commercial_company_name }}</field>
+  </record>
+  <record id="iap_extract.iap_extract_no_credit" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p>Dear,<br/></p>
+    <p>There are no more credits on your IAP OCR account.<br/>
+    You can charge your IAP OCR account in the settings page.</p>
+    <p>Best regards,<br/></p>
+    <p>Odoo S.A.</p>
+</div>]]></field>
+    <field name="email_from">iap@odoo.com</field>
+    <field name="email_to">iap@odoo.com</field>
+    <field name="model_id" ref="iap.model_iap_account"/>
+    <field name="name">IAP Extract Notification</field>
+    <field name="subject">IAP Extract Notification</field>
+  </record>
+  <record id="account.email_template_edi_invoice" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear
+        <t t-if="object.partner_id.parent_id">
+            <t t-out="object.partner_id.name or ''">Brandon Freeman</t> (<t t-out="object.partner_id.parent_id.name or ''">Azure Interior</t>),
+        </t>
+        <t t-else="">
+            <t t-out="object.partner_id.name or ''">Brandon Freeman</t>,
+        </t>
+        <br/><br/>
+        Here is your
+        <t t-if="object.name">
+            invoice <span style="font-weight:bold;" t-out="object.name or ''">INV/2021/05/0005</span>
+        </t>
+        <t t-else="">
+            invoice
+        </t>
+        <t t-if="object.invoice_origin">
+            (with reference: <t t-out="object.invoice_origin or ''">SUB003</t>)
+        </t>
+        amounting in <span style="font-weight:bold;" t-out="format_amount(object.amount_total, object.currency_id) or ''">$ 143,750.00</span>
+        from <t t-out="object.company_id.name or ''">YourCompany</t>.
+        <t t-if="object.payment_state in ('paid', 'in_payment')">
+            This invoice is already paid.
+        </t>
+        <t t-else="">
+            Please remit payment at your earliest convenience.
+            <t t-if="object.payment_reference">
+                <br/><br/>
+                Please use the following communication for your payment: <strong t-out="object.payment_reference or ''">INV/2021/05/0005</strong>
+                <t t-if="object.partner_bank_id">
+                    on the account <strong t-out="object.partner_bank_id.acc_number"/>
+                </t>
+                .
+            </t>
+        </t>
+        <t t-if="hasattr(object, 'timesheet_count') and object.timesheet_count">
+            <br/><br/>
+            PS: you can review your timesheets <a t-att-href="'/my/timesheets?search_in=invoice&amp;search=%s' % object.name">from the portal.</a>
+        </t>
+        <br/><br/>
+        Do not hesitate to contact us if you have any questions.
+        <t t-if="not is_html_empty(object.invoice_user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.invoice_user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+    </p>
+</div>
+            ]]></field>
+    <field name="email_from">{{ (object.invoice_user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="account.model_account_move"/>
+    <field name="name">Invoice: Sending</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="subject">{{ object.company_id.name }} Invoice (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="base_install_request.mail_template_base_install_request" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Hello,
+        <br/><br/>
+        <span style="font-weight: bold;" t-out="object.user_id.name"/> has requested to activate the <span style="font-weight: bold;" t-out="object.module_id.shortdesc"/> module. This module is included in your subscription. It has <span style="color: #875A7B; font-weight: bold;">no extra cost</span>, but an administrator role is required to activate it.
+        <br/><br/>
+        </p><blockquote data-o-mail-quote-node="1" data-o-mail-quote="1">
+            <t t-out="object.body_html"/>
+        </blockquote>
+        <br data-o-mail-quote="1"/><br data-o-mail-quote="1"/>
+        <a style="background-color:#875A7B; padding:8px 16px 8px 16px; text-decoration:none; color:#fff; border-radius:5px" t-attf-href="/odoo/{{ object.module_id.id }}/action-base_install_request.action_base_module_install_review?menu_id={{ ctx['menu_id'] }}">Review Request</a>
+        <br/><br/>
+        Thanks,
+        <t t-if="not is_html_empty(object.user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+        <br/><br/>
+    
+</div>
+            ]]></field>
+    <field name="email_from">{{ object.user_id.email_formatted or user.email_formatted }}</field>
+    <field name="lang">{{ ctx['partner'].lang or user.lang }}</field>
+    <field name="model_id" ref="base_install_request.model_base_module_install_request"/>
+    <field name="name">Mail: Install Request</field>
+    <field name="partner_to">{{ ctx['partner'].id}}</field>
+    <field name="subject">Module Activation Request for "{{ object.module_id.shortdesc }}"</field>
+  </record>
+  <record id="account_followup.email_template_followup_1" model="mail.template" forcecreate="1">
+    <field name="auto_delete" eval="False"/>
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px;">
+                        <t t-if="object.id != object.commercial_partner_id.id">Dear <t t-out="object.name or ''"/> (<t t-out="object.commercial_partner_id.name or ''"/>),</t>
+                        <t t-else="">Dear <t t-out="object.name or ''"/>,</t>
+                        <br/>
+                        It has come to our attention that you have&nbsp;an outstanding balance of <t t-out="format_amount(object.total_overdue, object.currency_id) or ''"/>
+                        <br/>
+                        We kindly request that you take necessary action to settle this amount within the next 8 days.
+                        <br/>
+                        </p><div t-if="object._show_pay_now_button()" class="d-flex">
+                            <a t-att-href="'/my/invoices/overdue'" class="btn btn-primary">Pay now</a>
+                        </div>
+                        If you have already made the payment after receiving this message, please disregard it.
+                        Our accounting department is available if you require any assistance or have any questions.
+                        <br/>
+                        Thank you for your cooperation.
+                        <br/>
+                        Sincerely,
+                        <t t-if="not is_html_empty(object._get_followup_responsible().signature)">
+                            <br/>
+                            <t t-out="object._get_followup_responsible().signature"/>
+                        </t>
+                        <t t-else="">
+                            <br/>
+                            --
+                            <br/>
+                            <t t-out="object._get_followup_responsible().name"/>
+                        </t>
+                    
+                </div>
+            ]]></field>
+    <field name="email_from">{{ object._get_followup_responsible().email_formatted }}</field>
+    <field name="lang">{{ object.lang }}</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="name">Payment Reminder</field>
+    <field name="subject">{{ (object.company_id or object._get_followup_responsible().company_id).name }} Payment Reminder - {{ object.commercial_company_name }}</field>
+  </record>
+  <record id="account.mail_template_data_payment_receipt" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear <t t-out="object.partner_id.name or ''">Azure Interior</t><br/><br/>
+        Thank you for your payment.
+        Here is your payment receipt <span style="font-weight:bold;" t-out="(object.name or '').replace('/','-') or ''">BNK1-2021-05-0002</span> amounting
+        to <span style="font-weight:bold;" t-out="format_amount(object.amount, object.currency_id) or ''">$ 10.00</span> from <t t-out="object.company_id.name or ''">YourCompany</t>.
+        <br/><br/>
+        Do not hesitate to contact us if you have any questions.
+        <br/><br/>
+        Best regards,
+        <t t-if="not is_html_empty(user.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="user.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+    </p>
+</div>
+]]></field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="account.model_account_payment"/>
+    <field name="name">Payment: Payment Receipt</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="report_template_ids" eval="[(6, 0, [ref('account.action_report_payment_receipt')])]"/>
+    <field name="subject">{{ object.company_id.name }} Payment Receipt (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="point_of_sale.pos_email_marketing_template" model="mail.template" forcecreate="1">
+    <field name="auto_delete" eval="False"/>
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <h4>
+        Dear <t t-out="object.partner_id.name or 'Valuable Customer'">Azure Interior</t>,
+    </h4>
+    <p style="font-size: 13px;">
+We have a limited-time offer only for you, enjoy a flat 20% off on your next purchase with us.
+We can't wait to continue serving you.
+    </p>
+</div>
+            ]]></field>
+    <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="email_to">{{ ( object.email or '') }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="point_of_sale.model_pos_order"/>
+    <field name="name">Point of Sale: Marketing</field>
+    <field name="subject">PoS Marketing</field>
+  </record>
+  <record id="portal.mail_template_data_portal_welcome" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<t t-set="user_name" t-value="object.user_id.name or object.partner_id.name or ''"/>
+            <t t-set="company_name" t-value="object.user_id.company_id.name or object.partner_id.company_id.name or ''"/>
+            <t t-set="signup_url" t-value="object.user_id.partner_id and object.user_id.partner_id._get_signup_url() or object.partner_id and object.partner_id._get_signup_url()"/>
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: white; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">
+                    <span style="font-size: 10px;">Your Account</span><br/>
+                    <span style="font-size: 20px; font-weight: bold;" t-out="user_name">Marc Demo</span>
+                </td><td valign="middle" align="right" t-if="not object.user_id.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.user_id.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.user_id.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="user_name">Marc Demo</t>,<br/> <br/>
+                        Welcome to <t t-out="company_name">YourCompany</t>'s Portal!<br/><br/>
+                        An account has been created for you with the following login: <t t-out="object.user_id.login">demo</t><br/><br/>
+                        Click on the button below to pick a password and activate your account.
+                        <div style="margin: 16px 0px 16px 0px; text-align: center;">
+                            <a t-att-href="signup_url" style="display: inline-block; padding: 10px; text-decoration: none; font-size: 12px; background-color: #875A7B; color: #fff; border-radius: 5px;">
+                                <strong>Activate Account</strong>
+                            </a>
+                        </div>
+                        <t t-out="object.wizard_id.welcome_message or ''">Welcome to our company's portal.</t>
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- FOOTER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle" align="left">
+                    <t t-out="company_name">YourCompany</t>
+                </td></tr>
+                <tr><td valign="middle" align="left" style="opacity: 0.7;">
+                    <t t-out="object.user_id.company_id.phone or ''">+1 650-123-4567</t>
+                    <t t-if="object.user_id.company_id.email">
+                        | <a t-attf-href="'mailto:%s' % {{ object.user_id.company_id.email }}" style="text-decoration:none; color: #454748;" t-out="object.user_id.company_id.email or ''">info@yourcompany.com</a>
+                    </t>
+                    <t t-if="object.user_id.company_id.website">
+                        | <a t-attf-href="'%s' % {{ object.user_id.company_id.website }}" style="text-decoration:none; color: #454748;" t-out="object.user_id.company_id.website or ''">http://www.example.com</a>
+                    </t>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=portalinvite" style="color: #875A7B;">Odoo</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table>
+            ]]></field>
+    <field name="email_to">{{ object.user_id.email_formatted or object.partner_id.email_formatted}}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="portal.model_portal_wizard_user"/>
+    <field name="name">Portal: User Invite</field>
+    <field name="subject">Your account at {{ object.user_id.company_id.name or object.partner_id.company_id.name }}</field>
+  </record>
+  <record id="purchase.email_template_edi_purchase_done" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear <t t-out="object.partner_id.name or ''">Brandon Freeman</t>
+        <t t-if="object.partner_id.parent_id">
+            (<t t-out="object.partner_id.parent_id.name or ''">Azure Interior</t>)
+        </t>
+        <br/><br/>
+        Here is in attachment a purchase order <span style="font-weight:bold;" t-out="object.name or ''">P00015</span>
+        <t t-if="object.partner_ref">
+            with reference: <t t-out="object.partner_ref or ''">REF_XXX</t>
+        </t>
+        amounting in <span style="font-weight:bold;" t-out="format_amount(object.amount_total, object.currency_id) or ''">$ 10.00</span>
+        from <t t-out="object.company_id.name or ''">YourCompany</t>. 
+        <br/><br/>
+        <t t-if="object.date_planned">
+            The receipt is expected for <span style="font-weight:bold;" t-out="format_date(object.date_planned) or ''">05/05/2021</span>.
+            <br/><br/>
+            Could you please acknowledge the receipt of this order?
+        </t>
+        <t t-if="not is_html_empty(object.user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+        <br/><br/>
+    </p>
+</div>]]></field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="purchase.model_purchase_order"/>
+    <field name="name">Purchase: Purchase Order</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="report_template_ids" eval="[(6, 0, [ref('purchase.action_report_purchase_order')])]"/>
+    <field name="subject">{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="purchase.email_template_edi_purchase" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear <t t-out="object.partner_id.name or ''">Brandon Freeman</t>
+        <t t-if="object.partner_id.parent_id">
+            (<t t-out="object.partner_id.parent_id.name or ''">Azure Interior</t>)
+        </t>
+        <br/><br/>
+        Here is in attachment a request for quotation <span style="font-weight:bold;" t-out="object.name or ''">P00015</span>
+        <t t-if="object.partner_ref">
+            with reference: <t t-out="object.partner_ref or ''">REF_XXX</t>
+        </t>
+        from <t t-out="object.company_id.name or ''">YourCompany</t>.
+        <br/><br/>
+        If you have any questions, please do not hesitate to contact us.
+        <br/><br/>
+            <a t-att-href="object.get_confirm_url(confirm_type='reception')" target="_blank" style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
+                Accept</a>
+
+            <a t-att-href="object.get_confirm_url(confirm_type='decline')" target="_blank" style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
+                Decline</a>
+        <br/><br/>
+        Best regards,
+        <t t-if="not is_html_empty(object.user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+    </p>
+</div>]]></field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="purchase.model_purchase_order"/>
+    <field name="name">Purchase: Request For Quotation</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="report_template_ids" eval="[(6, 0, [ref('purchase.report_purchase_quotation')])]"/>
+    <field name="subject">{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="purchase.email_template_edi_purchase_reminder" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear <t t-out="object.partner_id.name or ''">Brandon Freeman</t>
+        <t t-if="object.partner_id.parent_id">
+            (<t t-out="object.partner_id.parent_id.name or ''">Azure Interior</t>)
+        </t>
+        <br/><br/>
+        Here is a reminder that the delivery of the purchase order <span style="font-weight:bold;" t-out="object.name or ''">P00015</span>
+        <t t-if="object.partner_ref">
+            <span style="font-weight:bold;">(<t t-out="object.partner_ref or ''">REF_XXX</t>)</span>
+        </t>
+        is expected for 
+        <t t-if="object.date_planned">
+            <span style="font-weight:bold;" t-out="format_date(object.date_planned) or ''">05/05/2021</span>.
+        </t>
+         <t t-else="">
+            <span style="font-weight:bold;">undefined</span>.
+        </t>
+        Could you please confirm it will be delivered on time?
+        <t t-if="not is_html_empty(object.user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+        <br/><br/>
+    </p>
+</div>]]></field>
+    <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted) }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="purchase.model_purchase_order"/>
+    <field name="name">Purchase: Vendor Reminder</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="report_template_ids" eval="[(6, 0, [ref('purchase.action_report_purchase_order')])]"/>
+    <field name="subject">{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="sale.mail_template_sale_cancellation" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        <t t-set="doc_name" t-value="object.type_name"/>
+        Dear <t t-out="object.partner_id.name or ''">user</t>,
+        <br/><br/>
+        Please be advised that your
+        <t t-out="doc_name or ''">quotation</t> <strong t-out="object.name or ''">S00052</strong>
+        <t t-if="object.origin">
+            (with reference: <t t-out="object.origin or ''">S00052</t> )
+        </t>
+        has been cancelled. Therefore, you should not be charged further for this order.
+        If any refund is necessary, this will be executed at best convenience.
+        <br/><br/>
+        Do not hesitate to contact us if you have any questions.
+        <br/>
+    </p>
+</div>
+            ]]></field>
+    <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="name">Sales: Order Cancellation</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="subject">{{ object.company_id.name }} {{ object.type_name }} Cancelled (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="sale.mail_template_sale_confirmation" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 12px;">
+        Hello,
+        <br/><br/>
+        <t t-set="tx_sudo" t-value="object.get_portal_last_transaction()"/>
+        Your order <span style="font-weight:bold;" t-out="object.name or ''">S00049</span> amounting in <span style="font-weight:bold;" t-out="format_amount(object.amount_total, object.currency_id) or ''">$ 10.00</span>
+        <t t-if="object.state == 'sale' or (tx_sudo and tx_sudo.state in ('done', 'authorized'))">
+            has been confirmed.<br/>
+            Thank you for your trust!
+        </t>
+        <t t-elif="tx_sudo and tx_sudo.state == 'pending'">
+            is pending. It will be confirmed when the payment is received.
+            <t t-if="object.reference">
+                Your payment reference is <span style="font-weight:bold;" t-out="object.reference or ''"/>.
+            </t>
+        </t>
+        <br/>
+        <t t-set="documents" t-value="object._get_product_documents()"/>
+        <t t-if="documents">
+            <br/> 
+            <t t-if="len(documents)&gt;1">
+                Here are some additional documents that may interest you:
+            </t>
+            <t t-else="">
+                Here is an additional document that may interest you:
+            </t>
+            <ul style="margin-bottom: 0;">
+                <t t-foreach="documents" t-as="document">
+                    <li style="font-size: 13px;">
+                        <a t-out="document.ir_attachment_id.name" t-att-href="object.get_portal_url('/document/' + str(document.id))" t-att-target="target"/>
+                    </li>
+                </t>
+            </ul>
+        </t>
+        <br/>
+        Do not hesitate to contact us if you have any questions.
+        <t t-if="not is_html_empty(object.user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+        <br/><br/>
+    </p>
+<t t-if="hasattr(object, 'website_id') and object.website_id">
+    <div style="margin: 0px; padding: 0px;">
+        <table width="100%" style="color: #454748; font-size: 12px; border-collapse: collapse; white-space: nowrap;">
+            <tr style="border-bottom: 2px solid #dee2e6;">
+                <td style="width: 150px;"><span style="font-weight:bold;">Products</span></td>
+                <td/>
+                <td width="15%" align="center"><span style="font-weight:bold;">Quantity</span></td>
+                <td width="20%" align="right">
+                    <span style="font-weight:bold;">
+                        <t t-if="object.website_id.show_line_subtotals_tax_selection == 'tax_excluded'">
+                            Tax Excl.
+                        </t>
+                        <t t-else="">
+                            Tax Incl.
+                        </t>
+                    </span>
+                </td>
+            </tr>
+        </table>
+        <t t-set="current_subtotal" t-value="0"/>
+        <t t-foreach="object.order_line" t-as="line">
+            <t t-set="line_subtotal" t-value="                     line.price_subtotal                     if object.website_id.show_line_subtotals_tax_selection == 'tax_excluded'                     else line.price_total                 "/>
+            <t t-set="current_subtotal" t-value="current_subtotal + line_subtotal"/>
+            <t t-if="(not hasattr(line, 'is_delivery') or not line.is_delivery) and (                     line.display_type in ['line_section', 'line_note']                     or line.product_type == 'combo'                 )">
+                <table width="100%" style="color: #454748; font-size: 12px; border-collapse: collapse;">
+                    <t t-set="loop_cycle_number" t-value="loop_cycle_number or 0"/>
+                    <tr t-att-style="'background-color: #f2f2f2' if loop_cycle_number % 2 == 0 else 'background-color: #ffffff'">
+                        <t t-set="loop_cycle_number" t-value="loop_cycle_number + 1"/>
+                        <td colspan="4">
+                            <t t-if="line.display_type == 'line_section' or line.product_type == 'combo'">
+                                <span style="font-weight:bold;" t-out="line.name or ''">Taking care of Trees Course</span>
+                                <t t-set="current_section" t-value="line"/>
+                                <t t-set="current_subtotal" t-value="0"/>
+                            </t>
+                            <t t-elif="line.display_type == 'line_note'">
+                                <i t-out="line.name or ''">Taking care of Trees Course</i>
+                            </t>
+                        </td>
+                    </tr>
+                </table>
+            </t>
+            <t t-elif="(not hasattr(line, 'is_delivery') or not line.is_delivery)">
+                <table width="100%" style="color: #454748; font-size: 12px; border-collapse: collapse;">
+                    <t t-set="loop_cycle_number" t-value="loop_cycle_number or 0"/>
+                    <tr t-att-style="'background-color: #f2f2f2' if loop_cycle_number % 2 == 0 else 'background-color: #ffffff'">
+                        <t t-set="loop_cycle_number" t-value="loop_cycle_number + 1"/>
+                        <td style="width: 150px;">
+                            <img t-attf-src="/web/image/product.product/{{ line.product_id.id }}/image_128" style="width: 64px; height: 64px; object-fit: contain;" alt="Product image"/>
+                        </td>
+                        <td align="left" t-out="line.product_id.name or ''">	Taking care of Trees Course</td>
+                        <td width="15%" align="center" t-out="line.product_uom_qty or ''">1</td>
+                        <td width="20%" align="right"><span style="font-weight:bold; white-space: nowrap;">
+                        <t t-if="object.website_id.show_line_subtotals_tax_selection == 'tax_excluded'">
+                            <t t-out="format_amount(line.price_reduce_taxexcl, object.currency_id) or ''">$ 10.00</t>
+                        </t>
+                        <t t-else="">
+                            <t t-out="format_amount(line.price_reduce_taxinc, object.currency_id) or ''">$ 10.00</t>
+                        </t>
+                        </span></td>
+                    </tr>
+                </table>
+            </t>
+            <t t-if="current_section and (                     line_last                     or object.order_line[line_index+1].display_type == 'line_section'                     or object.order_line[line_index+1].product_type == 'combo'                     or (                         line.combo_item_id                         and not object.order_line[line_index+1].combo_item_id                     )                 ) and not line.is_downpayment">
+                <t t-set="current_section" t-value="None"/>
+                <table width="100%" style="color: #454748; font-size: 12px; border-collapse: collapse;">
+                    <t t-set="loop_cycle_number" t-value="loop_cycle_number or 0"/>
+                    <tr t-att-style="'background-color: #f2f2f2' if loop_cycle_number % 2 == 0 else 'background-color: #ffffff'">
+                        <t t-set="loop_cycle_number" t-value="loop_cycle_number + 1"/>
+                        <td style="width: 100%" align="right">
+                            <span style="font-weight: bold;">Subtotal:</span>
+                            <span t-out="format_amount(current_subtotal, object.currency_id) or ''">$ 10.00</span>
+                        </td>
+                    </tr>
+                </table>
+            </t>
+        </t>
+    </div>
+    <div style="margin: 0px; padding: 0px;" t-if="hasattr(object, 'carrier_id') and object.carrier_id">
+        <table width="100%" style="color: #454748; font-size: 12px; border-spacing: 0px 4px; white-space: nowrap;" align="right">
+            <tr>
+                <td style="width: 60%"/>
+                <td style="width: 30%; border-top: 1px solid #dee2e6;" align="right"><span style="font-weight:bold;">Delivery:</span></td>
+                <td style="width: 10%; border-top: 1px solid #dee2e6;" align="right" t-out="format_amount(object.amount_delivery, object.currency_id) or ''">$ 0.00</td>
+            </tr>
+            <tr>
+                <td style="width: 60%"/>
+                <td style="width: 30%;" align="right"><span style="font-weight:bold;">Untaxed Amount:</span></td>
+                <td style="width: 10%;" align="right" t-out="format_amount(object.amount_untaxed, object.currency_id) or ''">$ 10.00</td>
+            </tr>
+        </table>
+    </div>
+    <div style="margin: 0px; padding: 0px;" t-else="">
+        <table width="100%" style="color: #454748; font-size: 12px; border-spacing: 0px 4px; white-space: nowrap;" align="right">
+            <tr>
+                <td style="width: 60%"/>
+                <td style="width: 30%; border-top: 1px solid #dee2e6;" align="right"><span style="font-weight:bold;">Untaxed Amount:</span></td>
+                <td style="width: 10%; border-top: 1px solid #dee2e6;" align="right" t-out="format_amount(object.amount_untaxed, object.currency_id) or ''">$ 10.00</td>
+            </tr>
+        </table>
+    </div>
+    <div style="margin: 0px; padding: 0px;">
+        <table width="100%" style="color: #454748; font-size: 12px; border-spacing: 0px 4px; white-space: nowrap;" align="right">
+            <tr>
+                <td style="width: 60%"/>
+                <td style="width: 30%;" align="right"><span style="font-weight:bold;">Taxes:</span></td>
+                <td style="width: 10%;" align="right" t-out="format_amount(object.amount_tax, object.currency_id) or ''">$ 0.00</td>
+            </tr>
+            <tr>
+                <td style="width: 60%"/>
+                <td style="width: 30%; border-top: 1px solid #dee2e6;" align="right"><span style="font-weight:bold;">Total:</span></td>
+                <td style="width: 10%; border-top: 1px solid #dee2e6;" align="right" t-out="format_amount(object.amount_total, object.currency_id) or ''">$ 10.00</td>
+            </tr>
+        </table>
+    </div>
+    <div t-if="object.partner_invoice_id" style="margin: 0px; padding: 0px;">
+        <table width="100%" style="color: #454748; font-size: 12px;">
+            <tr>
+                <td style="padding-top: 10px;">
+                    <span style="font-weight:bold;">Bill to:</span>
+                    <t t-out="object.partner_invoice_id.street or ''">1201 S Figueroa St</t>
+                    <t t-out="object.partner_invoice_id.city or ''">Los Angeles</t>
+                    <t t-out="object.partner_invoice_id.state_id.name or ''">California</t>
+                    <t t-out="object.partner_invoice_id.zip or ''">90015</t>
+                    <t t-out="object.partner_invoice_id.country_id.name or ''">United States</t>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span style="font-weight:bold;">Payment Method:</span>
+                    <t t-if="tx_sudo.token_id">
+                        <t t-out="tx_sudo.token_id.display_name or ''"/>
+                    </t>
+                    <t t-else="">
+                        <t t-out="tx_sudo.provider_id.sudo().name or ''"/>
+                    </t>
+                    (<t t-out="format_amount(tx_sudo.amount, object.currency_id) or ''">$ 10.00</t>)
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div t-if="object.partner_shipping_id and not object.only_services" style="margin: 0px; padding: 0px;">
+        <table width="100%" style="color: #454748; font-size: 12px;">
+            <tr>
+                <td>
+                    <br/>
+                    <span style="font-weight:bold;">Ship to:</span>
+                    <t t-out="object.partner_shipping_id.street or ''">1201 S Figueroa St</t>
+                    <t t-out="object.partner_shipping_id.city or ''">Los Angeles</t>
+                    <t t-out="object.partner_shipping_id.state_id.name or ''">California</t>
+                    <t t-out="object.partner_shipping_id.zip or ''">90015</t>
+                    <t t-out="object.partner_shipping_id.country_id.name or ''">United States</t>
+                </td>
+            </tr>
+        </table>
+        <table t-if="hasattr(object, 'carrier_id') and object.carrier_id" width="100%" style="color: #454748; font-size: 12px;">
+            <tr>
+                <td>
+                    <span style="font-weight:bold;">Shipping Method:</span>
+                    <t t-out="object.carrier_id.name or ''"/>
+                    <t t-if="object.amount_delivery == 0.0">
+                        (Free)
+                    </t>
+                    <t t-else="">
+                        (<t t-out="format_amount(object.amount_delivery, object.currency_id) or ''">$ 10.00</t>)
+                    </t>
+                </td>
+            </tr>
+            <tr t-if="object.carrier_id.carrier_description">
+                <td>
+                    <strong>Shipping Description:</strong>
+                    <t t-out="object.carrier_id.carrier_description"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+</t>
+</div>]]></field>
+    <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="name">Sales: Order Confirmation</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="report_template_ids" eval="[(6, 0, [ref('sale.action_report_saleorder')])]"/>
+    <field name="subject">{{ object.company_id.name }} {{ (object.get_portal_last_transaction().state == 'pending') and 'Pending Order' or 'Order' }} (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="sale.mail_template_sale_payment_executed" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 12px;">
+        <t t-set="transaction_sudo" t-value="object.get_portal_last_transaction()"/>
+        Hello,
+        <br/><br/>
+        A payment with reference
+        <span style="font-weight:bold;" t-out="transaction_sudo.reference or ''">SOOO49</span>
+        amounting
+        <span style="font-weight:bold;" t-out="format_amount(transaction_sudo.amount, object.currency_id) or ''">$ 10.00</span>
+        for your order
+        <span style="font-weight:bold;" t-out="object.name or ''">S00049</span>
+        <t t-if="transaction_sudo and transaction_sudo.state == 'pending'">
+            is pending.
+            <br/>
+            <t t-if="object.currency_id.compare_amounts(object.amount_paid + transaction_sudo.amount, object.amount_total) &gt;= 0 and object.state in ('draft', 'sent')">
+                Your order will be confirmed once the payment is confirmed.
+            </t>
+            <t t-else="">
+                Once confirmed,
+                <span style="font-weight:bold;" t-out="format_amount(object.amount_total - object.amount_paid - transaction_sudo.amount, object.currency_id) or ''">$ 10.00</span>
+                will remain to be paid.
+            </t>
+        </t>
+        <t t-else="">
+            has been confirmed.
+            <t t-if="object.currency_id.compare_amounts(object.amount_paid, object.amount_total) &lt; 0">
+                <br/>
+                <span style="font-weight:bold;" t-out="format_amount(object.amount_total - object.amount_paid, object.currency_id) or ''">$ 10.00</span>
+                remains to be paid.
+            </t>
+        </t>
+        <br/><br/>
+        Thank you for your trust!
+        <br/>
+        Do not hesitate to contact us if you have any questions.
+        <t t-if="not is_html_empty(object.user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+        <br/><br/>
+    </p>
+</div>
+            ]]></field>
+    <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted) }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="name">Sales: Payment Done</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="report_template_ids" eval="[(6, 0, [ref('sale.action_report_saleorder')])]"/>
+    <field name="subject">{{ object.company_id.name }} {{ (object.get_portal_last_transaction().state == 'pending') and 'Pending Order' or 'Order' }} (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="sale.email_template_edi_sale" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        <t t-set="doc_name" t-value="'quotation' if object.state in ('draft', 'sent') else 'order'"/>
+        Hello,
+        <br/><br/>
+        Your
+        <t t-if="ctx.get('proforma')">
+            Pro forma invoice for <t t-out="doc_name or ''">quotation</t> <span style="font-weight: bold;" t-out="object.name or ''">S00052</span>
+            <t t-if="object.origin">
+                (with reference: <t t-out="object.origin or ''"/> )
+            </t>
+            amounting in <span style="font-weight: bold;" t-out="format_amount(object.amount_total, object.currency_id) or ''">$ 10.00</span> is available.
+        </t>
+        <t t-else="">
+            <t t-out="doc_name or ''">quotation</t> <span style="font-weight: bold;" t-out="object.name or ''">S00052</span>
+            <t t-if="object.origin">
+                (with reference: <t t-out="object.origin or ''">S00052</t> )
+            </t>
+            amounting in <span style="font-weight: bold;" t-out="format_amount(object.amount_total, object.currency_id) or ''">$ 10.00</span> is ready for review.
+        </t>
+        <br/>
+        <t t-set="documents" t-value="object._get_product_documents()"/>
+        <t t-if="documents">
+            <br/> 
+            <t t-if="len(documents)&gt;1">
+                Here are some additional documents that may interest you:
+            </t>
+            <t t-else="">
+                Here is an additional document that may interest you:
+            </t>
+            <ul style="margin-bottom: 0;">
+                <t t-foreach="documents" t-as="document">
+                    <li style="font-size: 13px;">
+                        <a t-out="document.ir_attachment_id.name" t-att-href="object.get_portal_url('/document/' + str(document.id))" t-att-target="target"/>
+                    </li>
+                </t>
+            </ul>
+        </t>
+        <br/>
+        Do not hesitate to contact us if you have any questions.
+        <t t-if="not is_html_empty(object.user_id.signature)" data-o-mail-quote-container="1">
+            <br/><br/>
+            <t t-out="object.user_id.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+        <br/><br/>
+    </p>
+</div>
+            ]]></field>
+    <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="name">Sales: Send Quotation</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="report_template_ids" eval="[(6, 0, [ref('sale.action_report_saleorder')])]"/>
+    <field name="subject">{{ object.company_id.name }} {{ object.state in ('draft', 'sent') and (ctx.get('proforma') and 'Proforma' or 'Quotation') or 'Order' }} (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+  <record id="account_followup.demo_followup_email_template_2" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+                    <p>
+                        <t t-if="object.id != object.commercial_partner_id.id">Dear <t t-out="object.name or ''"/> (<t t-out="object.commercial_partner_id.name or ''"/>),</t>
+                        <t t-else="">Dear <t t-out="object.name or ''"/>,</t>
+                        <br/>
+                        We are disappointed to see that despite sending a reminder, that your account is now seriously overdue.
+                        <br/>
+                        It is essential that immediate payment is made, otherwise we will have to consider placing a stop on your account which means that we will no longer be able to supply your company with (goods/services). Please, take appropriate measures in order to carry out this payment in the next 8 days.
+                        <br/>
+                        If there is a problem with paying invoice that we are not aware of, do not hesitate to contact our accounting department, so that we can resolve the matter quickly.
+                        <br/>
+                        Details of due payments is printed below.
+                        <br/>
+                        Best Regards,
+                        <t t-if="not is_html_empty(object._get_followup_responsible().signature)">
+                            <br/>
+                            <t t-out="object._get_followup_responsible().signature"/>
+                        </t>
+                        <t t-else="">
+                            <br/>
+                            --
+                            <br/>
+                            <t t-out="object._get_followup_responsible().name"/>
+                        </t>
+                    </p>
+                </div>
+            ]]></field>
+    <field name="email_from">{{ object._get_followup_responsible().email_formatted }}</field>
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="name">Second reminder followup</field>
+    <field name="subject">{{ (object.company_id or object._get_followup_responsible().company_id).name }} Payment Reminder - {{ object.commercial_company_name }}</field>
+  </record>
+  <record id="auth_totp_mail.mail_template_totp_invite" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear <t t-out="object.partner_id.name or ''"/><br/><br/>
+        <t t-out="user.name  or ''"/> requested you activate two-factor authentication to protect your account.<br/><br/>
+        Two-factor Authentication ("2FA") is a system of double authentication.
+        The first one is done with your password and the second one with a code you get from a dedicated mobile app.
+        Popular ones include Authy, Google Authenticator or the Microsoft Authenticator.
+
+        </p><p style="margin: 16px 0px 16px 0px; text-align: center;">
+            <a t-att-href="object.get_totp_invite_url()" style="background-color:#875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;">
+                Activate my two-factor Authentication
+            </a>
+        </p>
+    
+</div>
+        ]]></field>
+    <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="base.model_res_users"/>
+    <field name="name">Settings: 2Fa Invitation</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="subject">Invitation to activate two-factor authentication on your Odoo account</field>
+  </record>
+  <record id="auth_signup.mail_template_user_signup_account_created" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">
+                    <span style="font-size: 10px;">Your Account</span><br/>
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.name or ''">Marc Demo</t>,<br/><br/>
+                        Your account has been successfully created!<br/>
+                        Your login is <strong><t t-out="object.email or ''">mark.brown23@example.com</t></strong><br/>
+                        To gain access to your account, you can use the following link:
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-attf-href="/web/login?auth_login={{object.email}}" style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Go to My Account
+                            </a>
+                        </div>
+                        Thanks,<br/>
+                        <t t-if="user.signature" data-o-mail-quote-container="1">
+                            <br/>
+                            <t t-out="user.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+                        </t>
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- FOOTER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle" align="left">
+                    <t t-out="object.company_id.name or ''">YourCompany</t>
+                </td></tr>
+                <tr><td valign="middle" align="left" style="opacity: 0.7;">
+                    <t t-out="object.company_id.phone or ''">+1 650-123-4567</t>
+                    <t t-if="object.company_id.email">
+                        | <a t-attf-href="'mailto:%s' % {{ object.company_id.email }}" style="text-decoration:none; color: #454748;"><t t-out="object.company_id.email or ''">info@yourcompany.com</t></a>
+                    </t>
+                    <t t-if="object.company_id.website">
+                        | <a t-attf-href="'%s' % {{ object.company_id.website }}" style="text-decoration:none; color: #454748;">
+                            <t t-out="object.company_id.website or ''">http://www.example.com</t>
+                        </a>
+                    </t>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" style="color: #875A7B;">Odoo</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table>]]></field>
+    <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="email_to">{{ object.email_formatted }}</field>
+    <field name="lang">{{ object.lang }}</field>
+    <field name="model_id" ref="base.model_res_users"/>
+    <field name="name">Settings: New Portal Sign Up</field>
+    <field name="subject">Welcome to {{ object.company_id.name }}!</field>
+  </record>
+  <record id="auth_signup.set_password_email" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">
+                    <span style="font-size: 10px;">Welcome to Odoo</span><br/>
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">Marc Demo</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.name or ''">Marc Demo</t>,<br/><br/>
+                        You have been invited by <t t-out="object.create_uid.name or ''">OdooBot</t> of <t t-out="object.company_id.name or ''">YourCompany</t> to connect on Odoo.
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.partner_id._get_signup_url()" t-attf-style="background-color: {{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Accept invitation
+                            </a>
+                        </div>
+                        <b>  This link will remain valid during <t t-out="int(int(object.env['ir.config_parameter'].sudo().get_param('auth_signup.signup.validity.hours',144))/24)"/> days </b> <br/>
+                        <t t-set="website_url" t-value="object.get_base_url()"/>
+                        Your Odoo domain is: <b><a t-att-href="website_url" t-out="website_url or ''">http://yourcompany.odoo.com</a></b><br/>
+                        Your sign in email is: <b><a t-attf-href="/web/login?login={{ object.email }}" target="_blank" t-out="object.email or ''">mark.brown23@example.com</a></b><br/><br/>
+                        Never heard of Odoo? It’s an all-in-one business software loved by 7+ million users. It will considerably improve your experience at work and increase your productivity.
+                        <br/><br/>
+                        Have a look at the <a href="https://www.odoo.com/page/tour?utm_source=db&amp;utm_medium=auth" style="color: #875A7B;">Odoo Tour</a> to discover the tool.
+                        <br/><br/>
+                        Enjoy Odoo!<br/>
+                        --<br/>The <t t-out="object.company_id.name or ''">YourCompany</t> Team
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- FOOTER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle" align="left">
+                    <t t-out="object.company_id.name or ''">YourCompany</t>
+                </td></tr>
+                <tr><td valign="middle" align="left" style="opacity: 0.7;">
+                    <t t-out="object.company_id.phone or ''">+1 650-123-4567</t>
+                    <t t-if="object.company_id.email">
+                        | <a t-att-href="'mailto:%s' % object.company_id.email" style="text-decoration:none; color: #454748;" t-out="object.company_id.email or ''">info@yourcompany.com</a>
+                    </t>
+                    <t t-if="object.company_id.website">
+                        | <a t-att-href="'%s' % object.company_id.website" style="text-decoration:none; color: #454748;" t-out="object.company_id.website or ''">http://www.example.com</a>
+                    </t>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 590px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" style="color: #875A7B;">Odoo</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table>]]></field>
+    <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="email_to">{{ object.email_formatted }}</field>
+    <field name="lang">{{ object.lang }}</field>
+    <field name="model_id" ref="base.model_res_users"/>
+    <field name="name">Settings: New User Invite</field>
+    <field name="subject">{{ object.create_uid.name }} from {{ object.company_id.name }} invites you to connect to Odoo</field>
+  </record>
+  <record id="auth_signup.mail_template_data_unregistered_users" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<table border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <t t-set="invited_users" t-value="ctx.get('invited_users', [])"/>
+                <td style="text-align : left">
+                    <span style="font-size: 20px; font-weight: bold;">
+                        Pending Invitations
+                    </span><br/><br/>
+                </td>
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.name or ''">Mitchell Admin</t>,<br/> <br/>
+                        You added the following user(s) to your database but they haven't registered yet:
+                        <ul>
+                            <t t-foreach="invited_users" t-as="invited_user">
+                                <li t-out="invited_user or ''">demo@example.com</li>
+                            </t>
+                        </ul>
+                        Follow up with them so they can access your database and start working with you.
+                        <br/><br/>
+                        Have a nice day!<br/>
+                        --<br/>The <t t-out="object.company_id.name or ''">YourCompany</t> Team
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+</table>
+            ]]></field>
+    <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+    <field name="email_to">{{ object.email_formatted }}</field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="base.model_res_users"/>
+    <field name="name">Settings: Unregistered User Reminder</field>
+    <field name="subject">Reminder for unregistered users</field>
+  </record>
+  <record id="stock.mail_template_data_delivery_confirmation" model="mail.template" forcecreate="1">
+    <field name="body_html"><![CDATA[<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Hello <t t-out="object.partner_id.name or ''">Brandon Freeman</t>,<br/><br/>
+        We are glad to inform you that your order has been shipped.
+        <t t-if="hasattr(object, 'carrier_tracking_ref') and object.carrier_tracking_ref">
+            Your tracking reference is
+            <strong>
+            <t t-if="object.carrier_tracking_url">
+                <t t-set="multiple_carrier_tracking" t-value="object.get_multiple_carrier_tracking()"/>
+                <t t-if="multiple_carrier_tracking">
+                    <t t-foreach="multiple_carrier_tracking" t-as="line">
+                        <br/><a t-att-href="line[1]" target="_blank" t-out="line[0] or ''"/>
+                    </t>
+                </t>
+                <t t-else="">
+                    <a t-attf-href="{{ object.carrier_tracking_url }}" target="_blank" t-out="object.carrier_tracking_ref or ''"/>.
+                </t>
+            </t>
+            <t t-else="">
+                <t t-out="object.carrier_tracking_ref or ''"/>.
+            </t>
+            </strong>
+        </t>
+        <br/><br/>
+        Please find your delivery order attached for more details.<br/><br/>
+        Thank you,
+        <t t-if="user.signature" data-o-mail-quote-container="1">
+            <br/>
+            <t t-out="user.signature or ''" data-o-mail-quote="1">--<br data-o-mail-quote="1"/>Mitchell Admin</t>
+        </t>
+    </p>
+</div>
+        ]]></field>
+    <field name="lang">{{ object.partner_id.lang }}</field>
+    <field name="model_id" ref="stock.model_stock_picking"/>
+    <field name="name">Shipping: Send by Email</field>
+    <field name="partner_to">{{ object.partner_id.email and object.partner_id.id or object.partner_id.parent_id.id }}</field>
+    <field name="report_template_ids" eval="[(6, 0, [ref('stock.action_report_delivery')])]"/>
+    <field name="subject">{{ object.company_id.name }} Delivery Order (Ref {{ object.name or 'n/a' }})</field>
+  </record>
+</odoo>

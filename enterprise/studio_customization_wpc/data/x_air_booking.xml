@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_air_booking_2" model="x_air_booking">
+    <field name="x_name">WPC/BOOK/0001/06102025</field>
+    <field name="x_studio_type_booking">Booking Export</field>
+    <field name="x_studio_job_no">JOB/BOOK/0001/06102025</field>
+  </record>
+  <record id="x_air_booking_3" model="x_air_booking">
+    <field name="x_name">WPC/BOOK/0002/23102025</field>
+    <field name="x_studio_job_no">JOB/BOOK/0002/23102025</field>
+  </record>
+</odoo>

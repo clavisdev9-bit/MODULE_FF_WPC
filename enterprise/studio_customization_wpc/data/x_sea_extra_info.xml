@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_sea_extra_info_1" model="x_sea_extra_info">
+    <field name="x_studio_do_date">2025-11-11</field>
+    <field name="x_studio_do_date_collecting">2025-11-18</field>
+    <field name="x_studio_do_transit" eval="True"/>
+  </record>
+</odoo>

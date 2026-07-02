@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_vessel_details_2" model="x_vessel_details">
+    <field name="x_studio_warehouse_name" ref="stock.warehouse0"/>
+  </record>
+</odoo>

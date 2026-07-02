@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_handling_information_1" model="x_handling_information">
+    <field name="x_name"><![CDATA[Description 1]]></field>
+    <field name="x_studio_title">Title 1</field>
+  </record>
+</odoo>

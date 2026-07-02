@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_extra_info_2" model="x_extra_info">
+    <field name="x_studio_do_po_number">456</field>
+    <field name="x_studio_do_date">2025-09-27</field>
+    <field name="x_studio_do_product_name_1" ref="hr_expense.expense_product_gift_product_template"/>
+    <field name="x_studio_do_date_collecting">2025-09-29</field>
+    <field name="x_studio_do_supplier" ref="res_partner_38_63d9ecc3"/>
+    <field name="x_studio_do_peb_number">123</field>
+    <field name="x_studio_mawb_no" ref="x_air_mawb_12"/>
+    <field name="x_studio_do_npe_date">2025-09-30</field>
+  </record>
+</odoo>

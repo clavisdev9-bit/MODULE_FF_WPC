@@ -1,0 +1,8 @@
+The following relational data haven't been exported because they either refer
+to a model that Studio doesn't export, or have no XML id:
+
+Record: purchase_order_repor_12df630b-1f3d-4526-b002-24fcb1fa7a0a
+Model: ir.actions.report
+Field: paperformat_id
+Type: many2one
+Value: report.paperformat(13,) ('A4 - PO')

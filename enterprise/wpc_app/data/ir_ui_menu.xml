@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="real_estate_fff4f813-2558-43e7-b6b0-515dd3985388" model="ir.ui.menu" context="{'studio': True}">
+    <field name="name">Real Estate</field>
+    <field name="web_icon">fa fa-home,#00CEB3,#FFFFFF</field>
+  </record>
+  <record id="real_estate_properti_c679736c-ae76-43eb-936e-4ec5aa74d0ec" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="properties_cf0d0d2e-7605-4652-8e1e-8f9177e307d9"/>
+    <field name="name">Properties</field>
+    <field name="parent_id" ref="real_estate_fff4f813-2558-43e7-b6b0-515dd3985388"/>
+  </record>
+  <record id="real_estate_configur_7ee34852-9cd5-4da2-9acd-d2b5974f1521" model="ir.ui.menu" context="{'studio': True}">
+    <field name="name">Configuration</field>
+    <field name="parent_id" ref="real_estate_fff4f813-2558-43e7-b6b0-515dd3985388"/>
+    <field name="sequence">100</field>
+  </record>
+  <record id="real_estate_configur_95d866ca-3183-469a-91e4-7388caaa67db" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="properties_stages_54deb004-fb76-4e5d-acc8-13283da726bb"/>
+    <field name="name">Properties Stages</field>
+    <field name="parent_id" ref="real_estate_configur_7ee34852-9cd5-4da2-9acd-d2b5974f1521"/>
+  </record>
+</odoo>

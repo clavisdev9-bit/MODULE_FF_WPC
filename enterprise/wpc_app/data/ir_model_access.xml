@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="properties_group_sys_264b3ab0-04e0-4ce5-a58c-7bc11c108b9c" model="ir.model.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="properties_e8cd5813-49cd-40a4-97cd-cb55c0536779"/>
+    <field name="name">Properties group_system</field>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_unlink" eval="True"/>
+    <field name="perm_write" eval="True"/>
+  </record>
+  <record id="properties_group_use_6604870f-008f-415f-b749-225008086f04" model="ir.model.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="properties_e8cd5813-49cd-40a4-97cd-cb55c0536779"/>
+    <field name="name">Properties group_user</field>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_write" eval="True"/>
+  </record>
+  <record id="properties_stages_gr_d9f5333a-08a6-49b7-b46b-539b72ffe3d8" model="ir.model.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="properties_stages_c3267d40-d18b-4715-9ec3-605ec2a48081"/>
+    <field name="name">Properties Stages group_system</field>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_unlink" eval="True"/>
+    <field name="perm_write" eval="True"/>
+  </record>
+  <record id="properties_stages_gr_73ddf0ca-aff9-4477-9581-a547728f0512" model="ir.model.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="properties_stages_c3267d40-d18b-4715-9ec3-605ec2a48081"/>
+    <field name="name">Properties Stages group_user</field>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_write" eval="True"/>
+  </record>
+  <record id="properties_group_vie_cd12f9b8-30cc-4564-8120-9754df9b0d57" model="ir.model.access" context="{'studio': True}">
+    <field name="model_id" ref="properties_e8cd5813-49cd-40a4-97cd-cb55c0536779"/>
+    <field name="name">Properties group_view</field>
+    <field name="perm_read" eval="True"/>
+  </record>
+</odoo>

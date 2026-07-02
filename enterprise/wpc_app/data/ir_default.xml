@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="active_properties_733eb869-859b-41ae-847c-35606df6be92" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="active_properties_1f05549c-91e4-4b23-818f-a2554892c2c4"/>
+    <field name="json_value">true</field>
+  </record>
+  <record id="sequence_properties_9d5066ff-1d1b-4c04-90c8-86d397268bca" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="sequence_properties_f1dad725-2ebe-426c-9dcc-968d98dad478"/>
+    <field name="json_value">10</field>
+  </record>
+  <record id="stage_properties_dbfe4fbf-8213-4ff2-a6c9-c53adc485d6a" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="stage_properties_c191f798-1eb4-4c52-8d80-9700ee38f307"/>
+    <field name="json_value">1</field>
+  </record>
+</odoo>

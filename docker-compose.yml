@@ -21,6 +21,7 @@ services:
       - odoo-web-data:/var/lib/odoo
       - ./config:/etc/odoo
       - ./addons:/mnt/extra-addons/base
+      - ./enterprise:/mnt/extra-addons/enterprise
     command: odoo --db_user=odoo --db_password=odoo --db_host=db
 
 volumes:

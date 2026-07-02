@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_hbl_16" model="x_hbl">
+    <field name="x_studio_job_city" ref="base.state_id_jk"/>
+    <field name="x_studio_place_of_delivery" ref="x_port_132545"/>
+    <field name="x_studio_pre_carriage_mode" ref="x_vessel_1"/>
+    <field name="x_studio_booking_no" ref="x_sea_booking_info_10"/>
+    <field name="x_name">12/FCL-JKTPUS/25005</field>
+    <field name="x_studio_feeder_direct_vessel" ref="x_vessel_4"/>
+    <field name="x_studio_job_no">12/JOB-SHEET/25005</field>
+    <field name="x_studio_job_type">Export Job FCL</field>
+    <field name="x_studio_job_date">2025-12-24</field>
+    <field name="x_studio_shipment_type">Sea</field>
+    <field name="x_studio_customer_name" ref="res_partner_40_048d2aeb"/>
+    <field name="x_studio_original_bl_no">3</field>
+    <field name="x_studio_mother_vessel" ref="x_vessel_1"/>
+    <field name="x_studio_shipper_name" ref="res_partner_17_8b996d19"/>
+    <field name="x_studio_consignee_name" ref="res_partner_19_1d447a50"/>
+    <field name="x_studio_freight">PREPAID</field>
+    <field name="x_studio_notify_name" ref="res_partner_19_1d447a50"/>
+    <field name="x_studio_delivery_agent_name" ref="res_partner_19_1d447a50"/>
+    <field name="x_studio_reference_no">12345</field>
+    <field name="x_studio_cargo_type">FCL (Full Container Load)</field>
+    <field name="x_studio_commodity_code" ref="x_commodity_2349"/>
+    <field name="x_studio_port_of_loading_code" ref="x_port_132544"/>
+    <field name="x_studio_place_of_receipt">Jakarta</field>
+    <field name="x_studio_via_port_code" ref="x_port_132545"/>
+    <field name="x_studio_port_of_discharge_code" ref="x_port_132546"/>
+    <field name="x_studio_destination_port_code" ref="x_port_132550"/>
+  </record>
+  <record id="x_hbl_17" model="x_hbl">
+    <field name="x_studio_job_city" ref="base.state_ec_01"/>
+    <field name="x_studio_eta_etd">2025-12-24</field>
+    <field name="x_studio_eta">2025-12-24</field>
+    <field name="x_studio_destination_port_name">tes</field>
+    <field name="x_studio_bl_surrendered" eval="True"/>
+    <field name="x_studio_booking_no" ref="x_sea_booking_info_10"/>
+    <field name="x_name">12345678</field>
+    <field name="x_studio_feeder_direct_vessel" ref="x_vessel_4"/>
+    <field name="x_studio_job_no">4u2343</field>
+    <field name="x_studio_job_type">Export Job LCL</field>
+    <field name="x_studio_job_date">2025-12-24</field>
+    <field name="x_studio_shipment_type">Sea</field>
+    <field name="x_studio_master_job_no">weq3221</field>
+    <field name="x_studio_customer_name" ref="res_partner_40_048d2aeb"/>
+    <field name="x_studio_original_bl_no">2332432f</field>
+    <field name="x_studio_mother_vessel" ref="x_vessel_4"/>
+    <field name="x_studio_consignee_name" ref="res_partner_19_1d447a50"/>
+    <field name="x_studio_freight">PREPAID</field>
+    <field name="x_studio_notify_name" ref="res_partner_19_1d447a50"/>
+    <field name="x_studio_term_payment" ref="account.account_payment_term_end_following_month"/>
+    <field name="x_studio_shipping_line_code" ref="x_shipping_line_1904"/>
+    <field name="x_studio_delivery_agent_name" ref="res_partner_19_1d447a50"/>
+    <field name="x_studio_principle_agent_name" ref="res_partner_21_b5de4693"/>
+    <field name="x_studio_stuffing_warehouse" ref="stock.warehouse0"/>
+    <field name="x_studio_cargo_type">LCL (Less than Container Load)</field>
+    <field name="x_studio_delivery_type_code" ref="x_delivery_type_32"/>
+    <field name="x_studio_commodity_code" ref="x_commodity_2354"/>
+    <field name="x_studio_ship_mode">Air</field>
+    <field name="x_studio_service_level">Standard</field>
+    <field name="x_studio_origin_port_code" ref="x_port_132545"/>
+    <field name="x_studio_port_of_loading_code" ref="x_port_132544"/>
+    <field name="x_studio_via_port_code" ref="x_port_132545"/>
+    <field name="x_studio_etd">2025-12-24</field>
+    <field name="x_studio_port_of_discharge_code" ref="x_port_132546"/>
+    <field name="x_studio_destination_port_code" ref="x_port_132546"/>
+  </record>
+</odoo>

@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_pickup_origin_3" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">AAL</field>
+    <field name="x_name">AALBORG</field>
+    <field name="x_studio_transportation_method">Air</field>
+    <field name="x_studio_country" ref="base.be"/>
+    <field name="x_studio_state" ref="base.state_be_1"/>
+  </record>
+  <record id="x_pickup_origin_10" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">TJP</field>
+    <field name="x_name">TANJUNG PRIOK</field>
+    <field name="x_studio_transportation_method">Ocean</field>
+    <field name="x_studio_country" ref="base.id"/>
+    <field name="x_studio_state" ref="base.state_id_jk"/>
+  </record>
+  <record id="x_pickup_origin_17" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">DWC</field>
+    <field name="x_name">DUBAI LOGISTICS CITY</field>
+    <field name="x_studio_transportation_method">Domestic Ground Transportation</field>
+    <field name="x_studio_country" ref="base.ae"/>
+    <field name="x_studio_state" ref="base.state_ae_du"/>
+  </record>
+  <record id="x_pickup_origin_18" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">CIK</field>
+    <field name="x_name">KAWASAN INDUSTRI MM2100</field>
+    <field name="x_studio_transportation_method">Domestic Ground Transportation</field>
+    <field name="x_studio_country" ref="base.id"/>
+    <field name="x_studio_state" ref="base.state_id_jb"/>
+  </record>
+  <record id="x_pickup_origin_19" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">JFK</field>
+    <field name="x_name">NEW YORK</field>
+    <field name="x_studio_transportation_method">Air</field>
+    <field name="x_studio_country" ref="base.us"/>
+    <field name="x_studio_state" ref="base.state_us_27"/>
+  </record>
+  <record id="x_pickup_origin_20" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">SIN</field>
+    <field name="x_name">CHANGI AIRPORT</field>
+    <field name="x_studio_transportation_method">Air</field>
+    <field name="x_studio_country" ref="base.sg"/>
+  </record>
+  <record id="x_pickup_origin_21" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">RTM</field>
+    <field name="x_name">PORT OF ROTTERDAM</field>
+    <field name="x_studio_transportation_method">Ocean</field>
+    <field name="x_studio_country" ref="base.nl"/>
+    <field name="x_studio_state" ref="base.state_nl_ut"/>
+  </record>
+  <record id="x_pickup_origin_22" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">LGB</field>
+    <field name="x_name">PORT OF LONG BEACH</field>
+    <field name="x_studio_transportation_method">Ocean</field>
+    <field name="x_studio_country" ref="base.us"/>
+    <field name="x_studio_state" ref="base.state_us_5"/>
+  </record>
+  <record id="x_pickup_origin_23" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">TPE</field>
+    <field name="x_name">PELABUHAN TANJUNG PERAK</field>
+    <field name="x_studio_transportation_method">Domestic Ground Transportation</field>
+  </record>
+  <record id="x_pickup_origin_24" model="x_pickup_origin">
+    <field name="x_studio_pickup_code">CGK</field>
+    <field name="x_name">SOEKARNO-HATTA, JAKARTA</field>
+    <field name="x_studio_transportation_method">Air</field>
+    <field name="x_studio_country" ref="base.id"/>
+    <field name="x_studio_state" ref="base.state_id_jk"/>
+  </record>
+</odoo>

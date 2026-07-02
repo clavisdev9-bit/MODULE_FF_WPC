@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="default_list_view_fo_e08ab5d3-502a-4b87-8ad7-08fc5335bbc3" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list>
+        <field name="x_name"/>
+        <field name="x_studio_user_id" widget="many2one_avatar_user"/>
+        <field name="x_color" widget="color_picker"/>
+      </list>
+    </field>
+    <field name="model">x_properties</field>
+    <field name="name">Default list view for x_properties</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_aab9514f-a659-456a-ad92-45f2d2d4bbf0" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <field name="x_studio_stage_id" widget="statusbar" options="{'clickable': '1'}"/>
+        </header>
+        <sheet string="Properties">
+          <field name="x_studio_kanban_state" widget="state_selection"/>
+          <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="x_active"/>
+          <field name="x_active" invisible="1"/>
+          <field class="oe_avatar" widget="image" name="x_studio_image"/>
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_5edfdb">
+            <group name="studio_group_5edfdb_left">
+              <field name="x_studio_user_id" widget="many2one_avatar_user"/>
+            </group>
+            <group name="studio_group_5edfdb_right"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+    <field name="model">x_properties</field>
+    <field name="name">Default form view for x_properties</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__a94b467a-9fa0-49fd-9859-59ef7a3370d7" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+        <field name="x_studio_user_id"/>
+        <filter string="My Properties" name="my_x_properties" domain="[['x_studio_user_id', '=', uid]]"/>
+        <separator/>
+        <filter string="Archived" name="archived_x_properties" domain="[['x_active', '=', False]]"/>
+        <separator/>
+        <filter name="groupby_x_user" string="Responsible" context="{'group_by': 'x_studio_user_id'}" domain="[]"/>
+        <filter name="x_studio_stage_id" string="Stage" context="{'group_by': 'x_studio_stage_id'}" domain="[]"/>
+      </search>
+    </field>
+    <field name="model">x_properties</field>
+    <field name="name">Default search view for x_properties</field>
+    <field name="type">search</field>
+  </record>
+  <record id="default_kanban_view__4496e2aa-7d8a-4ff8-b151-3c9b0447c994" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <kanban default_group_by="x_studio_stage_id" default_order="x_studio_priority desc, x_studio_sequence asc, id desc" highlight_color="x_color">
+        <field name="x_color"/>
+        <progressbar field="x_studio_kanban_state" colors="{&quot;normal&quot;: &quot;200&quot;, &quot;done&quot;: &quot;success&quot;, &quot;blocked&quot;: &quot;danger&quot;}"/>
+        <templates>
+          <t t-name="menu">
+            <a t-if="widget.editable" role="menuitem" type="open" class="dropdown-item">Edit</a>
+            <a t-if="widget.deletable" role="menuitem" type="delete" class="dropdown-item">Delete</a>
+            <field widget="kanban_color_picker" name="x_color"/>
+          </t>
+          <t t-name="card" class="flex-row">
+            <aside>
+              <field name="x_studio_image" widget="image" options="{&quot;zoom&quot;: true, &quot;background&quot;: true, &quot;preventClicks&quot;: false}"/>
+            </aside>
+            <main>
+              <div name="studio_auto_kanban_header" class="d-flex">
+                <field name="x_studio_priority" widget="boolean_favorite" nolabel="1"/>
+                <field name="display_name" class="h5"/>
+              </div>
+              <div name="studio_auto_kanban_body"/>
+              <footer>
+                <div class="ms-auto d-flex align-items-center">
+                  <field name="x_studio_kanban_state" widget="state_selection"/>
+                  <field class="ms-1" name="x_studio_user_id" widget="kanban.many2one_avatar_user"/>
+                </div>
+              </footer>
+            </main>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+    <field name="model">x_properties</field>
+    <field name="name">Default kanban view for x_properties</field>
+    <field name="type">kanban</field>
+  </record>
+  <record id="default_list_view_fo_f0ed52b1-0496-47db-acd5-282080a4d72a" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list editable="bottom">
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="model">x_properties_stage</field>
+    <field name="name">Default list view for x_properties_stage</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_b61ce4f5-9aa2-43db-ac66-ea3d1a3682c3" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="Properties Stages">
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_0aa3f3">
+            <group name="studio_group_0aa3f3_left"/>
+            <group name="studio_group_0aa3f3_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="model">x_properties_stage</field>
+    <field name="name">Default form view for x_properties_stage</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__966f1f63-3baa-4317-81cb-c1ff16814ac1" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+      </search>
+    </field>
+    <field name="model">x_properties_stage</field>
+    <field name="name">Default search view for x_properties_stage</field>
+    <field name="type">search</field>
+  </record>
+  <record id="odoo_studio_default__91a42a55-3698-4488-8e1e-352afbec1b61" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//field[@name='x_studio_user_id']" position="after">
+          <field name="x_studio_value"/>
+          <field name="x_studio_currency_id"/>
+          <field name="x_studio_owner_1"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="default_form_view_fo_aab9514f-a659-456a-ad92-45f2d2d4bbf0"/>
+    <field name="mode">extension</field>
+    <field name="model">x_properties</field>
+    <field name="name">Odoo Studio: Default form view for x_properties customization</field>
+    <field name="priority">99</field>
+    <field name="type">form</field>
+  </record>
+</odoo>

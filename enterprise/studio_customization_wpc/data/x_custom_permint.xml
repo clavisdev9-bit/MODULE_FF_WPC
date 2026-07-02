@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_custom_permint_1" model="x_custom_permint">
+    <field name="x_studio_no_document">123</field>
+    <field name="x_studio_status">Cancelled</field>
+    <field name="x_studio_mawb_no" ref="x_air_mawb_15"/>
+    <field name="x_studio_date">2025-09-25</field>
+  </record>
+  <record id="x_custom_permint_7" model="x_custom_permint">
+    <field name="x_studio_no_document">1234</field>
+    <field name="x_studio_status">Process</field>
+  </record>
+  <record id="x_custom_permint_8" model="x_custom_permint">
+    <field name="x_studio_status">Cancelled</field>
+    <field name="x_studio_mawb_no" ref="x_air_mawb_18"/>
+  </record>
+  <record id="x_custom_permint_9" model="x_custom_permint">
+    <field name="x_studio_status">Cancelled</field>
+    <field name="x_studio_mawb_no" ref="x_air_mawb_26"/>
+  </record>
+  <record id="x_custom_permint_10" model="x_custom_permint">
+    <field name="x_studio_no_document">12</field>
+    <field name="x_studio_status">Process</field>
+    <field name="x_studio_mawb_no" ref="x_air_mawb_12"/>
+    <field name="x_studio_date">2025-09-23</field>
+    <field name="x_studio_description"><![CDATA[description]]></field>
+  </record>
+  <record id="x_custom_permint_11" model="x_custom_permint">
+    <field name="x_studio_status">Cancelled</field>
+    <field name="x_studio_mawb_no" ref="x_air_mawb_12"/>
+  </record>
+  <record id="x_custom_permint_12" model="x_custom_permint">
+    <field name="x_studio_status">Approve</field>
+  </record>
+</odoo>

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_vessel_schedule_3" model="x_vessel_schedule">
+    <field name="x_studio_vessel_id" ref="x_vessel_1"/>
+    <field name="x_studio_arrival">2025-11-03 08:54:00</field>
+    <field name="x_studio_status">Arrived</field>
+    <field name="x_studio_terminal" ref="x_terminal_1"/>
+  </record>
+</odoo>

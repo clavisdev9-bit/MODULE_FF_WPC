@@ -1,0 +1,224 @@
+The following relational data haven't been exported because they either refer
+to a model that Studio doesn't export, or have no XML id:
+
+Record: new_text_booking_inf_593d3932-b1a9-4284-b664-08834ba92f5d
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_text_booking_inf_d7bdd80c-3187-4a9f-9e23-a8ef8f413935
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_many2one_booking_b268fc17-43d2-4e19-af8c-f7952fb49c5f
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_many2one_booking_902b0561-7b71-47ee-954f-6a1563212fea
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_date_booking_inf_108bdd40-4294-41af-acfa-83ff32aeaad2
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_date_booking_inf_12ba8f64-8c1d-422c-bc11-73da1f280070
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_many2one_booking_4636bd45-6885-43ec-844c-7a3e83502159
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_many2one_booking_d4a798f8-fa24-4e9d-bd05-584263434236
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_many2one_booking_262e1eff-f276-422d-b899-7de3151296fe
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_one2many_booking_cbf91d53-d0c3-4cc8-b38a-6d3ece7eddbb
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_one2many_booking_91a35d4d-7e8e-4654-8da3-c1920726f9ed
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_many2many_bookin_f5343629-dd32-458f-a975-8fd22d146050
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_one2many_booking_ef92cef2-6a6d-4d65-be54-86f500060048
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_one2many_booking_756cabbf-9c27-4cea-8ab8-a89980610d3c
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_related_field_bo_ce90171c-07cf-4f3a-850c-3a887638164c
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_related_field_bo_b61d82e6-a4fc-4e90-80b2-a4999ec90116
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_related_field_bo_2c835de5-6875-47e6-a7af-91bdc222eab7
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_one2many_booking_c41b8fc5-725e-4bfa-865b-a0fa634a02b5
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_one2many_booking_4d66b1bc-5f8a-4f72-b815-d29aaf4eb23e
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_many2one_booking_4f372b8f-6f34-45ea-9dbf-ca5b401a30af
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_related_field_bo_305538ec-2773-461f-b45b-f0d18ccdfdd0
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_one2many_booking_176ee613-7e61-4ca2-8a31-9311dfd56eef
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: new_one2many_booking_e87e60a6-5657-4f43-9a47-cbcdc2614da0
+Model: ir.model.fields
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: odoo_studio_default__1e513dbb-fe46-4a92-9a1d-1a17e50a1198
+Model: ir.ui.view
+Field: inherit_id
+Type: many2one
+Value: ir.ui.view(2237,) ('Default list view for ir.model(884,)')
+
+Record: sales_order_report_5caac6fc-99b2-4619-932a-300fd905be97
+Model: ir.actions.report
+Field: paperformat_id
+Type: many2one
+Value: report.paperformat(9,) ('A4 - WPC Custom Header')
+
+Record: sales_order_report_6d23ac7e-cb91-4715-896f-dd307c773c96
+Model: ir.actions.report
+Field: paperformat_id
+Type: many2one
+Value: report.paperformat(9,) ('A4 - WPC Custom Header')
+
+Record: hbl_report_effa199b-083e-4815-aad7-0efa097356d3
+Model: ir.actions.report
+Field: paperformat_id
+Type: many2one
+Value: report.paperformat(9,) ('A4 - WPC Custom Header')
+
+Record: hbl_report_7602adeb-147f-4a17-8f66-4e01189cdc64
+Model: ir.actions.report
+Field: paperformat_id
+Type: many2one
+Value: report.paperformat(9,) ('A4 - WPC Custom Header')
+
+Record: invoice_pdf_d0765ad0-d3a8-474f-b912-00236b0129eb
+Model: ir.actions.report
+Field: paperformat_id
+Type: many2one
+Value: report.paperformat(9,) ('A4 - WPC Custom Header')
+
+Record: execute_code_507f78a3-ecb7-45b2-9017-1f9313ccd591
+Model: ir.actions.server
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: execute_code_94986c2b-487c-4ce6-bdc3-bc535a10b331
+Model: ir.actions.server
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: execute_code_0812ab57-e336-4c7a-bc25-e5ae984ec009
+Model: ir.actions.server
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: generate_sea_booking_9e19e208-1ff6-4802-80f6-d2bba7c1bc99
+Model: base.automation
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: generate_sea_job_no_bd7389ad-dee2-436d-8cbf-e6182a5c1191
+Model: base.automation
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: auto_fill_currency_f8f1e600-cb87-4dc2-91a7-a904e0d75b4e
+Model: base.automation
+Field: model_id
+Type: many2one
+Value: ir.model(878,) ('Booking Info')
+
+Record: extra_info_group_sys_723a9bd6-61c2-4d54-8091-c93e67d9770c
+Model: ir.model.access
+Field: model_id
+Type: many2one
+Value: ir.model(884,) ('Sea Extra Info')
+
+Record: extra_info_group_use_146586ba-4ba3-4221-98f1-d86580e77c7e
+Model: ir.model.access
+Field: model_id
+Type: many2one
+Value: ir.model(884,) ('Sea Extra Info')

@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_delivery_type_31" model="x_delivery_type">
+    <field name="x_name">ATA</field>
+    <field name="x_studio_delivery_type_name">AIRPORT TO AIRPORT</field>
+  </record>
+  <record id="x_delivery_type_32" model="x_delivery_type">
+    <field name="x_name">ATD</field>
+    <field name="x_studio_delivery_type_name">AIRPORT TO DOOR</field>
+  </record>
+  <record id="x_delivery_type_33" model="x_delivery_type">
+    <field name="x_name">CFR</field>
+    <field name="x_studio_delivery_type_name">COST &amp; FREIGHT</field>
+  </record>
+  <record id="x_delivery_type_34" model="x_delivery_type">
+    <field name="x_name">CIF</field>
+    <field name="x_studio_delivery_type_name">COST INSURANCE &amp; FREIGHT</field>
+  </record>
+  <record id="x_delivery_type_35" model="x_delivery_type">
+    <field name="x_name">CIP</field>
+    <field name="x_studio_delivery_type_name">CARRIAGE INSURANCE PAID TO</field>
+  </record>
+  <record id="x_delivery_type_36" model="x_delivery_type">
+    <field name="x_name">CPT</field>
+    <field name="x_studio_delivery_type_name">CARRIAGE PAID TO</field>
+  </record>
+  <record id="x_delivery_type_37" model="x_delivery_type">
+    <field name="x_name">CUS</field>
+    <field name="x_studio_delivery_type_name">CUSTOMS CLEARENCE</field>
+  </record>
+  <record id="x_delivery_type_38" model="x_delivery_type">
+    <field name="x_name">DAP</field>
+    <field name="x_studio_delivery_type_name">DELIVERED AT PLACE</field>
+  </record>
+  <record id="x_delivery_type_39" model="x_delivery_type">
+    <field name="x_name">DDP</field>
+    <field name="x_studio_delivery_type_name">DELIVERED DUTY PAID</field>
+  </record>
+  <record id="x_delivery_type_40" model="x_delivery_type">
+    <field name="x_name">DPU</field>
+    <field name="x_studio_delivery_type_name">DELIVERED AT PLACE UNLOADED</field>
+  </record>
+  <record id="x_delivery_type_41" model="x_delivery_type">
+    <field name="x_name">DTA</field>
+    <field name="x_studio_delivery_type_name">DOOR TO AIRPORT</field>
+  </record>
+  <record id="x_delivery_type_42" model="x_delivery_type">
+    <field name="x_name">DTD</field>
+    <field name="x_studio_delivery_type_name">DOOR TO DOOR</field>
+  </record>
+  <record id="x_delivery_type_43" model="x_delivery_type">
+    <field name="x_name">DTP</field>
+    <field name="x_studio_delivery_type_name">DOOR TO PORT</field>
+  </record>
+  <record id="x_delivery_type_44" model="x_delivery_type">
+    <field name="x_name">EXW</field>
+    <field name="x_studio_delivery_type_name">EX WORK</field>
+  </record>
+  <record id="x_delivery_type_45" model="x_delivery_type">
+    <field name="x_name">FAS</field>
+    <field name="x_studio_delivery_type_name">FREE ALONGSITE SHIP</field>
+  </record>
+  <record id="x_delivery_type_46" model="x_delivery_type">
+    <field name="x_name">FCA</field>
+    <field name="x_studio_delivery_type_name">FREE CARRIER</field>
+  </record>
+  <record id="x_delivery_type_47" model="x_delivery_type">
+    <field name="x_name">FOB</field>
+    <field name="x_studio_delivery_type_name">FREE ON BOARD</field>
+  </record>
+  <record id="x_delivery_type_48" model="x_delivery_type">
+    <field name="x_name">PTD</field>
+    <field name="x_studio_delivery_type_name">PORT TO DOOR</field>
+  </record>
+  <record id="x_delivery_type_49" model="x_delivery_type">
+    <field name="x_name">PTP</field>
+    <field name="x_studio_delivery_type_name">PORT TO PORT</field>
+  </record>
+  <record id="x_delivery_type_50" model="x_delivery_type">
+    <field name="x_name">SELF</field>
+    <field name="x_studio_delivery_type_name">SELF-DELIVERY</field>
+  </record>
+</odoo>

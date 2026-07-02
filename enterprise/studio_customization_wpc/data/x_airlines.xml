@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_airlines_1" model="x_airlines">
+    <field name="x_studio_airline_name">aaa</field>
+    <field name="x_studio_airline_id">aa</field>
+    <field name="x_name">AAA</field>
+  </record>
+  <record id="x_airlines_3" model="x_airlines">
+    <field name="x_studio_airline_name">bbb</field>
+    <field name="x_studio_airline_id">bb</field>
+    <field name="x_name">AAB</field>
+  </record>
+</odoo>

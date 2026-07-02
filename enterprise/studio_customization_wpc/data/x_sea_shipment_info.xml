@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_sea_shipment_info_5" model="x_sea_shipment_info">
+    <field name="x_studio_booking_remark" ref="x_sea_footer_remarks_1"/>
+  </record>
+  <record id="x_sea_shipment_info_6" model="x_sea_shipment_info">
+    <field name="x_studio_vessel_schedule" ref="x_vessel_schedule_3"/>
+  </record>
+</odoo>

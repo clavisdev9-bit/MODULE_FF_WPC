@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="sales_033e65b0-b0ce-4bde-865b-2689ab6c96d3" model="ir.ui.menu" context="{'studio': True}">
+    <field name="name">Sales</field>
+    <field name="web_icon">fa fa-home,#00CEB3,#FFFFFF</field>
+  </record>
+  <record id="sales_orders_ceca2db6-4818-485d-a4e6-f423a19550a6" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="orders_6a5907bb-fc25-421e-b656-38f3523a6ed6"/>
+    <field name="name">Orders</field>
+    <field name="parent_id" ref="sales_033e65b0-b0ce-4bde-865b-2689ab6c96d3"/>
+  </record>
+</odoo>

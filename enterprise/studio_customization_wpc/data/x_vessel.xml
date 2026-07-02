@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_vessel_1" model="x_vessel">
+    <field name="x_studio_vessel_name">Emma Maersk</field>
+    <field name="x_name">VSL-001</field>
+    <field name="x_studio_vessel_short_name">EMMA</field>
+    <field name="x_studio_imo_no">9321483</field>
+    <field name="x_studio_ship_owner" ref="res_partner_23_e5fa8a09"/>
+    <field name="x_studio_nrt">55394.0</field>
+    <field name="x_studio_grt">170794.0</field>
+    <field name="x_studio_vessel_type">Container Ship</field>
+    <field name="x_studio_year_build">2025-10-12</field>
+    <field name="x_studio_vessel_classification">LR</field>
+    <field name="x_studio_country_flag_code" ref="base.dk"/>
+    <field name="x_studio_year_build_1">2006</field>
+    <field name="x_studio_voyage_no">045E</field>
+  </record>
+  <record id="x_vessel_4" model="x_vessel">
+    <field name="x_studio_vessel_name">MSC Gulsun</field>
+    <field name="x_name">VSL-002</field>
+    <field name="x_studio_vessel_short_name">GULSUN</field>
+    <field name="x_studio_imo_no">9839430</field>
+    <field name="x_studio_ship_owner" ref="res_partner_21_b5de4693"/>
+    <field name="x_studio_nrt">111991.0</field>
+    <field name="x_studio_grt">232618.0</field>
+    <field name="x_studio_vessel_type">Container Ship</field>
+    <field name="x_studio_vessel_classification">DNV</field>
+    <field name="x_studio_country_flag_code" ref="base.pa"/>
+    <field name="x_studio_year_build_1">2019</field>
+    <field name="x_studio_voyage_no">022W</field>
+  </record>
+</odoo>

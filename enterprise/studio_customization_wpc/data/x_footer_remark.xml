@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_footer_remark_1" model="x_footer_remark">
+    <field name="x_studio_footer_name">AAA</field>
+    <field name="x_name">123</field>
+  </record>
+</odoo>

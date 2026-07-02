@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="x_pickup_destination_1_8b5bc58b" model="x_pickup_destination">
+    <field name="x_studio_pickup_code">SIN</field>
+    <field name="x_name">CHANGI AIRPORT</field>
+    <field name="x_studio_transportation_method">Air</field>
+    <field name="x_studio_country" ref="base.sg"/>
+  </record>
+  <record id="x_pickup_destination_8_aa1698bb" model="x_pickup_destination">
+    <field name="x_studio_state" ref="base.state_nl_ut"/>
+    <field name="x_studio_pickup_code">RTM</field>
+    <field name="x_name">PORT OF ROTTERDAM</field>
+    <field name="x_studio_transportation_method">Ocean</field>
+    <field name="x_studio_country" ref="base.nl"/>
+  </record>
+  <record id="x_pickup_destination_9_bb65b8c1" model="x_pickup_destination">
+    <field name="x_studio_state" ref="base.state_us_5"/>
+    <field name="x_studio_pickup_code">LGB</field>
+    <field name="x_name">PORT OF LONG BEACH</field>
+    <field name="x_studio_transportation_method">Air &amp; Ocean</field>
+    <field name="x_studio_country" ref="base.us"/>
+  </record>
+  <record id="x_pickup_destination_10_400809b2" model="x_pickup_destination">
+    <field name="x_studio_pickup_code">TPE</field>
+    <field name="x_name">PELABUHAN TANJUNG PERAK</field>
+    <field name="x_studio_transportation_method">Domestic Ground Transportation</field>
+  </record>
+  <record id="x_pickup_destination_11_359a30c3" model="x_pickup_destination">
+    <field name="x_studio_state" ref="base.state_id_jk"/>
+    <field name="x_studio_pickup_code">CGK</field>
+    <field name="x_name">SOEKARNO-HATTA, JAKARTA</field>
+    <field name="x_studio_transportation_method">Air</field>
+    <field name="x_studio_country" ref="base.id"/>
+  </record>
+</odoo>
