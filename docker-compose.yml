@@ -21,8 +21,6 @@ services:
       - odoo-web-data:/var/lib/odoo
       - ./config:/etc/odoo
       - ./addons:/mnt/extra-addons/base
-      # - C:\Users\stcor\Documents\STCORP\PT Click:/mnt/extra-addons/pt_click
-      # - C:\Users\stcor\Documents\STCORP\Freight Forwarding\Odoo\MODULE_FF_WPC\addons:/mnt/extra-addons/pt_wpc
     command: odoo --db_user=odoo --db_password=odoo --db_host=db
 
 volumes:
