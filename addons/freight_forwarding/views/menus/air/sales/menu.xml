@@ -7,8 +7,9 @@
 
     <menuitem id="menu_air_sales_freight_quotation" name="Freight Quotation"
         parent="menu_sub_parent_air_sales"
-        action="action_freight_sea_quotation"
+        action="action_freight_air_quotation"
         sequence="20" />
+
 
     <menuitem id="menu_sub_parent_air_sales_rate_enquiry" name="Rate Enquiry"
         parent="menu_sub_parent_air_sales"

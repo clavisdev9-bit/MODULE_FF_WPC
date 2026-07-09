@@ -45,13 +45,15 @@
         "report/sea/quotation/quotation_report.xml",
         "report/sea/hbl/hbl_report_template.xml",
         "report/sea/hbl/hbl_report.xml",
-        # Sea Quotation (moved from old quotation folder)
+        # Sea Quotation
         "views/sea/sales/quotation_type.xml",
         "views/sea/sales/quotation.xml",
         "views/sea/cargo_info.xml",
         "views/sea/sales/cargo_info.xml",
         "views/sea/sales/freight_items_line.xml",
         "views/sea/sales/rate_enquiry_actions.xml",
+        # Air Quotation
+        "views/air/sales/quotation.xml",
         "views/sea/booking/booking.xml",
         "views/sea/booking/extra_info_views.xml",
         "views/sea/booking/bl_info_views.xml",

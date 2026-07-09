@@ -16,3 +16,5 @@ access_freight_air_waybill_transaction_issue_to_agent,access.freight.air.waybill
 access_freight_air_waybill_transaction_return_from_agent,access.freight.air.waybill.transaction.return.from.agent,model_freight_air_waybill_transaction_return_from_agent,base.group_user,1,1,1,1
 access_freight_air_waybill_transaction_cancellation,access.freight.air.waybill.transaction.cancellation,model_freight_air_waybill_transaction_cancellation,base.group_user,1,1,1,1
 access_freight_air_waybill_transaction_lost,access.freight.air.waybill.transaction.lost,model_freight_air_waybill_transaction_lost,base.group_user,1,1,1,1
+access_freight_air_quotation,access.freight.air.quotation,model_freight_air_quotation,base.group_user,1,1,1,1
+access_freight_air_quotation_cargo_info,access.freight.air.quotation.cargo.info,model_freight_air_quotation_cargo_info,base.group_user,1,1,1,1
