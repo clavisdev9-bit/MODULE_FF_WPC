@@ -1,0 +1,8 @@
+[options]
+addons_path = /mnt/extra-addons/base, /mnt/extra-addons/enterprise
+data_dir = /var/lib/odoo
+admin_passwd = your_master_password_here
+db_host = db
+db_port = 5432
+db_user = odoo
+db_password = your_db_password_here

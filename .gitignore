@@ -8,5 +8,10 @@ __pycache__/
 /addons/currency_rate_update/
 /.vscode
 
+# Odoo config — berisi credential, jangan di-commit
+# Copy dari config/odoo.conf.example lalu isi credential lokal kamu
+/config/odoo.conf
+
 # Odoo Enterprise — JANGAN pernah di-commit ke repo publik
 /enterprise/
+
