@@ -1,9 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_quo_freight_items_3" model="x_quo_freight_items">
-    <field name="x_studio_type">aa</field>
-    <field name="x_studio_article">aa</field>
-    <field name="x_studio_cant">1111</field>
-    <field name="x_name" ref="x_quo_package_details_4"/>
-  </record>
-</odoo>

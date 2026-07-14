@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_term_condition_5" model="x_term_condition">
-    <field name="x_studio_departure_airport_code" ref="x_airport_1"/>
-  </record>
-</odoo>

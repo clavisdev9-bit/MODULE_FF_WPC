@@ -1,9 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_cargo_type_1" model="x_cargo_type">
-    <field name="x_name">Stackable</field>
-  </record>
-  <record id="x_cargo_type_2" model="x_cargo_type">
-    <field name="x_name">Non Stackable</field>
-  </record>
-</odoo>

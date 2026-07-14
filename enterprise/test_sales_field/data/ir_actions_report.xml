@@ -1,9 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="purchase_order_repor_12df630b-1f3d-4526-b002-24fcb1fa7a0a" model="ir.actions.report" context="{'studio': True}">
-    <field name="binding_model_id" ref="purchase.model_purchase_order"/>
-    <field name="model">purchase.order</field>
-    <field name="name">Purchase Order Report Revisi</field>
-    <field name="report_name">studio_customization.studio_report_docume_3911dc49-e28f-4bf9-b5b4-4da536fabeb1</field>
-  </record>
-</odoo>

@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_terminal_1" model="x_terminal">
-    <field name="x_name">T1</field>
-  </record>
-</odoo>

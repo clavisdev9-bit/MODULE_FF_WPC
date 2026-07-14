@@ -6,6 +6,7 @@ __pycache__/
 
 # Only track freight_forwarding addon
 /addons/currency_rate_update/
-/addons/custom1/
-/addons/custom2/
-/addons/web_responsive/
+/.vscode
+
+# Odoo Enterprise — JANGAN pernah di-commit ke repo publik
+/enterprise/

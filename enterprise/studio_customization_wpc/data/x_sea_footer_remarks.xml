@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_sea_footer_remarks_1" model="x_sea_footer_remarks">
-    <field name="x_name"><![CDATA[Booking Remark 1]]></field>
-    <field name="x_studio_warehouse_remark"><![CDATA[Warehouse Remark 1]]></field>
-  </record>
-</odoo>

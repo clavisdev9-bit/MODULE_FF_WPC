@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_hbl_sales_order_1" model="x_hbl_sales_order">
-    <field name="x_studio_bl_no" ref="x_hbl_16"/>
-  </record>
-</odoo>

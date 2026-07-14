@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_sea_freight_items_1" model="x_sea_freight_items">
-    <field name="x_studio_detail_cargo" ref="x_detail_cargo_4"/>
-  </record>
-</odoo>

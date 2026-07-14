@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_hbl_custom_permit_3" model="x_hbl_custom_permit">
-    <field name="x_studio_status">Cancelled</field>
-  </record>
-</odoo>

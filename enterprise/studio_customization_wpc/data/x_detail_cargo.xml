@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo>
-  <record id="x_detail_cargo_4" model="x_detail_cargo">
-    <field name="x_studio_package_type">Container / Box</field>
-  </record>
-</odoo>
