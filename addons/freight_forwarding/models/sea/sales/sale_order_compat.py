@@ -9,7 +9,7 @@ class SaleOrderCompat(models.Model):
             ("export", "Export"),
             ("import", "Import"),
         ],
-        string="Type",
+        string="Quotation Type",
     )
     container_type = fields.Selection(
         selection=[

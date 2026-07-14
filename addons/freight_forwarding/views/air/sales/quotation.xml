@@ -15,9 +15,9 @@
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
 
-            <!-- Fields sebelum partner_id: freight_type, validity_date, title -->
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="freight_type" />
+                <field name="container_type" />
                 <field name="validity_date" />
                 <field name="quotation_title" />
             </xpath>

@@ -46,11 +46,23 @@ class AirQuotation(models.Model):
         "write_date",
         "picking_policy",
         "effective_date",
+        "container_type",
     )
 
     # =========================================================
     # Air-specific Fields
     # =========================================================
+
+    # Container Type (sama seperti sea, di-sync ke sale_order)
+    container_type = fields.Selection(
+        selection=[
+            ("fcl", "FCL"),
+            ("lcl", "LCL"),
+            ("consol", "Consol"),
+        ],
+        string="Container Type",
+        required=True,
+    )
 
     # Relasi many2many — nama tabel relasi air-specific
     transaction_ids = fields.Many2many(
