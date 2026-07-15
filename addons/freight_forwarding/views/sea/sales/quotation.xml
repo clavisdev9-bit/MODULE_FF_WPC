@@ -30,7 +30,6 @@
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="freight_type" />
                 <field name="container_type" />
-                <field name="validity_date" />
                 <field name="quotation_title" />
             </xpath>
 
@@ -52,7 +51,7 @@
                         groups="!product.group_product_pricelist" />
                     <field name="delivery_type_id" />
                     <field name="effective_date" />
-                    <field name="expiry_date" />
+                    <field name="validity_date" string="Expiry Date" />
                     <field name="reference_number" />
                     <field name="commodity_id" />
                 </group>

@@ -55,7 +55,7 @@ class FreightQuotation(models.AbstractModel):
         "freight.delivery.type", string="Delivery Type", required=True
     )
     effective_date = fields.Date(string="Effective Date")
-    expiry_date = fields.Date(string="Expiry Date")
+    # validity_date = fields.Date(string="Expiry Date")
     reference_number = fields.Char(string="Reference Number")
     commodity_id = fields.Many2one(
         "freight.commodity", string="Commodity", required=True
@@ -154,6 +154,10 @@ class FreightQuotation(models.AbstractModel):
         """
         Sync baris dari tabel quotation masing-masing ke sale_order.
         Subclass wajib mendefinisikan _quotation_table dan _SALE_ORDER_SYNC_COLUMNS.
+
+        Catatan arsitektur: menggunakan raw SQL (bukan ORM) karena sale_order
+        adalah tabel Odoo bawaan yang tidak bisa di-inherit secara langsung.
+        Setelah raw INSERT, cache ORM di-invalidate secara eksplisit.
         """
         ids = self.ids
         query_filter = ""
@@ -191,6 +195,8 @@ class FreightQuotation(models.AbstractModel):
             )
             """
         )
+        # Invalidate ORM cache agar data yang baru di-sync terbaca dengan benar
+        self.env["sale.order"].invalidate_model()
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -208,6 +214,8 @@ class FreightQuotation(models.AbstractModel):
         result = super().unlink()
         if ids:
             self.env.cr.execute("DELETE FROM sale_order WHERE id = ANY(%s)", [ids])
+            # Invalidate cache setelah raw DELETE
+            self.env["sale.order"].invalidate_model()
         return result
 
     def get_report_logo_src(self):

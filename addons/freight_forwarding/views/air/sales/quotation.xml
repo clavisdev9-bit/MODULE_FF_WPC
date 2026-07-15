@@ -18,7 +18,6 @@
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="freight_type" />
                 <field name="container_type" />
-                <field name="validity_date" />
                 <field name="quotation_title" />
             </xpath>
 
@@ -42,7 +41,7 @@
                         groups="!product.group_product_pricelist" />
                     <field name="delivery_type_id" />
                     <field name="effective_date" />
-                    <field name="expiry_date" />
+                    <field name="validity_date" string="Expiry Date" />
                     <field name="reference_number" />
                     <field name="commodity_id" />
                 </group>
@@ -108,7 +107,7 @@
             <!-- Tab tambahan setelah customer_signature -->
             <xpath expr="//page[@name='customer_signature']" position="after">
 
-                <page string="Dimension">
+                <!-- <page string="Dimension">
                     <group>
                         <group>
                             <field name="loose_quantity" />
@@ -122,7 +121,7 @@
                             <field name="dimension" />
                         </group>
                     </group>
-                </page>
+                </page> -->
 
                 <!-- Shipment Info: hanya field dari mixin.
                      Field airport/airline akan ditambahkan di iterasi berikutnya. -->
