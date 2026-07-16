@@ -121,6 +121,8 @@
                         <field name="quantity" />
                         <field name="has_insurance" />
                         <field name="insurance_id" invisible="has_insurance == False" />
+                        <field name="loose_quantity" />
+                        <field name="uom_id" />
                     </group>
                     <group>
                         <field name="actual_weight" />
@@ -130,13 +132,11 @@
                 </group>
             </xpath>
 
-            <xpath expr="//page[@name='customer_signature']" position="after">
+            <!-- <xpath expr="//page[@name='customer_signature']" position="after">
                 <page string="Dimension">
                     <group>
                         <group>
-                            <field name="loose_quantity" />
                             <field name="pcs" />
-                            <field name="uom_id" />
                         </group>
                         <group>
                             <field name="length" />
@@ -191,7 +191,7 @@
                 <page string="Cargo Info">
                     <field name="cargo_info_ids" />
                 </page>
-            </xpath>
+            </xpath> -->
         </field>
     </record>
 
