@@ -56,7 +56,6 @@
         "views/air/sales/quotation.xml",
         "views/sea/booking/booking.xml",
         "views/sea/booking/extra_info_views.xml",
-        "views/sea/booking/bl_info_views.xml",
         "views/sea/booking/shipment_info_views.xml",
         "views/sea/booking/vessel_details_views.xml",
         "views/sea/booking/pickup_info_views.xml",
@@ -145,4 +144,11 @@
     "installable": True,
     "application": True,
     "auto_install": False,
+    "tests": [
+        "tests/test_cargo_info_mixin.py",
+        "tests/test_sea_booking.py",
+        "tests/test_booking_convert_wizard.py",
+        "tests/test_sea_hbl.py",
+        "tests/test_sea_quotation.py",
+    ],
 }
