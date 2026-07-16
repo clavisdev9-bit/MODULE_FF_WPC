@@ -27,7 +27,8 @@
                         <button name="action_view_quotation"
                             type="object"
                             class="oe_stat_button"
-                            icon="fa-file-text-o">
+                            icon="fa-file-text-o"
+                            invisible="quotation_count == 0">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">Quotation</span>
                             </div>
