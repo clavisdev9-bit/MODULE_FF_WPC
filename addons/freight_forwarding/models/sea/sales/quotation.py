@@ -122,13 +122,37 @@ class SeaQuotation(models.Model):
 
     @api.depends("booking_ids.hbl_ids")
     def _compute_hbl_count(self):
+        hbl_model = self.env["freight.sea.hbl"]
+
+        # Batch query 1: HBL via booking — group per booking_id
+        all_booking_ids = self.booking_ids.ids
+        booking_hbl_data = hbl_model.read_group(
+            [("booking_id", "in", all_booking_ids)],
+            ["booking_id"],
+            ["booking_id"],
+        )
+        # Map booking_id → hbl count
+        booking_hbl_count = {
+            d["booking_id"][0]: d["booking_id_count"]
+            for d in booking_hbl_data
+        }
+
+        # Batch query 2: HBL langsung dari quotation (import flow tanpa booking)
+        direct_hbl_data = hbl_model.read_group(
+            [("quotation_id", "in", self.ids)],
+            ["quotation_id"],
+            ["quotation_id"],
+        )
+        direct_hbl_count = {
+            d["quotation_id"][0]: d["quotation_id_count"]
+            for d in direct_hbl_data
+        }
+
         for rec in self:
-            # Count HBL dari booking (export) + HBL langsung dari quotation (import)
-            booking_hbls = sum(len(booking.hbl_ids) for booking in rec.booking_ids)
-            direct_hbls = self.env["freight.sea.hbl"].search_count(
-                [("quotation_id", "=", rec.id)]
+            via_booking = sum(
+                booking_hbl_count.get(b.id, 0) for b in rec.booking_ids
             )
-            rec.hbl_count = booking_hbls + direct_hbls
+            rec.hbl_count = via_booking + direct_hbl_count.get(rec.id, 0)
 
     # =========================================================
     # Sea-specific Actions
@@ -243,11 +267,10 @@ class SeaQuotation(models.Model):
     def action_convert_to_jobsheet_direct(self):
         """Convert import quotation directly to jobsheet (HBL) without booking"""
         self.ensure_one()
-        freight_type = "Export" if self.freight_type == "export" else "Import"
         hbl = self.env["freight.sea.hbl"].create(
             {
                 "quotation_id": self.id,
-                "freight_type": freight_type,
+                "freight_type": self.freight_type,
                 "container_type": self.container_type,
                 "customer_id": self.partner_id.id,
                 "term_payment": self.payment_term_id.id,
