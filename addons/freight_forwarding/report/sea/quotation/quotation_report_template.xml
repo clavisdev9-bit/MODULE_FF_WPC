@@ -96,7 +96,7 @@
                         <table
                             style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-family: 'Arial', sans-serif; font-weight: bold; font-size: 16px;">
                             <tr>
-                                <td style="padding: 4px; color: #000;"> Air Freight (LSE) from <span
+                                <td style="padding: 4px; color: #000;"> Sea Freight from <span
                                         t-if="doc.origin_id" t-field="doc.origin_id" />
             <span
                                         t-else="">Origin TBD</span> to <span
@@ -186,7 +186,7 @@
                                         t-options="{&quot;widget&quot;: &quot;date&quot;}" />
                                 </td>
                                 <td>
-                                    <span t-field="doc.expiry_date"
+                                    <span t-field="doc.validity_date"
                                         t-options="{&quot;widget&quot;: &quot;date&quot;}" />
                                 </td>
                             </tr>
@@ -392,7 +392,7 @@
                                         <t t-set="current_subtotal" t-value="0" />
 
                                         <tr class="text-bold">
-                                            <td name="td_section_line" colspan="99" class="px-2">
+                                            <td name="td_section_line" t-att-colspan="6 if display_discount else 5" class="px-2">
                                                 <span t-field="line.name" />
                                             </td>
                                         </tr>
@@ -400,7 +400,7 @@
 
                                     <t t-if="line.display_type == 'line_note'">
                                         <tr class="font-sm text-muted">
-                                            <td name="td_note_line" colspan="99" class="px-2">
+                                            <td name="td_note_line" t-att-colspan="6 if display_discount else 5" class="px-2">
                                                 <span t-field="line.name" />
                                             </td>
                                         </tr>
@@ -410,7 +410,7 @@
                                         t-if="current_section and (line_last or doc.order_line[line_index+1].display_type == 'line_section') and not line.display_type">
                                         <tr class="text-right text-bold"
                                             style="border-top: 1px solid #ccc !important;">
-                                            <td colspan="99" class="px-2">
+                                            <td t-att-colspan="6 if display_discount else 5" class="px-2">
                                                 <span class="mr-2">Section Subtotal: </span>
                                                 <span t-esc="current_subtotal"
                                                     t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: doc.currency_id}" />

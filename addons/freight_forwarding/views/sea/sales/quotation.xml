@@ -6,6 +6,9 @@
         <field name="mode">primary</field>
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='warehouse_id']" position="attributes">
+                <attribute name="options">{'no_create': False, 'no_create_edit': False, 'no_open': False}</attribute>
+            </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_bookings"
                     type="object"

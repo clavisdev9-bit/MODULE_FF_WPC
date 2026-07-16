@@ -5,7 +5,7 @@ class SeaHBL(models.Model):
     _description = "Sea Jobsheet"
     _rec_name = "hbl_no"
 
-    hbl_no = fields.Char(string="B/L No.", required=True)
+    hbl_no = fields.Char(string="B/L No.", required=True, default=lambda self: "New", copy=False, readonly=True)
     booking_id = fields.Many2one(
         "freight.sea.booking",
         string="Booking",
@@ -18,7 +18,7 @@ class SeaHBL(models.Model):
         "freight.sea.quotation",
         string="Quotation",
         required=False,
-        ondelete="cascade",
+        ondelete="set null",
     )
 
     # Counter fields untuk smart buttons
@@ -70,8 +70,8 @@ class SeaHBL(models.Model):
     # Header Information
     freight_type = fields.Selection(
         selection=[
-            ("Import", "Import"),
-            ("Export", "Export"),
+            ("import", "Import"),
+            ("export", "Export"),
         ],
         string="Type",
         required=True,
@@ -81,7 +81,7 @@ class SeaHBL(models.Model):
         string="Container Type",
         required=True,
     )
-    job_no = fields.Char(string="Job No.")
+    job_no = fields.Char(string="Job No.", default=lambda self: "New", copy=False, readonly=True)
     job_date = fields.Date(string="Job Date")
     job_city_id = fields.Many2one("res.country.state", string="Job City")
     master_job_no = fields.Char(string="Master Job No.")
@@ -108,8 +108,8 @@ class SeaHBL(models.Model):
         domain="[('category_id.name', '=', 'Shipper')]",
     )
     shipper_address = fields.Char(
-        related="shipper_id.contact_address",
         string="Shipper Address",
+        compute="_compute_shipper_address",
     )
     consignee_id = fields.Many2one(
         "res.partner",
@@ -117,9 +117,39 @@ class SeaHBL(models.Model):
         domain="[('category_id.name', '=', 'Consignee')]",
     )
     consignee_address = fields.Char(
-        related="consignee_id.contact_address",
         string="Consignee Address",
+        compute="_compute_consignee_address",
     )
+
+    @api.depends("shipper_id")
+    def _compute_shipper_address(self):
+        for rec in self:
+            if rec.shipper_id:
+                parts = [
+                    rec.shipper_id.street,
+                    rec.shipper_id.street2,
+                    rec.shipper_id.city,
+                    rec.shipper_id.state_id.name,
+                    rec.shipper_id.country_id.name,
+                ]
+                rec.shipper_address = ", ".join([p for p in parts if p])
+            else:
+                rec.shipper_address = False
+
+    @api.depends("consignee_id")
+    def _compute_consignee_address(self):
+        for rec in self:
+            if rec.consignee_id:
+                parts = [
+                    rec.consignee_id.street,
+                    rec.consignee_id.street2,
+                    rec.consignee_id.city,
+                    rec.consignee_id.state_id.name,
+                    rec.consignee_id.country_id.name,
+                ]
+                rec.consignee_address = ", ".join([p for p in parts if p])
+            else:
+                rec.consignee_address = False
     term_payment = fields.Many2one(
         "account.payment.term", 
         string="Terms of Payment"
@@ -245,16 +275,20 @@ class SeaHBL(models.Model):
             sequence_date = fields.Date.to_date(
                 vals.get("job_date") or fields.Date.context_today(self)
             )
-            month_value = sequence_date.strftime("%m")
-            year_value = sequence_date.strftime("%y")
-            if not vals.get("hbl_no"):
-                sequence_value = self.env["ir.sequence"].next_by_code(
-                    "freight.sea.hbl.bl_no"
-                ) or "1"
-                vals["hbl_no"] = f"{month_value}/FCL-JKTPUS/{year_value}{int(sequence_value):03d}"
-            if not vals.get("job_no"):
-                sequence_value = self.env["ir.sequence"].next_by_code(
-                    "freight.sea.hbl.job_no"
-                ) or "1"
-                vals["job_no"] = f"{month_value}/JOB-SHEET/{year_value}{int(sequence_value):03d}"
+            container_type = vals.get("container_type", "fcl")
+            if container_type == "lcl":
+                bl_seq_code = "freight.sea.hbl.bl_no.lcl"
+            elif container_type == "consol":
+                bl_seq_code = "freight.sea.hbl.bl_no.consol"
+            else:
+                bl_seq_code = "freight.sea.hbl.bl_no"
+                
+            if not vals.get("hbl_no") or vals.get("hbl_no") == "New":
+                vals["hbl_no"] = self.env["ir.sequence"].next_by_code(
+                    bl_seq_code, sequence_date=sequence_date
+                ) or "New"
+            if not vals.get("job_no") or vals.get("job_no") == "New":
+                vals["job_no"] = self.env["ir.sequence"].next_by_code(
+                    "freight.sea.hbl.job_no", sequence_date=sequence_date
+                ) or "New"
         return super().create(vals_list)

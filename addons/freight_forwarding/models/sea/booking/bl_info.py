@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class SeaBookingBlInfo(models.Model):
@@ -19,8 +19,7 @@ class SeaBookingBlInfo(models.Model):
     )
     shipper_address = fields.Char(
         string="Shipper Address",
-        related="shipper_id.contact_address",
-        readonly=True,
+        compute="_compute_shipper_address",
         store=False,
     )
 
@@ -31,8 +30,7 @@ class SeaBookingBlInfo(models.Model):
     )
     consignee_address = fields.Char(
         string="Consignee Address",
-        related="consignee_id.contact_address",
-        readonly=True,
+        compute="_compute_consignee_address",
         store=False,
     )
 
@@ -43,7 +41,51 @@ class SeaBookingBlInfo(models.Model):
     )
     notify_party_address = fields.Char(
         string="Notify Party Address",
-        related="notify_party_id.contact_address",
-        readonly=True,
+        compute="_compute_notify_party_address",
         store=False,
     )
+
+    @api.depends("shipper_id")
+    def _compute_shipper_address(self):
+        for rec in self:
+            if rec.shipper_id:
+                parts = [
+                    rec.shipper_id.street,
+                    rec.shipper_id.street2,
+                    rec.shipper_id.city,
+                    rec.shipper_id.state_id.name,
+                    rec.shipper_id.country_id.name,
+                ]
+                rec.shipper_address = ", ".join([p for p in parts if p])
+            else:
+                rec.shipper_address = False
+
+    @api.depends("consignee_id")
+    def _compute_consignee_address(self):
+        for rec in self:
+            if rec.consignee_id:
+                parts = [
+                    rec.consignee_id.street,
+                    rec.consignee_id.street2,
+                    rec.consignee_id.city,
+                    rec.consignee_id.state_id.name,
+                    rec.consignee_id.country_id.name,
+                ]
+                rec.consignee_address = ", ".join([p for p in parts if p])
+            else:
+                rec.consignee_address = False
+
+    @api.depends("notify_party_id")
+    def _compute_notify_party_address(self):
+        for rec in self:
+            if rec.notify_party_id:
+                parts = [
+                    rec.notify_party_id.street,
+                    rec.notify_party_id.street2,
+                    rec.notify_party_id.city,
+                    rec.notify_party_id.state_id.name,
+                    rec.notify_party_id.country_id.name,
+                ]
+                rec.notify_party_address = ", ".join([p for p in parts if p])
+            else:
+                rec.notify_party_address = False

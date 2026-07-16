@@ -72,22 +72,23 @@ class FreightCargoInfoMixin(models.AbstractModel):
     flash_point = fields.Char(string="Flash Point")
     material_description = fields.Char(string="Material Description")
 
+    def _recalculate_volume(self):
+        """Hitung volume otomatis (CBM) dari dimensi dalam cm.
+        Formula: CBM = (L × W × H) ÷ 1.000.000
+        """
+        if self.length and self.width and self.height:
+            self.volume = (self.length * self.width * self.height) / 1_000_000
+        else:
+            self.volume = 0.0
+
     @api.onchange("length", "width", "height")
     def _onchange_volume(self):
-        """Auto-calculate volume in CBM based on dimensions in cm when not manual.
-        Formula: CBM = (Length × Width × Height) ÷ 1,000,000
-        """
+        """Auto-calculate volume in CBM based on dimensions in cm when not manual."""
         if not self.volume_manual:
-            if self.length and self.width and self.height:
-                self.volume = (self.length * self.width * self.height) / 1_000_000
-            else:
-                self.volume = 0.0
+            self._recalculate_volume()
 
     @api.onchange("volume_manual")
     def _onchange_volume_manual(self):
         """Reset volume calculation when toggling manual mode off."""
         if not self.volume_manual:
-            if self.length and self.width and self.height:
-                self.volume = (self.length * self.width * self.height) / 1_000_000
-            else:
-                self.volume = 0.0
+            self._recalculate_volume()
