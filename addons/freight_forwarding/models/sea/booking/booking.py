@@ -80,7 +80,7 @@ class SeaBooking(models.Model):
             ("export", "Export"),
         ],
         string="Type",
-        # required=True,
+        required=True,
     )
     name = fields.Char(string="Booking No.", required=True, copy=False)
     booking_date = fields.Datetime(string="Date & Time")
@@ -152,11 +152,6 @@ class SeaBooking(models.Model):
         "booking_id",
         string="Cargo Info",
     )
-    sea_bl_info_ids = fields.One2many(
-        "freight.sea.booking.bl.info",
-        "booking_id",
-        string="Sea B/L Info",
-    )
     pickup_info_ids = fields.One2many(
         "freight.sea.booking.pickup.info",
         "booking_id",
@@ -196,8 +191,7 @@ class SeaBooking(models.Model):
     )
     shipper_address = fields.Char(
         string="Shipper Address",
-        related="shipper_id.contact_address",
-        readonly=True,
+        compute="_compute_shipper_address",
         store=False,
     )
     consignee_id = fields.Many2one(
@@ -207,8 +201,7 @@ class SeaBooking(models.Model):
     )
     consignee_address = fields.Char(
         string="Consignee Address",
-        related="consignee_id.contact_address",
-        readonly=True,
+        compute="_compute_consignee_address",
         store=False,
     )
     notify_party_id = fields.Many2one(
@@ -218,10 +211,54 @@ class SeaBooking(models.Model):
     )
     notify_party_address = fields.Char(
         string="Notify Party Address",
-        related="notify_party_id.contact_address",
-        readonly=True,
+        compute="_compute_notify_party_address",
         store=False,
     )
+
+    @api.depends("shipper_id")
+    def _compute_shipper_address(self):
+        for rec in self:
+            if rec.shipper_id:
+                parts = [
+                    rec.shipper_id.street,
+                    rec.shipper_id.street2,
+                    rec.shipper_id.city,
+                    rec.shipper_id.state_id.name,
+                    rec.shipper_id.country_id.name,
+                ]
+                rec.shipper_address = ", ".join([p for p in parts if p])
+            else:
+                rec.shipper_address = False
+
+    @api.depends("consignee_id")
+    def _compute_consignee_address(self):
+        for rec in self:
+            if rec.consignee_id:
+                parts = [
+                    rec.consignee_id.street,
+                    rec.consignee_id.street2,
+                    rec.consignee_id.city,
+                    rec.consignee_id.state_id.name,
+                    rec.consignee_id.country_id.name,
+                ]
+                rec.consignee_address = ", ".join([p for p in parts if p])
+            else:
+                rec.consignee_address = False
+
+    @api.depends("notify_party_id")
+    def _compute_notify_party_address(self):
+        for rec in self:
+            if rec.notify_party_id:
+                parts = [
+                    rec.notify_party_id.street,
+                    rec.notify_party_id.street2,
+                    rec.notify_party_id.city,
+                    rec.notify_party_id.state_id.name,
+                    rec.notify_party_id.country_id.name,
+                ]
+                rec.notify_party_address = ", ".join([p for p in parts if p])
+            else:
+                rec.notify_party_address = False
 
     def action_add_notify_party(self):
         self.ensure_one()
@@ -329,11 +366,10 @@ class SeaBooking(models.Model):
         if existing_hbl:
             hbl = existing_hbl
         else:
-            freight_type = "Export" if self.freight_type == "export" else "Import"
             hbl = self.env["freight.sea.hbl"].create(
                 {
                     "booking_id": self.id,
-                    "freight_type": freight_type,
+                    "freight_type": self.freight_type,
                     "container_type": self.container_type,
                     "customer_id": self.partner_id.id,
                     "term_payment": self.payment_term_id.id,

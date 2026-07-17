@@ -1,22 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+    <data noupdate="0">
         <record id="seq_freight_sea_hbl_bl_no" model="ir.sequence">
-            <field name="name">Sea Jobsheet BL Number</field>
+            <field name="name">Sea Jobsheet BL Number (FCL)</field>
             <field name="code">freight.sea.hbl.bl_no</field>
-            <field name="prefix"></field>
+            <field name="prefix">%(month)s/FCL-JKTPUS/%(y)s</field>
             <field name="padding">3</field>
-            <field name="number_next">1</field>
-            <field name="number_increment">1</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_freight_sea_hbl_bl_no_lcl" model="ir.sequence">
+            <field name="name">Sea Jobsheet BL Number (LCL)</field>
+            <field name="code">freight.sea.hbl.bl_no.lcl</field>
+            <field name="prefix">%(month)s/LCL-JKTPUS/%(y)s</field>
+            <field name="padding">3</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_freight_sea_hbl_bl_no_consol" model="ir.sequence">
+            <field name="name">Sea Jobsheet BL Number (Consol)</field>
+            <field name="code">freight.sea.hbl.bl_no.consol</field>
+            <field name="prefix">%(month)s/CONSOL-JKTPUS/%(y)s</field>
+            <field name="padding">3</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
         </record>
 
         <record id="seq_freight_sea_hbl_job_no" model="ir.sequence">
             <field name="name">Sea Jobsheet Job Number</field>
             <field name="code">freight.sea.hbl.job_no</field>
-            <field name="prefix"></field>
+            <field name="prefix">%(month)s/JOB-SHEET/%(y)s</field>
             <field name="padding">3</field>
-            <field name="number_next">1</field>
-            <field name="number_increment">1</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
         </record>
     </data>
-</odoo>
+</odoo>

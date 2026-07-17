@@ -1,7 +1,6 @@
 from . import booking
 from . import freight_items_line
 from . import extra_info
-from . import bl_info
 from . import shipment_info
 from . import vessel_details
 from . import pickup_info
