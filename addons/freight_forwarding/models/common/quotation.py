@@ -62,20 +62,20 @@ class FreightQuotation(models.AbstractModel):
     )
 
     # Address — Source
-    source_street = fields.Char(string="Source Street")
-    source_street2 = fields.Char(string="Source Street 2")
-    source_city = fields.Char(string="Source City")
-    source_state_id = fields.Many2one("res.country.state", string="Source State")
-    source_zip = fields.Char(string="Source Zip")
-    source_country_id = fields.Many2one("res.country", string="Source Country")
+    pickup_street = fields.Char(string="Pickup Street")
+    pickup_street2 = fields.Char(string="Pickup  Street 2")
+    pickup_city = fields.Char(string="Pickup  City")
+    pickup_state_id = fields.Many2one("res.country.state", string="Pickup  State")
+    pickup_zip = fields.Char(string="Pickup  Zip")
+    pickup_country_id = fields.Many2one("res.country", string="Pickup  Country")
 
     # Address — Destination
-    destination_street = fields.Char(string="Destination Street")
-    destination_street2 = fields.Char(string="Destination Street 2")
-    destination_city = fields.Char(string="Destination City")
-    destination_state_id = fields.Many2one("res.country.state", string="Destination State")
-    destination_zip = fields.Char(string="Destination Zip")
-    destination_country_id = fields.Many2one("res.country", string="Destination Country")
+    delivery_street = fields.Char(string="Delivery Street")
+    delivery_street2 = fields.Char(string="Delivery Street 2")
+    delivery_city = fields.Char(string="Delivery City")
+    delivery_state_id = fields.Many2one("res.country.state", string="Delivery State")
+    delivery_zip = fields.Char(string="Delivery Zip")
+    delivery_country_id = fields.Many2one("res.country", string="Delivery Country")
 
     # Extra Info
     description_of_goods = fields.Char(string="Description of Goods")

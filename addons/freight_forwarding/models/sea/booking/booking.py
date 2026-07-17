@@ -141,7 +141,7 @@ class SeaBooking(models.Model):
     commodity_id = fields.Many2one("freight.commodity", string="Commodity")
 
     # Vessel Information
-    pod_port_id = fields.Many2one("freight.port", string="Port of Discharge")
+    pod_port_id = fields.Many2one("freight.port", string="Port of Delivery")
     vessel_id = fields.Many2one("freight.vessel", string="Vessel Name", required=True)
     voyage_no = fields.Char(string="Voyage No.")
     eta_jkt = fields.Date(string="ETA on JKT")
