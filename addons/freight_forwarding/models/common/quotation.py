@@ -204,12 +204,17 @@ class FreightQuotation(models.AbstractModel):
         1. Preserve validity_date (Expiry Date) dari record sumber.
            Tanpa ini, saat duplicate Odoo me-reset date_order ke hari ini
            sehingga validity_date ikut recalculate → beda dari aslinya.
-        2. Sync record baru ke sale_order setelah dibuat.
+        2. Mencegah order_line ikut terduplikat (untuk kebutuhan multi-currency).
+        3. Sync record baru ke sale_order setelah dibuat.
         """
         default = dict(default or {})
         # Salin validity_date dari source agar tidak di-recalculate
         if "validity_date" not in default and self.validity_date:
             default["validity_date"] = self.validity_date
+            
+        # Cegah duplikasi order_line
+        default["order_line"] = []
+        
         new_record = super().copy(default=default)
         new_record._sync_sale_order_rows()
         return new_record

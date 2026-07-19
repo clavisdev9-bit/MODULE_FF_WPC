@@ -28,6 +28,13 @@
                         <span class="o_stat_text">Jobsheet</span>
                     </div>
                 </button>
+                <button name="action_view_currency_variants"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-money"
+                    invisible="variant_count == 0">
+                    <field name="variant_count" widget="statinfo" string="Variants" />
+                </button>
             </xpath>
             
             <xpath expr="//field[@name='partner_id']" position="before">
