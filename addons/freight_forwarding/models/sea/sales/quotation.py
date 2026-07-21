@@ -64,6 +64,18 @@ class SeaQuotation(models.Model):
         string="Jobsheet Count", compute="_compute_hbl_count"
     )
 
+    # Multi-currency variant tracking
+    original_quotation_id = fields.Many2one(
+        "freight.sea.quotation",
+        string="Original Quotation",
+        copy=False,
+        index=True,
+    )
+    variant_count = fields.Integer(
+        string="Variant Count",
+        compute="_compute_variant_count"
+    )
+
     # Container Type (sea-specific, juga di-sync ke sale_order)
     container_type = fields.Selection(
         selection=[
@@ -154,9 +166,46 @@ class SeaQuotation(models.Model):
             )
             rec.hbl_count = via_booking + direct_hbl_count.get(rec.id, 0)
 
+    def _compute_variant_count(self):
+        for rec in self:
+            if not rec.id:
+                rec.variant_count = 0
+                continue
+                
+            original_id = rec.original_quotation_id.id if rec.original_quotation_id else rec.id
+            domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
+            # Kurangi 1 agar tidak menghitung dirinya sendiri (hanya menghitung varian LAIN)
+            count = self.search_count(domain) - 1
+            rec.variant_count = count if count > 0 else 0
+
+    def copy(self, default=None):
+        default = dict(default or {})
+        # Jika saya diduplikasi, set original_quotation_id ke root original
+        # Jika saya adalah root, maka set ke ID saya.
+        if self.original_quotation_id:
+            default['original_quotation_id'] = self.original_quotation_id.id
+        else:
+            default['original_quotation_id'] = self.id
+            
+        return super().copy(default=default)
+
     # =========================================================
     # Sea-specific Actions
     # =========================================================
+
+    def action_view_currency_variants(self):
+        self.ensure_one()
+        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
+        domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
+        
+        return {
+            "name": "Currency Variants",
+            "type": "ir.actions.act_window",
+            "res_model": "freight.sea.quotation",
+            "view_mode": "list,form",
+            "domain": domain,
+            "context": dict(self.env.context, create=False),
+        }
 
     def action_view_bookings(self):
         self.ensure_one()

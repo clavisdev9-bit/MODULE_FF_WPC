@@ -78,9 +78,9 @@
                                 <field name="destination_country_id" />
                                 <field name="origin_country_id" />
                                 <field name="delivery_type_id" />
+                                <field name="pod_port_id" />
                             </group>
                             <group string="Vessel Information">
-                                <field name="pod_port_id" />
                                 <field name="vessel_id" required="1" />
                                 <field name="voyage_no" />
                                 <field name="eta_jkt" />
@@ -134,9 +134,9 @@
                             <page string="Cargo Info">
                                 <field name="cargo_info_ids" nolabel="1" />
                             </page>
-                            <page string="Purchase Order">
+                            <!-- <page string="Purchase Order">
                                 <field name="purchase_order_ids" nolabel="1" />
-                            </page>
+                            </page> -->
                         </notebook>
                     </sheet>
                 </form>

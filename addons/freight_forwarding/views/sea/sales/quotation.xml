@@ -28,8 +28,15 @@
                         <span class="o_stat_text">Jobsheet</span>
                     </div>
                 </button>
+                <button name="action_view_currency_variants"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-money"
+                    invisible="variant_count == 0">
+                    <field name="variant_count" widget="statinfo" string="Variants" />
+                </button>
             </xpath>
-            
+
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="freight_type" />
                 <field name="container_type" />
@@ -63,36 +70,36 @@
             <xpath expr="//group[@name='sale_header']" position="after">
                 <group string="Address">
                     <group>
-                        <span>Source</span>
+                        <span>Pickup</span>
                         <div class="o_address_format">
-                            <field name="source_street" placeholder="Street..."
+                            <field name="pickup_street" placeholder="Street..."
                                 class="o_address_street" />
-                            <field name="source_street2" placeholder="Street 2..."
+                            <field name="pickup_street2" placeholder="Street 2..."
                                 class="o_address_street" />
-                            <field name="source_city" placeholder="City"
+                            <field name="pickup_city" placeholder="City"
                                 class="o_address_city" />
-                            <field name="source_state_id" placeholder="State"
+                            <field name="pickup_state_id" placeholder="State"
                                 class="o_address_state" />
-                            <field name="source_zip" placeholder="ZIP"
+                            <field name="pickup_zip" placeholder="ZIP"
                                 class="o_address_zip" />
-                            <field name="source_country_id" placeholder="Country"
+                            <field name="pickup_country_id" placeholder="Country"
                                 class="o_address_country" />
                         </div>
                     </group>
                     <group name="studio_group_7a4382">
-                        <span>Destination</span>
+                        <span>Delivery</span>
                         <div class="o_address_format" name="studio_div_8cbbbf">
-                            <field name="destination_street" placeholder="Street..."
+                            <field name="delivery_street" placeholder="Street..."
                                 class="o_address_street" />
-                            <field name="destination_street2" placeholder="Street 2..."
+                            <field name="delivery_street2" placeholder="Street 2..."
                                 class="o_address_street" />
-                            <field name="destination_city" placeholder="City"
+                            <field name="delivery_city" placeholder="City"
                                 class="o_address_city" />
-                            <field name="destination_state_id" placeholder="State"
+                            <field name="delivery_state_id" placeholder="State"
                                 class="o_address_state" />
-                            <field name="destination_zip" placeholder="ZIP"
+                            <field name="delivery_zip" placeholder="ZIP"
                                 class="o_address_zip" />
-                            <field name="destination_country_id" placeholder="Country"
+                            <field name="delivery_country_id" placeholder="Country"
                                 class="o_address_country" />
                         </div>
                     </group>
@@ -124,6 +131,8 @@
                         <field name="quantity" />
                         <field name="has_insurance" />
                         <field name="insurance_id" invisible="has_insurance == False" />
+                        <field name="loose_quantity" />
+                        <field name="uom_id" />
                     </group>
                     <group>
                         <field name="actual_weight" />
@@ -133,13 +142,11 @@
                 </group>
             </xpath>
 
-            <xpath expr="//page[@name='customer_signature']" position="after">
+            <!-- <xpath expr="//page[@name='customer_signature']" position="after">
                 <page string="Dimension">
                     <group>
                         <group>
-                            <field name="loose_quantity" />
                             <field name="pcs" />
-                            <field name="uom_id" />
                         </group>
                         <group>
                             <field name="length" />
@@ -194,7 +201,7 @@
                 <page string="Cargo Info">
                     <field name="cargo_info_ids" />
                 </page>
-            </xpath>
+            </xpath> -->
         </field>
     </record>
 
