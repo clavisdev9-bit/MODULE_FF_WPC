@@ -68,14 +68,14 @@ class SeaHBL(models.Model):
         }
 
     # Header Information
-    freight_type = fields.Selection(
-        selection=[
-            ("import", "Import"),
-            ("export", "Export"),
-        ],
-        string="Type",
-        required=True,
-    )
+    # freight_type = fields.Selection(
+    #     selection=[
+    #         ("import", "Import"),
+    #         ("export", "Export"),
+    #     ],
+    #     string="Type",
+    #     required=True,
+    # )
     container_type = fields.Selection(
         selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
         string="Container Type",
