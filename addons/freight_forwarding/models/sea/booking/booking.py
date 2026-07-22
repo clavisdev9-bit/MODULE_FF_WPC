@@ -369,7 +369,7 @@ class SeaBooking(models.Model):
             hbl = self.env["freight.sea.hbl"].create(
                 {
                     "booking_id": self.id,
-                    # "freight_type": self.freight_type,
+                    "freight_type": self.freight_type,
                     "container_type": self.container_type,
                     "customer_id": self.partner_id.id,
                     "term_payment": self.payment_term_id.id,
