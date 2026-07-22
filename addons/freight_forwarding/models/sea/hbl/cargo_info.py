@@ -18,18 +18,18 @@ class SeaHBLCargoInfo(models.Model):
         store=True,
         readonly=True,
     )
-    # type = fields.Selection(
-    #     related="hbl_id.freight_type",
-    #     string="Type",
-    #     store=True,
-    #     readonly=True,
-    # )
-    # freight_type = fields.Selection(
-    #     related="hbl_id.container_type",
-    #     string="Container Type",
-    #     store=True,
-    #     readonly=True,
-    # )
+    type = fields.Selection(
+        related="hbl_id.freight_type",
+        string="Type",
+        store=True,
+        readonly=True,
+    )
+    freight_type = fields.Selection(
+        related="hbl_id.container_type",
+        string="Container Type",
+        store=True,
+        readonly=True,
+    )
     booking_id = fields.Many2one(
         "freight.sea.booking",
         string="Booking",
