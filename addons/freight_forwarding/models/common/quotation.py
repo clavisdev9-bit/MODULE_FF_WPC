@@ -64,7 +64,7 @@ class FreightQuotation(models.AbstractModel):
     # Address — Source
     pickup_street = fields.Char(string="Pickup Street")
     pickup_street2 = fields.Char(string="Pickup  Street 2")
-    pickup_city = fields.Char(string="Pickup  City")
+    pickup_city = fields.Many2one("res.city", string="Pickup  City")
     pickup_state_id = fields.Many2one("res.country.state", string="Pickup  State")
     pickup_zip = fields.Char(string="Pickup  Zip")
     pickup_country_id = fields.Many2one("res.country", string="Pickup  Country")
@@ -72,7 +72,7 @@ class FreightQuotation(models.AbstractModel):
     # Address — Destination
     delivery_street = fields.Char(string="Delivery Street")
     delivery_street2 = fields.Char(string="Delivery Street 2")
-    delivery_city = fields.Char(string="Delivery City")
+    delivery_city = fields.Many2one("res.city", string="Delivery City")
     delivery_state_id = fields.Many2one("res.country.state", string="Delivery State")
     delivery_zip = fields.Char(string="Delivery Zip")
     delivery_country_id = fields.Many2one("res.country", string="Delivery Country")

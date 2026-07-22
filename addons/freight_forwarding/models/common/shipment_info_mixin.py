@@ -7,8 +7,8 @@ class FreightShipmentInfoMixin(models.AbstractModel):
 
     # Shipment Details
     shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
-    place_of_receipt_id = fields.Many2one("res.country.state", string="Place of Receipt")
-    place_of_delivery_id = fields.Many2one("res.country.state", string="Place of Delivery")
+    place_of_receipt_id = fields.Many2one("res.country", string="Place of Receipt")
+    place_of_delivery_id = fields.Many2one("res.city", string="Place of Delivery")
     port_of_loading_id = fields.Many2one("freight.port", string="Port of Loading")
     port_of_discharge_id = fields.Many2one("freight.port", string="Port of Discharge")
     via_port_id = fields.Many2one("freight.port", string="Via Port")

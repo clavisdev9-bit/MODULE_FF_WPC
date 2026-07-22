@@ -83,7 +83,7 @@ class SeaHBL(models.Model):
     )
     job_no = fields.Char(string="Job No.", default=lambda self: "New", copy=False, readonly=True)
     job_date = fields.Date(string="Job Date")
-    job_city_id = fields.Many2one("res.country.state", string="Job City")
+    job_city_id = fields.Many2one("res.city", string="Job City")
     master_job_no = fields.Char(string="Master Job No.")
     original_bl_no = fields.Char(string="Original BL No.")
     shipment_type = fields.Selection(
