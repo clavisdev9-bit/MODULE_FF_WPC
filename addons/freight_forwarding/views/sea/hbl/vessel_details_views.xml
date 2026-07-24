@@ -27,10 +27,22 @@
                             <field name="scn_code" />
                         </group>
 
-                        <group string="Stuffing Warehouse &amp; SMK">
+                        <group string="Stuffing Warehouse &amp; SMK" invisible="freight_type == 'import'">
                             <group>
                                 <field name="warehouse_id" />
                                 <field name="warehouse_address" />
+                            </group>
+                            <group>
+                                <field name="smk_code1" />
+                                <field name="smk_code2" />
+                            </group>
+                        </group>
+
+                        <group string="Warehouse &amp; SMK" invisible="freight_type != 'import'">
+                            <group>
+                                <field name="warehouse_id" />
+                                <field name="warehouse_address" />
+                                <field name="pbm" />
                             </group>
                             <group>
                                 <field name="smk_code1" />

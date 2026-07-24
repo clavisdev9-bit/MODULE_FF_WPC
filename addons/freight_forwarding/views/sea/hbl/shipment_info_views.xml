@@ -20,7 +20,6 @@
             <field name="arch" type="xml">
                 <form>
                     <sheet>
-                        <field name="freight_type" invisible="1" />
                         <notebook>
                             <page string="Shipment Details">
                                 <group>

@@ -18,3 +18,4 @@ class SeaHBLVesselDetails(models.Model):
         store=True,
         readonly=True,
     )
+    pbm = fields.Char(string="PBM")
