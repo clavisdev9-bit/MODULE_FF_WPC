@@ -81,11 +81,19 @@ class FreightQuotation(models.AbstractModel):
     def _onchange_pickup_city(self):
         if self.pickup_city and self.pickup_city.zipcode:
             self.pickup_zip = self.pickup_city.zipcode
+        if self.pickup_city and self.pickup_city.state_id:
+            self.pickup_state_id = self.pickup_city.state_id
+        if self.pickup_city and self.pickup_city.country_id:
+            self.pickup_country_id = self.pickup_city.country_id
 
     @api.onchange('delivery_city')
     def _onchange_delivery_city(self):
         if self.delivery_city and self.delivery_city.zipcode:
             self.delivery_zip = self.delivery_city.zipcode
+        if self.delivery_city and self.delivery_city.state_id:
+            self.delivery_state_id = self.delivery_city.state_id
+        if self.delivery_city and self.delivery_city.country_id:
+            self.delivery_country_id = self.delivery_city.country_id
 
 
     # Extra Info

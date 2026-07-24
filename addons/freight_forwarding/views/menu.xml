@@ -3,7 +3,8 @@
     <!-- Root -->
     <menuitem id="menu_parent_root"
         name="Freight Forwarding"
-        web_icon="freight_forwarding,static/description/icon.png" />
+        web_icon="freight_forwarding,static/description/icon.png"
+        action="action_freight_sea_quotation" />
 
     <!-- Top-Level Menus -->
     <menuitem id="menu_parent_quotation" name="Quotation"
