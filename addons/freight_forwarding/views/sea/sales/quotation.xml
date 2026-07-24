@@ -142,6 +142,15 @@
                 </group>
             </xpath>
 
+            <xpath expr="//page[@name='customer_signature']" position="after">
+                <page string="Terms &amp; Conditions">
+                    <group>
+                        <field name="terms_and_condition_id" />
+                        <field name="description" />
+                    </group>
+                </page>
+            </xpath>
+
             <!-- <xpath expr="//page[@name='customer_signature']" position="after">
                 <page string="Dimension">
                     <group>
@@ -191,12 +200,7 @@
                     </group>
                 </page>
 
-                <page string="Terms &amp; Conditions">
-                    <group>
-                        <field name="terms_and_condition_id" />
-                        <field name="description" />
-                    </group>
-                </page>
+
 
                 <page string="Cargo Info">
                     <field name="cargo_info_ids" />

@@ -45,19 +45,6 @@
                         .quote-details-table .col-num {
                         white-space: nowrap;
                         }
-                        .loose-cargo-table {
-                        width: 100%;
-                        border: 1px solid #000 !important;
-                        border-collapse: collapse;
-                        margin-top: 0px;
-                        margin-bottom: 8px;
-                        }
-                        .loose-cargo-table th,
-                        .loose-cargo-table td {
-                        border: 1px solid #000 !important;
-                        padding: 7px 8px !important;
-                        vertical-align: top;
-                        }
 
                         .keep-together {
                         page-break-inside: avoid;
@@ -78,18 +65,17 @@
                         <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
                             <tr>
                                 <td style="width: 50%; vertical-align: top; padding: 0;">
-                                    <img t-att-src="doc.get_report_logo_src()"
-                                        alt="WPC Logistics"
+                                    <img t-att-src="doc.get_report_logo_src()" alt="WPC Logistics"
                                         style="max-height: 130px; width: auto; display: block;" />
                                 </td>
-                                <td style="width: 50%; vertical-align: top; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif; color: #000; font-size: 15px; padding: 0;">
-                                    <strong style="font-size: 18px; color: #085294;">WPC MAIN OFFICE - INDONESIA</strong>
-                                    <br />Jl. Kesehatan Raya No. 54 B Tanah Abang IV, Jakarta 10160
-                                    <br />Phone: +62 21 3450605
-                                    <br />Fax: +62 21 3458307
-                                    <br />Email: inquiry@wpclogistics.com
-                                    <br />https://wpclogistics.com/
-                                </td>
+                                <td
+                                    style="width: 50%; vertical-align: top; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif; color: #000; font-size: 15px; padding: 0;">
+                                    <strong style="font-size: 18px; color: #085294;">WPC MAIN OFFICE
+                                    - INDONESIA</strong>
+                                    <br /> Jl. Kesehatan Raya No. 54 B Tanah
+                                    Abang IV, Jakarta 10160 <br /> Phone: +62 21 3450605 <br /> Fax:
+                                    +62 21 3458307 <br /> Email: inquiry@wpclogistics.com <br />
+                                    https://wpclogistics.com/ </td>
                             </tr>
                         </table>
 
@@ -97,12 +83,9 @@
                             style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-family: 'Arial', sans-serif; font-weight: bold; font-size: 16px;">
                             <tr>
                                 <td style="padding: 4px; color: #000;"> Sea Freight from <span
-                                        t-if="doc.origin_id" t-field="doc.origin_id" />
-            <span
-                                        t-else="">Origin TBD</span> to <span
-                                        t-if="doc.destination_id" t-field="doc.destination_id" />
-            <span
-                                        t-else="">Destination TBD</span>
+                                        t-if="doc.quotation_title" t-field="doc.quotation_title" />
+                                <span
+                                        t-else="">TBD to TBD</span>
                                 </td>
                                 <td
                                     style="padding: 4px; color: #000; text-align: right; white-space: nowrap; width: 1%;">
@@ -146,14 +129,20 @@
                                     <table class="table-ait"
                                         style="width: 100%; margin-bottom: 0; border: 1px solid #000; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
                                         <tr>
-                                            <td class="header-gray" style="width: 32%; border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px; white-space: nowrap;">QUOTE NO.</td>
-                                            <td style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px;">
+                                            <td class="header-gray"
+                                                style="width: 32%; border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px; white-space: nowrap;">QUOTE
+                                                NO.</td>
+                                            <td
+                                                style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px;">
                                                 <span t-field="doc.name" />
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="header-gray" style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px; white-space: nowrap;">DATE</td>
-                                            <td style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px;">
+                                            <td class="header-gray"
+                                                style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px; white-space: nowrap;">
+                                                DATE</td>
+                                            <td
+                                                style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px;">
                                                 <span t-field="doc.date_order"
                                                     t-options="{&quot;widget&quot;: &quot;date&quot;}" />
                                             </td>
@@ -192,10 +181,9 @@
                             </tr>
                         </table>
 
-                        <div class="text-bold mb-1"
-                            style="border-bottom: 1px solid #000 !important; margin-top: 5px;">Shipment
-                            Information</div>
-                        <div class="font-sm mb-1">This Quotation applies to the following shipment:</div>
+                        <div class="text-bold mb-1" style="margin-top: 5px;">Shipment Information</div>
+                        <!-- <div class="font-sm mb-1">This Quotation applies to the following
+                        shipment:</div> -->
 
                         <!-- Consolidated Shipment Information table -->
                         <table class="table-ait table-outline w-100 mb-0 text-left">
@@ -214,19 +202,14 @@
                                 <col style="width:8.33%" />
                             </colgroup>
                             <tr class="header-gray text-left">
-                                <td colspan="6">CUSTOMER REFERENCE</td>
-                                <td colspan="3">PICKUP CODE ORIGIN</td>
-                                <td colspan="3">PICKUP CODE DESTINATION</td>
+                                <td colspan="12">CUSTOMER REFERENCE</td>
                             </tr>
                             <tr>
-                                <td colspan="6">
+                                <td colspan="12">
                                     <span t-field="doc.client_order_ref" />
-                                </td>
-                                <td colspan="3">
-                                    <span t-field="doc.origin_id" />
-                                </td>
-                                <td colspan="3">
-                                    <span t-field="doc.destination_id" />
+                                    <t t-if="not doc.client_order_ref">
+                                        <span>&#160;</span>
+                                    </t>
                                 </td>
                             </tr>
                             <tr class="header-gray text-left">
@@ -236,26 +219,25 @@
                                 <td colspan="3">Incoterm</td>
                             </tr>
                             <tr>
-                                <td colspan="3"><span t-field="doc.actual_weight" /> KG</td>
-                                <td colspan="3"><span t-field="doc.volume" /> M3</td>
-                                <td colspan="3"><span t-field="doc.chargeable_weight" /> KG</td>
+                                <td colspan="3">
+                                    <span t-field="doc.actual_weight" /> KG</td>
+                                <td colspan="3">
+                                    <span t-field="doc.volume" /> M3</td>
+                                <td colspan="3">
+                                    <span t-field="doc.chargeable_weight" /> KG</td>
                                 <td colspan="3">
                                     <span t-field="doc.incoterm" />
                                 </td>
                             </tr>
                             <tr class="header-gray text-left">
-                                <td colspan="3">Customs Entries</td>
-                                <td colspan="3">Entry / Invoice Lines</td>
-                                <td colspan="3">Value of Goods</td>
-                                <td colspan="3">Insurance Value</td>
+                                <td colspan="6">Value of Goods</td>
+                                <td colspan="6">Insurance Value</td>
                             </tr>
                             <tr>
-                                <td colspan="3">Not Specified</td>
-                                <td colspan="3">Not Specified</td>
-                                <td colspan="3">
+                                <td colspan="6">
                                     <span t-field="doc.description_of_goods" />
                                 </td>
-                                <td colspan="3">
+                                <td colspan="6">
                                     <span t-field="doc.insurance_id" />
                                 </td>
                             </tr>
@@ -265,53 +247,60 @@
                             </tr>
                             <tr>
                                 <td colspan="6">
-                                    <span t-field="doc.source_street"
-                                        t-if="doc.source_street" />
-                                    <br />
-                                    <span t-field="doc.source_city"
-                                        t-if="doc.source_city" />
-                                    <span t-field="doc.source_country_id"
-                                        t-if="doc.source_country_id" />
-                                    <t t-if="not doc.source_street">
-                                        <span class="text-muted">TBA</span>
+                                    <!-- <t t-if="doc.pickup_street"> -->
+                                    <span t-field="doc.pickup_street" t-if="doc.pickup_street" />
+                                    <t t-if="doc.pickup_street">
+                                        <br />
+                                    </t>
+                                    <span t-field="doc.pickup_street2" t-if="doc.pickup_street2" />
+                                    <t t-if="doc.pickup_street2">
+                                        <br />
+                                    </t>
+                                    <!-- </t> -->
+                                    <span t-field="doc.pickup_city.name" t-if="doc.pickup_city" />
+                                    <t t-if="doc.pickup_city">
+                                        <br />
+                                    </t>
+                                    <span t-field="doc.pickup_zip" t-if="doc.pickup_zip" />
+                                    <t t-if="doc.pickup_zip">
+                                        <br />
+                                    </t>
+                                    <span t-field="doc.pickup_country_id"
+                                        t-if="doc.pickup_country_id" />
+                                    <t
+                                        t-if="not doc.pickup_street and not doc.pickup_street2 and not doc.pickup_city and not doc.pickup_country_id">
+                                        <span class="text-muted">TBD</span>
                                     </t>
                                 </td>
                                 <td colspan="6">
-                                    <span t-field="doc.destination_street"
-                                        t-if="doc.destination_street" />
-                                    <br />
-                                    <span t-field="doc.destination_city"
-                                        t-if="doc.destination_city" />
-                                    <span t-field="doc.destination_country_id"
-                                        t-if="doc.destination_country_id" />
+                                    <!-- <t t-if="doc.delivery_street"> -->
+                                    <span t-field="doc.delivery_street" t-if="doc.delivery_street" />
+                                    <t t-if="doc.delivery_street">
+                                        <br />
+                                    </t>
+                                    <span t-field="doc.delivery_street2" t-if="doc.delivery_street2" />
+                                    <t t-if="doc.delivery_street2">
+                                        <br />
+                                    </t>
+                                    <!-- </t> -->
+                                    <span t-field="doc.delivery_city.name" t-if="doc.delivery_city" />
+                                    <t t-if="doc.delivery_city">
+                                        <br />
+                                    </t>
+                                    <span t-field="doc.delivery_zip" t-if="doc.delivery_zip" />
+                                    <t t-if="doc.delivery_zip">
+                                        <br />
+                                    </t>
+                                    <span t-field="doc.delivery_country_id"
+                                        t-if="doc.delivery_country_id" />
+                                    <t
+                                        t-if="not doc.delivery_street and not doc.delivery_street2 and not doc.delivery_city and not doc.delivery_country_id">
+                                        <span class="text-muted">TBD</span>
+                                    </t>
                                 </td>
                             </tr>
                         </table>
 
-                        <t t-set="valid_cargo"
-                            t-value="doc.cargo_info_ids.filtered(lambda p: p.quantity)" />
-                        <table class="loose-cargo-table w-100 mb-0">
-                            <tr class="header-gray text-left">
-                                <td colspan="3" class="px-2">Loose Cargo Information</td>
-                            </tr>
-                            <t t-foreach="valid_cargo" t-as="pack">
-                                <tr class="text-left">
-                                    <td width="15%" class="px-2">
-                                        <span t-field="pack.quantity" />
-                                    </td>
-                                    <td width="25%" class="px-2">
-                                        <span t-field="pack.package_type" />
-                                    </td>
-                                    <td class="px-2">
-                                        <span t-field="pack.length" /> x <span
-                                            t-field="pack.width" /> x <span
-                                            t-field="pack.height" /> CM </td>
-                                </tr>
-                            </t>
-                            <tr t-if="not valid_cargo">
-                                <td colspan="3" class="px-2">No cargo details specified.</td>
-                            </tr>
-                        </table>
 
                         <t t-set="display_discount"
                             t-value="any(l.discount for l in doc.order_line)" />
@@ -392,7 +381,9 @@
                                         <t t-set="current_subtotal" t-value="0" />
 
                                         <tr class="text-bold">
-                                            <td name="td_section_line" t-att-colspan="6 if display_discount else 5" class="px-2">
+                                            <td name="td_section_line"
+                                                t-att-colspan="6 if display_discount else 5"
+                                                class="px-2">
                                                 <span t-field="line.name" />
                                             </td>
                                         </tr>
@@ -400,7 +391,9 @@
 
                                     <t t-if="line.display_type == 'line_note'">
                                         <tr class="font-sm text-muted">
-                                            <td name="td_note_line" t-att-colspan="6 if display_discount else 5" class="px-2">
+                                            <td name="td_note_line"
+                                                t-att-colspan="6 if display_discount else 5"
+                                                class="px-2">
                                                 <span t-field="line.name" />
                                             </td>
                                         </tr>
@@ -410,7 +403,8 @@
                                         t-if="current_section and (line_last or doc.order_line[line_index+1].display_type == 'line_section') and not line.display_type">
                                         <tr class="text-right text-bold"
                                             style="border-top: 1px solid #ccc !important;">
-                                            <td t-att-colspan="6 if display_discount else 5" class="px-2">
+                                            <td t-att-colspan="6 if display_discount else 5"
+                                                class="px-2">
                                                 <span class="mr-2">Section Subtotal: </span>
                                                 <span t-esc="current_subtotal"
                                                     t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: doc.currency_id}" />
@@ -455,13 +449,14 @@
                         </div>
 
                         <div class="keep-together" style="margin-top: 8px;">
-                            <div class="mt-2 mb-2 font-sm" style="padding: 4px; border: 1px solid #000 !important; padding: 8px;">
+                            <div class="mt-2 mb-2 font-sm"
+                                style="padding: 4px; border: 1px solid #000 !important; padding: 8px;">
                                 <div class="header-gray p-1"
                                     style="border-bottom: 1px solid #000 !important; padding: 8px;">QUOTATION
                                     ADDITIONAL CONDITIONS</div>
                                 <div class="p-2" style="padding: 8px;">
-                                    <div t-if="doc.note"
-                                        t-field="doc.note" />
+                                    <div t-if="doc.terms_and_condition_id.description"
+                                        t-field="doc.terms_and_condition_id.description" />
                                     <div t-else="">
                                         <ul style="padding-left: 15px; margin: 0;">
                                             <li>All rates are based on current valid pricing and
