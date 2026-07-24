@@ -110,9 +110,9 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Purchase Order">
+                        <!-- <page string="Purchase Order">
                             <field name="purchase_order_ids" nolabel="1"/>
-                        </page>
+                        </page> -->
                         <page string="Sales Order">
                             <field name="sales_order_ids" nolabel="1"/>
                         </page>
