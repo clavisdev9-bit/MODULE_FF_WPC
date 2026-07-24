@@ -18,3 +18,7 @@ class SeaHBLShipmentInfo(models.Model):
         store=True,
         readonly=True,
     )
+    warehouse_location_id = fields.Many2one(
+        "stock.warehouse",
+        string="Warehouse Location",
+    )
