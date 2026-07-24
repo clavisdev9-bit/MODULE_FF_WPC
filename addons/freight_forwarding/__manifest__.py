@@ -65,6 +65,7 @@
         "views/sea/hbl/cargo_info.xml",
         "views/sea/hbl/custom_permit.xml",
         "views/sea/hbl/shipment_info_views.xml",
+        "views/sea/hbl/vessel_details_views.xml",
         "views/sea/hbl/purchase_order_views.xml",
         "views/sea/hbl/sales_order_views.xml",
         "views/sea/hbl/tax_refund_doc_views.xml",
