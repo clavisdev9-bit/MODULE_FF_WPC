@@ -20,6 +20,7 @@
             <field name="arch" type="xml">
                 <form>
                     <sheet>
+                        <field name="freight_type" invisible="1" />
                         <group string="Booking &amp; Agent Information">
                             <field name="principle_agent_id" />
                             <field name="shipping_agent_id" />
