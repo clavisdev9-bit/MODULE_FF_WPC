@@ -122,6 +122,12 @@
                     class="oe_highlight"
                     invisible="freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
                 />
+                <button
+                    name="action_create_currency_variant"
+                    type="object"
+                    string="New Currency Variant"
+                    class="btn-secondary"
+                />
             </xpath>
 
             <xpath expr="//page[@name='other_information']" position="inside">
