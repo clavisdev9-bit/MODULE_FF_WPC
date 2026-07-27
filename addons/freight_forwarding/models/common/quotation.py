@@ -214,8 +214,27 @@ class FreightQuotation(models.AbstractModel):
             )
             """
         )
+        
+        # Perbaiki issue currency di order_line (sale.order.line)
+        # Karena INSERT/UPDATE ke sale_order di atas menggunakan raw SQL,
+        # ORM tidak mendeteksi perubahan dan tidak me-recompute related field (currency_id) di line.
+        # Kita update langsung di DB agar sinkron.
+        if ids:
+            self.env.cr.execute(
+                """
+                UPDATE sale_order_line sol
+                SET currency_id = so.currency_id
+                FROM sale_order so
+                WHERE sol.order_id = so.id 
+                  AND so.id = ANY(%s) 
+                  AND (sol.currency_id != so.currency_id OR sol.currency_id IS NULL)
+                """,
+                [ids]
+            )
+
         # Invalidate ORM cache agar data yang baru di-sync terbaca dengan benar
         self.env["sale.order"].invalidate_model()
+        self.env["sale.order.line"].invalidate_model(['currency_id'])
 
     def copy(self, default=None):
         """
