@@ -15,24 +15,11 @@ class FreightShipmentInfoMixin(models.AbstractModel):
     terminal_id = fields.Many2one("freight.location", string="Terminal")
 
     feeder_vessel_id = fields.Many2one("freight.vessel", string="Feeder Vessel")
-    feeder_voyage_no = fields.Char(
-        string="Feeder Voyage No.",
-        related="feeder_vessel_id.voyage_no",
-        readonly=True,
-    )
+    feeder_voyage_no = fields.Char(string="Feeder Voyage No.")
     mother_vessel_id = fields.Many2one("freight.vessel", string="Mother Vessel")
-    mother_voyage_no = fields.Char(
-        string="Mother Voyage No.",
-        related="mother_vessel_id.voyage_no",
-        readonly=True,
-    )
+    mother_voyage_no = fields.Char(string="Mother Voyage No.")
     shipping_line_id = fields.Many2one("freight.shipping.line", string="Shipping Line")
-    shipping_line_ref_no = fields.Char(
-        string="Shipping Line Ref No",
-        related="shipping_line_id.shipping_line_ref_no",
-        readonly=True,
-        store=False,
-    )
+    shipping_line_ref_no = fields.Char(string="Shipping Line Ref No")
     coloader_id = fields.Many2one("res.partner", string="Coloader")
     coloader_ref_no = fields.Char(string="Coloader Ref No")
     stuffing_location_id = fields.Many2one("stock.warehouse", string="Stuffing Location")
