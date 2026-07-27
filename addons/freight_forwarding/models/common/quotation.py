@@ -214,8 +214,27 @@ class FreightQuotation(models.AbstractModel):
             )
             """
         )
+        
+        # Perbaiki issue currency di order_line (sale.order.line)
+        # Karena INSERT/UPDATE ke sale_order di atas menggunakan raw SQL,
+        # ORM tidak mendeteksi perubahan dan tidak me-recompute related field (currency_id) di line.
+        # Kita update langsung di DB agar sinkron.
+        if ids:
+            self.env.cr.execute(
+                """
+                UPDATE sale_order_line sol
+                SET currency_id = so.currency_id
+                FROM sale_order so
+                WHERE sol.order_id = so.id 
+                  AND so.id = ANY(%s) 
+                  AND (sol.currency_id != so.currency_id OR sol.currency_id IS NULL)
+                """,
+                [ids]
+            )
+
         # Invalidate ORM cache agar data yang baru di-sync terbaca dengan benar
         self.env["sale.order"].invalidate_model()
+        self.env["sale.order.line"].invalidate_model(['currency_id'])
 
     def copy(self, default=None):
         """
@@ -223,19 +242,29 @@ class FreightQuotation(models.AbstractModel):
         1. Preserve validity_date (Expiry Date) dari record sumber.
            Tanpa ini, saat duplicate Odoo me-reset date_order ke hari ini
            sehingga validity_date ikut recalculate → beda dari aslinya.
-        2. Mencegah order_line ikut terduplikat (untuk kebutuhan multi-currency).
-        3. Sync record baru ke sale_order setelah dibuat.
+        2. Menyelesaikan issue "Missing Record" saat menduplikasi order_line.
+           Karena order_line divalidasi ke tabel sale_order, kita menunda 
+           duplikasi order_line sampai setelah record disinkronisasi ke sale_order.
         """
         default = dict(default or {})
         # Salin validity_date dari source agar tidak di-recalculate
         if "validity_date" not in default and self.validity_date:
             default["validity_date"] = self.validity_date
             
-        # Cegah duplikasi order_line
-        default["order_line"] = []
-        
+        # Tunda duplikasi order_line dari ORM bawaan
+        copy_order_lines = False
+        if "order_line" not in default:
+            default["order_line"] = False
+            copy_order_lines = True
+            
         new_record = super().copy(default=default)
         new_record._sync_sale_order_rows()
+        
+        # Setelah record disinkronisasi ke tabel sale_order, barulah aman menduplikasi order_line
+        if copy_order_lines and self.order_line:
+            for line in self.order_line:
+                line.copy({"order_id": new_record.id})
+                
         return new_record
 
     @api.model_create_multi

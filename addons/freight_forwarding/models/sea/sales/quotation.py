@@ -178,16 +178,25 @@ class SeaQuotation(models.Model):
             count = self.search_count(domain) - 1
             rec.variant_count = count if count > 0 else 0
 
-    def copy(self, default=None):
-        default = dict(default or {})
-        # Jika saya diduplikasi, set original_quotation_id ke root original
-        # Jika saya adalah root, maka set ke ID saya.
-        if self.original_quotation_id:
-            default['original_quotation_id'] = self.original_quotation_id.id
-        else:
-            default['original_quotation_id'] = self.id
-            
-        return super().copy(default=default)
+    def action_create_currency_variant(self):
+        """
+        Buat salinan header-only yang tertaut ke quotation asal sebagai currency variant.
+        Berbeda dari Duplicate standar: tidak menyalin order lines,
+        dan otomatis tertaut lewat original_quotation_id.
+        """
+        self.ensure_one()
+        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
+        new_variant = self.copy(default={
+            'original_quotation_id': original_id,
+            'order_line': [],
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'freight.sea.quotation',
+            'res_id': new_variant.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
 
     # =========================================================
     # Sea-specific Actions
