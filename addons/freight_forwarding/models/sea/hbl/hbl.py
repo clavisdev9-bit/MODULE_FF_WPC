@@ -2,6 +2,7 @@ from odoo import api, fields, models
 
 class SeaHBL(models.Model):
     _name = "freight.sea.hbl"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = "Sea Jobsheet"
     _rec_name = "hbl_no"
 

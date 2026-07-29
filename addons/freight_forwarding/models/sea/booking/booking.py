@@ -2,6 +2,7 @@ from odoo import api, fields, models
 
 class SeaBooking(models.Model):
     _name = "freight.sea.booking"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = "Sea Booking"
     _rec_name = "name"
 
