@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class SeaQuotation(models.Model):
@@ -185,6 +186,9 @@ class SeaQuotation(models.Model):
         dan otomatis tertaut lewat original_quotation_id.
         """
         self.ensure_one()
+        if self.original_quotation_id:
+            raise UserError("You cannot create a currency variant from a child quotation. Please create it from the parent quotation instead.")
+
         original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
         new_variant = self.copy(default={
             'original_quotation_id': original_id,

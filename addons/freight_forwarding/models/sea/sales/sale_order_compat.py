@@ -4,6 +4,46 @@ from odoo import api, fields, models
 class SaleOrderCompat(models.Model):
     _inherit = "sale.order"
 
+    def write(self, vals):
+        res = super().write(vals)
+        # Reverse sync: jika SO diupdate dari native Odoo (misal klik Cancel di Sales app),
+        # sync kembali kolom yang berubah ke custom quotation tables (sea & air)
+        # Raw SQL digunakan agar tidak mentrigger write loop.
+        
+        sea_model = self.env.get("freight.sea.quotation")
+        if sea_model is not None:
+            sea_cols = getattr(sea_model, "_SALE_ORDER_SYNC_COLUMNS", [])
+            sea_update = {k: v for k, v in vals.items() if k in sea_cols}
+            if sea_update:
+                set_clauses = []
+                params = []
+                for k, v in sea_update.items():
+                    set_clauses.append(f"{k} = %s")
+                    params.append(v)
+                params.append(self.ids)
+                self.env.cr.execute(
+                    f"UPDATE freight_sea_quotation SET {', '.join(set_clauses)} WHERE id = ANY(%s)",
+                    params,
+                )
+                
+        air_model = self.env.get("freight.air.quotation")
+        if air_model is not None:
+            air_cols = getattr(air_model, "_SALE_ORDER_SYNC_COLUMNS", [])
+            air_update = {k: v for k, v in vals.items() if k in air_cols}
+            if air_update:
+                set_clauses = []
+                params = []
+                for k, v in air_update.items():
+                    set_clauses.append(f"{k} = %s")
+                    params.append(v)
+                params.append(self.ids)
+                self.env.cr.execute(
+                    f"UPDATE freight_air_quotation SET {', '.join(set_clauses)} WHERE id = ANY(%s)",
+                    params,
+                )
+                
+        return res
+
     freight_type = fields.Selection(
         selection=[
             ("export", "Export"),
