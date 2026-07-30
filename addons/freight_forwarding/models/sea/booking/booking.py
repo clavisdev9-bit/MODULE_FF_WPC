@@ -1,8 +1,13 @@
 from odoo import api, fields, models
 
+
 class SeaBooking(models.Model):
     _name = "freight.sea.booking"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = [
+        "mail.thread",
+        "mail.activity.mixin",
+        "freight.sea.shipment.info.mixin",
+    ]
     _description = "Sea Booking"
     _rec_name = "name"
 
@@ -83,7 +88,12 @@ class SeaBooking(models.Model):
         string="Type",
         required=True,
     )
-    name = fields.Char(string="Booking No.", required=True, copy=False)
+    name = fields.Char(
+        string="Booking No.",
+        required=True,
+        default=lambda self: "New",
+        copy=False,
+    )
     booking_date = fields.Datetime(string="Date & Time")
     bl_no = fields.Char(string="B/L No.")
     job_no = fields.Char(string="Job No.")
@@ -122,6 +132,12 @@ class SeaBooking(models.Model):
     )
 
     # Shipment Details
+    # NOTE (FF-22): port_of_loading_id, port_of_discharge_id, commodity_id,
+    # dan eta_jkt juga ada di freight.sea.shipment.info.mixin. Karena Booking
+    # sudah mendefinisikan field ini sendiri (dengan required=True dan string
+    # custom), definisi di sini yang dipakai. Field ini TIDAK ditambahkan lagi
+    # di tab "Shipment Details"/"Vessel Schedule" baru supaya tidak duplikat
+    # di view.
     port_of_loading_id = fields.Many2one(
         "freight.port", string="Origin Port (POL)", required=True
     )
@@ -148,6 +164,10 @@ class SeaBooking(models.Model):
     eta_jkt = fields.Date(string="ETA on JKT")
 
     # Notebook
+    # NOTE (FF-22): field shipment_info_ids (One2many ke
+    # freight.sea.booking.shipment.info) DIHAPUS. Model perantaranya sudah
+    # dihapus; field-fieldnya sekarang ada langsung di sini lewat
+    # freight.sea.shipment.info.mixin (lihat _inherit di atas).
     cargo_info_ids = fields.One2many(
         "freight.sea.booking.cargo.info",
         "booking_id",
@@ -157,11 +177,6 @@ class SeaBooking(models.Model):
         "freight.sea.booking.pickup.info",
         "booking_id",
         string="Pickup Info",
-    )
-    shipment_info_ids = fields.One2many(
-        "freight.sea.booking.shipment.info",
-        "booking_id",
-        string="Shipment Info",
     )
     vessel_details_ids = fields.One2many(
         "freight.sea.booking.vessel.details",
@@ -288,6 +303,15 @@ class SeaBooking(models.Model):
             "target": "current",
         }
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get("name") or vals.get("name") == "New":
+                vals["name"] = self.env["ir.sequence"].next_by_code(
+                    "freight.sea.booking"
+                ) or "New"
+        return super().create(vals_list)
+
     def _copy_records_to_hbl(self, source_records, target_model_name, target_field_name, extra_values=None, excluded_fields=None):
         target_model = self.env[target_model_name]
         excluded_fields = set(excluded_fields or [])
@@ -326,15 +350,11 @@ class SeaBooking(models.Model):
                 hbl_items_model.create(item_values)
 
     def _copy_booking_data_to_hbl(self, booking, hbl):
-        if not hbl.shipment_info_ids and booking.shipment_info_ids:
-            self._copy_records_to_hbl(
-                booking.shipment_info_ids,
-                "freight.sea.hbl.shipment.info",
-                "hbl_id",
-                extra_values={"hbl_id": hbl.id},
-                excluded_fields={"booking_id"},
-            )
-
+        # NOTE (FF-22): pemanggilan copy shipment_info_ids DIHAPUS di sini
+        # karena model freight.sea.booking.shipment.info /
+        # freight.sea.hbl.shipment.info sudah tidak ada. Field-field
+        # shipment info sekarang langsung ada di Booking & HBL (lewat mixin),
+        # jadi tidak perlu proses copy antar model perantara lagi.
         if not hbl.vessel_details_ids and booking.vessel_details_ids:
             self._copy_records_to_hbl(
                 booking.vessel_details_ids,

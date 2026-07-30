@@ -13,5 +13,4 @@ from . import vendor_invoice
 from . import vendor_debit_note
 from . import vendor_credit_note
 from . import cash_purchase
-from . import shipment_info
 from . import vessel_details

@@ -92,9 +92,90 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Shipment Info">
-                            <field name="shipment_info_ids" nolabel="1"/>
+                        <page string="Shipment Details">
+                            <group>
+                                <group>
+                                    <field name="shipment_type_id" />
+                                    <field name="place_of_receipt_id" />
+                                    <field name="place_of_delivery_id" />
+                                    <field name="commodity_id" />
+                                </group>
+                                <group>
+                                    <field name="port_of_loading_id" />
+                                    <field name="port_of_discharge_id" />
+                                    <field name="via_port_id" />
+                                    <field name="terminal_id" />
+                                </group>
+                            </group>
+
+                            <group>
+                                <group>
+                                    <field name="feeder_vessel_id" />
+                                    <field name="feeder_voyage_no" />
+                                    <field name="mother_vessel_id" />
+                                    <field name="mother_voyage_no" />
+                                </group>
+                                <group>
+                                    <field name="shipping_line_id" />
+                                    <field name="shipping_line_ref_no" />
+                                    <field name="coloader_id" />
+                                    <field name="coloader_ref_no" />
+                                </group>
+                            </group>
+
+                            <group>
+                                <field name="stuffing_location_id" invisible="freight_type == 'import'" />
+                                <field name="warehouse_location_id" invisible="freight_type != 'import'" />
+                            </group>
                         </page>
+
+                        <page string="Agent &amp; Terms">
+                            <group>
+                                <group>
+                                    <field name="forward_agent_id" />
+                                    <field name="letter_of_credit" />
+                                </group>
+                                <group>
+                                    <field name="freight_terms" />
+                                    <field name="other_charges_terms" />
+                                    <field name="ship_mode" />
+                                    <field name="service_level" />
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Vessel Schedule">
+                            <group>
+                                <field name="vessel_schedule_id">
+                                    <form>
+                                        <group>
+                                            <field name="vessel_id" />
+                                            <field name="name" />
+                                            <field name="voyage_no" />
+                                            <field name="arrival" />
+                                            <field name="berthing" />
+                                            <field name="departure" />
+                                            <field name="closing" />
+                                            <field name="terminal_id" />
+                                            <field name="status" />
+                                            <field name="open_stack" />
+                                        </group>
+                                    </form>
+                                </field>
+                                <field name="eta_jkt" />
+                                <field name="etd_eta" />
+                                <field name="via_etd" />
+                                <field name="via_eta" />
+                            </group>
+                        </page>
+
+                        <page string="Footer Remarks">
+                            <group>
+                                <field name="booking_remark_id" />
+                                <field name="warehouse_remark" />
+                            </group>
+                        </page>
+
                         <page string="Vessel Details">
                             <field name="vessel_details_ids" nolabel="1"/>
                         </page>
