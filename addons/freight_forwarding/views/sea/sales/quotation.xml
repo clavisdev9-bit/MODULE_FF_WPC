@@ -108,6 +108,7 @@
             </xpath>
 
             <xpath expr="//header" position="inside">
+                <field name="original_quotation_id" invisible="1"/>
                 <button
                     name="action_convert_to_jobsheet_direct"
                     type="object"
@@ -127,6 +128,7 @@
                     type="object"
                     string="New Currency Variant"
                     class="btn-secondary"
+                    invisible="original_quotation_id != False"
                 />
             </xpath>
 

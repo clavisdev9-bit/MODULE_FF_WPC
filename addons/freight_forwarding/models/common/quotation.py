@@ -169,6 +169,7 @@ class FreightQuotation(models.AbstractModel):
             if record.est_transit_time_days < 0:
                 raise ValidationError("Est. Transit Time (Days) cannot be negative.")
 
+
     def _sync_sale_order_rows(self):
         """
         Sync baris dari tabel quotation masing-masing ke sale_order.
@@ -256,6 +257,11 @@ class FreightQuotation(models.AbstractModel):
         if "order_line" not in default:
             default["order_line"] = False
             copy_order_lines = True
+        elif not default["order_line"]:
+            # [] atau None dari caller (misal action_create_currency_variant) tidak cukup untuk
+            # suppress copying di Odoo ORM — normalize ke False agar lines tidak ikut ter-copy.
+            default["order_line"] = False
+
             
         new_record = super().copy(default=default)
         new_record._sync_sale_order_rows()
@@ -270,11 +276,16 @@ class FreightQuotation(models.AbstractModel):
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
+        # Flush deferred computed fields (e.g. currency_id dari pricelist_id) ke DB
+        # sebelum raw SQL sync, agar _sync_sale_order_rows tidak baca nilai stale.
+        records.flush_recordset()
         records._sync_sale_order_rows()
         return records
 
     def write(self, vals):
         result = super().write(vals)
+        # Flush deferred computed fields sebelum sync — lihat FF-19.
+        self.flush_recordset()
         self._sync_sale_order_rows()
         return result
 
