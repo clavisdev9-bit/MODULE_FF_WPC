@@ -44,8 +44,3 @@ class SeaHBLCargoInfo(models.Model):
         store=True,
         readonly=True,
     )
-    freight_items_line = fields.One2many(
-        "freight.sea.hbl.items.line",
-        "hbl_cargo_info_id",
-        string="Freight Items Line",
-    )

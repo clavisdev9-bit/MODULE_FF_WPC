@@ -2,7 +2,7 @@ from odoo import api, fields, models
 
 class SeaBooking(models.Model):
     _name = "freight.sea.booking"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ["mail.thread", "mail.activity.mixin", "freight.sea.vessel.details.mixin"]
     _description = "Sea Booking"
     _rec_name = "name"
 
@@ -163,11 +163,6 @@ class SeaBooking(models.Model):
         "booking_id",
         string="Shipment Info",
     )
-    vessel_details_ids = fields.One2many(
-        "freight.sea.booking.vessel.details",
-        "booking_id",
-        string="Vessel Details",
-    )
     purchase_order_ids = fields.One2many(
         "freight.sea.booking.purchase.order",
         "booking_id",
@@ -303,27 +298,16 @@ class SeaBooking(models.Model):
 
     def _copy_cargo_info_lines_to_hbl(self, booking_cargo_info_records, hbl):
         hbl_cargo_model = self.env["freight.sea.hbl.cargo.info"]
-        hbl_items_model = self.env["freight.sea.hbl.items.line"]
 
         for booking_cargo_info in booking_cargo_info_records:
             cargo_values = booking_cargo_info.copy_data(default={"hbl_id": hbl.id})[0]
-            for field_name in ["booking_id", "quotation_id", "freight_items_line"]:
+            for field_name in ["booking_id", "quotation_id"]:
                 cargo_values.pop(field_name, None)
             for field_name in list(cargo_values.keys()):
                 if field_name not in hbl_cargo_model._fields:
                     cargo_values.pop(field_name, None)
             cargo_values["hbl_id"] = hbl.id
-            hbl_cargo = hbl_cargo_model.create(cargo_values)
-
-            for booking_item_line in booking_cargo_info.freight_items_line:
-                item_values = booking_item_line.copy_data(default={"hbl_cargo_info_id": hbl_cargo.id})[0]
-                for field_name in ["booking_cargo_info_id"]:
-                    item_values.pop(field_name, None)
-                for field_name in list(item_values.keys()):
-                    if field_name not in hbl_items_model._fields:
-                        item_values.pop(field_name, None)
-                item_values["hbl_cargo_info_id"] = hbl_cargo.id
-                hbl_items_model.create(item_values)
+            hbl_cargo_model.create(cargo_values)
 
     def _copy_booking_data_to_hbl(self, booking, hbl):
         if not hbl.shipment_info_ids and booking.shipment_info_ids:
@@ -335,14 +319,19 @@ class SeaBooking(models.Model):
                 excluded_fields={"booking_id"},
             )
 
-        if not hbl.vessel_details_ids and booking.vessel_details_ids:
-            self._copy_records_to_hbl(
-                booking.vessel_details_ids,
-                "freight.sea.hbl.vessel.details",
-                "hbl_id",
-                extra_values={"hbl_id": hbl.id},
-                excluded_fields={"booking_id"},
-            )
+        vessel_fields = [
+            "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
+            "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
+            "stuffing_date", "contact_id", "yard_id", "depot_id",
+            "depot_instruction", "general_instruction"
+        ]
+        hbl_update = {}
+        for field in vessel_fields:
+            if not hbl[field] and booking[field]:
+                val = booking[field]
+                hbl_update[field] = val.id if hasattr(val, 'id') else val
+        if hbl_update:
+            hbl.write(hbl_update)
 
         if not hbl.cargo_info_ids and booking.cargo_info_ids:
             self._copy_cargo_info_lines_to_hbl(booking.cargo_info_ids, hbl)
