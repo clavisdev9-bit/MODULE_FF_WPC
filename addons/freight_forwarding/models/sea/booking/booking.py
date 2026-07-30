@@ -2,7 +2,7 @@ from odoo import api, fields, models
 
 class SeaBooking(models.Model):
     _name = "freight.sea.booking"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ["mail.thread", "mail.activity.mixin", "freight.sea.vessel.details.mixin"]
     _description = "Sea Booking"
     _rec_name = "name"
 
@@ -163,11 +163,6 @@ class SeaBooking(models.Model):
         "booking_id",
         string="Shipment Info",
     )
-    vessel_details_ids = fields.One2many(
-        "freight.sea.booking.vessel.details",
-        "booking_id",
-        string="Vessel Details",
-    )
     purchase_order_ids = fields.One2many(
         "freight.sea.booking.purchase.order",
         "booking_id",
@@ -324,14 +319,19 @@ class SeaBooking(models.Model):
                 excluded_fields={"booking_id"},
             )
 
-        if not hbl.vessel_details_ids and booking.vessel_details_ids:
-            self._copy_records_to_hbl(
-                booking.vessel_details_ids,
-                "freight.sea.hbl.vessel.details",
-                "hbl_id",
-                extra_values={"hbl_id": hbl.id},
-                excluded_fields={"booking_id"},
-            )
+        vessel_fields = [
+            "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
+            "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
+            "stuffing_date", "contact_id", "yard_id", "depot_id",
+            "depot_instruction", "general_instruction"
+        ]
+        hbl_update = {}
+        for field in vessel_fields:
+            if not hbl[field] and booking[field]:
+                val = booking[field]
+                hbl_update[field] = val.id if hasattr(val, 'id') else val
+        if hbl_update:
+            hbl.write(hbl_update)
 
         if not hbl.cargo_info_ids and booking.cargo_info_ids:
             self._copy_cargo_info_lines_to_hbl(booking.cargo_info_ids, hbl)
