@@ -13,9 +13,3 @@ class SeaQuotationCargoInfo(models.Model):
         required=True,
         ondelete="cascade",
     )
-    
-    freight_items_line = fields.One2many(
-        "freight.sea.quotation.items.line",
-        "quotation_cargo_info_id",
-        string="Freight Items Line",
-    )

@@ -217,13 +217,22 @@
         </field>
     </record>
 
-    <record id="view_sea_quotation_list" model="ir.ui.view">
-        <field name="name">freight.sea.quotation.list</field>
+    <record id="view_sea_quotation_list_custom" model="ir.ui.view">
+        <field name="name">freight.sea.quotation.list.custom</field>
         <field name="model">freight.sea.quotation</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="sale.view_quotation_tree" />
+        <!-- Hapus mode dan inherit_id -->
         <field name="arch" type="xml">
-            <data />
+            <list>
+                <!-- Masukkan field sesuai urutan yang Anda mau -->
+                <field name="name" string="Number" decoration-bf="1" />
+                <field name="create_date" string="Creation Date" />
+                <field name="freight_type" string="Quotation Type" />
+                <field name="container_type" string="Container Type" />
+                <field name="partner_id" string="Customer" />
+                <field name="user_id" string="Salesperson" />
+                <field name="amount_total" string="Total" />
+                <field name="state" string="Status" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'sale'"/>
+            </list>
         </field>
     </record>
 
@@ -252,8 +261,8 @@
         <field name="name">Sea Quotation</field>
         <field name="res_model">freight.sea.quotation</field>
         <field name="view_mode">list,form</field>
-        <field name="view_id" ref="view_sea_quotation_list"/>
-        <field name="views" eval="[(ref('view_sea_quotation_list'), 'list'), (ref('view_sea_quotation_form'), 'form')]"/>
+        <field name="view_id" ref="view_sea_quotation_list_custom"/>
+        <field name="views" eval="[(ref('view_sea_quotation_list_custom'), 'list'), (ref('view_sea_quotation_form'), 'form')]"/>
         <field name="search_view_id" ref="view_sea_quotation_search"/>
         <field name="context">{'search_default_my_quotation': 1}</field>
     </record>

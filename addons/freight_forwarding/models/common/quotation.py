@@ -77,24 +77,29 @@ class FreightQuotation(models.AbstractModel):
     delivery_zip = fields.Char(string="Delivery Zip")
     delivery_country_id = fields.Many2one("res.country", string="Delivery Country")
 
-    @api.onchange('pickup_city')
+    @api.onchange("pickup_city")
     def _onchange_pickup_city(self):
-        if self.pickup_city and self.pickup_city.zipcode:
-            self.pickup_zip = self.pickup_city.zipcode
-        if self.pickup_city and self.pickup_city.state_id:
-            self.pickup_state_id = self.pickup_city.state_id
-        if self.pickup_city and self.pickup_city.country_id:
-            self.pickup_country_id = self.pickup_city.country_id
+        city = self.pickup_city
+        if not city:
+            return
+        if city.zipcode:
+            self.pickup_zip = city.zipcode
+        if city.state_id:
+            self.pickup_state_id = city.state_id
+        if city.country_id:
+            self.pickup_country_id = city.country_id
 
-    @api.onchange('delivery_city')
+    @api.onchange("delivery_city")
     def _onchange_delivery_city(self):
-        if self.delivery_city and self.delivery_city.zipcode:
-            self.delivery_zip = self.delivery_city.zipcode
-        if self.delivery_city and self.delivery_city.state_id:
-            self.delivery_state_id = self.delivery_city.state_id
-        if self.delivery_city and self.delivery_city.country_id:
-            self.delivery_country_id = self.delivery_city.country_id
-
+        city = self.delivery_city
+        if not city:
+            return
+        if city.zipcode:
+            self.delivery_zip = city.zipcode
+        if city.state_id:
+            self.delivery_state_id = city.state_id
+        if city.country_id:
+            self.delivery_country_id = city.country_id
 
     # Extra Info
     description_of_goods = fields.Char(string="Description of Goods")
@@ -117,9 +122,7 @@ class FreightQuotation(models.AbstractModel):
     # Shipment Info — Common
     origin_id = fields.Many2one("res.city", string="Origin")
     destination_id = fields.Many2one("res.city", string="Destination")
-    est_transit_time_days = fields.Integer(
-        string="Est. Transit Time (Days)", default=0
-    )
+    est_transit_time_days = fields.Integer(string="Est. Transit Time (Days)", default=0)
     est_transit_time_note = fields.Char(string="Est. Transit Time Note")
     frequency = fields.Selection(
         selection=[("weekly", "Weekly"), ("bi_weekly", "Bi-weekly")],
@@ -169,7 +172,6 @@ class FreightQuotation(models.AbstractModel):
             if record.est_transit_time_days < 0:
                 raise ValidationError("Est. Transit Time (Days) cannot be negative.")
 
-
     def _sync_sale_order_rows(self):
         """
         Sync baris dari tabel quotation masing-masing ke sale_order.
@@ -215,7 +217,7 @@ class FreightQuotation(models.AbstractModel):
             )
             """
         )
-        
+
         # Perbaiki issue currency di order_line (sale.order.line)
         # Karena INSERT/UPDATE ke sale_order di atas menggunakan raw SQL,
         # ORM tidak mendeteksi perubahan dan tidak me-recompute related field (currency_id) di line.
@@ -230,12 +232,12 @@ class FreightQuotation(models.AbstractModel):
                   AND so.id = ANY(%s) 
                   AND (sol.currency_id != so.currency_id OR sol.currency_id IS NULL)
                 """,
-                [ids]
+                [ids],
             )
 
         # Invalidate ORM cache agar data yang baru di-sync terbaca dengan benar
         self.env["sale.order"].invalidate_model()
-        self.env["sale.order.line"].invalidate_model(['currency_id'])
+        self.env["sale.order.line"].invalidate_model(["currency_id"])
 
     def copy(self, default=None):
         """
@@ -244,14 +246,14 @@ class FreightQuotation(models.AbstractModel):
            Tanpa ini, saat duplicate Odoo me-reset date_order ke hari ini
            sehingga validity_date ikut recalculate → beda dari aslinya.
         2. Menyelesaikan issue "Missing Record" saat menduplikasi order_line.
-           Karena order_line divalidasi ke tabel sale_order, kita menunda 
+           Karena order_line divalidasi ke tabel sale_order, kita menunda
            duplikasi order_line sampai setelah record disinkronisasi ke sale_order.
         """
         default = dict(default or {})
         # Salin validity_date dari source agar tidak di-recalculate
         if "validity_date" not in default and self.validity_date:
             default["validity_date"] = self.validity_date
-            
+
         # Tunda duplikasi order_line dari ORM bawaan
         copy_order_lines = False
         if "order_line" not in default:
@@ -262,15 +264,14 @@ class FreightQuotation(models.AbstractModel):
             # suppress copying di Odoo ORM — normalize ke False agar lines tidak ikut ter-copy.
             default["order_line"] = False
 
-            
         new_record = super().copy(default=default)
         new_record._sync_sale_order_rows()
-        
+
         # Setelah record disinkronisasi ke tabel sale_order, barulah aman menduplikasi order_line
         if copy_order_lines and self.order_line:
             for line in self.order_line:
                 line.copy({"order_id": new_record.id})
-                
+
         return new_record
 
     @api.model_create_multi
