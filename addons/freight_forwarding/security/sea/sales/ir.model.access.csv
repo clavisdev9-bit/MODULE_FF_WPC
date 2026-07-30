@@ -49,5 +49,3 @@ access_freight_sea_quotation_user,Freight Sea Quotation User,model_freight_sea_q
 access_freight_sea_quotation_admin,Freight Sea Quotation Admin,model_freight_sea_quotation,base.group_system,1,1,1,1
 access_freight_sea_quotation_cargo_info_user,Freight Sea Quotation Cargo Info User,model_freight_sea_quotation_cargo_info,base.group_user,1,1,1,0
 access_freight_sea_quotation_cargo_info_admin,Freight Sea Quotation Cargo Info Admin,model_freight_sea_quotation_cargo_info,base.group_system,1,1,1,1
-access_freight_sea_quotation_items_line_user,Freight Sea Quotation Items Line User,model_freight_sea_quotation_items_line,base.group_user,1,1,1,0
-access_freight_sea_quotation_items_line_admin,Freight Sea Quotation Items Line Admin,model_freight_sea_quotation_items_line,base.group_system,1,1,1,1

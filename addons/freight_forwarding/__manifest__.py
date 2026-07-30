@@ -48,9 +48,7 @@
         # Sea Quotation
         "views/sea/sales/quotation_type.xml",
         "views/sea/sales/quotation.xml",
-        "views/sea/cargo_info.xml",
-        "views/sea/sales/cargo_info.xml",
-        "views/sea/sales/freight_items_line.xml",
+
         "views/sea/sales/rate_enquiry_actions.xml",
         # Air Quotation
         "views/air/sales/quotation.xml",

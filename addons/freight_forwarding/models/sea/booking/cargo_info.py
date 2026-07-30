@@ -18,11 +18,5 @@ class SeaBookingCargoInfo(models.Model):
         string="Quotation No.",
         related="booking_id.quotation_id",
         store=True,
-        required=False,
         readonly=True,
-    )
-    freight_items_line = fields.One2many(
-        "freight.sea.booking.items.line",
-        "booking_cargo_info_id",
-        string="Freight Items Line",
     )
