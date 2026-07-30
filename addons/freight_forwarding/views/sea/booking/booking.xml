@@ -88,9 +88,6 @@
                         </group>
 
                         <notebook>
-                            <page string="Extra Info">
-                                <field name="extra_info_ids" nolabel="1" />
-                            </page>
                             <page string="B/L Info">
                                 <group>
                                     <group string="Shipper">
@@ -169,9 +166,6 @@
                                 <group string="General Instructions">
                                     <field name="general_instruction" />
                                 </group>
-                            </page>
-                            <page string="Pickup Info">
-                                <field name="pickup_info_ids" nolabel="1" />
                             </page>
                             <page string="Cargo Info">
                                 <field name="cargo_info_ids" nolabel="1" />
