@@ -4,4 +4,3 @@ access_freight_sea_quotation_cargo_info,access.freight.sea.quotation.cargo.info,
 access_freight_sea_hbl,access.freight.sea.hbl,model_freight_sea_hbl,base.group_user,1,1,1,1
 access_freight_sea_hbl_cargo_info,access.freight.sea.hbl.cargo.info,model_freight_sea_hbl_cargo_info,base.group_user,1,1,1,1
 access_freight_sea_hbl_shipment_info,access.freight.sea.hbl.shipment.info,model_freight_sea_hbl_shipment_info,base.group_user,1,1,1,1
-access_freight_sea_hbl_vessel_details,access.freight.sea.hbl.vessel.details,model_freight_sea_hbl_vessel_details,base.group_user,1,1,1,1
