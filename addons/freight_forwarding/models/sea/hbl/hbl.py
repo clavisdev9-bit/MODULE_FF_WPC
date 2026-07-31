@@ -7,6 +7,7 @@ class SeaHBL(models.Model):
         "mail.thread",
         "mail.activity.mixin",
         "freight.sea.shipment.info.mixin",
+        "freight.sea.vessel.details.mixin"
     ]
     _description = "Sea Jobsheet"
     _rec_name = "hbl_no"
@@ -214,6 +215,12 @@ class SeaHBL(models.Model):
         "hbl_id",
         string="Vessel Details",
     )
+    shipment_info_ids = fields.One2many(
+        "freight.sea.hbl.shipment.info",
+        "hbl_id",
+        string="Shipment Info",
+    )
+    pbm = fields.Char(string="PBM")
     custom_permit_ids = fields.One2many(
         "freight.sea.hbl.custom.permit",
         "hbl_id",

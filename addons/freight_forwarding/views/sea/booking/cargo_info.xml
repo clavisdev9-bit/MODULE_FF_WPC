@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
         <record id="view_sea_booking_detail_cargo_list" model="ir.ui.view">
@@ -6,9 +6,12 @@
             <field name="model">freight.sea.booking.cargo.info</field>
             <field name="arch" type="xml">
                 <list>
-                    <field name="uom" />
-                    <field name="package_type_id" />
-                    <field name="types_of_cargo" />
+                    <field name="container_no" column_invisible="parent.container_type != 'fcl'" />
+                    <field name="container_type_id"
+                        column_invisible="parent.container_type != 'fcl'" />
+                    <field name="package_type_id" column_invisible="parent.container_type == 'fcl'" />
+                    <field name="quantity" />
+                    <field name="gross_weight" />
                 </list>
             </field>
         </record>
@@ -21,25 +24,24 @@
                 <form string="Sea Booking Cargo Info">
                     <sheet>
                         <group>
-                            <field name="booking_id" />
-                            <field name="quotation_id" />
-                            <field name="uom" widget="radio" options="{&quot;horizontal&quot;:true}" />
+                            <field name="booking_id" invisible="1" />
+                            <field name="quotation_id" invisible="1" />
                         </group>
 
                         <group>
                             <group string="Box / Pallet / Load">
-                                <field name="package_type_id" invisible="uom == 'container'" />
-                                <field name="container_no" invisible="uom == 'box'" />
-                                <field name="seal_no" invisible="uom == 'box'" />
-                                <field name="container_type_id" invisible="uom == 'box'" />
+                                <field name="package_type_id" />
+                                <field name="container_no" />
+                                <field name="seal_no" />
+                                <field name="container_type_id" />
                             </group>
-                            <group string="Qty &amp; Type" invisible="uom == 'box'">
+                            <group string="Qty &amp; Type">
                                 <field name="types_of_cargo" />
                                 <field name="quantity" />
                             </group>
                         </group>
 
-                        <group invisible="uom == 'container'">
+                        <group>
                             <group string="Dimension">
                                 <field name="length" />
                                 <field name="width" />
@@ -79,8 +81,9 @@
                             </group>
                         </group>
 
-                        <group>
-                            <field name="freight_items_line" />
+                        <group string="Description">
+                            <field name="description_of_goods" />
+                            <field name="marks_and_no" />
                         </group>
                     </sheet>
                 </form>

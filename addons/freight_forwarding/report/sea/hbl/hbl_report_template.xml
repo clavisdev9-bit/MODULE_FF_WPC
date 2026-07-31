@@ -439,17 +439,7 @@
                                                     </div>
 
                                                     <!-- Articles (one2many) -->
-                                                    <div>
-                                                        <t
-                                                            t-if="cargo1 and cargo1.freight_items_line">
-                                                            <t
-                                                                t-foreach="cargo1.freight_items_line"
-                                                                t-as="ln">
-                                                                <span t-field="ln.article" />
-                                                                <br />
-                                                            </t>
-                                                        </t>
-                                                    </div>
+
                                                 </div>
                                             </td>
 
