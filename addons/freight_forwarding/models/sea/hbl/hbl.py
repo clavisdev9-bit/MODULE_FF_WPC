@@ -109,6 +109,14 @@ class SeaHBL(models.Model):
         string="Warehouse Location",
     )
 
+    # NOTE (FF-21): field baru untuk report "Shipping Instruction".
+    # Diisi manual oleh staff, BUKAN hasil konversi angka-ke-kata otomatis --
+    # sesuai contoh lampiran PDF, isinya berupa catatan bebas (mis. "PLS
+    # ISSUED SEAWAYBILL"), bukan selalu representasi jumlah paket.
+    total_packages_remark = fields.Char(
+        string="Total No. of Packages/Units (in words)"
+    )
+
     # Customer & Sales
     customer_id = fields.Many2one(
         "res.partner",
