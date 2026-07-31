@@ -45,6 +45,8 @@
         "report/sea/quotation/quotation_report.xml",
         "report/sea/hbl/hbl_report_template.xml",
         "report/sea/hbl/hbl_report.xml",
+        "report/sea/hbl/shipping_instruction_report_template.xml",
+        "report/sea/hbl/shipping_instruction_report.xml",
         # Sea Quotation
         "views/sea/sales/quotation_type.xml",
         "views/sea/sales/quotation.xml",

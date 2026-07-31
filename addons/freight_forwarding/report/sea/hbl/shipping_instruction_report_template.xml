@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="shipping_instruction_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
+                    <div class="page">
+                        <style>
+                            * { box-sizing: border-box; }
+                            .page { font-size: 14pt; }
+                            .page span { font-size: inherit; }
+                            .container-fluid { width: 100%; }
+
+                            /* ── Table (pakai nama class bawaan .table supaya menang cascade) ── */
+                            .table { width: 100%; border-collapse: collapse; }
+                            .table, .table th, .table td { border: none !important; }
+                            .table td, .table th {
+                                font-size: 12pt !important;
+                                padding: 8px 10px !important;
+                                vertical-align: top;
+                                line-height: 1.6;
+                            }
+
+                            .si-label { font-weight: 400; font-size: 12pt; margin-bottom: 2px; }
+                            .si-header-company { font-size: 16pt; font-weight: bold; color: #1e1c1c; }
+                            .si-header-sub { font-size: 12pt; font-weight: 500; line-height: 1.5; }
+                            .si-title { text-align: center; font-weight: 400; font-size: 14pt; margin: 24px 0 14px 0; }
+                            .si-inline { display: table; width: 100%; }
+                            .si-inline-row { display: table-row; }
+                            .si-inline-label { display: table-cell; font-weight: 400; width: 90px; white-space: nowrap; padding-bottom: 4px; padding-left: 15px; }
+                            .si-inline-colon { display: table-cell; width: 12px; }
+                            .si-inline-value { display: table-cell; }
+
+                            .no-left-border tr > th:first-child,
+                            .no-left-border tr > td:first-child { border-left: hidden !important; }
+                            .no-right-border tr > th:last-child,
+                            .no-right-border tr > td:last-child { border-right: hidden !important; }
+                            .border-dark { border: none !important; }
+                            .text-center { text-align: center; }
+                            .mb-0 { margin-bottom: 0; }
+                            .mt-0 { margin-top: 0; }
+                        </style>
+
+                        <div class="container-fluid">
+                            <!-- Letterhead -->
+                            <table style="width:100%; border-collapse: collapse; border: none !important; margin-bottom: 6px;">
+                                <tr>
+                                    <td style="border:none !important; width: 135px; vertical-align: top;">
+                                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJIAAAC3CAIAAAB2eJBcAAA8g0lEQVR42u19B0BUV/rvvdMrvXcQUARRsVcEjTFqminGxPRm7Jrdzb5t2fLfkv1v7CU9RqMxvVmjAmLDrkiR3utQp8+t75xz7wwDMwOouMm8N9/ussht55zf188538FZlsU85G6EI9hYrZnSWiihEP+52+Mhl0TTrFoq9JaJAWocbNgbx4v+fbJCIBH93G3zkEtiCGrtjLiNc5Mxq7RhvzpW/HZ2CSaV/Nxt85BrMhOr0hO2zLOD7dfHiv+TU4rJPLD9gslErE5P2HzvSMwDmzuRBza3JA9sbkke2NySPLC5JXlgc0vywOaW5IHNLckDm1uSBza3JA9sbkke2NySPLC5JXlgc0vywOaW5IHNLckDm1uSBza3JA9sbkke2NySPLC5JXlgc0vywOaW5IHNLckDm1uSBza3JA9sbkke2NySPLC5JXlgc0vywOaW5IHNLckDm1uSBza3JA9sbkke2NySPLC5JXlgc0vywOaW5IHNLckDm1uSBza3JA9sbkke2H4GYvn/gTHHbq/+49DABh5kXJcQxXFM4KJ14Kn+a4+CB3H8lh/s8xQ3TCxqJ/cTw3o/joaPewrHnH/xtokbHJpBQwR+Wj/BwCGHnwZtAp8WCV121pGGADbwFI6Fq6R8C3qTEMc7zKTeQmECgcPQ0xKRKEQpoV0AIMDxBr2FAb217wzoLcv4KcUKkYjFnDwoEuBNBgtBMRgugIMFfgE/xQKJTOwrFfnJxb4ysVomVooEEqFQiLMkwxpIut1INuvNjXqCMBHwrSIcEwrgG26baPRdmgVDEOAtG+6vGhmgTPBThajE3jKJVCgAo60nKY2BrOg0FLTqbrTqG7tNsLVS4cDfHQLYGNZHLqpfm6GUiJxIAC5443jxv3PKMKm4N9gMZqZ2LhqzbHw0/N2RAFQsFrM5u6bLBEfQfjgwrGRVeqK/ysmDuEBvIaO35HQYLbDzOLYsLWpunP9wf2WwSuorkwgE/bFzp8lSrDEcKmv9sqi5tFkLRhwTiW5Zj9E0RkEBGh3mvWRU6ML4wER/tVg0EBIse7Ndvye/4V9nqhiWHUDshgQ2pUTYtD5T3QcYK73+U9GG3LK+dUUZWiQUNq7NDIRi6qojbNjGE81aSy/YSGpitN/5F6chyXbSt/ev1L7y5VVMLsEYJsZXUbUm4xZHnacTlZrfnLh5pboDA+wIvz8IyeOEWyx4MjXsjSlxqSHetq5ggwO/00T4/+cEy7CY4O7DJhYKGtZlBCqdA7DyYOH2M+VwHO2JIO9LCjn05ETwUdwFZ5kpJmzDiU4j0Qs2E7Ht4dErJsQ4eQAx6YjtJ0tatVBKSPLe4SFHnpp4K2D1ehX4/7dOl//2aDEUO6FwgEeAkJH0/OQwMJrx/kr7lwyetuRVrfk+H1MMNPhDAhsuxOtXZ4R5yZxef/nH/A/OV/dSkiwsG/vFUxMeSw7r58VA3YVuzNJb6B7Wo2kBYJG1mSFq59/KrmzL/OgslA8wXmbij3NG/DVj+C0NXG+CUvJ5Qf0TQHxBGwQukAOqmqIUcvGHD6Q8kRJxu5+CGE/58EweJ9/905DABn5UrU6P8VU6vf7cd9c/uViDyexgo2m1TNK8PlMhEfajPTpMROiGLOhc2GAjyYy4wKznprh6ZP7eC4dvNmMSMRwFM3XguYkLEkNucxztRvOfp8t+d6gYdsGxsQyDEXRSuPeRp8ZHeStvQ8Js1NBtjNicA1lFMNAbhsaTpJmbq2cBZ8np9ae+ubrvcl0v2Czk0rTIPYvG9v/iFr0lfOMJ6IJw3YAySu5+Iu3pVOccXdGuj9+aA/kAKFUaetvlqzOG+SmxOyUoc8k7Tha1IN1rTwzkpKlx/tnPTJaIBtKiA9E7l2pe++YaHPkBcR8a2Cg6f0X6qGAvp9cXf3Xli2v1PUoSseeJl6dkxgT2/+LaLlP05iwIAwcbChga183yVzjXkGsPF24+VYHJ0YcoOkAtAzeLhU4Vjr2PYPvduePAMIxAINhzvf6Z/VcwuahHmEBHSGZslM+FF6cC94q7rb9RGkgK0z8+m1vVjokHUcp/aGAjqYvLZowP93V6/aHPL39/o6EHNpoO95HVrs5Evnh/PSnr0CcCpQHjJ3QbQS8YGXxgyQSnXowBGsJsnZngfQeCmhoXcOZ55+rUSFCgVZVdJoKiQTNCVbKHhgetmRQjE4tcjT6IKII3ZFO0ncamKH+V7OaKGQEu2MgGOTdMhS26vMauwla9xkQwNHC/ReFe0hH+qlFBqpFB6i4TGfAfoFpolxZ06GEj6NOvTJsW5ef0+oLPLhwqbO6BzUyunTls473JLMPggv686oIW7ajtJ2H6AMZwwFaRXz094ZGkvl4MNzQ7L1YvBxpGLuU5wUIsnzps+/wUp2++0aJN3ZwNGUKIshUY7EJSlM/Fl6YpJWJX7enxUTHk6zPMiecmZ8YFukKaZRkcF5gIetvF6ncu11W26YEOQKE0im5xFmNx6BmIBWE+iggv6YW6Lshzg7GMQwQbdez5yXOGBTm9Pu/T80dLW3nZhxqVurZ81ugQrwFffKmha8I7ufBBABvNquTC5nWZzoaVRWOaWwICZM4HQ57q7sVpT4+OdPrmffkNT+2/1CsmAY+YLL+bM+Lvs0e4as/sPeeyytr4jpjIFydHf/DA6P67cLis5bkfbrQCwMRCyH+OSUgu8caghA/UK4Mb86GADbL2D89Mun+4c59t9u68rFINJkW9pagRQV7FK9J7vQAqPcxRYZ6pbZ/+7lmU7MGBF/PYmIgvHk1z+okTFW1zPgZ+vzUthMzt9eUz7QLeXrTi4I0d5yr7ZgBIKi3C9/Ir0111dN7eC0dLWiBsFCOXCevXZPq5CLA4Nf7u5epl3+WjyEGACe4gT3a3YANB2JMTHktxHoTN/PjcqSorkxqJf8xP/j8z4u1vsNBUh5EKdQjFjle23fPBGeSCwiDs8AtT5sU7F+i5n+YdK2nFbIIIEzeCpvVz1FLn5n3yR2fPA+PfJzwiqJGhXoXL0zEXNOuTcycrUEdM5BuZif+aM6IfPf9VUcNjn17GpIJB2apbpaGZATASux5Pe3asc400+cOz52vboUkArheDVa2bFePTyym/2tTVaSKBkejz4MGy1oW78qBRpGlg/OvXZchgZq+vUJa26YZvzYV/tiVTKCY5VF2wbKaz5rAWionYlNWmt/RNfFjIh0aFfrt4gqtejtxxshjEAMCHEeB1qzPCveWu7qzrNg7bmktSJCa8Oyc8DQ1sJmLHojGvjY92enHCB6cv1XRC1iapyTH+516Y2scb/nN2yYxov9kOsH1Z1Pj4pxdhSwjq2QmRux4cwxn5HgQQs686VLDtTGWvuJAgnxgb+ZmLuLCsXZe49SSaJbETFBSeH3lh0r3xwU6f0pnJ0E1ZBguN0dSchOBjT0/qZzwe/uLyd9cbejXpFwkb+e8Fyb+eNszpxTHvnLrepIWiYCLef2zMS2l26CL8knfk7HlobFpYXzu053odCpXEmIXKeWlaeqy/48v1FgL4/Xoz2Ut0TOSmB1LWTI5z2p7vi5seAtwgtUt5sAxmJJ+YEPXZI2muAqzc6vZ0oLEB85nJXY+5VC2Ailp1ycABhvbsrp2BNzSwmck/z016Mz3B6cWRO3KLW3SgD2IR3rQ20793xhny/paTZWsy4h3SGTsu1qz49jpwNEK9pPVrM5062dsvVK8E98jtMgvIs819edqMaH+n7fn1T8X/yQIdtPqcFJzBe3FSzAcPjOonjnz5h/wPLtRgEgF4pGr1LFeZPECrjxRuzbVG/XeJhkpJ/iYz8a05SU4vJmzNLm8zYgw9f0TIQYd8/D9yy35/pKjht/eEeSn6XPr36fI3DhUCVfba1NgdCxwjMJjUSNyWU6bR9co5MbRQIGhYlxmsch4FLzuQv7+wCUPTsH5yydRI75XjYyZG+PYzvdJhJMI3ZZktFLglyl9Zs2YW+rPzm4dtzYYhmuhunls4RLBRy2fEbr/PeWwbszmrptMEJMBpsJy8I7dIo9f8anaAw7zPH7Ju/v14CRjds69OnxLpJJb/qbz13o/zYGhhr9ZoOtpPUb16lvMZMjQXT9EsycDVATKxYDAzYcsO3Hj3bBWnru8ZHvSTa8MGnJGoTTnwt7unIbGhgs1CPj8x+iOnsScL3LbshnaDWi1tXJep6h0sl7bph2/OksolII72kff94uojBVtPlkcGe9WuybQuu7AffXzOnrwTpXZ+v7Ux80eGHHzytqbZ+rYdujxHy1vn7T6PidAaBQvx2tS4HfNHuXokt6Y9/b3TyHD+8mEj6MVjwvY/4iQWphg6fEN2a4dxybjIfY+M7eMK/vlkyV8O31T7ypvWZigdJsdf+O76x2cqVmYkbp2fAoOH3ratpE03Avj94G99bB40tMPfTL+TabYeAh7/uA/PmgiKd3nM5D/njfxt77jTnr4obFi899Kgsvh3QkMlbfenhP3wxHhnV5iQTSe6OozHXp46x97FR+ICLVOL1kctb1ybIXeYG3z0y8tfX6w5typjcqSTJPWKQwU7+vj93GvN5KHnp9yX4DwwHzRB4T5b13Hvpxf1JjS9zjGHiXjv0TEvp0W7euyjK3Uvfnll4OnpO6Shkra5iYFHnWl8g4X0f/uESixsfX0O6ngPE15s7Jy48zQAL0AtbVg7WyLua4oyPjl3vVXf8as5mEPqS2umwjadMJhIrM8sF5yzZatXZ0T7KrDbJH4R3L/PVLxxrATGBjDGt7bNSHzyxLhnRrucwt6bX7/0s8vuAhs1Iy4g19ksSZeJ8P3XsVcnRL2zsK89WPbjjXfzqjGxIEglrV+XIXZYrDH6nVPjw7w+7G0yOWW5Na9y9fc3nIwOzQQhIyq8pRxgr1iN/a64+ffZZUX1XaBtfdnCSHy0eOzzY6JcvSm7uj3z/dMw2+kGSpKgJkb7nn/JSRK2VW8O/t/jeS9PnxThYz9OZpIO25TVaSDAd0O8ZfVrwED37ejwbdnvLkid1TfKhtIQvyWnol3nxMkm6elx/qecrVrofxoTWK8bGt23xc37CptqW/QQMC4F3Pc+8u2FyeunDnP1nma9OXxjNjPIabPbpqGBjaRGhfnkL5vheKWq03jv3gulK2cizdMDzJcFDY/vQ6abYcIAbGsz8D5rOll2zqfnDywZL3PA5mh5y7yPzztfBmohVk8ftnme81CkrF2/41JtvK9CieyokaSadURll7Gsw1DaYejSEVCWxWipjys/0EytnBa3dX5yP4Mx/aMzZ6o64XTE3aOhgY2iEoO9Spzlzq82dX1zs/lvGSPgbCQ/zQs1EpoW0GBiMVBroV4wTSzojUG3mXjnUu0b0534bJmfnM8u1zgZFzQXse+J8UtSw502891L1cv2XYZeDLcMF7fOfolwfsX7gMuBCSo9PiDn2Sn9rBM8UtZ6365zdzcGGCJpo2MDFJWrMx2vFLR0C3B8ZFCvSdHydn3ClpMYnDWE673DfGQNazIwB9g6TGSsQw6pWKMbuTWHn/LuQ2ia7cbK9JQg53OwL3x/7eMLtXeU4aVoP5UU+L1SVys+EFM++9313cBsgw8J7w5yQyRtdKiPomHtLNyBWymGgUaLYe3npX5/ovgfJ8qglhNA2CJ9FbWOa4dR/+0NEhfzvfrjjffyqpwPPUOrpJLm9RmuFhaMfe/UtbqugVch9kNw2Q+d/dLUWTEBrm+C1hcufLpSByMHsQuVC7d0oMXwENpbnEQdKtgCUbZXMuDSXQwulI7YeKJJa+YDWAibHOZBBkFdJkvophyz2cHv54igUiO8r7/qdJoN+IBk6IZsLdxEcmcSYCEXj4nY/2haP3qSo93X6/50srymVQ/DEtuCUBopZxrEFbi/tyLaS3aloRsbcIdAHxoa2BjaWyYBbrdiEIx8uLxl/kd5PXmEW4Ftw7mK138sgElIpz6hmVw6PnLPw86n2QpbtSnbTjrXrrdENA3ko2pV38nevsQFFQx7rqEzq6q9QKPvAlEmjgFvKFQlSQpQpoV4Twr3udjYPemdU/wy6sHTUMEml4ib1mV692s2OPZc+NnFg0VNPYlEmonyldcMDrbYzdnVHa6T60Zi2yIX2wMwbH9Bw5J9Q5R2slCPpIZ/9XjanaxB5qiwRZuy/daZaWhgo2mxWNCwdrar3Rs2atLBsIZl7cIamonzU1asTh8wE3+gpOX+T/JcjjuaZkPr/pxPs609UrT5dAUmHYr5FBoubN2/ZOzilIgBlw32Tw3dpojNWXDl3S2p7iGCDXgcbP262WFqWf83wim0w4W9kgiDgQ0x9axd505WopjBKTGsSIgDiQ9wwTozPj532rYS6c6JogUi4eWXpowJ9bkT5LRmMnxT7+0pg6Ghgg38qFyTHuvb/4J7NmHryXKNrtfYDU7aClq1o7ahmX6hiwGimLgARcUqp7vZWIpmwei06swD73caPFG0UibOembixHDf29aWDMOGb85q7ja77JdTGrK92zRbvHLmiEB1P3edqe2Y/t4paNV6zWoyw/yU5QPB9soP198/X8uvJHBKBL1wZMiPS8Y7vVjVoY/bmot2SQ/pekUKuCeCDxamvJgWddvvQAvC9LfmTA4ZbCSTv3LGqGBvlzfg+NPfXP30Sn1f60IxiUGqkhXp/by+00SEbcg2U2R/iT4z8de5SX9MT3R68WBpy8Jd553vdLpDAshRzD1JQRvmJqUEed/Kk/zEb+Ynedlw+eWtqIGhg42+vGx6movdGxhU4kTopiyjhemrxGlmRKCquF/Y/nO24tcHCvpzAkHDCeL489NmD3MeBf85u+Qvx0vu1go4tAsCiN3cxIAV46IzYv1d7Yfu/RBb1mE4VNryP6er2o3Ez2HbMDj6Mb4KuUTgtOoBUIpGC13TZcRwYd+EAMuKBYIEPznj4sUgoinrNFooqj9Rg7NsUNlKRLhjA8AbqnVmNNt5N9O7DAMlj2FVKmlqiHpimO/oYFWEl1wtFgqFAgZO39JdFqpBayppNxZpdEXt+oYuEwb4WHbrK5eHspwMcIv7qTGCo9UDrnx3eqDqJAMyI4sGjr2DNwwJcaVP4H4cmk+ICNF2Idhzht/dw+0n5pp0e2GfpwrQ3aW+sn+7ZX/6kAc2tyQPbG5JHtjckjywuSV5YHMPshXpo2no5pjIV2clcovhPLDdBeI9SZb/MfjUGopE+aKGaDsneFaukER6yYYHKMcEez02MoSrKOKB7XbJVtYT/mBQuMbVTISFbcQigVCAUwxNgdgU77dwCR/wIbRYHJMKQ9XSRD/VmBCvieHeqcFeCb4KKcqBkRTdarCEe8MlvB7YBkEcMFwFTwazxtEQD4FYoBKLvGViX7k4QC7xkcOMuYGgWnTmRp2pw0RRsDCm3avgS1BtUAZlG8CrZKJIb3lKgGpShPekCN8kP1WUj8x+eU6xRnewtOWHMs2p6vZXxke9uzAV88DmhPjqE4y15ivLCZBEJFRJhb4ySYBCFqKSBCvl/gqJj0wMVKCBIBt1lvJ2fVWXoVlnMZEUn7jhNmSxOMrm0KhCKAbkKVgtSw5UTY30nRbhmxykBjqwT96kVW86VdP57c2WrNqOpi4jRsK6ohhJr85IdFuXhOP9XkOMWYs9sdb1tLcyIWJDyJaOEonkYqGPTBKkkoSp5MFKaYBCCkRKJYF/BwNopGiNnqjuNtxs01V3GtpMBBhTawlfgTWnxfI4CTGFQjIiQDU53GdmtF9aiDrWRylymGkjKeZaS/eB0taD5ZprzVraRMFOiND2EQ5UN/AkbZYDbcuwVvbF+ZlJODi4SCgUi4QSsVAkgpk+MEgESRvMJM1X3XH1ZrYHKowv6CLjQFJLI9TyMLXcXy72lkrlElwsEOL8Ui1YpBeYlupOY3G7rk5r7DaQ0MET2Go0C1CWleYVoFgY7iMfE+w9K9Z3eqRfkr/SW+58bJu0ppzajq+Lm07VdrV2GiELijkWdMi//7Jgs2XwbNoJ49YOAw0vEKLqxgAbmVgkBcwuAT/FwEQDDqQZ1kKROiP4r1lvJi0UxcJayWxf5421Og4sGlNWgEkEaokIyFCElzzSWxGolPrJJHKJUCIQMAzLgEFDhaPA/wwkozFYqjr1N9v1dd1GnYmEAgSX0Ql7Cq0xsMYRZC25ONFPMTXCb06s/4Rwr3hfFe4ikU0zzPUW7felLQdLNVdbtIyRgu/kJvH7yTL/bLDZPGOubhFXgAolxYHSkABgxEK5BI6gTCqWCEViMcQMcLwIDABcZsiYCFpnMnfqzVqj2WwhaZJGiVrre2x9RnUTkQcBRVMghjYpWCWN9lYAqIIUUi+5RCaErAFgohio08C/IJ/gIDpiWo0QqqJ2fX2XUW8hYBFk6MoJMG7TF404AE5f4DKlaGSgemaU7z1xgWNDvHpXx+m7K1xjMJ+q6fqquCm7uqMZWCxUCRutaf+v1dwaLEJYr2LuAihAIrFACoyHVAwcWzkQHYkQ/BPIjxCNOyqQxrEp7DZBUyYLpTUS3XoTgAqoQR4Prqu4teYkXzuelydcIvSVS0JV0hgfRRSSJ7VUJBUIWbh8DC4BRPWkUXOA+RDiECq9uapLf7NNXwulikBj2luq4LwaUK24XC1JDVJnxvrfE+s/OsTLTz7AwjXwzgOlLcC/uNjYTRpJZLFupY78XYSNcxP44UO8j+acgP1Gmk2skIkVHEJiiBDiaygjaPQ4oYBaScDCP5I0YzAT3UZLt8GkNxEUSfMHDnC7LgTWClu2mTbwu1DoJROFecmjfRQx3sogJfAgRBKEE8XCCBZ8geXmT3BWBHQvjluAAjRbajoNwMOu7jJobVBh1kK7NkOFY0olgMp7dpzf3NjA0SEqr4EGykhQeQ2dXxc3Hylvq2wzQIdFjCrrDVKw7gpsrF2YyfIKCgiLWAwQEiqkEqVcCsWIU3ECDiHwIRo6DmzPZBSSFq78IGahaAiVwdKpNxksJEvQML5hUU1W23wVF5wCT5pLH8hEAB6A0zAfVbCXDKhBuRBH86ZApHD7DyGpYkFbgPnrAFB1Qaiqug0dwK2gkAfIlwZEbWFoVLUEkyllo4JUc+P874kLGBvq7TWINQfAvzhW1f5VUVNubVd3twn6SQLBEKyJvh3YWM7DRqzNDbIAF4qg3AALpJKJlVKJTAJdBgFUdNChQiUFEZyOL4MqDNbqZ2AdLFpvJLoMJoCWyUIwFG09DALnV6LxCQieS3Ax7ieXRXjJ4v2U0JVQSBViMeBgCu4+hKrPfnYSMAiQasA04ItdJqpOC6DSl3caQEgEUenlrLPcwgLwGlwmSQ5Uzo4LXDAscFx4/wqwp/5rcav+h7KWb4pbLjV3MwYKE3H+xSC2YA0ZbM4kCTgMcrEImCKFTAQkCag74HkDJ0KEw9Fnra65q7UBHB9DqHCWIGit2dKtBwrQaLBQcLwwq6HipIq1Jk/hMyzwG0NUslgfRZyfOkwtA6pPJhQCH5KBHhzb57AWVDgNQQFDYKq+21zWAZxAbZPOQpkJ3qvm1CDnFtHIs5CK4nwV6dH+CxICpkX5hqhcFkOzJ4KmLzR0f1XYdKCitaLVAFlBhPNSe5e2uDnC9qtjRW9nlcDVjLy6A7pOrJZLoSTJxFIEkhBZI/Sf/kCygwqqJmC1LARQgJZ2HfQpjGYKQcJaA2S00oT3+pBYC3EvuTTMWz7cTxntowpSSNRSEMjAzVfofBW8z3dBc0SQJwTQs6CgZ1HWqStq1YPQymwiOH7hP8QxIsAJHY8R6CufGu79wPDg9Cj/Yf6D2JCBqMtE5tS0fVYAvUENCLMwtOVJdGdHrNw2bG/mlm+40hDurQAOHvDCgU1CztzAktQHKi4yxeC+WV4BdhpMJhtUNqniBpzPn4IAUxSoEAOQEoD281IEKKXAO0dJBparUOtInCMmxgXA4+g0AX/dUNimq+wwAEcGhVac8bd+iHcCMblKOj7U675hQfcOC0gN8RINOjdfrzUeLtN8UdR8ur7TrEMngggFt7+YZ6hg21nY+mGxRgFXrgETgQ8GJCtUPUVYoa0yE106U5fBYoDhjlWqcLSP3Wao0N9EIOBVSeN8lAn+ygi1wlsGQmocehPATmHOGwAaB0ReiKRYbwbmynSzTVvSrm/SWc0VZlVTPTlAFpOIhgcq58YGAMEaF+bj21PNzFW1rZ6/39Tovy9tBmhdadRiFhLiBAG7A29waGHbcaP5vSKNetCLZGH0izxqABWIproM5g6dCbiCLGWNf9EhQ3xpZ7goDzp/EpkoVCUb5guggoZKLREBfgcOBfAxkUvh8lsi4MgIBQTNtBjMZe2Gotbumm6TxWynA7lvcX4gCXQg5u+tmBrh/dCI4MwYf/vKdAPuKwS3XG7q/rKo+fuS1pstWoxk+FNT8KFelP7fgQ23QgXMjMlEAu3XYTAZjARKVSCjg1tLkPFzfRjyKSQAoUR/1TBfVaiXTAWECkRmMO6F23tdfguDfiAcKhz4gXRNt6FI013abgQfhQLE+YHculWW4SdBGBaE8anBXsCzWJgYPDbYSzooLuRlC7gYefVd+wsaD5Rq6joM8IViDq2fRbLuDDYumQ4TgCxjslDAcnRogf0AUFGoxgveI1XQStEwbkZQATc90V8NPPVgpUwlA8oX+AEwcgOaC3dtvQFnCAUssFjAuWjWGW926ItatcCuUGa7pC33OIMsFg2di2A/+awov0UjQmbG+IfYn1U1iCOdjCSVW9OxN7/hcGV7O3QxYBa4J+n+i6J+YYNZAQHyzTh/HUKlN3brzRaC4s5Rs24XZ/g5Q5QckcqgVI0IsEIlEaEsIuep998cFgySGEbKeJeJqO423mjtKm+HzGFNWwj42gNcZgQdvCVQSoA83Z8YvDA+cHSoWjSIhdn26lFrJrOr2/bcaDpe0dYNTCOO817GLxCtfmDbeaP5/eI2tQREpzhQF3oz2aE3dEFzRfF5BM5+CAR8ltZqq5ACVMf7q8JsUIFwCkndgKMoQcGGGQiWwVyi0RZqHAULYcpnLqC9DPSRp0f7LUoKzogJsBMsPsAcsOMdJuJYhWbvjcYTNR1GuP8ftzqEP6vRum3Ythc0b7ncSBFEB8zYWhhorhg+qOKI4aepBBJxOMxTqIb7c/GvBG4ARKmkgaQK8juILERwMh8GQMCtgILVpoenHDJ8AGHNj1h9TsA0UtEoIFgJgUC2xoV5iQe3FcNettqNxJEyzZ4bDSfrOsw6wjpL8jM5hEMI22+zS946fhNuaxfYOYF8Qh2Dlc2U8nhfZVKgOtJLDmw98ACBp07BVHp/toojHE1iioUwxtIYzKXtuhstuupuPWGh+T0NNovFqUEAFYup1bIpEb6PJAXfNyww0sdWum6wRxAitCyHIVqN2TUdpAGhJRL0fMvtyGVyCx40ivHrkIS4j0I6zE+ZFOAV7aPwV0jFOA78EGiu2EEMHNzaDA9vBWgZSbpeZyxs0RZrYJ4J7cbE+HAYx/iEJ8WfxBrpr5wbF7A4OWRyhO9gdoxxZC9bnUbicIXmk+sN2TXtpN4CoeLOGv0l263BkCNs638q2ni8BJNLFHJRjA+AShXnpw5SSKUiKFUgCqYG12nOcxCjuurdZqK605jf3FXSodcDNciiCMFWQo6zkeiIY1wmHhvqtWh48P2JQanwHBzbbOfgRQtWQzxaofk4vyGnqsPSI1vupgn7IUfY/vds5Q9lbWmhviFKCfAsYCCEZkAGlS5BkYBAgEuAOLJQNd1s0+a36Ko6DRQsv8OpQW74GOssPrSEKm8pcNwfTQq9Z5h/mHpQCVyO7Kv46izkT+WaXfkNx6raLXq3tVuDIUfYTtd1n6vXioQ4TfNHBg2GBCj6BmrQQjNNWjNwBfNbu5u0RpRZwJDjjvGLqLgVnHB2H4+AatB/cXLYtAhfpW1P92CrDvACCOKtrKr2XdfrjoBYQWe25nPd1m4Nhhxhy6npPF2nkw5u4z436wjQ0pN0Xbchv6UbBMUdBgsUI4FdgpVbjkBTEC2JKCVY9dDwkIeTgtNCvG/bzAAFAOKtT641HChv7YTzkPj/a5qwH3KELbum88xAsOE4K4K6ENMRZGWn8WpTV2m73gCMFkzgYig9aJ3bpFHGncbECvGUSN/HRoQsSAy0K19yKybL+kheXefu/Iavb7a2dhj4XbYC4a3WiHNvuiXYcORigGHuNFPlHborzV0VHTqLie5ttDB+wwEFnE3M21uWERuwZGRoZpxfP4dBDoaKNLrd1xo+L26qbtWjNY1WZfj/IQ0IGwjW0FIwMEAsiFVL2vVXm7orO3U0gbLG3C56m0PI5QZxPNRPfl980JLk0KlRvoo7q5dU02n4vLBpT0FTQUM3FNz/2lTkL5lcwSYTwdU6YlwAQqlWo6VYo7vW3FndacJIbv2lsNdCRBKhJRYkBKkeHB78+IiQ8eHeA4be/RMIub4vaf7wWv3p2k7MTMEzgX5ROfiflxxhy63rOl+vFwtxjcFcoNEC2QK+BnQIOf/CtmCdW3wBQmOZKDVE/fjIsIeGByX3VLu9RaNl9R5Jmj5e0fbe1bqjFW0mGHLhPUcneMhGjrAdKGvbcqGmWKOt7zZCVIR4z+QFyx/XDONiuXhKuM/jKSEPJgTH+N75keTYlcYuIFufFzW1d5iQJrybS2jcnRxhe/1Y0YZjpZhC1Guxm9UhlCjF0yP9lo4KnTcsMNTrFuJiB+LFsUFr/DS/8ePrDSXN3TC5JfrFT5r8EqjfBXco64EW5CrVssxovyWjwubGBfoPxUkgJoL6obT1vSt1WdXtcGmGyGO6boWcw5ZVAgeRZby95ffEBjw9KjQjJkB9B3XG7NO75+s637tS+3VJS3eXCa4n5PJPHrolcoRt9eHCHZdrHk8KfXpUWHqsv819v91Cl7wybETK8COoDLXwb6LBHZfgIafkCFttl8lHLvbiM4S3kcXgnuNBphj6UKlmx6Xao1VtmNmjDIeI+sBmPS6BRWrtjkThpkb3/pXa3QXNbe163jPEbqXCg4f6IUdpu02yipeBIL+52bLjQk1eXQdK8wt4V95DQ0hDBhs6heidyzWfFbTotGZkuoR364QXD902bFCdol3VrQbL5wWNOy/XFtd3wbyJ6G4eE+4hjizU8owE7ujlW5Q2liVo5tMbDXtvNNbrTFKBUCoSePD675CBoJ9Pi3h9Mjz979ZgA94LV9TGg9XPRdyCjDu1bR76WcgDm1uSBza3JA9sbkke2NySPLC5JXlgc0vywOaW5IHNLckDm1uSBza3JA9sbkke2NySPLC5JXlgc0vywOaW5AS2ig5DcZtORzAKkSApUJ3oP8Baf9t57waCutjYeb1FrzEQQiEe6y2fEOaTHARP5bbfbd3PG8wkfb2lG7yhXm+mGdZLIor2kY0N8RnuzxW46DU3W6jR1XWZSJaVCQUjA5XhXoqeF1o/16AzXW7sLmnXd1loIY4HKMTD/ZSpIV6hqp5dd406s9ZMDby6DO44Z+J8FTK0eFCjt9zQ6AwkLRDg4SrZmGC144pC2wLfLjNxtUlb0KrTmAiWwbxk4jgfWVqoN9yqaV1GZV0/hxkJ8kqTLl+jbdETFAsHIcZHNibEa7i/Cp60gm5zAlvSjpybNV1wJQ9BLZ0Wt+fhsQOC32Ywv5lb/ml+o1ZrRluBMb7usEiQFu679b6kqVH+LkvLoXY3aU3/OFO590ZjpxYVQxNg/JkyLNzZNm2Y/6lnptiX1ddayKC3T1jA5wA8BPnHhSl/zRhu/8JLjZ2/PVFyoqodbrjiGgPfiUqkSCUTwry+XzyOq/8+amcu3EU34MoldIbQ5ZXpYLjBvx778spXF6vhGjUGiwxT166Z7ewB/Eaz9m+nyn4o01j0FlRGybYbhsHEwufHRX/0YKrtgW4L8cfssl3XG3TcMKL6teisFQaTiEK85dvnjVw0MhRzlDY9QYZuyNKDrgLkzcTOR8YsGxftuidwgL4raX7qm+tGrQWTokOJreWO+ULlJCzMte/xsUtGRdikqk/ftl2sXHe0hDKSsEyZ0Fp+DbO+hCDTE4Jynp1s/1hBi3bUtpP8ceNm6ofnJ96fEGJj8G3nK1cdLORPsMCFfLl5zFr/l6YEIlHr65n+CmmTzhy2KQttMhpI3GCdS0HdulkRSKxTdp4sbNbBZbskuWBk6IElExxH5/WjRRvOVsKiE2LrtltuTLgOmoj1GQlvzx3JDUuRRpvxyYXWdgMmEdqVira2GSBnIPc9M2FJSrgT2IB6HLn1JP8YQZ1dNmNKhPPT0DlF9N6Vmle/uc7v9mQFcD8VzfDaTCKwniICi0yWrUqPh2LeF7OXfrz+4blqCIBIyJfvJGm+nDYnuBT76VMTnkoNt3/yi8LGxXsvoprcsHBQ2aqMeKsyP1TasmD3eX6vMESdxkS4EFXtgAXPUcGw+alhB5dMBDefq+uYCuC3rerEcf5YGQ4nVDaF/yTFhAWrG9bN5pg7bEO2DhYGhcz95twRf04fbt88gmLu+TQvt7QVk0jQYc4Yt9OMP0aH5SvX569KHxUMZVdrIRK35bZ0mVBFHwbyOuA/qRgIJw1+B8/imEQhaVqfyVXd7gvbd8VND4M+g2uwPhbWsDYzWOVy83VWlWb2R+f4mumw8Bw9dVjgi2MiIrykBRr9W6crW7lyZLBv5JJxEfsWpfUYOSSpyw8W7DxdgUlFUHswcIdqZJBqcVLoxHBvtVTUaaby6jsvN3UfWzpRDgWrR4/99sTNt7JK4Qn2NO2rlDaszZCLRdw7E7fnlLXoMPBPGnAx9veMxEVJoT4yMc0wrUbipwrNzsu1ux5ITY8JAO/Jb+n+Y3apTIyK9uG4zkwdKGvhJYOkp8X6xfjIKYSchWIyYv1XT4zF4I5yffK2bLT7BMcslu+fnvLAiGA7XsTSd+XllrVCDLiekszoKFiIalSgl1SEN+uJIxWtQMK/fnwc98zvsor/ebwUk0s4XlmUHPrGtGGR3mDkcWDgrjRpN1+oAmOy6d4U50uA/pBd+vfjxZCLaSbaR169NsNVZVrQjdgt2U2wyoSQK0L39ryU9VPjbHc0aI0jduTqTRQElaK9FJLG9RlKcc8Wnr359Uv3X4Z9A8IN62yxf5k9/E8zE5zvFmB6HRN1797zP5W0YOBtFDUm3PfqK9O5v19p6hq3PRe+E4fnnmx6MGXNpDjHxiN+deIlXW7qHL/9NFRTSGTyV83iTifso2O+Lmp6dM9FTC7ipLBkTXqiv9p2D6wXnl0GeREMHUNLxKJPHhr1REqEs2ZgnCWI3XKyug2xGkVNjvY/98JUZ0NuPcPCUdoW7LtwqLgVtpsk5yQGH1s6ydUI/jmn5C9Hb2IKxCAE/bvZiX/PHNFn28fqwwVbzwBhknB1mi4vn5EW6sNdAmohcmO21kxyu7MAa+95bOzS1EhsQEJfiN2SVd1mhKrVTD4zIfqTh0ZzF/fk1z8DWIFTnhYqb/nMSeE+A7/TSlsuVK75rgCTQyEWiURN62YFKJ0om99l3fznCSTrDO0llzSvA7LOs+ONlu7UHadQbUXIrBKp8OILU1NDvPvZvKQxmEM3ZtOopCnozqvT4t6Zn9L/9pm+sMVvy67QGKF+NxO/mpX4v/ckOR05I0kD5d5tIpCgUDF+qqrVsxybZWeBoHf//TMTHxgRwjHsH7JL/n7sJryEw0urZsRtmZcyyI1ZoJ9hG3MoioKQm8gtD6WsmsiL1PaLVSu/yce4TZQW6tcz4/89N2nwe4ie/e767os1nO6N8VNUrc502qT5+y4cLmrGpGIgkaMjfK69OgOzekPz9108XNQIOZWFfPPZkjQgZ/3HP3XdpqhN2fA3ATxbLyFIVboyvf8G94Ktw2gJ3ZhFoIKbALb9T01YnBzm9LG9+Q1L91+C3cPgndsXjV4+Psbxtp8qWu/9KI9XF2Zi9xPjnk6NQONJh2/Kagc+sRDpT7mkYX2GSjLYLZAXGjon7TzFWw6Czn5pyixkqAAdLmudD74oR0oSeR9vZg7/c3riIN+c9t6pq3Vd8M0W8p4RwT85KhvEAMO25lRq9JysPzkucu8iPkaq6NDHb87hSyGR1MRov/MvThuQF00kFbIhS2skoDVhoOJJTwj86rG0AIXUFcP1gu1SY9eEnafhIToYrL+ZvzJ9VJCX0y/dt/fCkWLEbgwrFuFN66Az7XjbjyUtD3ySZ5U2Yt+TwH+FfHCkvPU+4MvIYEVQ4L6vmh635b7kQY4soA+v1r70xVWkn+HhOcBvCuN3lLPAfUjYmlPdZuBBBaNgocdE++6YnzIl0rf/15oIKnxzdqeeQMqGeiMz/l+znSibNoMlbFM2CWRdAGV94wOj1k6O5S797VT5nw4XQs+ChSrki6cmPJYcOpgerTlSsCWnHANjiKOQjmCUSvFb94xYgYTBMXDqBdvu6/XPfn4ZfpWiFTIx8CC8pU62bBMUFbIxp9Ng4VyJCVE+F16c7rQ171+peeXL65hCzHXj4POT5idAj2vZgfx386p4TUJQp16ZNj3K3/5BW8qgh+x49rWDN945V8mZzDAvWd26TIEdOwPncOKH5ywmxLzc+QMUCYLWZ8dF7VyYLBe5rHNT3qFP2IJkBemGz5+a8LgzZYOYOxfjNtxayBMvT82MCeQuTf7wzPnqDsgxNPBEhE3rZ/vJB7PnHeCCZezJy73ZAiWBi75oGjDcqBi/3Q+mjgnx7vNAL9hWHinYfhp5ECQ1ItSr+LV0pwJeotGNALEdFxiZiDWz4jfNdS4rMN48Vca7JAxzdflMrgVp75++Wt8Jq3MyrEwChHWOj8MmceBcbMqrttAs0DejQ9S7H0i1cdzUj8+dq2qDA0fSM+P8Tj7X43dxeJe26Rfuv1TW0A31M1ewCBh8Cxkdos59bnKUt8Jpaw+VtS74OA/qAAwqmxsr01OcKZuPr9W/AJjbKuu1azMjkawbCCoMOFlGC2QXkkoN876+bOYtbaN+5rtrey7UoCPDUMkjrpCtULB70RhgXOwNZC/Y0nedy61o4zT7w6nh31ijCofutSz4+DxScThmJPYsGbc0NcLpnRm7z+WUtsGxo2iZVNywdpafQkpSdNjm7DbuyBGaGeanLAfujAPdu/fCTwWN8NgdghwbF3DlZV6gKYYO35jdyj1uIVZMH7ZtXorj4wC/35woeftMOUpSoC3IyGxEBapuLp/ZJwrk6K+5ZW8eLYIqnWGVEkHT+jlqqRPRXHGoYMdZ3j0O9gIh42whSllVdhiAzeOO5wRtfiQ1/KvHnA9gPwRCi9cOFWg6jCiWtYodxWa9NDnDKtO9YGMYOnJLTiMI1JF79j/3jfj9DOeW/IOrtS9zpgU6S+TJV2bMjPZzvM1MUqGbsrsMnN9BjQr1zgfch8qDh208YSGRvwt1rO8FYLcdKGFbdrnGADnXQrw2JW7HglHc32u7TNFbsviT/czEJ4vHPTPaKdNAY16s0b5ysPB0mQaTCnn+NZNvLUz5zbR4xwce+vzi9zeaoJqimKRgddHymU67P33XuTOVvKxPi/U//fwU7u89yhMpoRXT47fNvwWDjZoMRdNEUX/MKn0bqD0c54vdEuSYCJ+rr/a0pwe2eq0pErihnOdipg4+P3l+QpDTl284V/n6jyi4QdWBrq1MHx3s7Xjb8aq2ez48a4t838hM/NccENhhLXpL+KYT8Kwi5O9OjvFzjC47zWTYhuNmeCoy8NaIDx8f+8KYKO7SiSrNnA/OYlwZZZK6vHymLRZ0RYu/uvLFtQZMylujGfFBQFU63jZi+8mSVj1U/gS5KDX8a2eywjBs2KasFpj9EQBsXpvWw0+najpmvn8Ghrw4PEVr7YzEjfcmYbdL+wsalnx5GXYfZqthaAFcjRBrxqoHNuB+Zbx/DnIlal3F6ow4P+dTNhvzKtf/YIONyV85Y1Rv2LgI5sH9F38obIJaDlXBu7FyZkoQvK3DSIRsOEFy0SXg6yBV0Yq+RhQmO3ZYfVqSOr9s+sRwPyvTVLz+YyH8OsNKRXiDCyfWnqq7DLGbcvj6YRSVFuF3+eW+8t1lJkAkagKMgo6V/cf8kf9nuhOJRMydxZ9gayQ+Wjz2eSs/nW/onPzOKV7aCHLJmMh9j4xFFYlvo+IAlJ5x75++Ut8N2QglM6vWZsRYK7T3wLb1QvXq765DN5Jm/JSSxnUZUhdO16f59U/bMhFm6vhLU2bHBfa552pzV9rOM3y9TgIweGDus7wyYVgmYmNWk9bC8ZFAhDWtyQzqnfnck1/3zP4rqCoRLRaJGtdmBCh5bJ745srnV+shN5BUXKC6YtWsAcegTmuM2pjNWx0LOW9k6OEn+ybsrzZ1pwEVJxJybuThF6bMi3eibLKr2zKBSFll/cJrMyeE8bJe3WmIBY4ody4dTUf5KmvWZNw6YBxqkIknfHDmUl2H1XETNK7J9LXWYuqB7dnvru2+VIs0Oz0+yveiM3vDBRCXGrsn7Mi1aYPl04bBDcWcuKCfJEOn7jx1s0WHCUXwOEuCOfvKtClRPfbvgf2XfixE7gaal1kxNXbb/FE2LgP/t+5o0abcMpQapeP8VRAbawJv9Lun8hu7YGcs5IKRIQeehIn83gFD3xAV5uGOo0MFcTgL+Y8FQJIS+nRtb0HD0n2XOK4FXahcNTPWT+U4ApvyKtdxmgYFrI1rM238BEYyfFNWU7cR9hrGXvTmB1JXT4yxwWDXNrgtlysqYleGvdc9MEn23hlUZB/moVJDfa4vm2FrRg9sae+dvtrQhZxX+sHkkPcXjtIRpO0+IKZykTAcerowiRy2MauD8zVoFlj6Y0+Pnx3L82Z5u+Hxb65crelE+hYagOcnxXz04Gj7adIfS5sf2HWed5ZQbPBcWtSf0uNthXlnfZJ3skIDFQ4UjpDDCBt41Dxwsjdlaw0oJjOTf5gz/G/W2dGTNe37CxqfHx2RGqKWWfWEniA35FW9mVXKl4BDZ2dWrJkV51Ce7/WfCjecrITuMUX7qaSN6zJRUdS+3ubSb6/uvVQH00MkFRugruztA685XLgltwLGqRh/9O3v04etnhQXZIXWSFLn6jvHh3p7owST3kKuPlq0MD5oZoyvrcwtGKij5ZpnfsjXAAsKCwvDmba3H0xdP6UnJ87BxpoREp0GlGO0njbU60xYkp6XHGwdPtDJog05KCAT8OeITo32ifBSNGjNZ4BcAy8RyCIDJWlUpM/VV6YJ7Y8OQmw17aOzZ2GwIeSRIxnwe5QPPNTNSDFV/GnicMbn97MT/wcmqSGVtKGQkTv3gaC/XjphURKfhpi39/zRa41gQH3UkjgfhZdM1G2mSjsMsG65GE0yAAkwkmszEjbe68TBy9yTl12igZxEUFDZgHijj9Cif45979S1Bl7W70sKOfTURPuXtBjMUZuyCYLCOL6B/aJFCnGst1wlEZloulFr0bbpdz018dkx0PvdX9iwBIRSEqFEJY3zlgeqpDTNAkvcCAIAIBIiARe0xAarSpbPQpNLeC9pK+8wJGzJtqsh6bAuyEK9OjX2HavXZCSo+O3ZTe1m2E+GO7CN4UrvomlGJJ5melS0L/DZfGSSXkoMTSC0GCxp755ubLNN5lqPCGBY7tx7dFoLhpks3zwz6WErNt+WtCwCYgrTLnBKoWhVRlIAVGWtBlPophz+LGHrYdmof6DzcC0AjFst9ILUUKRU+2pRMAhRW3LqOw1wsMzkcxOjPn5wjAOyrIlkQjeegAl0AbzNOulhvYwsyIHS5vv3XILLKUTWkJnDj1tnIYTO89Pjonc/DN8/Z8/5E6UtcARoxBfcmcfcCZ0CNKoW2sdHev6FaYn+Kvsx5GH79mbTog/zMLnQ1ewaZqJ2L534NIqQbJmIOZ9eqGvWImWI8wYfQ9PBSNpWTIredG+SSCB0kqlC1GY0P/Xt9Z+KWlAnhfyJVRjHBLZjv9ji9bNHBPKzWb89fvMtOB0oBgMhV0g062ejkwTwQ+WtC3aegiZHaD2pFrMu2YB+LCNSSP44I+5PveegbdSgM0X85wSvYMzU5kdHc9OhfahIo03mPFLQYyP9+bMTHk/uNefOJTKyqtqe/vZao0ZvPcIU4zHjWJagkiJ9i5anExTj+++f4GIOMVeFH3WfkwG03giM54Lk4A/uH93rUDp72D4raNx8vlolcV4sEGlNZs9DY8O9eP3LIWEhqW2XavfmN5R1GY0EZBWZSBDjLb8vPvC18VHxyKS7wgzAy3Uot6btvSv1Z+o6m/UWCzofTiwQeEmFgUppkr9yfmIgMFcCa1LnN8eKPi1owmGtPHxapM++R9J46SfJw2Vt35W0XGrSNurMegKeVQpGw0cmTvRTPjQ88Lkxkf0k1AtbtQ98ftlMAjcBkwkF+x8dM85ZLHiuvmPx19cphgFfBy38bvH4eIcYiUOOpJg9N+r33GgsatV1WihUvZhViEQBCvEIf+XS0WFPpUSAtlxo7PiquPlkTWdlh6mLAA/B25RiYaRaNivW76XRkWORm9p7htgKm7OVOYMkfhQMBKm1UABdpUTkfbslKDuNhIGiAJYgGlNLxRLbmhyri2VzapAbhttfsg/7gBuis8ATlMQioa9EJBYNvnAly69hcZZ07/UXh1VyrkaGYlgQpwLXWoQLFBKh7bClPjNwBE13myiCoQWQIcRKyQCHkQzF8tZer77TooZ3+p6+z3Jrbn7G4je9O+Iys9yrzTbucUWeVcluSf8XNoDJkXH7ng4AAAAASUVORK5CYII="
+                                            style="height: 145px; width: auto;" />
+                                    </td>
+                                    <td style="border:none !important; vertical-align: top;">
+                                        <div class="si-header-company">PT. WINDU PERSADA CARGO</div>
+                                        <div class="si-header-sub">Jl. Kesehatan Raya No.54B, Tanah Abang IV, Jakarta Pusat 10160 - Indonesia</div>
+                                        <div class="si-header-sub">Telp : (62-21) 345 0605, 345 8305 (Hunting) Fax : (62-21) 345 8307-08, Homepage: www.wpclogistics.com</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div class="si-title">SHIPPING INSTRUCTION</div>
+
+                            <!-- Row 0: Empty spacer row -->
+                            <table class="table table-bordered border-dark mb-0 no-left-border no-right-border">
+                                <tr>
+                                    <td colspan="2">&#160;</td>
+                                </tr>
+                            </table>
+
+                            <!-- Row 1: Shipper (left) | Date/To/Attn/TEL/FAX/Booking No./Job No./STAFF (right) -->
+                            <table class="table table-bordered border-dark mb-0 mt-0 no-left-border no-right-border">
+                                <tr>
+                                    <td style="width:55%;">
+                                        <div class="si-label">Shipper</div>
+                                        <div>
+                                            <span t-field="doc.shipper_id.name" /><br />
+                                            <span t-field="doc.shipper_id.street" />
+                                            <span t-if="doc.shipper_id.city">, <span t-field="doc.shipper_id.city" /></span>
+                                            <br />
+                                            <span t-field="doc.shipper_id.phone" />
+                                        </div>
+                                    </td>
+                                    <td style="width:45%;">
+                                        <div class="si-inline">
+                                            <div class="si-inline-row">
+                                                <div class="si-inline-label">Date</div>
+                                                <div class="si-inline-colon">:</div>
+                                                <div class="si-inline-value">
+                                                    <span t-field="doc.booking_id.booking_date"
+                                                        t-options="{'widget': 'date'}" />
+                                                </div>
+                                            </div>
+                                            <div class="si-inline-row">
+                                                <div class="si-inline-label">To</div>
+                                                <div class="si-inline-colon">:</div>
+                                                <div class="si-inline-value">
+                                                    <span t-field="doc.shipping_line_id.name" />
+                                                </div>
+                                            </div>
+                                            <div class="si-inline-row">
+                                                <div class="si-inline-label">Attn</div>
+                                                <div class="si-inline-colon">:</div>
+                                                <div class="si-inline-value">&#160;</div>
+                                            </div>
+                                            <div class="si-inline-row">
+                                                <div class="si-inline-label">TEL</div>
+                                                <div class="si-inline-colon">:</div>
+                                                <div class="si-inline-value">
+                                                    <span t-field="doc.shipping_line_id.phone" />
+                                                </div>
+                                            </div>
+                                            <div class="si-inline-row">
+                                                <div class="si-inline-label">FAX</div>
+                                                <div class="si-inline-colon">:</div>
+                                                <div class="si-inline-value">&#160;</div>
+                                            </div>
+                                            <div class="si-inline-row">
+                                                <div class="si-inline-label">Booking No.</div>
+                                                <div class="si-inline-colon">:</div>
+                                                <div class="si-inline-value">
+                                                    <span t-field="doc.booking_id.name" />
+                                                </div>
+                                            </div>
+                                            <div class="si-inline-row">
+                                                <div class="si-inline-label">Job No.</div>
+                                                <div class="si-inline-colon">:</div>
+                                                <div class="si-inline-value">
+                                                    <span t-field="doc.job_no" />
+                                                </div>
+                                            </div>
+                                            <div class="si-inline-row">
+                                                <div class="si-inline-label">STAFF</div>
+                                                <div class="si-inline-colon">:</div>
+                                                <div class="si-inline-value">
+                                                    <span t-esc="doc.env.user.name" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 2: Consignee -->
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="si-label">Consignee</div>
+                                        <div>
+                                            <span t-field="doc.consignee_id.name" /><br />
+                                            <span t-field="doc.consignee_id.city" /><br />
+                                            <span t-field="doc.consignee_id.phone" />
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 3: Notify Party -->
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="si-label">Notify Party</div>
+                                        <div>
+                                            <t t-set="same_notify" t-value="doc.notify_id and doc.notify_id == doc.consignee_id" />
+                                            <t t-if="same_notify">
+                                                <strong>SAME AS CONSIGNEE</strong>
+                                            </t>
+                                            <t t-else="">
+                                                <span t-field="doc.notify_id.name" /><br />
+                                                <span t-field="doc.notify_id.city" /><br />
+                                                <span t-field="doc.notify_id.phone" />
+                                            </t>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 4: Feeder Vessel | Place of Receipt -->
+                                <tr>
+                                    <td>
+                                        <div class="si-label">Feeder Vessel</div>
+                                        <div><span t-field="doc.feeder_vessel_id.name" /></div>
+                                    </td>
+                                    <td>
+                                        <div class="si-label">Place of Receipt</div>
+                                        <div><span t-field="doc.place_of_receipt_id.name" /></div>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 5: Mother Vessel | Port of Loading -->
+                                <tr>
+                                    <td>
+                                        <div class="si-label">Mother Vessel</div>
+                                        <div><span t-field="doc.mother_vessel_id.name" /></div>
+                                    </td>
+                                    <td>
+                                        <div class="si-label">Port of Loading</div>
+                                        <div><span t-field="doc.port_of_loading_id.name" /></div>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 6: Port of Discharge | Place of Delivery | No. of Original B/L -->
+                                <tr>
+                                    <td>
+                                        <div class="si-label">Port of Discharge</div>
+                                        <div><span t-field="doc.port_of_discharge_id.name" /></div>
+                                    </td>
+                                    <td>
+                                        <table style="width:100%; border-collapse:collapse; border:none !important;">
+                                            <tr>
+                                                <td style="border:none !important; width:65%; padding:0 !important;">
+                                                    <div class="si-label">Place of Delivery</div>
+                                                    <div><span t-field="doc.place_of_delivery_id.name" /></div>
+                                                </td>
+                                                <td style="border:none !important; width:35%; padding:0 !important;">
+                                                    <div class="si-label">No. of Original B/L</div>
+                                                    <div><span t-field="doc.original_bl_no" /></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Cargo item table -->
+                            <table class="table table-bordered border-dark mb-0 mt-0 no-left-border no-right-border">
+                                <tr>
+                                    <td style="width:15%;"><div class="si-label">Container / Seal No. Marks &amp; Nos.</div></td>
+                                    <td style="width:15%;"><div class="si-label">No. and Kind of Package</div></td>
+                                    <td style="width:45%;"><div class="si-label">Description of Goods</div></td>
+                                    <td style="width:25%;"><div class="si-label">Weight<br />Measurement</div></td>
+                                </tr>
+                                <t t-foreach="doc.cargo_info_ids" t-as="cargo">
+                                    <tr>
+                                        <td>
+                                            <span t-field="cargo.container_no" /><br />
+                                            <span t-if="cargo.seal_no" t-field="cargo.seal_no" /><br />
+                                            <span t-if="cargo.marks_and_no" t-field="cargo.marks_and_no" />
+                                        </td>
+                                        <td>
+                                            <span t-field="cargo.quantity" />
+                                            <span t-field="cargo.package_type_id.name" />
+                                        </td>
+                                        <td>
+                                            <span t-field="cargo.description_of_goods" />
+                                        </td>
+                                        <td>
+                                            <span t-field="cargo.gross_weight" /> KGS<br />
+                                            <span t-if="cargo.total_volume" t-field="cargo.total_volume" />
+                                            <span t-elif="cargo.volume" t-field="cargo.volume" /> CBM
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        SHIPPED ON BOARD DATED: 
+                                        <span t-field="doc.booking_id.booking_date"
+                                            t-options="{'widget': 'date'}" />
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Total number of packages -->
+                            <table class="table table-bordered border-dark mt-0 no-left-border no-right-border">
+                                <tr>
+                                    <td>
+                                        <div class="si-label" style="font-weight: normal;">Total number of packages or units (in words)</div>
+                                        <div>
+                                            <span t-field="doc.total_packages_remark" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <p style="page-break-after: always;" />
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
