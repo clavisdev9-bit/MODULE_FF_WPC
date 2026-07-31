@@ -172,6 +172,7 @@ class FreightQuotation(models.AbstractModel):
             if record.est_transit_time_days < 0:
                 raise ValidationError("Est. Transit Time (Days) cannot be negative.")
 
+
     def _sync_sale_order_rows(self):
         """
         Sync baris dari tabel quotation masing-masing ke sale_order.

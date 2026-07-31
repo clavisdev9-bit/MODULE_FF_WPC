@@ -1,8 +1,14 @@
 from odoo import api, fields, models
 
+
 class SeaHBL(models.Model):
     _name = "freight.sea.hbl"
-    _inherit = ["mail.thread", "mail.activity.mixin", "freight.sea.vessel.details.mixin"]
+    _inherit = [
+        "mail.thread",
+        "mail.activity.mixin",
+        "freight.sea.shipment.info.mixin",
+        "freight.sea.vessel.details.mixin"
+    ]
     _description = "Sea Jobsheet"
     _rec_name = "hbl_no"
 
@@ -92,6 +98,16 @@ class SeaHBL(models.Model):
         string="Shipment Type",
     )
     bl_surrendered = fields.Boolean(string="BL Surrendered")
+
+    # NOTE: field khusus HBL, tidak ada di mixin (Booking tidak butuh field ini).
+    # Dulu didefinisikan di model perantara freight.sea.hbl.shipment.info,
+    # sekarang dipindahkan langsung ke sini karena model perantara dihapus.
+    # Saling eksklusif dengan stuffing_location_id (dari mixin) berdasarkan
+    # freight_type -- lihat kondisi invisible di views/sea/hbl/hbl.xml.
+    warehouse_location_id = fields.Many2one(
+        "stock.warehouse",
+        string="Warehouse Location",
+    )
 
     # Customer & Sales
     customer_id = fields.Many2one(
@@ -194,6 +210,11 @@ class SeaHBL(models.Model):
         string="Freight",
     )
 
+    vessel_details_ids = fields.One2many(
+        "freight.sea.hbl.vessel.details",
+        "hbl_id",
+        string="Vessel Details",
+    )
     shipment_info_ids = fields.One2many(
         "freight.sea.hbl.shipment.info",
         "hbl_id",

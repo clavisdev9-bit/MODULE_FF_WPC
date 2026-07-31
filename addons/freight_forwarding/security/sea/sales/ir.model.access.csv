@@ -5,6 +5,8 @@ access_freight_sea_booking_cargo_info_user,Freight Sea Booking Cargo Info User,m
 access_freight_sea_booking_cargo_info_admin,Freight Sea Booking Cargo Info Admin,model_freight_sea_booking_cargo_info,base.group_system,1,1,1,1
 access_freight_sea_booking_pickup_info_user,Freight Sea Booking Pickup Info User,model_freight_sea_booking_pickup_info,base.group_user,1,1,1,0
 access_freight_sea_booking_pickup_info_admin,Freight Sea Booking Pickup Info Admin,model_freight_sea_booking_pickup_info,base.group_system,1,1,1,1
+access_freight_sea_booking_vessel_details_user,Freight Sea Booking Vessel Details User,model_freight_sea_booking_vessel_details,base.group_user,1,1,1,0
+access_freight_sea_booking_vessel_details_admin,Freight Sea Booking Vessel Details Admin,model_freight_sea_booking_vessel_details,base.group_system,1,1,1,1
 access_freight_sea_booking_shipment_info_user,Freight Sea Booking Shipment Info User,model_freight_sea_booking_shipment_info,base.group_user,1,1,1,0
 access_freight_sea_booking_shipment_info_admin,Freight Sea Booking Shipment Info Admin,model_freight_sea_booking_shipment_info,base.group_system,1,1,1,1
 access_freight_sea_booking_purchase_order_user,Freight Sea Booking Purchase Order User,model_freight_sea_booking_purchase_order,base.group_user,1,1,1,0
