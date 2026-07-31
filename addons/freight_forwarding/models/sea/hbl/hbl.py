@@ -210,16 +210,6 @@ class SeaHBL(models.Model):
         string="Freight",
     )
 
-    vessel_details_ids = fields.One2many(
-        "freight.sea.hbl.vessel.details",
-        "hbl_id",
-        string="Vessel Details",
-    )
-    shipment_info_ids = fields.One2many(
-        "freight.sea.hbl.shipment.info",
-        "hbl_id",
-        string="Shipment Info",
-    )
     pbm = fields.Char(string="PBM")
     custom_permit_ids = fields.One2many(
         "freight.sea.hbl.custom.permit",

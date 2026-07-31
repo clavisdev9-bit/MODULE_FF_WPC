@@ -179,15 +179,6 @@ class SeaBooking(models.Model):
         "booking_id",
         string="Pickup Info",
     )
-    vessel_details_ids = fields.One2many(
-        "freight.sea.booking.vessel.details",
-        "booking_id",
-        string="Vessel Details",
-    shipment_info_ids = fields.One2many(
-        "freight.sea.booking.shipment.info",
-        "booking_id",
-        string="Shipment Info",
-    )
     purchase_order_ids = fields.One2many(
         "freight.sea.booking.purchase.order",
         "booking_id",
@@ -349,14 +340,11 @@ class SeaBooking(models.Model):
         # freight.sea.hbl.shipment.info sudah tidak ada. Field-field
         # shipment info sekarang langsung ada di Booking & HBL (lewat mixin),
         # jadi tidak perlu proses copy antar model perantara lagi.
-        if not hbl.vessel_details_ids and booking.vessel_details_ids:
+
+        if not hbl.pickup_info_ids and booking.pickup_info_ids:
             self._copy_records_to_hbl(
-                booking.vessel_details_ids,
-                "freight.sea.hbl.vessel.details",
-        if not hbl.shipment_info_ids and booking.shipment_info_ids:
-            self._copy_records_to_hbl(
-                booking.shipment_info_ids,
-                "freight.sea.hbl.shipment.info",
+                booking.pickup_info_ids,
+                "freight.sea.hbl.pickup.info",
                 "hbl_id",
                 extra_values={"hbl_id": hbl.id},
                 excluded_fields={"booking_id"},
