@@ -64,18 +64,30 @@
                     <div class="header">
                         <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
                             <tr>
-                                <td style="width: 50%; vertical-align: top; padding: 0;">
-                                    <img t-att-src="doc.get_report_logo_src()" alt="WPC Logistics"
+                                <td style="width: 40%; vertical-align: top; padding: 0;">
+                                    <img t-if="doc.company_id.logo" t-att-src="image_data_uri(doc.company_id.logo)" alt="WPC Logistics"
                                         style="max-height: 130px; width: auto; display: block;" />
                                 </td>
                                 <td
-                                    style="width: 50%; vertical-align: top; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif; color: #000; font-size: 15px; padding: 0;">
-                                    <strong style="font-size: 18px; color: #085294;">WPC MAIN OFFICE
-                                    - INDONESIA</strong>
-                                    <br /> Jl. Kesehatan Raya No. 54 B Tanah
-                                    Abang IV, Jakarta 10160 <br /> Phone: +62 21 3450605 <br /> Fax:
-                                    +62 21 3458307 <br /> Email: inquiry@wpclogistics.com <br />
-                                    https://wpclogistics.com/ </td>
+                                    style="width: 60%; vertical-align: top; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif; color: #000; font-size: 15px; padding: 0;">
+                                    <strong style="font-size: 18px; color: #085294;" t-field="doc.company_id.name">WPC MAIN OFFICE - INDONESIA</strong>
+                                    <br />
+                                    <span t-if="doc.company_id.street" t-field="doc.company_id.street"/>
+                                    <span t-if="doc.company_id.street2"> <span t-field="doc.company_id.street2"/></span>
+                                    <span t-if="doc.company_id.city">, <span t-field="doc.company_id.city"/></span>
+                                    <span t-if="doc.company_id.zip"> <span t-field="doc.company_id.zip"/> - </span>
+                                    <span t-if="doc.company_id.country_id" t-field="doc.company_id.country_id.name"/>
+                                    
+                                    <t t-if="doc.company_id.phone">
+                                        <br /> Phone: <span t-field="doc.company_id.phone"/>
+                                    </t>
+                                    <t t-if="doc.company_id.email">
+                                        <br /> Email: <span t-field="doc.company_id.email"/>
+                                    </t>
+                                    <t t-if="doc.company_id.website">
+                                        <br /> <span t-field="doc.company_id.website"/>
+                                    </t>
+                                </td>
                             </tr>
                         </table>
 
@@ -135,6 +147,9 @@
                                             <td
                                                 style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px;">
                                                 <span t-field="doc.name" />
+                                                <t t-if="not doc.name">
+                                                    <span>&#160;</span>
+                                                </t>
                                             </td>
                                         </tr>
                                         <tr>
@@ -145,6 +160,9 @@
                                                 style="border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px;">
                                                 <span t-field="doc.date_order"
                                                     t-options="{&quot;widget&quot;: &quot;date&quot;}" />
+                                                <t t-if="not doc.date_order">
+                                                    <span>&#160;</span>
+                                                </t>
                                             </td>
                                         </tr>
                                     </table>
@@ -166,17 +184,29 @@
                             <tr class="text-left">
                                 <td>
                                     <span t-field="doc.name" />
+                                    <t t-if="not doc.name">
+                                        <span>&#160;</span>
+                                    </t>
                                 </td>
                                 <td>
                                     <span t-field="doc.service_level" />
+                                    <t t-if="not doc.service_level">
+                                        <span>&#160;</span>
+                                    </t>
                                 </td>
                                 <td>
                                     <span t-field="doc.effective_date"
                                         t-options="{&quot;widget&quot;: &quot;date&quot;}" />
+                                    <t t-if="not doc.effective_date">
+                                        <span>&#160;</span>
+                                    </t>
                                 </td>
                                 <td>
                                     <span t-field="doc.validity_date"
                                         t-options="{&quot;widget&quot;: &quot;date&quot;}" />
+                                    <t t-if="not doc.validity_date">
+                                        <span>&#160;</span>
+                                    </t>
                                 </td>
                             </tr>
                         </table>
@@ -220,13 +250,19 @@
                             </tr>
                             <tr>
                                 <td colspan="3">
-                                    <span t-field="doc.actual_weight" /> KG</td>
+                                    <span t-field="doc.actual_weight" /> KG
+                                </td>
                                 <td colspan="3">
-                                    <span t-field="doc.volume" /> M3</td>
+                                    <span t-field="doc.volume" /> M3
+                                </td>
                                 <td colspan="3">
-                                    <span t-field="doc.chargeable_weight" /> KG</td>
+                                    <span t-field="doc.chargeable_weight" /> KG
+                                </td>
                                 <td colspan="3">
                                     <span t-field="doc.incoterm" />
+                                    <t t-if="not doc.incoterm">
+                                        <span>&#160;</span>
+                                    </t>
                                 </td>
                             </tr>
                             <tr class="header-gray text-left">
@@ -236,9 +272,15 @@
                             <tr>
                                 <td colspan="6">
                                     <span t-field="doc.description_of_goods" />
+                                    <t t-if="not doc.description_of_goods">
+                                        <span>&#160;</span>
+                                    </t>
                                 </td>
                                 <td colspan="6">
                                     <span t-field="doc.insurance_id" />
+                                    <t t-if="not doc.insurance_id">
+                                        <span>&#160;</span>
+                                    </t>
                                 </td>
                             </tr>
                             <tr class="header-gray text-left">
@@ -355,23 +397,41 @@
                                         <tr>
                                             <td name="td_name" class="px-2">
                                                 <span t-field="line.name" />
+                                                <t t-if="not line.name">
+                                                    <span>&#160;</span>
+                                                </t>
                                             </td>
                                             <td name="td_quantity" class="text-right px-2 col-num">
                                                 <span t-field="line.product_uom_qty" />
+                                                <t t-if="not line.product_uom_qty">
+                                                    <span>&#160;</span>
+                                                </t>
                                             </td>
                                             <td name="td_priceunit" class="text-right px-2 col-num">
                                                 <span t-field="line.price_unit" />
+                                                <t t-if="not line.price_unit">
+                                                    <span>&#160;</span>
+                                                </t>
                                             </td>
                                             <td t-if="display_discount"
                                                 class="text-right px-2 col-num">
                                                 <span t-field="line.discount" />
+                                                <t t-if="not line.discount">
+                                                    <span>&#160;</span>
+                                                </t>
                                             </td>
                                             <td name="td_taxes" class="text-right px-2 col-num">
                                                 <span t-field="line.tax_id" />
+                                                <t t-if="not line.tax_id">
+                                                    <span>&#160;</span>
+                                                </t>
                                             </td>
                                             <td name="td_subtotal"
                                                 class="text-right o_price_total px-2 col-num">
                                                 <span t-field="line.price_total" />
+                                                <t t-if="not line.price_total">
+                                                    <span>&#160;</span>
+                                                </t>
                                             </td>
                                         </tr>
                                     </t>
