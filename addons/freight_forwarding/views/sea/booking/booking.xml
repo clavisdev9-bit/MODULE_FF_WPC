@@ -112,17 +112,12 @@
                                             context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
                                         <field name="notify_party_address" readonly="1" nolabel="0" />
                                     </group>
+                                    <group string="Delivery Agent">
+                                        <field name="delivery_agent_id" widget="res_partner_many2one"
+                                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                                        <field name="delivery_agent_address" readonly="1" nolabel="0" />
+                                    </group>
                                 </group>
-                                <div class="d-flex mt-2">
-                                    <button name="action_add_notify_party"
-                                        type="object"
-                                        string="Add Notify Party"
-                                        class="btn-primary me-2" />
-                                    <button name="action_view_notify_party"
-                                        type="object"
-                                        string="View Notify Party"
-                                        class="btn-secondary" />
-                                </div>
                             </page>
                             <page string="Shipment Info">
                                 <group>
@@ -149,7 +144,7 @@
                                 </group>
                             </page>
 
-                            <page string="Agent &amp; Terms">
+                            <!-- <page string="Agent &amp; Terms">
                                 <group>
                                     <group>
                                         <field name="forward_agent_id" />
@@ -192,7 +187,7 @@
                                     <field name="booking_remark_id" />
                                     <field name="warehouse_remark" />
                                 </group>
-                            </page>
+                            </page> -->
 
                             <page string="Vessel Details">
                                 <group string="Booking &amp; Agent Information">

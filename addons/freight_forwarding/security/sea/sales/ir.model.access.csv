@@ -33,8 +33,6 @@ access_freight_sea_hbl_cash_purchase_user,Freight Sea HBL Cash Purchase User,mod
 access_freight_sea_hbl_cash_purchase_admin,Freight Sea HBL Cash Purchase Admin,model_freight_sea_hbl_cash_purchase,base.group_system,1,1,1,1
 access_freight_sea_booking_extra_info_user,Freight Sea Booking Extra Info User,model_freight_sea_booking_extra_info,base.group_user,1,1,1,0
 access_freight_sea_booking_extra_info_admin,Freight Sea Booking Extra Info Admin,model_freight_sea_booking_extra_info,base.group_system,1,1,1,1
-access_freight_sea_booking_notify_party_user,Freight Sea Booking Notify Party User,model_freight_sea_booking_notify_party,base.group_user,1,1,1,0
-access_freight_sea_booking_notify_party_admin,Freight Sea Booking Notify Party Admin,model_freight_sea_booking_notify_party,base.group_system,1,1,1,1
 access_freight_sea_booking_vessel_schedule_user,Freight Sea Booking Vessel Schedule User,model_freight_sea_booking_vessel_schedule,base.group_user,1,1,1,0
 access_freight_sea_booking_vessel_schedule_admin,Freight Sea Booking Vessel Schedule Admin,model_freight_sea_booking_vessel_schedule,base.group_system,1,1,1,1
 access_freight_sea_booking_convert_wizard_user,Freight Sea Booking Convert Wizard User,model_freight_sea_booking_convert_wizard,base.group_user,1,1,1,1
