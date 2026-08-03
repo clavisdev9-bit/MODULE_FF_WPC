@@ -253,14 +253,6 @@ class SeaBooking(models.Model):
         # shipment info sekarang langsung ada di Booking & HBL (lewat mixin),
         # jadi tidak perlu proses copy antar model perantara lagi.
 
-        if not hbl.pickup_info_ids and booking.pickup_info_ids:
-            self._copy_records_to_hbl(
-                booking.pickup_info_ids,
-                "freight.sea.hbl.pickup.info",
-                "hbl_id",
-                extra_values={"hbl_id": hbl.id},
-                excluded_fields={"booking_id"},
-            )
 
         vessel_fields = [
             "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
