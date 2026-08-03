@@ -5,15 +5,6 @@ class FreightCargoInfoMixin(models.AbstractModel):
     _name = "freight.sea.cargo.info.mixin"
     _description = "Freight Cargo Info Mixin"
 
-    uom = fields.Selection(
-        [
-            ("box", "Box / Load"),
-            ("container", "Container"),
-        ],
-        string="Unit of Measure",
-        required=True,
-    )
-
     # Box / Pallet / Load
     container_type_id = fields.Many2one(
         "freight.container.type",
@@ -24,7 +15,11 @@ class FreightCargoInfoMixin(models.AbstractModel):
         "stock.package.type",
         string="Package Type",
     )
-    seal_no = fields.Integer(string="Seal No.")
+    seal_no = fields.Char(string="Seal No.")
+    
+    # Description
+    description_of_goods = fields.Text(string="Description of Goods")
+    marks_and_no = fields.Text(string="Marks and No.")
 
     # Qty & Type
     types_of_cargo = fields.Many2one(

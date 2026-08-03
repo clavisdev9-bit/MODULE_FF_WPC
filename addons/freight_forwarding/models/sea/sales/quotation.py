@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class SeaQuotation(models.Model):
@@ -178,16 +179,28 @@ class SeaQuotation(models.Model):
             count = self.search_count(domain) - 1
             rec.variant_count = count if count > 0 else 0
 
-    def copy(self, default=None):
-        default = dict(default or {})
-        # Jika saya diduplikasi, set original_quotation_id ke root original
-        # Jika saya adalah root, maka set ke ID saya.
+    def action_create_currency_variant(self):
+        """
+        Buat salinan header-only yang tertaut ke quotation asal sebagai currency variant.
+        Berbeda dari Duplicate standar: tidak menyalin order lines,
+        dan otomatis tertaut lewat original_quotation_id.
+        """
+        self.ensure_one()
         if self.original_quotation_id:
-            default['original_quotation_id'] = self.original_quotation_id.id
-        else:
-            default['original_quotation_id'] = self.id
-            
-        return super().copy(default=default)
+            raise UserError("You cannot create a currency variant from a child quotation. Please create it from the parent quotation instead.")
+
+        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
+        new_variant = self.copy(default={
+            'original_quotation_id': original_id,
+            'order_line': [],
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'freight.sea.quotation',
+            'res_id': new_variant.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
 
     # =========================================================
     # Sea-specific Actions
@@ -242,10 +255,11 @@ class SeaQuotation(models.Model):
     def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
         return {
             "booking_id": booking.id,
-            "uom": cargo_info.uom,
             "package_type_id": cargo_info.package_type_id.id if cargo_info.package_type_id else False,
             "container_no": cargo_info.container_no,
             "seal_no": cargo_info.seal_no,
+            "description_of_goods": cargo_info.description_of_goods,
+            "marks_and_no": cargo_info.marks_and_no,
             "container_type_id": cargo_info.container_type_id.id if cargo_info.container_type_id else False,
             "types_of_cargo": cargo_info.types_of_cargo.id if cargo_info.types_of_cargo else False,
             "quantity": cargo_info.quantity,
@@ -302,6 +316,7 @@ class SeaQuotation(models.Model):
             "freight_type": self.freight_type,
             "booking_date": fields.Datetime.now(),
             "job_date": fields.Date.today(),
+            "company_id": self.company_id.id,
         }
         booking = self.env["freight.sea.booking"].create(booking_vals)
         self._copy_cargo_info_to_booking(booking)
@@ -324,6 +339,7 @@ class SeaQuotation(models.Model):
                 "customer_id": self.partner_id.id,
                 "term_payment": self.payment_term_id.id,
                 "job_date": fields.Date.today(),
+                "company_id": self.company_id.id,
             }
         )
         return {

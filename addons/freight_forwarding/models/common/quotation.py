@@ -64,7 +64,7 @@ class FreightQuotation(models.AbstractModel):
     # Address — Source
     pickup_street = fields.Char(string="Pickup Street")
     pickup_street2 = fields.Char(string="Pickup  Street 2")
-    pickup_city = fields.Char(string="Pickup  City")
+    pickup_city = fields.Many2one("res.city", string="Pickup  City")
     pickup_state_id = fields.Many2one("res.country.state", string="Pickup  State")
     pickup_zip = fields.Char(string="Pickup  Zip")
     pickup_country_id = fields.Many2one("res.country", string="Pickup  Country")
@@ -72,10 +72,34 @@ class FreightQuotation(models.AbstractModel):
     # Address — Destination
     delivery_street = fields.Char(string="Delivery Street")
     delivery_street2 = fields.Char(string="Delivery Street 2")
-    delivery_city = fields.Char(string="Delivery City")
+    delivery_city = fields.Many2one("res.city", string="Delivery City")
     delivery_state_id = fields.Many2one("res.country.state", string="Delivery State")
     delivery_zip = fields.Char(string="Delivery Zip")
     delivery_country_id = fields.Many2one("res.country", string="Delivery Country")
+
+    @api.onchange("pickup_city")
+    def _onchange_pickup_city(self):
+        city = self.pickup_city
+        if not city:
+            return
+        if city.zipcode:
+            self.pickup_zip = city.zipcode
+        if city.state_id:
+            self.pickup_state_id = city.state_id
+        if city.country_id:
+            self.pickup_country_id = city.country_id
+
+    @api.onchange("delivery_city")
+    def _onchange_delivery_city(self):
+        city = self.delivery_city
+        if not city:
+            return
+        if city.zipcode:
+            self.delivery_zip = city.zipcode
+        if city.state_id:
+            self.delivery_state_id = city.state_id
+        if city.country_id:
+            self.delivery_country_id = city.country_id
 
     # Extra Info
     description_of_goods = fields.Char(string="Description of Goods")
@@ -98,9 +122,7 @@ class FreightQuotation(models.AbstractModel):
     # Shipment Info — Common
     origin_id = fields.Many2one("res.city", string="Origin")
     destination_id = fields.Many2one("res.city", string="Destination")
-    est_transit_time_days = fields.Integer(
-        string="Est. Transit Time (Days)", default=0
-    )
+    est_transit_time_days = fields.Integer(string="Est. Transit Time (Days)", default=0)
     est_transit_time_note = fields.Char(string="Est. Transit Time Note")
     frequency = fields.Selection(
         selection=[("weekly", "Weekly"), ("bi_weekly", "Bi-weekly")],
@@ -150,6 +172,7 @@ class FreightQuotation(models.AbstractModel):
             if record.est_transit_time_days < 0:
                 raise ValidationError("Est. Transit Time (Days) cannot be negative.")
 
+
     def _sync_sale_order_rows(self):
         """
         Sync baris dari tabel quotation masing-masing ke sale_order.
@@ -195,8 +218,27 @@ class FreightQuotation(models.AbstractModel):
             )
             """
         )
+
+        # Perbaiki issue currency di order_line (sale.order.line)
+        # Karena INSERT/UPDATE ke sale_order di atas menggunakan raw SQL,
+        # ORM tidak mendeteksi perubahan dan tidak me-recompute related field (currency_id) di line.
+        # Kita update langsung di DB agar sinkron.
+        if ids:
+            self.env.cr.execute(
+                """
+                UPDATE sale_order_line sol
+                SET currency_id = so.currency_id
+                FROM sale_order so
+                WHERE sol.order_id = so.id 
+                  AND so.id = ANY(%s) 
+                  AND (sol.currency_id != so.currency_id OR sol.currency_id IS NULL)
+                """,
+                [ids],
+            )
+
         # Invalidate ORM cache agar data yang baru di-sync terbaca dengan benar
         self.env["sale.order"].invalidate_model()
+        self.env["sale.order.line"].invalidate_model(["currency_id"])
 
     def copy(self, default=None):
         """
@@ -204,29 +246,48 @@ class FreightQuotation(models.AbstractModel):
         1. Preserve validity_date (Expiry Date) dari record sumber.
            Tanpa ini, saat duplicate Odoo me-reset date_order ke hari ini
            sehingga validity_date ikut recalculate → beda dari aslinya.
-        2. Mencegah order_line ikut terduplikat (untuk kebutuhan multi-currency).
-        3. Sync record baru ke sale_order setelah dibuat.
+        2. Menyelesaikan issue "Missing Record" saat menduplikasi order_line.
+           Karena order_line divalidasi ke tabel sale_order, kita menunda
+           duplikasi order_line sampai setelah record disinkronisasi ke sale_order.
         """
         default = dict(default or {})
         # Salin validity_date dari source agar tidak di-recalculate
         if "validity_date" not in default and self.validity_date:
             default["validity_date"] = self.validity_date
-            
-        # Cegah duplikasi order_line
-        default["order_line"] = []
-        
+
+        # Tunda duplikasi order_line dari ORM bawaan
+        copy_order_lines = False
+        if "order_line" not in default:
+            default["order_line"] = False
+            copy_order_lines = True
+        elif not default["order_line"]:
+            # [] atau None dari caller (misal action_create_currency_variant) tidak cukup untuk
+            # suppress copying di Odoo ORM — normalize ke False agar lines tidak ikut ter-copy.
+            default["order_line"] = False
+
         new_record = super().copy(default=default)
         new_record._sync_sale_order_rows()
+
+        # Setelah record disinkronisasi ke tabel sale_order, barulah aman menduplikasi order_line
+        if copy_order_lines and self.order_line:
+            for line in self.order_line:
+                line.copy({"order_id": new_record.id})
+
         return new_record
 
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
+        # Flush deferred computed fields (e.g. currency_id dari pricelist_id) ke DB
+        # sebelum raw SQL sync, agar _sync_sale_order_rows tidak baca nilai stale.
+        records.flush_recordset()
         records._sync_sale_order_rows()
         return records
 
     def write(self, vals):
         result = super().write(vals)
+        # Flush deferred computed fields sebelum sync — lihat FF-19.
+        self.flush_recordset()
         self._sync_sale_order_rows()
         return result
 

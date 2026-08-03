@@ -1,7 +1,14 @@
 from odoo import api, fields, models
 
+
 class SeaBooking(models.Model):
     _name = "freight.sea.booking"
+    _inherit = [
+        "mail.thread",
+        "mail.activity.mixin",
+        "freight.sea.shipment.info.mixin",
+        "freight.sea.vessel.details.mixin"
+    ]
     _description = "Sea Booking"
     _rec_name = "name"
 
@@ -56,7 +63,7 @@ class SeaBooking(models.Model):
             "view_mode": "form" if len(hbls) == 1 else "list,form",
             "domain": [("id", "in", hbls.ids)],
             "res_id": hbls.id if len(hbls) == 1 else False,
-            "context": dict(self.env.context, default_booking_id=self.id),
+            "context": dict(self.env.context, default_booking_id=self.id, default_company_id=self.company_id.id),
         }
 
     def action_view_quotation(self):
@@ -82,7 +89,18 @@ class SeaBooking(models.Model):
         string="Type",
         required=True,
     )
-    name = fields.Char(string="Booking No.", required=True, copy=False)
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
+    )
+    name = fields.Char(
+        string="Booking No.",
+        required=True,
+        default=lambda self: "New",
+        copy=False,
+    )
     booking_date = fields.Datetime(string="Date & Time")
     bl_no = fields.Char(string="B/L No.")
     job_no = fields.Char(string="Job No.")
@@ -121,6 +139,12 @@ class SeaBooking(models.Model):
     )
 
     # Shipment Details
+    # NOTE (FF-22): port_of_loading_id, port_of_discharge_id, commodity_id,
+    # dan eta_jkt juga ada di freight.sea.shipment.info.mixin. Karena Booking
+    # sudah mendefinisikan field ini sendiri (dengan required=True dan string
+    # custom), definisi di sini yang dipakai. Field ini TIDAK ditambahkan lagi
+    # di tab "Shipment Details"/"Vessel Schedule" baru supaya tidak duplikat
+    # di view.
     port_of_loading_id = fields.Many2one(
         "freight.port", string="Origin Port (POL)", required=True
     )
@@ -147,6 +171,10 @@ class SeaBooking(models.Model):
     eta_jkt = fields.Date(string="ETA on JKT")
 
     # Notebook
+    # NOTE (FF-22): field shipment_info_ids (One2many ke
+    # freight.sea.booking.shipment.info) DIHAPUS. Model perantaranya sudah
+    # dihapus; field-fieldnya sekarang ada langsung di sini lewat
+    # freight.sea.shipment.info.mixin (lihat _inherit di atas).
     cargo_info_ids = fields.One2many(
         "freight.sea.booking.cargo.info",
         "booking_id",
@@ -156,16 +184,6 @@ class SeaBooking(models.Model):
         "freight.sea.booking.pickup.info",
         "booking_id",
         string="Pickup Info",
-    )
-    shipment_info_ids = fields.One2many(
-        "freight.sea.booking.shipment.info",
-        "booking_id",
-        string="Shipment Info",
-    )
-    vessel_details_ids = fields.One2many(
-        "freight.sea.booking.vessel.details",
-        "booking_id",
-        string="Vessel Details",
     )
     purchase_order_ids = fields.One2many(
         "freight.sea.booking.purchase.order",
@@ -287,6 +305,15 @@ class SeaBooking(models.Model):
             "target": "current",
         }
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get("name") or vals.get("name") == "New":
+                vals["name"] = self.env["ir.sequence"].next_by_code(
+                    "freight.sea.booking"
+                ) or "New"
+        return super().create(vals_list)
+
     def _copy_records_to_hbl(self, source_records, target_model_name, target_field_name, extra_values=None, excluded_fields=None):
         target_model = self.env[target_model_name]
         excluded_fields = set(excluded_fields or [])
@@ -302,46 +329,46 @@ class SeaBooking(models.Model):
 
     def _copy_cargo_info_lines_to_hbl(self, booking_cargo_info_records, hbl):
         hbl_cargo_model = self.env["freight.sea.hbl.cargo.info"]
-        hbl_items_model = self.env["freight.sea.hbl.items.line"]
 
         for booking_cargo_info in booking_cargo_info_records:
             cargo_values = booking_cargo_info.copy_data(default={"hbl_id": hbl.id})[0]
-            for field_name in ["booking_id", "quotation_id", "freight_items_line"]:
+            for field_name in ["booking_id", "quotation_id"]:
                 cargo_values.pop(field_name, None)
             for field_name in list(cargo_values.keys()):
                 if field_name not in hbl_cargo_model._fields:
                     cargo_values.pop(field_name, None)
             cargo_values["hbl_id"] = hbl.id
-            hbl_cargo = hbl_cargo_model.create(cargo_values)
-
-            for booking_item_line in booking_cargo_info.freight_items_line:
-                item_values = booking_item_line.copy_data(default={"hbl_cargo_info_id": hbl_cargo.id})[0]
-                for field_name in ["booking_cargo_info_id"]:
-                    item_values.pop(field_name, None)
-                for field_name in list(item_values.keys()):
-                    if field_name not in hbl_items_model._fields:
-                        item_values.pop(field_name, None)
-                item_values["hbl_cargo_info_id"] = hbl_cargo.id
-                hbl_items_model.create(item_values)
+            hbl_cargo_model.create(cargo_values)
 
     def _copy_booking_data_to_hbl(self, booking, hbl):
-        if not hbl.shipment_info_ids and booking.shipment_info_ids:
+        # NOTE (FF-22): pemanggilan copy shipment_info_ids DIHAPUS di sini
+        # karena model freight.sea.booking.shipment.info /
+        # freight.sea.hbl.shipment.info sudah tidak ada. Field-field
+        # shipment info sekarang langsung ada di Booking & HBL (lewat mixin),
+        # jadi tidak perlu proses copy antar model perantara lagi.
+
+        if not hbl.pickup_info_ids and booking.pickup_info_ids:
             self._copy_records_to_hbl(
-                booking.shipment_info_ids,
-                "freight.sea.hbl.shipment.info",
+                booking.pickup_info_ids,
+                "freight.sea.hbl.pickup.info",
                 "hbl_id",
                 extra_values={"hbl_id": hbl.id},
                 excluded_fields={"booking_id"},
             )
 
-        if not hbl.vessel_details_ids and booking.vessel_details_ids:
-            self._copy_records_to_hbl(
-                booking.vessel_details_ids,
-                "freight.sea.hbl.vessel.details",
-                "hbl_id",
-                extra_values={"hbl_id": hbl.id},
-                excluded_fields={"booking_id"},
-            )
+        vessel_fields = [
+            "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
+            "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
+            "stuffing_date", "contact_id", "yard_id", "depot_id",
+            "depot_instruction", "general_instruction"
+        ]
+        hbl_update = {}
+        for field in vessel_fields:
+            if not hbl[field] and booking[field]:
+                val = booking[field]
+                hbl_update[field] = val.id if hasattr(val, 'id') else val
+        if hbl_update:
+            hbl.write(hbl_update)
 
         if not hbl.cargo_info_ids and booking.cargo_info_ids:
             self._copy_cargo_info_lines_to_hbl(booking.cargo_info_ids, hbl)

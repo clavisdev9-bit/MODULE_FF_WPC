@@ -1,6 +1,6 @@
 from . import hbl
 from . import cargo_info
-from . import freight_items_line
+
 from . import custom_permit
 from . import purchase_order
 from . import sales_order
@@ -14,4 +14,3 @@ from . import vendor_debit_note
 from . import vendor_credit_note
 from . import cash_purchase
 from . import shipment_info
-from . import vessel_details

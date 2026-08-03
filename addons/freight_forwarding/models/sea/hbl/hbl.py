@@ -1,7 +1,14 @@
 from odoo import api, fields, models
 
+
 class SeaHBL(models.Model):
     _name = "freight.sea.hbl"
+    _inherit = [
+        "mail.thread",
+        "mail.activity.mixin",
+        "freight.sea.shipment.info.mixin",
+        "freight.sea.vessel.details.mixin"
+    ]
     _description = "Sea Jobsheet"
     _rec_name = "hbl_no"
 
@@ -76,6 +83,12 @@ class SeaHBL(models.Model):
         string="Type",
         required=True,
     )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
+    )
     container_type = fields.Selection(
         selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
         string="Container Type",
@@ -83,7 +96,7 @@ class SeaHBL(models.Model):
     )
     job_no = fields.Char(string="Job No.", default=lambda self: "New", copy=False, readonly=True)
     job_date = fields.Date(string="Job Date")
-    job_city_id = fields.Many2one("res.country.state", string="Job City")
+    job_city_id = fields.Many2one("res.city", string="Job City")
     master_job_no = fields.Char(string="Master Job No.")
     original_bl_no = fields.Char(string="Original BL No.")
     shipment_type = fields.Selection(
@@ -91,6 +104,16 @@ class SeaHBL(models.Model):
         string="Shipment Type",
     )
     bl_surrendered = fields.Boolean(string="BL Surrendered")
+
+    # NOTE: field khusus HBL, tidak ada di mixin (Booking tidak butuh field ini).
+    # Dulu didefinisikan di model perantara freight.sea.hbl.shipment.info,
+    # sekarang dipindahkan langsung ke sini karena model perantara dihapus.
+    # Saling eksklusif dengan stuffing_location_id (dari mixin) berdasarkan
+    # freight_type -- lihat kondisi invisible di views/sea/hbl/hbl.xml.
+    warehouse_location_id = fields.Many2one(
+        "stock.warehouse",
+        string="Warehouse Location",
+    )
 
     # Customer & Sales
     customer_id = fields.Many2one(
@@ -193,16 +216,7 @@ class SeaHBL(models.Model):
         string="Freight",
     )
 
-    shipment_info_ids = fields.One2many(
-        "freight.sea.hbl.shipment.info",
-        "hbl_id",
-        string="Shipment Info",
-    )
-    vessel_details_ids = fields.One2many(
-        "freight.sea.hbl.vessel.details",
-        "hbl_id",
-        string="Vessel Details",
-    )
+    pbm = fields.Char(string="PBM")
     custom_permit_ids = fields.One2many(
         "freight.sea.hbl.custom.permit",
         "hbl_id",

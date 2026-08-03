@@ -3,7 +3,9 @@ __pycache__/
 *.pyo
 .odoo_dev/
 .claude*
-
+.graphify*
+.agents*
+graphify-out/
 # Only track freight_forwarding addon
 /addons/currency_rate_update/
 /.vscode

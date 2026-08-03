@@ -7,32 +7,23 @@ class FreightShipmentInfoMixin(models.AbstractModel):
 
     # Shipment Details
     shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
-    place_of_receipt_id = fields.Many2one("res.country.state", string="Place of Receipt")
-    place_of_delivery_id = fields.Many2one("res.country.state", string="Place of Delivery")
+    place_of_receipt_id = fields.Many2one("freight.port", string="Place of Receipt")
+    place_of_delivery_id = fields.Many2one("freight.port", string="Place of Delivery")
     port_of_loading_id = fields.Many2one("freight.port", string="Port of Loading")
     port_of_discharge_id = fields.Many2one("freight.port", string="Port of Discharge")
     via_port_id = fields.Many2one("freight.port", string="Via Port")
     terminal_id = fields.Many2one("freight.location", string="Terminal")
 
     feeder_vessel_id = fields.Many2one("freight.vessel", string="Feeder Vessel")
-    feeder_voyage_no = fields.Char(
-        string="Feeder Voyage No.",
-        related="feeder_vessel_id.voyage_no",
-        readonly=True,
-    )
+    feeder_voyage_no = fields.Char(string="Feeder Voyage No.")
     mother_vessel_id = fields.Many2one("freight.vessel", string="Mother Vessel")
-    mother_voyage_no = fields.Char(
-        string="Mother Voyage No.",
-        related="mother_vessel_id.voyage_no",
-        readonly=True,
+    mother_voyage_no = fields.Char(string="Mother Voyage No.")
+    shipping_line_id = fields.Many2one(
+        "res.partner",
+        string="Shipping Line",
+        domain="[('category_id.name', '=', 'Shipping Line')]",
     )
-    shipping_line_id = fields.Many2one("freight.shipping.line", string="Shipping Line")
-    shipping_line_ref_no = fields.Char(
-        string="Shipping Line Ref No",
-        related="shipping_line_id.shipping_line_ref_no",
-        readonly=True,
-        store=False,
-    )
+    shipping_line_ref_no = fields.Char(string="Shipping Line Ref No")
     coloader_id = fields.Many2one("res.partner", string="Coloader")
     coloader_ref_no = fields.Char(string="Coloader Ref No")
     stuffing_location_id = fields.Many2one("stock.warehouse", string="Stuffing Location")
