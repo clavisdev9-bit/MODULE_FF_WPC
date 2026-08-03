@@ -151,7 +151,7 @@ class SeaBooking(models.Model):
         "res.country", string="Destination Country"
     )
     origin_country_id = fields.Many2one(
-        "res.country", string="Cargo Origin Country (Optional)"
+        "res.country", string="Origin Country"
     )
     from_city = fields.Many2one("res.city", string="From")
     to_city = fields.Many2one("res.city", string="To")
