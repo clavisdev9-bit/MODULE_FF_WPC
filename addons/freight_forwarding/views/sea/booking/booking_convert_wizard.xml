@@ -15,13 +15,10 @@
                             <field name="quotation_id" readonly="1" />
                             <field name="customer_id" readonly="1" />
                             <field name="delivery_type_id" readonly="1" />
-                            <field name="origin_port_id" readonly="1" />
-                            <field name="destination_port_id" readonly="1" />
+                            <field name="origin_port_id" required="1" />
+                            <field name="destination_port_id" required="1" />
                         </group>
                         <group>
-                            <field name="currency_id" readonly="1" />
-                            <field name="destination_country_id" readonly="1" />
-                            <field name="origin_country_id" readonly="1" />
                             <field name="payment_term_id" readonly="1" />
                             <field name="salesman_id" readonly="1" />
                         </group>
@@ -50,14 +47,12 @@
                     <separator string="Optional Information" />
                     <group>
                         <group>
-                            <field name="contact_person" />
-                            <field name="phone" />
-                            <field name="email" widget="email" />
-                        </group>
-                        <group>
                             <field name="import_job_no" />
                             <field name="nomination_cargo" />
                             <field name="railing" />
+                        </group>
+                        <group>
+                            <!-- Empty group for layout balance -->
                         </group>
                     </group>
 
