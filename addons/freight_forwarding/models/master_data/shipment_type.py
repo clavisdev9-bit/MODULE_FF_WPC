@@ -12,4 +12,5 @@ class ShipmentType(models.Model):
 
     code = fields.Char(string="Shipment Type Code", required=True)
     name = fields.Char(string="Shipment Type Name", required=True)
+    description = fields.Char(string="Description")
     active = fields.Boolean(string="Active", default=True)
