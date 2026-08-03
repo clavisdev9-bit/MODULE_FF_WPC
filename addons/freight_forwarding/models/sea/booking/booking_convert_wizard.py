@@ -162,6 +162,7 @@ class SeaBookingConvertWizard(models.TransientModel):
                 "railing": self.railing,
                 "booking_date": fields.Datetime.now(),
                 "job_date": fields.Date.today(),
+                "company_id": quotation.company_id.id,
             }
         )
 

@@ -70,7 +70,7 @@
                                 </td>
                                 <td
                                     style="width: 60%; vertical-align: top; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif; color: #000; font-size: 15px; padding: 0;">
-                                    <strong style="font-size: 18px; color: #085294;" t-field="doc.company_id.name">WPC MAIN OFFICE - INDONESIA</strong>
+                                    <strong style="font-size: 18px; color: #085294;" t-field="doc.company_id.name"></strong>
                                     <br />
                                     <span t-if="doc.company_id.street" t-field="doc.company_id.street"/>
                                     <span t-if="doc.company_id.street2"> <span t-field="doc.company_id.street2"/></span>

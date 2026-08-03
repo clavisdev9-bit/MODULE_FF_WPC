@@ -316,6 +316,7 @@ class SeaQuotation(models.Model):
             "freight_type": self.freight_type,
             "booking_date": fields.Datetime.now(),
             "job_date": fields.Date.today(),
+            "company_id": self.company_id.id,
         }
         booking = self.env["freight.sea.booking"].create(booking_vals)
         self._copy_cargo_info_to_booking(booking)
@@ -338,6 +339,7 @@ class SeaQuotation(models.Model):
                 "customer_id": self.partner_id.id,
                 "term_payment": self.payment_term_id.id,
                 "job_date": fields.Date.today(),
+                "company_id": self.company_id.id,
             }
         )
         return {
