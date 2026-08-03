@@ -52,6 +52,18 @@ class SeaBooking(models.Model):
         for rec in self:
             rec.destination_country_id = rec.port_of_discharge_id.country_id
 
+    @api.onchange("from_city")
+    def _onchange_from_city(self):
+        for rec in self:
+            if rec.from_city.country_id:
+                rec.origin_country_id = rec.from_city.country_id
+
+    @api.onchange("to_city")
+    def _onchange_to_city(self):
+        for rec in self:
+            if rec.to_city.country_id:
+                rec.destination_country_id = rec.to_city.country_id
+
     # Fungsi pas tombol Jobsheet di klik
     def action_view_hbl(self):
         self.ensure_one()
