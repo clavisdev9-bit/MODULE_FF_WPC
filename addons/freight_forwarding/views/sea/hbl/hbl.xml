@@ -82,8 +82,8 @@
 
                     <group>
                         <group string="Notify Party">
-                            <field name="notify_id" />
-                            <field name="notify_address" readonly="1" />
+                            <field name="notify_party_id" />
+                            <field name="notify_party_address" readonly="1" />
                         </group>
                         <group string="Delivery &amp; Freight">
                             <field name="delivery_agent_id" />

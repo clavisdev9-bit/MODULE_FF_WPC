@@ -1,0 +1,87 @@
+from odoo import api, fields, models
+
+
+class FreightBlInfoMixin(models.AbstractModel):
+    _name = "freight.sea.bl.info.mixin"
+    _description = "Freight Sea B/L Info Mixin"
+
+    # Shipper
+    shipper_id = fields.Many2one(
+        "res.partner",
+        string="Shipper",
+        domain="[('category_id.name', '=', 'Shipper')]",
+    )
+    shipper_address = fields.Char(
+        string="Shipper Address",
+        compute="_compute_shipper_address",
+        store=False,
+    )
+
+    # Consignee
+    consignee_id = fields.Many2one(
+        "res.partner",
+        string="Consignee",
+        domain="[('category_id.name', '=', 'Consignee')]",
+    )
+    consignee_address = fields.Char(
+        string="Consignee Address",
+        compute="_compute_consignee_address",
+        store=False,
+    )
+
+    # Notify Party
+    notify_party_id = fields.Many2one(
+        "res.partner",
+        string="Notify Party",
+        domain="[('category_id.name', '=', 'Notify Party')]",
+    )
+    notify_party_address = fields.Char(
+        string="Notify Party Address",
+        compute="_compute_notify_party_address",
+        store=False,
+    )
+
+    # Delivery Agent
+    delivery_agent_id = fields.Many2one(
+        "res.partner",
+        string="Delivery Agent",
+        domain="[('category_id.name', '=', 'Delivery Agent')]",
+    )
+    delivery_agent_address = fields.Char(
+        string="Delivery Agent Address",
+        compute="_compute_delivery_agent_address",
+        store=False,
+    )
+
+    def _build_partner_address(self, partner):
+        """Build formatted address string dari res.partner record."""
+        if not partner:
+            return False
+        parts = [
+            partner.street,
+            partner.street2,
+            partner.city,
+            partner.state_id.name,
+            partner.country_id.name,
+        ]
+        return ", ".join(filter(None, parts))
+
+    @api.depends("shipper_id")
+    def _compute_shipper_address(self):
+        for rec in self:
+            rec.shipper_address = self._build_partner_address(rec.shipper_id)
+
+    @api.depends("consignee_id")
+    def _compute_consignee_address(self):
+        for rec in self:
+            rec.consignee_address = self._build_partner_address(rec.consignee_id)
+
+    @api.depends("notify_party_id")
+    def _compute_notify_party_address(self):
+        for rec in self:
+            rec.notify_party_address = self._build_partner_address(rec.notify_party_id)
+                
+    @api.depends("delivery_agent_id")
+    def _compute_delivery_agent_address(self):
+        for rec in self:
+            rec.delivery_agent_address = self._build_partner_address(rec.delivery_agent_id)
