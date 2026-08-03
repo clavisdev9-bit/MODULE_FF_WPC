@@ -13,14 +13,10 @@ class SeaBookingConvertWizard(models.TransientModel):
     # Auto-filled from quotation
     customer_id = fields.Many2one("res.partner", string="Customer Name")
     delivery_type_id = fields.Many2one("freight.delivery.type", string="Delivery Type")
-    currency_id = fields.Many2one("res.currency", string="Currency")
     origin_port_id = fields.Many2one("freight.port", string="Origin Port (POL)")
     destination_port_id = fields.Many2one("freight.port", string="Destination Port (POD)")
     destination_country_id = fields.Many2one("res.country", string="Destination Country")
     origin_country_id = fields.Many2one("res.country", string="Cargo Origin Country")
-    contact_person = fields.Char(string="Contact Person")
-    phone = fields.Char(string="Phone")
-    email = fields.Char(string="Email")
     salesman_id = fields.Many2one("hr.employee", string="Salesman")
     payment_term_id = fields.Many2one("account.payment.term", string="Terms Payment")
 
@@ -50,10 +46,10 @@ class SeaBookingConvertWizard(models.TransientModel):
     railing = fields.Boolean(string="Railing")
 
     def _get_destination_country(self, quotation):
-        return quotation.destination_country_id or quotation.destination_id.country_id
+        return quotation.delivery_country_id or quotation.delivery_city.country_id
 
     def _get_origin_country(self, quotation):
-        return quotation.source_country_id or quotation.origin_id.country_id
+        return quotation.pickup_country_id or quotation.pickup_city.country_id
 
     def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
         return {
@@ -105,16 +101,9 @@ class SeaBookingConvertWizard(models.TransientModel):
             res.update(
                 {
                     "quotation_id": quotation_id,
+                    "freight_type": quotation.freight_type,
                     "customer_id": quotation.partner_id.id,
                     "delivery_type_id": quotation.delivery_type_id.id,
-                    "currency_id": quotation.currency_id.id,
-                    "origin_port_id": quotation.port_of_loading_id.id,
-                    "destination_port_id": quotation.port_of_discharge_id.id,
-                    "destination_country_id": destination_country.id if destination_country else False,
-                    "origin_country_id": origin_country.id if origin_country else False,
-                    "contact_person": quotation.contact_person,
-                    "phone": quotation.phone,
-                    "email": quotation.email,
                     "salesman_id": quotation.salesman_id.id,
                     "payment_term_id": quotation.payment_term_id.id,
                 }
@@ -139,17 +128,17 @@ class SeaBookingConvertWizard(models.TransientModel):
             {
                 "name": booking_no,
                 "quotation_id": self.quotation_id.id,
-                "customer_id": self.customer_id.id,
+                "partner_id": self.customer_id.id,
                 "delivery_type_id": self.delivery_type_id.id,
-                "origin_port_id": self.origin_port_id.id,
-                "destination_port_id": self.destination_port_id.id,
                 "destination_country_id": destination_country.id if destination_country else False,
-                "cargo_origin_country_id": origin_country.id if origin_country else False,
-                "phone": self.phone,
-                "email": self.email,
+                "origin_country_id": origin_country.id if origin_country else False,
+                "from_city": quotation.pickup_city.id,
+                "to_city": quotation.delivery_city.id,
                 "salesman_id": self.salesman_id.id,
                 "payment_term_id": self.payment_term_id.id,
                 "container_type": quotation.container_type,
+                "commodity_id": quotation.commodity_id.id,
+                "service_level": quotation.service_level,
                 "freight_type": self.freight_type,
                 "vessel_id": self.vessel_id.id,
                 "voyage_no": self.voyage_no,
