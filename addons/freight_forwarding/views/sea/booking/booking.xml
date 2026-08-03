@@ -149,7 +149,7 @@
                                 </group>
                             </page>
 
-                            <page string="Agent &amp; Terms">
+                            <!-- <page string="Agent &amp; Terms">
                                 <group>
                                     <group>
                                         <field name="forward_agent_id" />
@@ -192,7 +192,7 @@
                                     <field name="booking_remark_id" />
                                     <field name="warehouse_remark" />
                                 </group>
-                            </page>
+                            </page> -->
 
                             <page string="Vessel Details">
                                 <group string="Booking &amp; Agent Information">
