@@ -159,6 +159,8 @@ class SeaBooking(models.Model):
     origin_country_id = fields.Many2one(
         "res.country", string="Cargo Origin Country (Optional)"
     )
+    from_city = fields.Many2one("res.city", string="From")
+    to_city = fields.Many2one("res.city", string="To")
     delivery_type_id = fields.Many2one(
         "freight.delivery.type", string="Delivery Type", required=True
     )
