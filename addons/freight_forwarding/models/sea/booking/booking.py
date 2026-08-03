@@ -63,7 +63,7 @@ class SeaBooking(models.Model):
             "view_mode": "form" if len(hbls) == 1 else "list,form",
             "domain": [("id", "in", hbls.ids)],
             "res_id": hbls.id if len(hbls) == 1 else False,
-            "context": dict(self.env.context, default_booking_id=self.id),
+            "context": dict(self.env.context, default_booking_id=self.id, default_company_id=self.company_id.id),
         }
 
     def action_view_quotation(self):
@@ -88,6 +88,12 @@ class SeaBooking(models.Model):
         ],
         string="Type",
         required=True,
+    )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
     )
     name = fields.Char(
         string="Booking No.",

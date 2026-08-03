@@ -83,6 +83,12 @@ class SeaHBL(models.Model):
         string="Type",
         required=True,
     )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
+    )
     container_type = fields.Selection(
         selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
         string="Container Type",
