@@ -7,7 +7,8 @@ class SeaHBL(models.Model):
         "mail.thread",
         "mail.activity.mixin",
         "freight.sea.shipment.info.mixin",
-        "freight.sea.vessel.details.mixin"
+        "freight.sea.vessel.details.mixin",
+        "freight.sea.bl.info.mixin",
     ]
     _description = "Sea Jobsheet"
     _rec_name = "hbl_no"
@@ -83,6 +84,12 @@ class SeaHBL(models.Model):
         string="Type",
         required=True,
     )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
+    )
     container_type = fields.Selection(
         selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
         string="Container Type",
@@ -127,54 +134,6 @@ class SeaHBL(models.Model):
         related="customer_id.ref",
         string="Customer Reference"
     )
-    shipper_id = fields.Many2one(
-        "res.partner",
-        string="Shipper",
-        domain="[('category_id.name', '=', 'Shipper')]",
-    )
-    shipper_address = fields.Char(
-        string="Shipper Address",
-        compute="_compute_shipper_address",
-    )
-    consignee_id = fields.Many2one(
-        "res.partner",
-        string="Consignee",
-        domain="[('category_id.name', '=', 'Consignee')]",
-    )
-    consignee_address = fields.Char(
-        string="Consignee Address",
-        compute="_compute_consignee_address",
-    )
-
-    @api.depends("shipper_id")
-    def _compute_shipper_address(self):
-        for rec in self:
-            if rec.shipper_id:
-                parts = [
-                    rec.shipper_id.street,
-                    rec.shipper_id.street2,
-                    rec.shipper_id.city,
-                    rec.shipper_id.state_id.name,
-                    rec.shipper_id.country_id.name,
-                ]
-                rec.shipper_address = ", ".join([p for p in parts if p])
-            else:
-                rec.shipper_address = False
-
-    @api.depends("consignee_id")
-    def _compute_consignee_address(self):
-        for rec in self:
-            if rec.consignee_id:
-                parts = [
-                    rec.consignee_id.street,
-                    rec.consignee_id.street2,
-                    rec.consignee_id.city,
-                    rec.consignee_id.state_id.name,
-                    rec.consignee_id.country_id.name,
-                ]
-                rec.consignee_address = ", ".join([p for p in parts if p])
-            else:
-                rec.consignee_address = False
     term_payment = fields.Many2one(
         "account.payment.term", 
         string="Terms of Payment"
@@ -190,26 +149,12 @@ class SeaHBL(models.Model):
     )
 
     # Notify Party
-    notify_id = fields.Many2one(
-        "res.partner",
-        string="Notify",
-        domain="[('category_id.name', '=', 'Notify Party')]",
-    )
-    notify_address = fields.Char(
-        related="notify_id.contact_address",
-        string="Notify Address",
-    )
+    # NOTE: field notify_id dan notify_address digantikan oleh notify_party_id
+    # dan notify_party_address dari freight.sea.bl.info.mixin (FF-29).
 
     # Delivery & Freight
-    delivery_agent_id = fields.Many2one(
-        "res.partner",
-        string="Delivery Agent",
-        domain="[('category_id.name', '=', 'Delivery Agent')]",
-    )
-    delivery_agent_address = fields.Char(
-        related="delivery_agent_id.contact_address",
-        string="Delivery Agent Address",
-    )
+    # NOTE: delivery_agent_id dan delivery_agent_address dipindahkan ke
+    # freight.sea.bl.info.mixin (FF-29).
     freight = fields.Selection(
         selection=[
             ("prepaid", "Prepaid"),

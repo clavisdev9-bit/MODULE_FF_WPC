@@ -293,9 +293,9 @@ class SeaQuotation(models.Model):
     def action_convert_to_booking_direct(self):
         self.ensure_one()
         destination_country = (
-            self.destination_country_id or self.destination_id.country_id
+            self.delivery_country_id or self.delivery_city.country_id
         )
-        origin_country = self.source_country_id or self.origin_id.country_id
+        origin_country = self.pickup_country_id or self.pickup_city.country_id
         booking_no = self.env["ir.sequence"].next_by_code("freight.sea.booking")
         booking_vals = {
             "name": booking_no,
@@ -308,14 +308,17 @@ class SeaQuotation(models.Model):
                 destination_country.id if destination_country else False
             ),
             "origin_country_id": origin_country.id if origin_country else False,
-            "phone": self.phone,
-            "email": self.email,
+            "from_city": self.pickup_city.id,
+            "to_city": self.delivery_city.id,
             "salesman_id": self.salesman_id.id,
             "payment_term_id": self.payment_term_id.id,
             "container_type": self.container_type,
+            "commodity_id": self.commodity_id.id,
+            "service_level": self.service_level,
             "freight_type": self.freight_type,
             "booking_date": fields.Datetime.now(),
             "job_date": fields.Date.today(),
+            "company_id": self.company_id.id,
         }
         booking = self.env["freight.sea.booking"].create(booking_vals)
         self._copy_cargo_info_to_booking(booking)
@@ -338,6 +341,7 @@ class SeaQuotation(models.Model):
                 "customer_id": self.partner_id.id,
                 "term_payment": self.payment_term_id.id,
                 "job_date": fields.Date.today(),
+                "company_id": self.company_id.id,
             }
         )
         return {

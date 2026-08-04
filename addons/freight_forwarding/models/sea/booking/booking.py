@@ -7,7 +7,8 @@ class SeaBooking(models.Model):
         "mail.thread",
         "mail.activity.mixin",
         "freight.sea.shipment.info.mixin",
-        "freight.sea.vessel.details.mixin"
+        "freight.sea.vessel.details.mixin",
+        "freight.sea.bl.info.mixin",
     ]
     _description = "Sea Booking"
     _rec_name = "name"
@@ -51,6 +52,18 @@ class SeaBooking(models.Model):
         for rec in self:
             rec.destination_country_id = rec.port_of_discharge_id.country_id
 
+    @api.onchange("from_city")
+    def _onchange_from_city(self):
+        for rec in self:
+            if rec.from_city.country_id:
+                rec.origin_country_id = rec.from_city.country_id
+
+    @api.onchange("to_city")
+    def _onchange_to_city(self):
+        for rec in self:
+            if rec.to_city.country_id:
+                rec.destination_country_id = rec.to_city.country_id
+
     # Fungsi pas tombol Jobsheet di klik
     def action_view_hbl(self):
         self.ensure_one()
@@ -63,7 +76,7 @@ class SeaBooking(models.Model):
             "view_mode": "form" if len(hbls) == 1 else "list,form",
             "domain": [("id", "in", hbls.ids)],
             "res_id": hbls.id if len(hbls) == 1 else False,
-            "context": dict(self.env.context, default_booking_id=self.id),
+            "context": dict(self.env.context, default_booking_id=self.id, default_company_id=self.company_id.id),
         }
 
     def action_view_quotation(self):
@@ -88,6 +101,12 @@ class SeaBooking(models.Model):
         ],
         string="Type",
         required=True,
+    )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
     )
     name = fields.Char(
         string="Booking No.",
@@ -151,8 +170,10 @@ class SeaBooking(models.Model):
         "res.country", string="Destination Country"
     )
     origin_country_id = fields.Many2one(
-        "res.country", string="Cargo Origin Country (Optional)"
+        "res.country", string="Origin Country"
     )
+    from_city = fields.Many2one("res.city", string="From")
+    to_city = fields.Many2one("res.city", string="To")
     delivery_type_id = fields.Many2one(
         "freight.delivery.type", string="Delivery Type", required=True
     )
@@ -174,130 +195,17 @@ class SeaBooking(models.Model):
         "booking_id",
         string="Cargo Info",
     )
-    pickup_info_ids = fields.One2many(
-        "freight.sea.booking.pickup.info",
-        "booking_id",
-        string="Pickup Info",
-    )
+
     purchase_order_ids = fields.One2many(
         "freight.sea.booking.purchase.order",
         "booking_id",
         string="Sea Purchase Order",
-    )
-    notify_party_line_ids = fields.One2many(
-        "freight.sea.booking.notify.party",
-        "booking_id",
-        string="Notify Party",
     )
     extra_info_ids = fields.One2many(
         "freight.sea.booking.extra.info",
         "booking_id",
         string="Extra Info",
     )
-
-    # B/L Info (One2One - fields langsung di booking)
-    shipper_id = fields.Many2one(
-        "res.partner",
-        string="Shipper",
-        domain="[('category_id.name', '=', 'Shipper')]",
-    )
-    shipper_address = fields.Char(
-        string="Shipper Address",
-        compute="_compute_shipper_address",
-        store=False,
-    )
-    consignee_id = fields.Many2one(
-        "res.partner",
-        string="Consignee",
-        domain="[('category_id.name', '=', 'Consignee')]",
-    )
-    consignee_address = fields.Char(
-        string="Consignee Address",
-        compute="_compute_consignee_address",
-        store=False,
-    )
-    notify_party_id = fields.Many2one(
-        "res.partner",
-        string="Notify Party",
-        domain="[('category_id.name', '=', 'Notify Party')]",
-    )
-    notify_party_address = fields.Char(
-        string="Notify Party Address",
-        compute="_compute_notify_party_address",
-        store=False,
-    )
-
-    @api.depends("shipper_id")
-    def _compute_shipper_address(self):
-        for rec in self:
-            if rec.shipper_id:
-                parts = [
-                    rec.shipper_id.street,
-                    rec.shipper_id.street2,
-                    rec.shipper_id.city,
-                    rec.shipper_id.state_id.name,
-                    rec.shipper_id.country_id.name,
-                ]
-                rec.shipper_address = ", ".join([p for p in parts if p])
-            else:
-                rec.shipper_address = False
-
-    @api.depends("consignee_id")
-    def _compute_consignee_address(self):
-        for rec in self:
-            if rec.consignee_id:
-                parts = [
-                    rec.consignee_id.street,
-                    rec.consignee_id.street2,
-                    rec.consignee_id.city,
-                    rec.consignee_id.state_id.name,
-                    rec.consignee_id.country_id.name,
-                ]
-                rec.consignee_address = ", ".join([p for p in parts if p])
-            else:
-                rec.consignee_address = False
-
-    @api.depends("notify_party_id")
-    def _compute_notify_party_address(self):
-        for rec in self:
-            if rec.notify_party_id:
-                parts = [
-                    rec.notify_party_id.street,
-                    rec.notify_party_id.street2,
-                    rec.notify_party_id.city,
-                    rec.notify_party_id.state_id.name,
-                    rec.notify_party_id.country_id.name,
-                ]
-                rec.notify_party_address = ", ".join([p for p in parts if p])
-            else:
-                rec.notify_party_address = False
-
-    def action_add_notify_party(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": "Add Notify Party",
-            "res_model": "freight.sea.booking.notify.party",
-            "view_mode": "form",
-            "target": "new",
-            "context": {
-                "default_booking_id": self.id,
-            },
-        }
-
-    def action_view_notify_party(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": "Notify Party",
-            "res_model": "freight.sea.booking.notify.party",
-            "view_mode": "list,form",
-            "domain": [("booking_id", "=", self.id)],
-            "context": {
-                "default_booking_id": self.id,
-            },
-            "target": "current",
-        }
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -341,14 +249,6 @@ class SeaBooking(models.Model):
         # shipment info sekarang langsung ada di Booking & HBL (lewat mixin),
         # jadi tidak perlu proses copy antar model perantara lagi.
 
-        if not hbl.pickup_info_ids and booking.pickup_info_ids:
-            self._copy_records_to_hbl(
-                booking.pickup_info_ids,
-                "freight.sea.hbl.pickup.info",
-                "hbl_id",
-                extra_values={"hbl_id": hbl.id},
-                excluded_fields={"booking_id"},
-            )
 
         vessel_fields = [
             "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",

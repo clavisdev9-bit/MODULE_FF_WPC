@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "1.1",
+    "version": "1.2",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -56,7 +56,6 @@
         "views/air/sales/quotation.xml",
         "views/sea/booking/booking.xml",
         "views/sea/booking/extra_info_views.xml",
-        "views/sea/booking/pickup_info_views.xml",
         "views/sea/booking/cargo_info.xml",
         "views/sea/booking/purchase_line_views.xml",
         "views/sea/booking/booking_convert_wizard.xml",
@@ -140,6 +139,7 @@
     "installable": True,
     "application": True,
     "auto_install": False,
+    "post_init_hook": "post_init_hook",
     "tests": [
         "tests/test_cargo_info_mixin.py",
         "tests/test_sea_booking.py",

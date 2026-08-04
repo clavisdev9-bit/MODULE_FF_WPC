@@ -38,54 +38,59 @@
                         <h1>
                             <field name="name" readonly="1" />
                         </h1>
-                        <group string="Header Information">
+                        <group>
                             <group>
                                 <field name="freight_type"/>
-                                <field name="booking_date" />
-                                <field name="bl_no" />
-                                <field name="job_no" />
-                                <field name="nomination_cargo" />
-                                <field name="commodity_id" />
+                                <field name="booking_date"/>
+                                <field name="bl_no"/>
+                                <field name="job_no"/>
+                                <field name="nomination_cargo"/>
+                                <field name="commodity_id"/>
                             </group>
                             <group>
                                 <field name="container_type"/>
-                                <field name="job_date" />
-                                <field name="import_job_no" />
-                                <field name="railing" />
+                                <field name="job_date"/>
+                                <field name="import_job_no"/>
+                                <field name="railing"/>
                             </group>
                         </group>
 
-                        <group string="Customer &amp; Contact Data">
+                        <separator />
+
+                        <group>
                             <group>
                                 <field name="partner_id"/>
-                                <field name="customer_reference" />
-                                <field name="phone" />
-                                <field name="email" widget="email" />
+                                <field name="customer_reference"/>
+                                <field name="phone"/>
+                                <field name="email" widget="email"/>
                             </group>
                             <group>
-                                <field name="payment_term_id" />
-                                <field name="salesman_id" />
-                                <field name="quotation_id" readonly="1" />
+                                <field name="payment_term_id"/>
+                                <field name="salesman_id"/>
+                                <field name="quotation_id" readonly="1"/>
                             </group>
                         </group>
 
-                        <group string="Shipment Details">
+                        <separator />
+
+                        <group>
                             <group>
-                                <field name="port_of_loading_id" required="1" />
-                                <field name="port_of_discharge_id" required="1" />
-                                <field name="etd" />
-                                <field name="eta" />
-                                <field name="destination_country_id" />
-                                <field name="origin_country_id" />
-                                <field name="delivery_type_id" />
-                                <field name="pod_port_id" />
+                                <!--<field name="port_of_loading_id" required="1"/>-->
+                                <!--<field name="port_of_discharge_id" required="1"/>-->
+                                <field name="from_city"/>
+                                <field name="origin_country_id"/>
+                                <field name="to_city"/>
+                                <field name="destination_country_id"/>
+                                <!--<field name="pod_port_id"/>-->
                             </group>
-                            <group string="Vessel Information">
-                                <field name="vessel_id" required="1" />
-                                <field name="voyage_no" />
-                                <field name="eta_jkt" />
+                            <group>
+                                <field name="etd"/>
+                                <field name="eta"/>
+                                <field name="delivery_type_id"/>
                             </group>
                         </group>
+
+                        <separator />
 
                         <notebook>
                             <page string="B/L Info">
@@ -107,17 +112,12 @@
                                             context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
                                         <field name="notify_party_address" readonly="1" nolabel="0" />
                                     </group>
+                                    <group string="Delivery Agent">
+                                        <field name="delivery_agent_id" widget="res_partner_many2one"
+                                            context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
+                                        <field name="delivery_agent_address" readonly="1" nolabel="0" />
+                                    </group>
                                 </group>
-                                <div class="d-flex mt-2">
-                                    <button name="action_add_notify_party"
-                                        type="object"
-                                        string="Add Notify Party"
-                                        class="btn-primary me-2" />
-                                    <button name="action_view_notify_party"
-                                        type="object"
-                                        string="View Notify Party"
-                                        class="btn-secondary" />
-                                </div>
                             </page>
                             <page string="Shipment Info">
                                 <group>
@@ -144,7 +144,7 @@
                                 </group>
                             </page>
 
-                            <page string="Agent &amp; Terms">
+                            <!-- <page string="Agent &amp; Terms">
                                 <group>
                                     <group>
                                         <field name="forward_agent_id" />
@@ -187,7 +187,7 @@
                                     <field name="booking_remark_id" />
                                     <field name="warehouse_remark" />
                                 </group>
-                            </page>
+                            </page> -->
 
                             <page string="Vessel Details">
                                 <group string="Booking &amp; Agent Information">
