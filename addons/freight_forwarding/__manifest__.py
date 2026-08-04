@@ -56,7 +56,6 @@
         "views/air/sales/quotation.xml",
         "views/sea/booking/booking.xml",
         "views/sea/booking/extra_info_views.xml",
-        "views/sea/booking/pickup_info_views.xml",
         "views/sea/booking/cargo_info.xml",
         "views/sea/booking/purchase_line_views.xml",
         "views/sea/booking/booking_convert_wizard.xml",
