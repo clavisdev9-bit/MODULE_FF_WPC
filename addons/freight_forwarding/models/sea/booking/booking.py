@@ -195,11 +195,7 @@ class SeaBooking(models.Model):
         "booking_id",
         string="Cargo Info",
     )
-    pickup_info_ids = fields.One2many(
-        "freight.sea.booking.pickup.info",
-        "booking_id",
-        string="Pickup Info",
-    )
+
     purchase_order_ids = fields.One2many(
         "freight.sea.booking.purchase.order",
         "booking_id",
