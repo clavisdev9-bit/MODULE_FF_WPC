@@ -7,7 +7,7 @@
                     <div class="page">
                         <style>
                             * { box-sizing: border-box; }
-                            .page { font-size: 12pt; color: #2b2626; }
+                            .page { font-size: 12pt; color: #222; }
                             .page span { font-size: inherit; }
                             .container-fluid { width: 100%; }
 
@@ -159,14 +159,14 @@
                                     <td style="width:55%;">
                                         <div class="si-label">Notify Party</div>
                                         <div>
-                                            <t t-set="same_notify" t-value="doc.notify_id and doc.notify_id == doc.consignee_id" />
+                                            <t t-set="same_notify" t-value="doc.notify_party_id and doc.notify_party_id == doc.consignee_id" />
                                             <t t-if="same_notify">
                                                 <strong>SAME AS CONSIGNEE</strong>
                                             </t>
                                             <t t-else="">
-                                                <span t-field="doc.notify_id.name" /><br />
-                                                <span t-field="doc.notify_id.city" /><br />
-                                                <span t-field="doc.notify_id.phone" />
+                                                <span t-field="doc.notify_party_id.name" /><br />
+                                                <span t-field="doc.notify_party_id.city" /><br />
+                                                <span t-field="doc.notify_party_id.phone" />
                                             </t>
                                         </div>
                                     </td>
