@@ -40,7 +40,8 @@
                     <div class="page">
                         <style>
                             * { box-sizing: border-box; }
-                            .page { font-size: 12pt; color: #222; }
+                            @page { margin-bottom: 50mm; }
+                            .page { font-size: 12pt; color: #222; padding-bottom: 40px; }
                             .page span { font-size: inherit; }
                             .container-fluid { width: 100%; }
 
