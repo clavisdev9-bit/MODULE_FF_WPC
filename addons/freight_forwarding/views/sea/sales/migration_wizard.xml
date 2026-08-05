@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_sea_quotation_migration_wizard_form" model="ir.ui.view">
+        <field name="name">freight.sea.quotation.migration.wizard.form</field>
+        <field name="model">freight.sea.quotation.migration.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sea Quotation Migration">
+                <group>
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Warning!</strong> This will copy data from the old <code>freight_sea_quotation</code> table to the <code>sale_order</code> table and then <strong>drop</strong> the old table. Ensure you have tested this in a safe environment before executing.
+                    </div>
+                </group>
+                <footer>
+                    <button string="Execute Migration" name="action_migrate" type="object" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sea_quotation_migration_wizard" model="ir.actions.act_window">
+        <field name="name">Migrate Sea Quotation</field>
+        <field name="res_model">freight.sea.quotation.migration.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+
+</odoo>

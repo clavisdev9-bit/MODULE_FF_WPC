@@ -3,52 +3,9 @@ from odoo.exceptions import UserError
 
 
 class SeaQuotation(models.Model):
-    _name = "freight.sea.quotation"
+    _name = "sale.order"
     _inherit = ["sale.order", "freight.quotation"]
     _description = "Sea Quotation"
-    _rec_name = "name"
-
-    # Nama tabel DB untuk _sync_sale_order_rows() di mixin
-    _quotation_table = "freight_sea_quotation"
-
-    _SALE_ORDER_SYNC_COLUMNS = (
-        "campaign_id",
-        "source_id",
-        "medium_id",
-        "company_id",
-        "partner_id",
-        "partner_invoice_id",
-        "partner_shipping_id",
-        "fiscal_position_id",
-        "payment_term_id",
-        "pricelist_id",
-        "currency_id",
-        "user_id",
-        "team_id",
-        "create_uid",
-        "write_uid",
-        "name",
-        "state",
-        "client_order_ref",
-        "origin",
-        "reference",
-        "invoice_status",
-        "validity_date",
-        "note",
-        "currency_rate",
-        "amount_untaxed",
-        "amount_tax",
-        "amount_total",
-        "locked",
-        "require_signature",
-        "require_payment",
-        "create_date",
-        "date_order",
-        "write_date",
-        "picking_policy",
-        "effective_date",
-        "container_type",
-    )
 
     # =========================================================
     # Sea-specific Fields
@@ -67,7 +24,7 @@ class SeaQuotation(models.Model):
 
     # Multi-currency variant tracking
     original_quotation_id = fields.Many2one(
-        "freight.sea.quotation",
+        "sale.order",
         string="Original Quotation",
         copy=False,
         index=True,
@@ -88,22 +45,7 @@ class SeaQuotation(models.Model):
         required=True,
     )
 
-    # Relasi many2many — nama tabel relasi sea-specific
-    transaction_ids = fields.Many2many(
-        "payment.transaction",
-        "freight_sea_quotation_transaction_rel",
-        "sea_quotation_id",
-        "transaction_id",
-        string="Transactions",
-        copy=False,
-    )
-    tag_ids = fields.Many2many(
-        "crm.tag",
-        "freight_sea_quotation_tag_rel",
-        "sea_quotation_id",
-        "tag_id",
-        string="Tags",
-    )
+
 
     # Cargo Info (comodel sea-specific)
     cargo_info_ids = fields.One2many(
@@ -186,6 +128,8 @@ class SeaQuotation(models.Model):
         dan otomatis tertaut lewat original_quotation_id.
         """
         self.ensure_one()
+        if not self.is_freight_quotation:
+            raise UserError("This action is only available for Freight Quotations.")
         if self.original_quotation_id:
             raise UserError("You cannot create a currency variant from a child quotation. Please create it from the parent quotation instead.")
 
@@ -196,7 +140,7 @@ class SeaQuotation(models.Model):
         })
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'freight.sea.quotation',
+            'res_model': 'sale.order',
             'res_id': new_variant.id,
             'view_mode': 'form',
             'target': 'current',
@@ -214,7 +158,7 @@ class SeaQuotation(models.Model):
         return {
             "name": "Currency Variants",
             "type": "ir.actions.act_window",
-            "res_model": "freight.sea.quotation",
+            "res_model": "sale.order",
             "view_mode": "list,form",
             "domain": domain,
             "context": dict(self.env.context, create=False),

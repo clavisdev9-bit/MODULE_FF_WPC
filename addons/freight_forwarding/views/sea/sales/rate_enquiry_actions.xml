@@ -10,7 +10,7 @@
         <field name="name">Sales Activity Log</field>
         <field name="res_model">mail.activity</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[("res_model", "=", "freight.sea.quotation")]</field>
+        <field name="domain">[("res_model", "=", "sale.order")]</field>
     </record>
 
     <record id="action_sea_sales_rate_cust_charge" model="ir.actions.act_window">

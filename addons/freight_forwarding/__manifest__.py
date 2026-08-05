@@ -50,6 +50,7 @@
         # Sea Quotation
         "views/sea/sales/quotation_type.xml",
         "views/sea/sales/quotation.xml",
+        "views/sea/sales/migration_wizard.xml",
 
         "views/sea/sales/rate_enquiry_actions.xml",
         # Air Quotation
@@ -72,17 +73,17 @@
         "views/acct/payment_term.xml",
         "views/acct/vat_code.xml",
         # Air
-        "views/air/air_waybill/airline.xml",
-        "views/air/air_waybill/airport.xml",
-        "views/air/air_waybill/air_booking.xml",
-        "views/air/air_waybill/mawb.xml",
-        "views/air/air_waybill/custom_permit.xml",
-        "views/air/air_waybill/package_details.xml",
-        "views/air/air_waybill/document_list.xml",
-        "views/air/air_waybill/freight_items_line.xml",
-        "views/air/air_waybill/extra_info.xml",
-        "views/air/air_waybill/handling_information.xml",
-        "views/air/air_waybill/air_waybill_transaction.xml",
+        # "views/air/air_waybill/airline.xml",
+        # "views/air/air_waybill/airport.xml",
+        # "views/air/air_waybill/air_booking.xml",
+        # "views/air/air_waybill/mawb.xml",
+        # "views/air/air_waybill/custom_permit.xml",
+        # "views/air/air_waybill/package_details.xml",
+        # "views/air/air_waybill/document_list.xml",
+        # "views/air/air_waybill/freight_items_line.xml",
+        # "views/air/air_waybill/extra_info.xml",
+        # "views/air/air_waybill/handling_information.xml",
+        # "views/air/air_waybill/air_waybill_transaction.xml",
         # Master Data
         "views/air/master_data/delivery_type.xml",
         "views/air/master_data/commodity.xml",

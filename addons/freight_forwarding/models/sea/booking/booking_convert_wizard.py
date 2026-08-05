@@ -5,7 +5,7 @@ class SeaBookingConvertWizard(models.TransientModel):
     _description = "Convert Sea Quotation to Sea Booking"
 
     quotation_id = fields.Many2one(
-        "freight.sea.quotation",
+        "sale.order",
         string="Quotation",
         readonly=True,
     )
@@ -95,7 +95,7 @@ class SeaBookingConvertWizard(models.TransientModel):
         res = super().default_get(fields_list)
         quotation_id = self.env.context.get("active_id")
         if quotation_id:
-            quotation = self.env["freight.sea.quotation"].browse(quotation_id)
+            quotation = self.env["sale.order"].browse(quotation_id)
             destination_country = self._get_destination_country(quotation)
             origin_country = self._get_origin_country(quotation)
             res.update(

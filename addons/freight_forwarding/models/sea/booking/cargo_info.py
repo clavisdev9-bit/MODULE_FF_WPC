@@ -14,7 +14,7 @@ class SeaBookingCargoInfo(models.Model):
         required=True,
     )
     quotation_id = fields.Many2one(
-        "freight.sea.quotation",
+        "sale.order",
         string="Quotation No.",
         related="booking_id.quotation_id",
         store=True,

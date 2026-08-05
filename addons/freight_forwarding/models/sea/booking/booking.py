@@ -87,7 +87,7 @@ class SeaBooking(models.Model):
         return {
             "name": "Sea Quotation",
             "type": "ir.actions.act_window",
-            "res_model": "freight.sea.quotation",
+            "res_model": "sale.order",
             "res_id": self.quotation_id.id,
             "view_mode": "form",
             "context": dict(self.env.context),
@@ -145,7 +145,7 @@ class SeaBooking(models.Model):
         string="Salesman",
     )
     quotation_id = fields.Many2one(
-        "freight.sea.quotation",
+        "sale.order",
         string="Quotation No.",
         ondelete="set null",
         readonly=True,
