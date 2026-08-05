@@ -40,7 +40,8 @@
                     <div class="page">
                         <style>
                             * { box-sizing: border-box; }
-                            @page { margin-bottom: 50mm; }
+                            @page { margin-bottom: 18mm; }
+                            @page :first { margin-bottom: 18mm; }
                             .page { font-size: 12pt; color: #222; padding-bottom: 40px; }
                             .page span { font-size: inherit; }
                             .container-fluid { width: 100%; }
@@ -274,7 +275,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="4" style="border-left: 1px solid #000; border-right: 1px solid #000; border-top: none; border-bottom: 1px solid #000; padding: 0; height: 0; line-height: 0; font-size: 1px;">&#160;</td>
+                                        <td colspan="4" style="border-left: 1px solid #000; border-right: 1px solid #000; border-top: none; border-bottom: 1px solid #000; padding: 0; height: 12mm; line-height: 12mm; font-size: 1px;">&#160;</td>
                                     </tr>
                                 </tfoot>
 
