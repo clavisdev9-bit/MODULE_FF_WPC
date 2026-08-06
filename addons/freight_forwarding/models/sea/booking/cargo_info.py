@@ -12,11 +12,4 @@ class SeaBookingCargoInfo(models.Model):
         string="Booking",
         ondelete="cascade",
         required=True,
-    )
-    quotation_id = fields.Many2one(
-        "sale.order",
-        string="Quotation No.",
-        related="booking_id.quotation_id",
-        store=True,
-        readonly=True,
-    )
+    )

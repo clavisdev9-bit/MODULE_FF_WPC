@@ -2,8 +2,6 @@ from . import hbl
 from . import cargo_info
 
 from . import custom_permit
-from . import purchase_order
-from . import sales_order
 from . import tax_refund_doc
 from . import invoice
 from . import debit_note
