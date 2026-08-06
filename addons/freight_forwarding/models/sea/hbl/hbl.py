@@ -13,6 +13,18 @@ class SeaHBL(models.Model):
     _description = "Sea Jobsheet"
     _rec_name = "hbl_no"
 
+    state = fields.Selection(
+        [
+            ("draft", "Draft"),
+            ("active", "Active"),
+            ("closed", "Closed"),
+            ("cancelled", "Cancelled"),
+        ],
+        string="State",
+        default="draft",
+        tracking=True,
+    )
+
     hbl_no = fields.Char(string="B/L No.", required=True, default=lambda self: "New", copy=False, readonly=True)
     booking_id = fields.Many2one(
         "freight.sea.booking",
@@ -22,42 +34,68 @@ class SeaHBL(models.Model):
     )
 
     # Direct relasi ke quotation (untuk import flow tanpa booking)
-    quotation_id = fields.Many2one(
+    sale_order_ids = fields.Many2many(
         "sale.order",
-        string="Quotation",
-        required=False,
-        ondelete="set null",
+        string="Sales Orders",
+    )
+    
+    analytic_account_id = fields.Many2one(
+        "account.analytic.account",
+        string="Analytic Account",
     )
 
     # Counter fields untuk smart buttons
-    quotation_count = fields.Integer(
-        string="Quotation Count", compute="_compute_quotation_count"
+    sales_order_count = fields.Integer(
+        string="Sales Order Count", compute="_compute_sales_order_count"
     )
     booking_count = fields.Integer(
         string="Booking Count", compute="_compute_booking_count"
     )
 
-    @api.depends("quotation_id")
-    def _compute_quotation_count(self):
+    @api.depends("sale_order_ids")
+    def _compute_sales_order_count(self):
         for rec in self:
-            rec.quotation_count = 1 if rec.quotation_id else 0
+            rec.sales_order_count = len(rec.sale_order_ids)
+
+    @api.onchange("to_city")
+    def _onchange_to_city(self):
+        for rec in self:
+            rec.destination_country_id = rec.to_city.country_id
+
+    def action_active(self):
+        for rec in self:
+            rec.state = "active"
+
+    def action_close(self):
+        for rec in self:
+            rec.state = "closed"
+
+    def action_cancel(self):
+        for rec in self:
+            rec.state = "cancelled"
+
+    def action_draft(self):
+        for rec in self:
+            rec.state = "draft"
 
     @api.depends("booking_id")
     def _compute_booking_count(self):
         for rec in self:
             rec.booking_count = 1 if rec.booking_id else 0
 
-    def action_view_quotation(self):
+    def action_view_sales_orders(self):
         self.ensure_one()
-        if not self.quotation_id:
+        orders = self.sale_order_ids
+        if not orders:
             return False
 
         return {
-            "name": "Sea Quotation",
+            "name": "Sales Orders",
             "type": "ir.actions.act_window",
             "res_model": "sale.order",
-            "res_id": self.quotation_id.id,
-            "view_mode": "form",
+            "view_mode": "form" if len(orders) == 1 else "list,form",
+            "domain": [("id", "in", orders.ids)],
+            "res_id": orders.id if len(orders) == 1 else False,
             "context": dict(self.env.context),
         }
 
@@ -174,16 +212,11 @@ class SeaHBL(models.Model):
         "hbl_id",
         string="Cargo Info",
     )
-    purchase_order_ids = fields.One2many(
-        "freight.sea.hbl.purchase.order",
-        "hbl_id",
-        string="Purchase Order",
+    purchase_order_ids = fields.Many2many(
+        "purchase.order",
+        string="Purchase Orders",
     )
-    sales_order_ids = fields.One2many(
-        "freight.sea.hbl.sales.order",
-        "hbl_id",
-        string="Sales Order",
-    )
+
     tax_refund_doc_ids = fields.One2many(
         "freight.sea.hbl.tax.refund.doc",
         "hbl_id",
@@ -230,6 +263,46 @@ class SeaHBL(models.Model):
         string="Cash Purchase",
     )
 
+    def write(self, vals):
+        res = super().write(vals)
+        self._sync_analytic_to_related_docs()
+        return res
+
+    def _sync_analytic_to_related_docs(self):
+        import json
+        for rec in self:
+            if not rec.analytic_account_id:
+                continue
+            
+            distribution = {str(rec.analytic_account_id.id): 100.0}
+            
+            # Sync to Sales Order Lines
+            if rec.sale_order_ids:
+                for so in rec.sale_order_ids:
+                    # Update header if field exists
+                    if hasattr(so, 'analytic_account_id') and not so.analytic_account_id:
+                        so.analytic_account_id = rec.analytic_account_id.id
+                    # Update all order lines
+                    for line in so.order_line:
+                        if not line.analytic_distribution:
+                            # Bypass locked order check by writing directly to DB
+                            self.env.cr.execute(
+                                "UPDATE sale_order_line SET analytic_distribution = %s WHERE id = %s",
+                                (json.dumps(distribution), line.id)
+                            )
+                            line.invalidate_recordset(['analytic_distribution'])
+                            
+            # Sync to Purchase Order Lines
+            if rec.purchase_order_ids:
+                for po in rec.purchase_order_ids:
+                    for line in po.order_line:
+                        if not line.analytic_distribution:
+                            self.env.cr.execute(
+                                "UPDATE purchase_order_line SET analytic_distribution = %s WHERE id = %s",
+                                (json.dumps(distribution), line.id)
+                            )
+                            line.invalidate_recordset(['analytic_distribution'])
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -252,4 +325,20 @@ class SeaHBL(models.Model):
                 vals["job_no"] = self.env["ir.sequence"].next_by_code(
                     "freight.sea.hbl.job_no", sequence_date=sequence_date
                 ) or "New"
-        return super().create(vals_list)
+                
+        records = super().create(vals_list)
+        
+        # Auto-create analytic account for each jobsheet
+        plan = self.env["account.analytic.plan"].search([], limit=1)
+        for rec in records:
+            if not rec.analytic_account_id:
+                analytic_acc = self.env["account.analytic.account"].create({
+                    "name": rec.hbl_no,
+                    "plan_id": plan.id if plan else False,
+                    "partner_id": rec.customer_id.id,
+                    "company_id": rec.company_id.id,
+                })
+                rec.analytic_account_id = analytic_acc.id
+                
+        records._sync_analytic_to_related_docs()
+        return records
