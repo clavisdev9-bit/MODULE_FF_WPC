@@ -3,14 +3,8 @@ access_freight_sea_booking_user,Freight Sea Booking User,model_freight_sea_booki
 access_freight_sea_booking_admin,Freight Sea Booking Admin,model_freight_sea_booking,base.group_system,1,1,1,1
 access_freight_sea_booking_cargo_info_user,Freight Sea Booking Cargo Info User,model_freight_sea_booking_cargo_info,base.group_user,1,1,1,0
 access_freight_sea_booking_cargo_info_admin,Freight Sea Booking Cargo Info Admin,model_freight_sea_booking_cargo_info,base.group_system,1,1,1,1
-access_freight_sea_booking_purchase_order_user,Freight Sea Booking Purchase Order User,model_freight_sea_booking_purchase_order,base.group_user,1,1,1,0
-access_freight_sea_booking_purchase_order_admin,Freight Sea Booking Purchase Order Admin,model_freight_sea_booking_purchase_order,base.group_system,1,1,1,1
-access_freight_sea_hbl_purchase_order_user,Freight Sea HBL Purchase Order User,model_freight_sea_hbl_purchase_order,base.group_user,1,1,1,0
-access_freight_sea_hbl_purchase_order_admin,Freight Sea HBL Purchase Order Admin,model_freight_sea_hbl_purchase_order,base.group_system,1,1,1,1
 access_freight_sea_hbl_custom_permit_user,Freight Sea HBL Custom Permit User,model_freight_sea_hbl_custom_permit,base.group_user,1,1,1,0
 access_freight_sea_hbl_custom_permit_admin,Freight Sea HBL Custom Permit Admin,model_freight_sea_hbl_custom_permit,base.group_system,1,1,1,1
-access_freight_sea_hbl_sales_order_user,Freight Sea HBL Sales Order User,model_freight_sea_hbl_sales_order,base.group_user,1,1,1,0
-access_freight_sea_hbl_sales_order_admin,Freight Sea HBL Sales Order Admin,model_freight_sea_hbl_sales_order,base.group_system,1,1,1,1
 access_freight_sea_hbl_tax_refund_doc_user,Freight Sea HBL Tax Refund Doc User,model_freight_sea_hbl_tax_refund_doc,base.group_user,1,1,1,0
 access_freight_sea_hbl_tax_refund_doc_admin,Freight Sea HBL Tax Refund Doc Admin,model_freight_sea_hbl_tax_refund_doc,base.group_system,1,1,1,1
 access_freight_sea_hbl_invoice_user,Freight Sea HBL Invoice User,model_freight_sea_hbl_invoice,base.group_user,1,1,1,0
