@@ -5,7 +5,7 @@ class SeaBookingConvertWizard(models.TransientModel):
     _description = "Convert Sea Quotation to Sea Booking"
 
     quotation_id = fields.Many2one(
-        "freight.sea.quotation",
+        "sale.order",
         string="Quotation",
         readonly=True,
     )
@@ -95,7 +95,7 @@ class SeaBookingConvertWizard(models.TransientModel):
         res = super().default_get(fields_list)
         quotation_id = self.env.context.get("active_id")
         if quotation_id:
-            quotation = self.env["freight.sea.quotation"].browse(quotation_id)
+            quotation = self.env["sale.order"].browse(quotation_id)
             destination_country = self._get_destination_country(quotation)
             origin_country = self._get_origin_country(quotation)
             res.update(
@@ -115,6 +115,12 @@ class SeaBookingConvertWizard(models.TransientModel):
         self.ensure_one()
 
         quotation = self.quotation_id
+        
+        # Ambil semua variant quotation yang bersangkutan
+        original_id = quotation.original_quotation_id.id if quotation.original_quotation_id else quotation.id
+        domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
+        all_variants = self.env["sale.order"].search(domain)
+
         destination_country = self._get_destination_country(quotation)
         origin_country = self._get_origin_country(quotation)
 
@@ -127,7 +133,7 @@ class SeaBookingConvertWizard(models.TransientModel):
         booking = self.env["freight.sea.booking"].create(
             {
                 "name": booking_no,
-                "quotation_id": self.quotation_id.id,
+                "sale_order_ids": [(6, 0, all_variants.ids)],
                 "partner_id": self.customer_id.id,
                 "delivery_type_id": self.delivery_type_id.id,
                 "destination_country_id": destination_country.id if destination_country else False,

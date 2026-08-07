@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <menuitem id="menu_air_import_consol_awb_entry" name="Consol AWB Entry"
+    <!-- <menuitem id="menu_air_import_consol_awb_entry" name="Consol AWB Entry"
         parent="menu_sub_parent_air_import"
         action="action_freight_air_booking"
         sequence="10" />
@@ -134,5 +134,5 @@
     <menuitem id="menu_air_import_report_management" name="Management Report"
         parent="menu_sub_parent_air_import_report"
         action="action_freight_air_mawb"
-        sequence="40" />
+        sequence="40" /> -->
 </odoo>

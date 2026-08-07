@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <menuitem id="menu_air_waybill_master" name="Air Waybill Master"
+    <!-- <menuitem id="menu_air_waybill_master" name="Air Waybill Master"
         parent="menu_sub_parent_air_waybill"
         action="action_freight_air_mawb"
         sequence="20" />
@@ -66,5 +66,5 @@
     <menuitem id="menu_air_waybill_report_transaction" name="AWB Transaction"
         parent="menu_sub_parent_air_waybill_report"
         action="action_freight_air_waybill_transaction_receipt"
-        sequence="30" />
+        sequence="30" /> -->
 </odoo>

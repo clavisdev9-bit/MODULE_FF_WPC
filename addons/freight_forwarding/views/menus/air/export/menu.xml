@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <menuitem id="menu_sub_parent_air_export_awb_preparation" name="AWB Preparation"
+    <!-- <menuitem id="menu_sub_parent_air_export_awb_preparation" name="AWB Preparation"
         parent="menu_sub_parent_air_export"
         sequence="10" />
 
@@ -143,5 +143,5 @@
     <menuitem id="menu_air_export_report_management" name="Management Report"
         parent="menu_sub_parent_air_export_report"
         action="action_freight_air_mawb"
-        sequence="50" />
+        sequence="50" /> -->
 </odoo>

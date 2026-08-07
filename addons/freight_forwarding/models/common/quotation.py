@@ -19,11 +19,21 @@ class FreightQuotation(models.AbstractModel):
     _name = "freight.quotation"
     _description = "Freight Quotation Mixin"
 
+    is_freight_quotation = fields.Boolean(string="Is Freight Quotation", default=False)
+
+
     # =========================================================
-    # Common Fields
+    # Header Information
     # =========================================================
 
-    # Header
+    # Left side header
+    freight_business_type = fields.Selection(
+        selection=[
+            ("sea", "Sea"),
+            ("air", "Air"),
+        ],
+        string="Freight Business Type",
+    )
     freight_type = fields.Selection(
         selection=[
             ("export", "Export"),
@@ -182,6 +192,8 @@ class FreightQuotation(models.AbstractModel):
         adalah tabel Odoo bawaan yang tidak bisa di-inherit secara langsung.
         Setelah raw INSERT, cache ORM di-invalidate secara eksplisit.
         """
+        if self._name == "sale.order":
+            return
         ids = self.ids
         query_filter = ""
         params = []
@@ -250,6 +262,9 @@ class FreightQuotation(models.AbstractModel):
            Karena order_line divalidasi ke tabel sale_order, kita menunda
            duplikasi order_line sampai setelah record disinkronisasi ke sale_order.
         """
+        if self._name == "sale.order":
+            return super().copy(default=default)
+            
         default = dict(default or {})
         # Salin validity_date dari source agar tidak di-recalculate
         if "validity_date" not in default and self.validity_date:
@@ -277,6 +292,8 @@ class FreightQuotation(models.AbstractModel):
 
     @api.model_create_multi
     def create(self, vals_list):
+        if self._name == "sale.order":
+            return super().create(vals_list)
         records = super().create(vals_list)
         # Flush deferred computed fields (e.g. currency_id dari pricelist_id) ke DB
         # sebelum raw SQL sync, agar _sync_sale_order_rows tidak baca nilai stale.
@@ -285,6 +302,8 @@ class FreightQuotation(models.AbstractModel):
         return records
 
     def write(self, vals):
+        if self._name == "sale.order":
+            return super().write(vals)
         result = super().write(vals)
         # Flush deferred computed fields sebelum sync — lihat FF-19.
         self.flush_recordset()
@@ -292,6 +311,8 @@ class FreightQuotation(models.AbstractModel):
         return result
 
     def unlink(self):
+        if self._name == "sale.order":
+            return super().unlink()
         ids = self.ids
         result = super().unlink()
         if ids:
