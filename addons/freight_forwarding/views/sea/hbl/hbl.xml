@@ -8,7 +8,7 @@
                 <field name="hbl_no"/>
                 <field name="freight_type"/>
                 <field name="container_type"/>
-                <field name="quotation_id"/>
+                <field name="sale_order_ids" widget="many2many_tags"/>
                 <field name="booking_id"/>
                 <field name="customer_id"/>
                 <field name="job_no"/>
@@ -22,15 +22,22 @@
         <field name="model">freight.sea.hbl</field>
         <field name="arch" type="xml">
             <form string="Sea Jobsheet">
+                <header>
+                    <button name="action_active" string="Mark as Active" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_close" string="Close Jobsheet" type="object" class="oe_highlight" invisible="state != 'active'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('cancelled', 'closed')"/>
+                    <button name="action_draft" string="Set to Draft" type="object" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,closed,cancelled"/>
+                </header>
                 <sheet>
                     <div name="button_box" class="oe_button_box">
-                        <button name="action_view_quotation"
+                        <button name="action_view_sales_orders"
                             type="object"
                             class="oe_stat_button"
                             icon="fa-file-text-o"
-                            invisible="quotation_count == 0">
+                            invisible="sales_order_count == 0">
                             <div class="o_stat_info">
-                                <span class="o_stat_text">Quotation</span>
+                                <span class="o_stat_text">Sales Orders</span>
                             </div>
                         </button>
                         <button name="action_view_booking"
@@ -50,7 +57,6 @@
                         <group>
                             <field name="freight_type"/>
                             <field name="container_type"/>
-                            <field name="quotation_id"/>
                             <field name="booking_id"/>
                             <field name="job_no" readonly="1"/>
                             <field name="job_date"/>
@@ -77,6 +83,7 @@
                             <field name="term_payment"/>
                             <field name="salesman_id"/>
                             <field name="export_sales_team_id"/>
+                            <field name="analytic_account_id"/>
                         </group>
                     </group>
 
@@ -245,11 +252,26 @@
                                 </list>
                             </field>
                         </page>
-                        <!-- <page string="Purchase Order">
-                            <field name="purchase_order_ids" nolabel="1"/>
-                        </page> -->
-                        <page string="Sales Order">
-                            <field name="sales_order_ids" nolabel="1"/>
+                        <page string="Purchase Order">
+                            <field name="purchase_order_ids" nolabel="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="currency_id"/>
+                                    <field name="amount_total"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sales Orders">
+                            <field name="sale_order_ids" nolabel="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="currency_id"/>
+                                    <field name="amount_total"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
                         </page>
                         <page string="Tax Refund Doc">
                             <field name="tax_refund_doc_ids" nolabel="1"/>

@@ -3,60 +3,18 @@ from odoo.exceptions import UserError
 
 
 class SeaQuotation(models.Model):
-    _name = "freight.sea.quotation"
+    _name = "sale.order"
     _inherit = ["sale.order", "freight.quotation"]
     _description = "Sea Quotation"
-    _rec_name = "name"
-
-    # Nama tabel DB untuk _sync_sale_order_rows() di mixin
-    _quotation_table = "freight_sea_quotation"
-
-    _SALE_ORDER_SYNC_COLUMNS = (
-        "campaign_id",
-        "source_id",
-        "medium_id",
-        "company_id",
-        "partner_id",
-        "partner_invoice_id",
-        "partner_shipping_id",
-        "fiscal_position_id",
-        "payment_term_id",
-        "pricelist_id",
-        "currency_id",
-        "user_id",
-        "team_id",
-        "create_uid",
-        "write_uid",
-        "name",
-        "state",
-        "client_order_ref",
-        "origin",
-        "reference",
-        "invoice_status",
-        "validity_date",
-        "note",
-        "currency_rate",
-        "amount_untaxed",
-        "amount_tax",
-        "amount_total",
-        "locked",
-        "require_signature",
-        "require_payment",
-        "create_date",
-        "date_order",
-        "write_date",
-        "picking_policy",
-        "effective_date",
-        "container_type",
-    )
 
     # =========================================================
     # Sea-specific Fields
     # =========================================================
 
     # Relasi booking & HBL
-    booking_ids = fields.One2many(
-        "freight.sea.booking", "quotation_id", string="Sea Bookings"
+    booking_ids = fields.Many2many(
+        "freight.sea.booking",
+        string="Sea Bookings"
     )
     booking_count = fields.Integer(
         string="Booking Count", compute="_compute_booking_count"
@@ -67,7 +25,7 @@ class SeaQuotation(models.Model):
 
     # Multi-currency variant tracking
     original_quotation_id = fields.Many2one(
-        "freight.sea.quotation",
+        "sale.order",
         string="Original Quotation",
         copy=False,
         index=True,
@@ -88,22 +46,7 @@ class SeaQuotation(models.Model):
         required=True,
     )
 
-    # Relasi many2many — nama tabel relasi sea-specific
-    transaction_ids = fields.Many2many(
-        "payment.transaction",
-        "freight_sea_quotation_transaction_rel",
-        "sea_quotation_id",
-        "transaction_id",
-        string="Transactions",
-        copy=False,
-    )
-    tag_ids = fields.Many2many(
-        "crm.tag",
-        "freight_sea_quotation_tag_rel",
-        "sea_quotation_id",
-        "tag_id",
-        string="Tags",
-    )
+
 
     # Cargo Info (comodel sea-specific)
     cargo_info_ids = fields.One2many(
@@ -133,39 +76,9 @@ class SeaQuotation(models.Model):
         for rec in self:
             rec.booking_count = len(rec.booking_ids)
 
-    @api.depends("booking_ids.hbl_ids")
     def _compute_hbl_count(self):
-        hbl_model = self.env["freight.sea.hbl"]
-
-        # Batch query 1: HBL via booking — group per booking_id
-        all_booking_ids = self.booking_ids.ids
-        booking_hbl_data = hbl_model.read_group(
-            [("booking_id", "in", all_booking_ids)],
-            ["booking_id"],
-            ["booking_id"],
-        )
-        # Map booking_id → hbl count
-        booking_hbl_count = {
-            d["booking_id"][0]: d["booking_id_count"]
-            for d in booking_hbl_data
-        }
-
-        # Batch query 2: HBL langsung dari quotation (import flow tanpa booking)
-        direct_hbl_data = hbl_model.read_group(
-            [("quotation_id", "in", self.ids)],
-            ["quotation_id"],
-            ["quotation_id"],
-        )
-        direct_hbl_count = {
-            d["quotation_id"][0]: d["quotation_id_count"]
-            for d in direct_hbl_data
-        }
-
         for rec in self:
-            via_booking = sum(
-                booking_hbl_count.get(b.id, 0) for b in rec.booking_ids
-            )
-            rec.hbl_count = via_booking + direct_hbl_count.get(rec.id, 0)
+            rec.hbl_count = self.env["freight.sea.hbl"].search_count([("sale_order_ids", "=", rec.id)])
 
     def _compute_variant_count(self):
         for rec in self:
@@ -186,6 +99,8 @@ class SeaQuotation(models.Model):
         dan otomatis tertaut lewat original_quotation_id.
         """
         self.ensure_one()
+        if not self.is_freight_quotation:
+            raise UserError("This action is only available for Freight Quotations.")
         if self.original_quotation_id:
             raise UserError("You cannot create a currency variant from a child quotation. Please create it from the parent quotation instead.")
 
@@ -196,7 +111,7 @@ class SeaQuotation(models.Model):
         })
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'freight.sea.quotation',
+            'res_model': 'sale.order',
             'res_id': new_variant.id,
             'view_mode': 'form',
             'target': 'current',
@@ -206,6 +121,22 @@ class SeaQuotation(models.Model):
     # Sea-specific Actions
     # =========================================================
 
+    def action_confirm(self):
+        res = super().action_confirm()
+        for rec in self:
+            if rec.is_freight_quotation:
+                original_id = rec.original_quotation_id.id if rec.original_quotation_id else rec.id
+                domain = [
+                    '|', ('id', '=', original_id), ('original_quotation_id', '=', original_id),
+                    ('id', '!=', rec.id),
+                    ('state', 'in', ['draft', 'sent'])
+                ]
+                variants = self.env["sale.order"].search(domain)
+                if variants:
+                    # Prevent infinite recursion by passing context or just rely on state filter
+                    variants.action_confirm()
+        return res
+
     def action_view_currency_variants(self):
         self.ensure_one()
         original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
@@ -214,7 +145,7 @@ class SeaQuotation(models.Model):
         return {
             "name": "Currency Variants",
             "type": "ir.actions.act_window",
-            "res_model": "freight.sea.quotation",
+            "res_model": "sale.order",
             "view_mode": "list,form",
             "domain": domain,
             "context": dict(self.env.context, create=False),
@@ -230,18 +161,12 @@ class SeaQuotation(models.Model):
             "view_mode": "form" if len(bookings) == 1 else "list,form",
             "domain": [("id", "in", bookings.ids)],
             "res_id": bookings.id if len(bookings) == 1 else False,
-            "context": dict(self.env.context, default_quotation_id=self.id),
+            "context": dict(self.env.context, default_sale_order_ids=[self.id]),
         }
 
     def action_view_hbls(self):
         self.ensure_one()
-        hbls = self.env["freight.sea.hbl"].search(
-            [
-                "|",
-                ("booking_id.quotation_id", "=", self.id),
-                ("quotation_id", "=", self.id),
-            ]
-        )
+        hbls = self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)])
         return {
             "name": "Sea Jobsheet",
             "type": "ir.actions.act_window",
@@ -292,6 +217,10 @@ class SeaQuotation(models.Model):
 
     def action_convert_to_booking_direct(self):
         self.ensure_one()
+        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
+        domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
+        all_variants = self.env["sale.order"].search(domain)
+        
         destination_country = (
             self.delivery_country_id or self.delivery_city.country_id
         )
@@ -299,7 +228,7 @@ class SeaQuotation(models.Model):
         booking_no = self.env["ir.sequence"].next_by_code("freight.sea.booking")
         booking_vals = {
             "name": booking_no,
-            "quotation_id": self.id,
+            "sale_order_ids": [(6, 0, all_variants.ids)],
             "partner_id": self.partner_id.id,
             "delivery_type_id": self.delivery_type_id.id,
             "port_of_loading_id": self.port_of_loading_id.id,
@@ -333,9 +262,13 @@ class SeaQuotation(models.Model):
     def action_convert_to_jobsheet_direct(self):
         """Convert import quotation directly to jobsheet (HBL) without booking"""
         self.ensure_one()
+        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
+        domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
+        all_variants = self.env["sale.order"].search(domain)
+        
         hbl = self.env["freight.sea.hbl"].create(
             {
-                "quotation_id": self.id,
+                "sale_order_ids": [(6, 0, all_variants.ids)],
                 "freight_type": self.freight_type,
                 "container_type": self.container_type,
                 "customer_id": self.partner_id.id,

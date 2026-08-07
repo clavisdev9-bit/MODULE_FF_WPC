@@ -13,13 +13,18 @@ class SeaBooking(models.Model):
     _description = "Sea Booking"
     _rec_name = "name"
 
-    _sql_constraints = [
-        (
-            "quotation_id_unique",
-            "unique(quotation_id)",
-            "Quotation No. already exists on another Sea Booking.",
-        )
-    ]
+
+
+    state = fields.Selection(
+        [
+            ("draft", "Draft"),
+            ("confirmed", "Confirmed"),
+            ("cancelled", "Cancelled"),
+        ],
+        string="State",
+        default="draft",
+        tracking=True,
+    )
 
     # Field relasi narik data Jobsheet (HBL) yang terkait sama Booking ini
     hbl_ids = fields.One2many("freight.sea.hbl", "booking_id", string="Sea Jobsheets")
@@ -27,9 +32,9 @@ class SeaBooking(models.Model):
     # Field count buat trigger sembunyi/tampil tombol
     hbl_count = fields.Integer(string="Jobsheet Count", compute="_compute_hbl_count")
 
-    # Field buat show quotation (one-to-one relationship)
-    quotation_count = fields.Integer(
-        string="Quotation Count", compute="_compute_quotation_count"
+    # Field buat show quotation (one-to-many relationship)
+    sales_order_count = fields.Integer(
+        string="Sales Order Count", compute="_compute_sales_order_count"
     )
 
     @api.depends("hbl_ids")
@@ -37,10 +42,10 @@ class SeaBooking(models.Model):
         for rec in self:
             rec.hbl_count = len(rec.hbl_ids)
 
-    @api.depends("quotation_id")
-    def _compute_quotation_count(self):
+    @api.depends("sale_order_ids")
+    def _compute_sales_order_count(self):
         for rec in self:
-            rec.quotation_count = 1 if rec.quotation_id else 0
+            rec.sales_order_count = len(rec.sale_order_ids)
 
     @api.onchange("port_of_loading_id")
     def _onchange_port_of_loading_id(self):
@@ -61,8 +66,19 @@ class SeaBooking(models.Model):
     @api.onchange("to_city")
     def _onchange_to_city(self):
         for rec in self:
-            if rec.to_city.country_id:
-                rec.destination_country_id = rec.to_city.country_id
+            rec.destination_country_id = rec.to_city.country_id
+
+    def action_confirm(self):
+        for rec in self:
+            rec.state = "confirmed"
+
+    def action_cancel(self):
+        for rec in self:
+            rec.state = "cancelled"
+
+    def action_draft(self):
+        for rec in self:
+            rec.state = "draft"
 
     # Fungsi pas tombol Jobsheet di klik
     def action_view_hbl(self):
@@ -79,17 +95,19 @@ class SeaBooking(models.Model):
             "context": dict(self.env.context, default_booking_id=self.id, default_company_id=self.company_id.id),
         }
 
-    def action_view_quotation(self):
+    def action_view_sales_orders(self):
         self.ensure_one()
-        if not self.quotation_id:
+        orders = self.sale_order_ids
+        if not orders:
             return False
 
         return {
-            "name": "Sea Quotation",
+            "name": "Sales Orders",
             "type": "ir.actions.act_window",
-            "res_model": "freight.sea.quotation",
-            "res_id": self.quotation_id.id,
-            "view_mode": "form",
+            "res_model": "sale.order",
+            "view_mode": "form" if len(orders) == 1 else "list,form",
+            "domain": [("id", "in", orders.ids)],
+            "res_id": orders.id if len(orders) == 1 else False,
             "context": dict(self.env.context),
         }
 
@@ -144,11 +162,9 @@ class SeaBooking(models.Model):
         "hr.employee",
         string="Salesman",
     )
-    quotation_id = fields.Many2one(
-        "freight.sea.quotation",
-        string="Quotation No.",
-        ondelete="set null",
-        readonly=True,
+    sale_order_ids = fields.Many2many(
+        "sale.order",
+        string="Sales Orders",
     )
 
     # Shipment Details
@@ -196,10 +212,9 @@ class SeaBooking(models.Model):
         string="Cargo Info",
     )
 
-    purchase_order_ids = fields.One2many(
-        "freight.sea.booking.purchase.order",
-        "booking_id",
-        string="Sea Purchase Order",
+    purchase_order_ids = fields.Many2many(
+        "purchase.order",
+        string="Purchase Orders",
     )
     extra_info_ids = fields.One2many(
         "freight.sea.booking.extra.info",
@@ -234,7 +249,7 @@ class SeaBooking(models.Model):
 
         for booking_cargo_info in booking_cargo_info_records:
             cargo_values = booking_cargo_info.copy_data(default={"hbl_id": hbl.id})[0]
-            for field_name in ["booking_id", "quotation_id"]:
+            for field_name in ["booking_id", "sale_order_ids"]:
                 cargo_values.pop(field_name, None)
             for field_name in list(cargo_values.keys()):
                 if field_name not in hbl_cargo_model._fields:
@@ -264,17 +279,14 @@ class SeaBooking(models.Model):
         if hbl_update:
             hbl.write(hbl_update)
 
+        if not hbl.sale_order_ids and booking.sale_order_ids:
+            hbl.write({"sale_order_ids": [(6, 0, booking.sale_order_ids.ids)]})
+
         if not hbl.cargo_info_ids and booking.cargo_info_ids:
             self._copy_cargo_info_lines_to_hbl(booking.cargo_info_ids, hbl)
 
         if not hbl.purchase_order_ids and booking.purchase_order_ids:
-            self._copy_records_to_hbl(
-                booking.purchase_order_ids,
-                "freight.sea.hbl.purchase.order",
-                "hbl_id",
-                extra_values={"hbl_id": hbl.id},
-                excluded_fields={"booking_id"},
-            )
+            hbl.write({"purchase_order_ids": [(6, 0, booking.purchase_order_ids.ids)]})
 
     def action_convert_to_hbl(self):
         self.ensure_one()

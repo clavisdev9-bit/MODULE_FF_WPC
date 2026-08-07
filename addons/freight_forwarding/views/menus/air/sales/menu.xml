@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <menuitem id="menu_air_sales_activity_tracking" name="Activity Tracking"
+    <!-- <menuitem id="menu_air_sales_activity_tracking" name="Activity Tracking"
         parent="menu_sub_parent_air_sales"
         action="action_freight_air_mawb"
-        sequence="10" />
+        sequence="10" /> -->
 
     <menuitem id="menu_air_sales_freight_quotation" name="Freight Quotation"
         parent="menu_sub_parent_air_sales"
         action="action_freight_air_quotation"
         sequence="20" />
 
-
-    <menuitem id="menu_sub_parent_air_sales_rate_enquiry" name="Rate Enquiry"
+    <!-- <menuitem id="menu_sub_parent_air_sales_rate_enquiry" name="Rate Enquiry"
         parent="menu_sub_parent_air_sales"
         sequence="30" />
 
@@ -62,5 +61,5 @@
     <menuitem id="menu_air_sales_report_iata_rate" name="IATA Rate"
         parent="menu_sub_parent_air_sales_report"
         action="action_freight_air_mawb"
-        sequence="60" />
+        sequence="60" /> -->
 </odoo>

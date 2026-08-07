@@ -2,19 +2,21 @@
 <odoo>
     <record id="view_sea_quotation_form" model="ir.ui.view">
         <field name="name">freight.sea.quotation.form</field>
-        <field name="model">freight.sea.quotation</field>
-        <field name="mode">primary</field>
+        <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='warehouse_id']" position="attributes">
                 <attribute name="options">{'no_create': False, 'no_create_edit': False, 'no_open': False}</attribute>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <field name="is_freight_quotation" invisible="1" />
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_bookings"
                     type="object"
                     class="oe_stat_button"
                     icon="fa-ship"
-                    invisible="booking_count == 0">
+                    invisible="not is_freight_quotation or booking_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Booking</span>
                     </div>
@@ -23,7 +25,7 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-file-text-o"
-                    invisible="hbl_count == 0">
+                    invisible="not is_freight_quotation or hbl_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Jobsheet</span>
                     </div>
@@ -32,26 +34,26 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-money"
-                    invisible="variant_count == 0">
+                    invisible="not is_freight_quotation or variant_count == 0">
                     <field name="variant_count" widget="statinfo" string="Variants" />
                 </button>
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="freight_type" />
-                <field name="container_type" />
-                <field name="quotation_title" />
+                <field name="freight_type" invisible="not is_freight_quotation" />
+                <field name="container_type" invisible="not is_freight_quotation" />
+                <field name="quotation_title" invisible="not is_freight_quotation" />
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="email" />
-                <field name="phone" />
-                <field name="contact_person" />
-                <field name="salesman_id" />
+                <field name="email" invisible="not is_freight_quotation" />
+                <field name="phone" invisible="not is_freight_quotation" />
+                <field name="contact_person" invisible="not is_freight_quotation" />
+                <field name="salesman_id" invisible="not is_freight_quotation" />
             </xpath>
 
             <xpath expr="//group[@name='order_details']" position="replace">
-                <group>
+                <group name="freight_order_details" invisible="not is_freight_quotation">
                     <field name="currency_id" />
                     <field name="currency_rate" />
                     <field name="pricelist_id" />
@@ -68,7 +70,7 @@
             </xpath>
 
             <xpath expr="//group[@name='sale_header']" position="after">
-                <group string="Address">
+                <group string="Address" invisible="not is_freight_quotation">
                     <group>
                         <span>Pickup</span>
                         <div class="o_address_format">
@@ -114,44 +116,37 @@
                     type="object"
                     string="Convert to Jobsheet"
                     class="oe_highlight"
-                    invisible="freight_type != 'import' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
+                    invisible="not is_freight_quotation or freight_type != 'import' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
                 />
                 <button
                     name="action_convert_to_booking_direct"
                     type="object"
                     string="Convert to Booking"
                     class="oe_highlight"
-                    invisible="freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
-                />
-                <button
-                    name="action_create_currency_variant"
-                    type="object"
-                    string="New Currency Variant"
-                    class="btn-secondary"
-                    invisible="original_quotation_id != False"
+                    invisible="not is_freight_quotation or freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
                 />
             </xpath>
 
             <xpath expr="//page[@name='other_information']" position="inside">
                 <group string="Extra Info">
-                    <group>
-                        <field name="description_of_goods" />
-                        <field name="quantity" />
-                        <field name="has_insurance" />
-                        <field name="insurance_id" invisible="has_insurance == False" />
-                        <field name="loose_quantity" />
-                        <field name="uom_id" />
+                        <group>
+                            <field name="description_of_goods" />
+                            <field name="quantity" />
+                            <field name="has_insurance" />
+                            <field name="insurance_id" invisible="has_insurance == False" />
+                            <field name="loose_quantity" />
+                            <field name="uom_id" />
+                        </group>
+                        <group>
+                            <field name="actual_weight" />
+                            <field name="volume" />
+                            <field name="chargeable_weight" />
+                        </group>
                     </group>
-                    <group>
-                        <field name="actual_weight" />
-                        <field name="volume" />
-                        <field name="chargeable_weight" />
-                    </group>
-                </group>
             </xpath>
 
             <xpath expr="//page[@name='customer_signature']" position="after">
-                <page string="Terms &amp; Conditions">
+                <page string="Terms &amp; Conditions" invisible="not is_freight_quotation">
                     <group>
                         <field name="terms_and_condition_id" />
                         <field name="description" />
@@ -219,7 +214,7 @@
 
     <record id="view_sea_quotation_list_custom" model="ir.ui.view">
         <field name="name">freight.sea.quotation.list.custom</field>
-        <field name="model">freight.sea.quotation</field>
+        <field name="model">sale.order</field>
         <!-- Hapus mode dan inherit_id -->
         <field name="arch" type="xml">
             <list>
@@ -238,7 +233,7 @@
 
     <record id="view_sea_quotation_search" model="ir.ui.view">
         <field name="name">freight.sea.quotation.search</field>
-        <field name="model">freight.sea.quotation</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <search string="Sea Quotation">
                 <field name="name" string="Quotation Number"/>
@@ -259,11 +254,24 @@
 
     <record id="action_freight_sea_quotation" model="ir.actions.act_window">
         <field name="name">Sea Quotation</field>
-        <field name="res_model">freight.sea.quotation</field>
+        <field name="res_model">sale.order</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_sea_quotation_list_custom"/>
         <field name="views" eval="[(ref('view_sea_quotation_list_custom'), 'list'), (ref('view_sea_quotation_form'), 'form')]"/>
         <field name="search_view_id" ref="view_sea_quotation_search"/>
-        <field name="context">{'search_default_my_quotation': 1}</field>
+        <field name="domain">[('freight_business_type', '=', 'sea'), ('is_freight_quotation', '=', True)]</field>
+        <field name="context">{'search_default_my_quotation': 1, 'default_freight_business_type': 'sea', 'default_is_freight_quotation': True}</field>
     </record>
+
+    <!-- Action gear menu item: New Currency Variant -->
+    <record id="action_server_create_currency_variant" model="ir.actions.server">
+        <field name="name">New Currency Variant</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">form</field>
+        <field name="sequence">1</field>
+        <field name="state">code</field>
+        <field name="code">action = record.action_create_currency_variant()</field>
+    </record>
+
 </odoo>

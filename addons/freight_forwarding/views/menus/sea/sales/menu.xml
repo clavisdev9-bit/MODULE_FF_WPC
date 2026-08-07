@@ -63,8 +63,13 @@
         parent="menu_sub_parent_sea_sales"
         sequence="50" />
 
-    <menuitem id="menu_sea_sales_stat_ad_hoc" name="Ad-Hoc Enquiry"
+    <!-- <menuitem id="menu_sea_sales_stat_ad_hoc" name="Ad-Hoc Enquiry"
         parent="menu_sub_parent_sea_sales_statistical_analysis"
         action="action_freight_air_mawb"
-        sequence="10" />
+        sequence="10" /> -->
+    <menuitem id="menu_sea_quotation_migration"
+              name="Migrate Sea Quotation Data"
+              parent="menu_sub_parent_sea_sales"
+              action="action_sea_quotation_migration_wizard"
+              sequence="99" />
 </odoo>

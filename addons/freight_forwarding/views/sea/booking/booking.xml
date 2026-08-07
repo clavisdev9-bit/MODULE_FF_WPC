@@ -8,21 +8,21 @@
             <field name="arch" type="xml">
                 <form string="Sea Booking">
                     <header>
-                        <button name="action_convert_to_hbl"
-                            type="object"
-                            string="Convert to Jobsheet"
-                            class="oe_highlight"
-                            invisible="hbl_count &gt; 0"
-                        />
+                        <button name="action_confirm" string="Confirm Booking" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                        <button name="action_convert_to_hbl" type="object" string="Convert to Jobsheet" class="oe_highlight" invisible="hbl_count &gt; 0 or state != 'confirmed'"/>
+                        <button name="action_cancel" string="Cancel" type="object" invisible="state in ('cancelled', 'confirmed')"/>
+                        <button name="action_draft" string="Set to Draft" type="object" invisible="state == 'draft'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
                     </header>
                     <sheet>
                         <div name="button_box" class="oe_button_box">
-                            <button name="action_view_quotation"
+                            <button name="action_view_sales_orders"
                                 type="object"
                                 class="oe_stat_button"
-                                icon="fa-file-text-o">
+                                icon="fa-file-text-o"
+                                invisible="sales_order_count == 0">
                                 <div class="o_stat_info">
-                                    <span class="o_stat_text">Quotation</span>
+                                    <span class="o_stat_text">Sales Orders</span>
                                 </div>
                             </button>
                             <button name="action_view_hbl"
@@ -67,7 +67,6 @@
                             <group>
                                 <field name="payment_term_id"/>
                                 <field name="salesman_id"/>
-                                <field name="quotation_id" readonly="1"/>
                             </group>
                         </group>
 
@@ -238,8 +237,26 @@
                                 <field name="cargo_info_ids" nolabel="1" />
                             </page>
                             <!-- <page string="Purchase Order">
-                                <field name="purchase_order_ids" nolabel="1" />
+                                <field name="purchase_order_ids" nolabel="1">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="partner_id"/>
+                                        <field name="currency_id"/>
+                                        <field name="amount_total"/>
+                                        <field name="state"/>
+                                    </list>
+                                </field>
                             </page> -->
+                            <page string="Sales Orders">
+                                <field name="sale_order_ids">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="currency_id"/>
+                                        <field name="amount_total"/>
+                                        <field name="state"/>
+                                    </list>
+                                </field>
+                            </page>
                         </notebook>
                     </sheet>
                     <chatter/>
@@ -254,7 +271,7 @@
             <field name="arch" type="xml">
                 <list>
                     <field name="name" />
-                    <field name="quotation_id" />
+                    <field name="sale_order_ids" widget="many2many_tags"/>
                     <field name="partner_id" />
                     <field name="container_type" />
                     <field name="freight_type" />

@@ -8,7 +8,7 @@ class SeaQuotationCargoInfo(models.Model):
     _rec_name = "quotation_id"
 
     quotation_id = fields.Many2one(
-        "freight.sea.quotation",
+        "sale.order",
         string="Quotation No.",
         required=True,
         ondelete="cascade",

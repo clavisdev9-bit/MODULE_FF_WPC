@@ -18,11 +18,11 @@
 
     <record id="quotation_report" model="ir.actions.report">
         <field name="name">Quotation Report</field>
-        <field name="model">freight.sea.quotation</field>
+        <field name="model">sale.order</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">freight_forwarding.quotation_report_template</field>
         <field name="paperformat_id" ref="quotation_paperformat" />
-        <field name="binding_model_id" ref="freight_forwarding.model_freight_sea_quotation" />
+        <field name="binding_model_id" ref="sale.model_sale_order" />
         <field name="binding_type">report</field>
     </record>
 </odoo>

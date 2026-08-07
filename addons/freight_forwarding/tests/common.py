@@ -70,6 +70,7 @@ class FreightTestBase(TransactionCase):
     def _create_quotation(self, **kwargs):
         """Buat Sea Quotation dengan default nilai yang valid."""
         vals = {
+            "freight_business_type": "sea",
             "freight_type": "export",
             "partner_id": self.partner.id,
             "delivery_type_id": self.delivery_type.id,
@@ -79,7 +80,7 @@ class FreightTestBase(TransactionCase):
             "port_of_discharge_id": self.port_discharge.id,
         }
         vals.update(kwargs)
-        return self.env["freight.sea.quotation"].create(vals)
+        return self.env["sale.order"].create(vals)
 
     def _create_booking(self, **kwargs):
         """Buat Sea Booking dengan default nilai yang valid."""

@@ -2,4 +2,5 @@
 from . import quotation_type
 from . import quotation
 from . import cargo_info
-from . import sale_order_compat
+from . import migration_wizard
+
