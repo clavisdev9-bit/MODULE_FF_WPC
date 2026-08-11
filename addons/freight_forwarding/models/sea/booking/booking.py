@@ -47,15 +47,7 @@ class SeaBooking(models.Model):
         for rec in self:
             rec.sales_order_count = len(rec.sale_order_ids)
 
-    @api.onchange("port_of_loading_id")
-    def _onchange_port_of_loading_id(self):
-        for rec in self:
-            rec.origin_country_id = rec.port_of_loading_id.country_id
 
-    @api.onchange("port_of_discharge_id")
-    def _onchange_port_of_discharge_id(self):
-        for rec in self:
-            rec.destination_country_id = rec.port_of_discharge_id.country_id
 
     @api.onchange("from_city")
     def _onchange_from_city(self):
@@ -307,7 +299,7 @@ class SeaBooking(models.Model):
                     "customer_id": self.partner_id.id,
                     "term_payment": self.payment_term_id.id,
                     "job_date": self.job_date,
-                    "job_no": self.job_no,
+                    "master_job_no": self.job_no,
                     "salesman_id": self.salesman_id.id if self.salesman_id else False,
                 }
             )

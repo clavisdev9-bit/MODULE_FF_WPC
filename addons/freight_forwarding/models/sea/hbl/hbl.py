@@ -26,6 +26,7 @@ class SeaHBL(models.Model):
     )
 
     hbl_no = fields.Char(string="B/L No.", required=True, default=lambda self: "New", copy=False, readonly=True)
+    master_bl_no = fields.Char(string="OB/L No.", related="booking_id.bl_no", store=True, readonly=False)
     booking_id = fields.Many2one(
         "freight.sea.booking",
         string="Booking",
@@ -133,11 +134,11 @@ class SeaHBL(models.Model):
         string="Container Type",
         required=True,
     )
-    job_no = fields.Char(string="Job No.", default=lambda self: "New", copy=False, readonly=True)
+    job_no = fields.Char(string="Job No.", default=lambda self: "New", copy=False)
     job_date = fields.Date(string="Job Date")
     job_city_id = fields.Many2one("res.city", string="Job City")
     master_job_no = fields.Char(string="Master Job No.")
-    original_bl_no = fields.Char(string="Original BL No.")
+    original_bl_no = fields.Char(string="No. of Original B/L")
     shipment_type = fields.Selection(
         selection=[("sea", "Sea"), ("air", "Air"), ("multimodal", "Multimodal")],
         string="Shipment Type",
