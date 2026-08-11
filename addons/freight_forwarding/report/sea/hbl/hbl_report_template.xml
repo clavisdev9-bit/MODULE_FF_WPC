@@ -201,8 +201,8 @@
                                             <td class="align-top">
                                                 <div class="bl-label">TYPE OF SERVICE</div>
                                                 <div class="bl-field-sm">
-                                                    <span t-field="doc.type" />
-                                                    <span t-field="doc.freight_type" />
+                                                    <span t-field="doc.container_type" />
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -210,9 +210,10 @@
                                             <td class="align-top">
                                                 <div class="bl-label">CONTAINER NO.</div>
                                                 <div class="bl-field-sm">
-                                                    <t t-set="cargo"
-                                                        t-value="doc.cargo_info_ids[0] if doc.cargo_info_ids else False" />
-                                                    <span t-field="cargo.container_no" />
+                                                    <t t-foreach="doc.cargo_info_ids" t-as="cargo">
+                                                        <span t-field="cargo.container_no" />
+                                                        <br />
+                                                    </t>
                                                 </div>
                                             </td>
                                         </tr>
@@ -221,13 +222,13 @@
                                                 <div class="bl-label">NOTIFY PARTY</div>
                                                 <div class="">
                                                     <t t-set="same_name"
-                                                        t-value="doc.notify_id == doc.consignee_id" />
+                                                        t-value="doc.notify_party_id == doc.consignee_id" />
                                                     <t t-set="same_addr"
-                                                        t-value="doc.notify_id.street == doc.consignee_id.street" />
+                                                        t-value="doc.notify_party_id.street == doc.consignee_id.street" />
                                                     <t t-set="same_phone"
-                                                        t-value="doc.notify_id.phone == doc.consignee_id.phone" />
+                                                        t-value="doc.notify_party_id.phone == doc.consignee_id.phone" />
                                                     <t t-set="same_vat"
-                                                        t-value="doc.notify_id.vat == doc.consignee_id.vat" />
+                                                        t-value="doc.notify_party_id.vat == doc.consignee_id.vat" />
                                                     <t
                                                         t-if="same_name and same_addr and same_phone and same_vat">
                                                         <span
@@ -235,22 +236,24 @@
                                                             AS CONSIGNEE</span>
                                                     </t>
                                                     <t t-else="">
-                                                        <span t-field="doc.notify_id" />
+                                                        <span t-field="doc.notify_party_id" />
                                                         <br />
-                                                        <span t-field="doc.notify_id.street" />
+                                                        <span t-field="doc.notify_party_id.street" />
                                                         <br />
-                                                        <span t-field="doc.notify_id.phone" />
+                                                        <span t-field="doc.notify_party_id.phone" />
                                                         <br />
-                                                        <span t-field="doc.notify_id.vat" />
+                                                        <span t-field="doc.notify_party_id.vat" />
                                                     </t>
                                                 </div>
                                             </td>
                                             <td rowspan="2" class="align-top">
                                                 <div class="bl-label">DELIVERY AGENT</div>
                                                 <div class="">
-                                                    <span t-field="doc.delivery_agent_id" />
-                                                    <br />
-                                                    <span t-field="doc.delivery_agent_id.street" />
+                                                    <t t-if="doc.delivery_agent_id">
+                                                        <span t-field="doc.delivery_agent_id.name" />
+                                                        <br />
+                                                        <span t-field="doc.delivery_agent_id.street" />
+                                                    </t>
                                                 </div>
                                             </td>
                                         </tr>
@@ -258,19 +261,15 @@
                                             <td class="align-top">
                                                 <div class="bl-label">PRE-CARRIAGE BY</div>
                                                 <div class="bl-field-sm">
-                                                    <t t-if="doc.shipment_info_ids">
-                                                        <span
-                                                            t-field="doc.shipment_info_ids[0].feeder_vessel_id.name" />
-                                                    </t>
+                                                    <span t-field="doc.feeder_vessel_id.name" />
+                                                    <span t-if="doc.feeder_voyage_no">/ <span
+                                                            t-field="doc.feeder_voyage_no" /></span>
                                                 </div>
                                             </td>
                                             <td class="align-top">
                                                 <div class="bl-label">PLACE OF RECEIPT</div>
                                                 <div class="bl-field-sm">
-                                                    <t t-if="doc.shipment_info_ids">
-                                                        <span
-                                                            t-field="doc.shipment_info_ids[0].place_of_receipt_id.name" />
-                                                    </t>
+                                                    <span t-field="doc.place_of_receipt_id.name" />
                                                 </div>
                                             </td>
                                         </tr>
@@ -278,19 +277,15 @@
                                             <td class="align-top">
                                                 <div class="bl-label">OCEAN VESSEL/VOYAGE</div>
                                                 <div class="bl-field-sm">
-                                                    <t t-if="doc.shipment_info_ids">
-                                                        <span
-                                                            t-field="doc.shipment_info_ids[0].feeder_vessel_id.name" />
-                                                    </t>
+                                                    <span t-field="doc.mother_vessel_id.name" />
+                                                    <span t-if="doc.mother_voyage_no">/ <span
+                                                            t-field="doc.mother_voyage_no" /></span>
                                                 </div>
                                             </td>
                                             <td class="align-top">
                                                 <div class="bl-label">PORT OF LOADING</div>
                                                 <div class="bl-field-sm">
-                                                    <t t-if="doc.shipment_info_ids">
-                                                        <span
-                                                            t-field="doc.shipment_info_ids[0].port_of_loading_id.name" />
-                                                    </t>
+                                                    <span t-field="doc.port_of_loading_id.name" />
                                                 </div>
                                             </td>
                                             <td rowspan="2" class="align-top">
@@ -305,19 +300,13 @@
                                             <td class="align-top">
                                                 <div class="bl-label">PORT OF DISCHARGE</div>
                                                 <div class="bl-field-sm">
-                                                    <t t-if="doc.shipment_info_ids">
-                                                        <span
-                                                            t-field="doc.shipment_info_ids[0].port_of_discharge_id.name" />
-                                                    </t>
+                                                    <span t-field="doc.port_of_discharge_id.name" />
                                                 </div>
                                             </td>
                                             <td class="align-top">
                                                 <div class="bl-label">PLACE OF DELIVERY</div>
                                                 <div class="bl-field-sm">
-                                                    <t t-if="doc.shipment_info_ids">
-                                                        <span
-                                                            t-field="doc.shipment_info_ids[0].place_of_delivery_id.name" />
-                                                    </t>
+                                                    <span t-field="doc.place_of_delivery_id.name" />
                                                 </div>
                                             </td>
                                         </tr>
@@ -352,116 +341,84 @@
                                         <tr>
                                             <td class="align-top">
                                                 <div class="bl-field-xl">
-                                                    <t t-set="cargo"
-                                                        t-value="doc.cargo_info_ids[0] if doc.cargo_info_ids else False" />
                                                     <div>
                                                         <strong>Shipper Name: </strong>
                                                         <span t-field="doc.shipper_id.name" />
                                                     </div>
-                                                    <div>
-                                                        <strong>Gross Weight: </strong>
-                                                        <span t-if="cargo"
-                                                            t-field="cargo.gross_weight" />
-                                                    </div>
-                                                    <div>
-                                                        <strong>Net Weight: </strong>
-                                                        <span t-if="cargo"
-                                                            t-field="cargo.net_weight" />
-                                                    </div>
-                                                    <div>
-                                                        <strong>Measurement: </strong>
-                                                        <span t-if="cargo" t-field="cargo.volume" />
-                                                    </div>
-                                                    <div>
-                                                        <strong>Total Volume (CBM): </strong>
-                                                        <span t-if="cargo"
-                                                            t-field="cargo.total_volume" />
-                                                    </div>
-                                                    <div>
-                                                        <strong>C/No: </strong>
-                                                        <span t-if="cargo"
-                                                            t-field="cargo.container_no" />
-                                                    </div>
-                                                    <br />
-                                                    <div>
-                                                        <strong>Seal</strong>
-                                                        <br />
-                                                        <span t-if="cargo" t-field="cargo.stamp_no" />
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="align-top">
-                                                <div class="bl-field-xl">
-                                                    <t t-set="cargo"
-                                                        t-value="doc.cargo_info_ids if doc.cargo_info_ids else False" />
-                                                    <t t-set="cargo1"
-                                                        t-value="doc.cargo_info_ids[:1] if doc.cargo_info_ids else False" />
-                                                    <div>
-                                                        <strong>Summary Qty:</strong>
-                                                        <span
-                                                            t-esc="sum(line.quantity for line in cargo)" />
-                                                        <span t-field="cargo1.package_type" />
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="align-top">
-                                                <div class="bl-field-xl">
-                                                    <!-- Cargo lines (recordset; aman walau kosong) -->
-                                                    <t t-set="cargo" t-value="doc.cargo_info_ids" />
 
-                                                    <!-- First cargo (recordset 0/1; aman) -->
+                                                    <t t-foreach="doc.cargo_info_ids" t-as="cargo">
+                                                        <div style="margin-top: 10px;">
+                                                            <div t-if="cargo.gross_weight">
+                                                                <strong>Gross Weight: </strong>
+                                                                <span t-field="cargo.gross_weight" />
+                                                            </div>
+                                                            <div t-if="cargo.net_weight">
+                                                                <strong>Net Weight: </strong>
+                                                                <span t-field="cargo.net_weight" />
+                                                            </div>
+                                                            <div t-if="cargo.volume">
+                                                                <strong>Measurement: </strong>
+                                                                <span t-field="cargo.volume" />
+                                                            </div>
+                                                            <div t-if="cargo.total_volume">
+                                                                <strong>Total Volume (CBM): </strong>
+                                                                <span t-field="cargo.total_volume" />
+                                                            </div>
+                                                            <div t-if="cargo.container_no">
+                                                                <strong>C/No: </strong>
+                                                                <span t-field="cargo.container_no" />
+                                                            </div>
+                                                            <div t-if="cargo.seal_no">
+                                                                <strong>Seal: </strong>
+                                                                <br />
+                                                                <span t-field="cargo.seal_no" />
+                                                            </div>
+                                                        </div>
+                                                    </t>
+                                                </div>
+                                            </td>
+                                            <td class="align-top">
+                                                <div class="bl-field-xl">
+                                                    <t t-set="cargo" t-value="doc.cargo_info_ids" />
                                                     <t t-set="cargo1"
                                                         t-value="doc.cargo_info_ids[:1]" />
-
-                                                    <!-- Container type description -->
                                                     <div>
-                                                        <t
-                                                            t-if="cargo1 and cargo1.container_type_id">
-                                                            <span
-                                                                t-field="cargo1.container_type_id.name" />
-                                                        </t>
+                                                        <strong>Summary Qty:</strong>
+                                                        <span t-esc="sum(cargo.mapped('quantity'))" />
+                                                        <span t-if="cargo1"
+                                                            t-field="cargo1.package_type_id.name" />
                                                     </div>
-
-                                                    <!-- Qty + package + commodity -->
-                                                    <div>
-                                                        <t t-set="total_qty"
-                                                            t-value="sum(cargo.mapped('quantity'))" />
-                                            <span
-                                                            t-esc="total_qty" />
-                                            <t t-if="cargo1">
-                                                            <span t-field="cargo1.package_type" />
-                                                        </t>
-                                                        = <span t-esc="total_qty" /> PCS OF <t
-                                                            t-if="doc.shipment_info_ids and doc.shipment_info_ids[0].commodity_id.name">
+                                                </div>
+                                            </td>
+                                            <td class="align-top">
+                                                <div class="bl-field-xl">
+                                                    <t t-foreach="doc.cargo_info_ids"
+                                                        t-as="cargo_line">
+                                                        <div style="margin-bottom: 15px;">
                                                             <span
-                                                                t-field="doc.shipment_info_ids[0].commodity_id.name" />
-                                                        </t>
-                                                    </div>
-
-                                                    <!-- Articles (one2many) -->
-
+                                                                t-field="cargo_line.description_of_goods" />
+                                                        </div>
+                                                    </t>
                                                 </div>
                                             </td>
 
                                             <td class="align-top">
                                                 <div class="bl-field-xl">
-                                                    <t t-set="cargo"
-                                                        t-value="doc.cargo_info_ids if doc.cargo_info_ids else False" />
+                                                    <t t-set="cargo" t-value="doc.cargo_info_ids" />
                                                     <div>
                                                         <strong>Summary Gross Weight (kg):</strong>
-                                            <span
-                                                            t-esc="sum(line.gross_weight for line in cargo)" />
+                                                        <span
+                                                            t-esc="sum(cargo.mapped('gross_weight'))" />
                                                         KGS </div>
                                                 </div>
                                             </td>
                                             <td class="align-top">
                                                 <div class="bl-field-xl">
-                                                    <t t-set="cargo"
-                                                        t-value="doc.cargo_info_ids if doc.cargo_info_ids else False" />
+                                                    <t t-set="cargo" t-value="doc.cargo_info_ids" />
                                                     <div>
                                                         <strong>Summary Volume (CBM):</strong>
-                                            <span
-                                                            t-esc="sum(line.volume for line in cargo)" />
+                                                        <span
+                                                            t-esc="sum(cargo.mapped('volume'))" />
                                                         CBM </div>
                                                 </div>
                                             </td>
