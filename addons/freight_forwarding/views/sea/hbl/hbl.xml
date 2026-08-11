@@ -58,13 +58,14 @@
                             <field name="freight_type"/>
                             <field name="container_type"/>
                             <field name="booking_id"/>
-                            <field name="job_no" readonly="1"/>
+                            <field name="job_no" />
                             <field name="job_date"/>
                         </group>
                         <group>
                             <field name="job_city_id"/>
                             <field name="master_job_no"/>
                             <field name="original_bl_no"/>
+                            <field name="master_bl_no"/>
                             <field name="shipment_type"/>
                             <field name="bl_surrendered"/>
                         </group>
