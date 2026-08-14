@@ -52,7 +52,6 @@
                             <group>
                                 <field name="container_type"/>
                                 <field name="job_date"/>
-                                <field name="import_job_no"/>
                                 <field name="railing"/>
                             </group>
                         </group>
@@ -171,7 +170,8 @@
                                             </group>
                                         </form>
                                     </field>
-                                    <field name="etd_eta" />
+                                    <field name="etd" />
+                                    <field name="eta" />
                                     <field name="via_etd" />
                                     <field name="via_eta" />
                                 </group>
@@ -185,11 +185,6 @@
                             </page> -->
 
                             <page string="Vessel Details">
-                                <group string="Booking &amp; Agent Information">
-                                    <field name="principle_agent_id" />
-                                    <field name="shipping_agent_id" />
-                                    <field name="scn_code" />
-                                </group>
 
                                 <group string="Stuffing Warehouse &amp; SMK">
                                     <group>
