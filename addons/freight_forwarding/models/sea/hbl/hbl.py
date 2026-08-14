@@ -53,32 +53,6 @@ class SeaHBL(models.Model):
         string="Booking Count", compute="_compute_booking_count"
     )
 
-    # FF-JS-Simplify (MoM 13-08-2026): Yard on the Jobsheet's Vessel Details
-    # tab now selects from stock.warehouse instead of the old yard master
-    # data model. yard_id is defined on freight.sea.vessel.details.mixin and
-    # shared with freight.sea.booking, but this change only applies to the
-    # Jobsheet per the MoM - so it's overridden here rather than in the
-    # mixin, leaving freight.sea.booking's yard_id untouched.
-    #
-    # yard_code / yard_address are related fields on the mixin
-    # (yard_id.ref / yard_id.address on the old yard master model), which
-    # don't exist on stock.warehouse - that's what broke module install
-    # (KeyError: 'Field ref referenced in related field definition
-    # freight.sea.hbl.yard_code does not exist.'). They're overridden here
-    # too, as plain fields populated via onchange instead of related=.
-    # IMPORTANT: related=None and readonly=False are both required here -
-    # without them Odoo's field-merge mechanism keeps inheriting the
-    # mixin's original related="yard_id.ref" / related="yard_id.address"
-    # definition even though this class redeclares the field, which is
-    # exactly what kept causing the KeyError after previous edits.
-    # domain=[] explicitly clears the mixin's original
-    # domain="[('category_id.name', '=', 'Yard')]" (written for the old
-    # yard master model, which had a category_id field) - without this,
-    # the same field-merge behaviour that kept the old related= around also
-    # keeps this domain around, and stock.warehouse has no category_id
-    # field, which is what broke the view with:
-    # "Unknown field 'stock.warehouse.category_id' in domain of python
-    # field 'yard_id'"
     yard_id = fields.Many2one(
         "stock.warehouse",
         string="Yard",
@@ -200,31 +174,12 @@ class SeaHBL(models.Model):
         string="Shipment Type",
     )
     bl_surrendered = fields.Boolean(string="BL Surrendered")
-
-    # FIX-ETA-HBL: etd/eta TIDAK ada di freight.sea.shipment.info.mixin,
-    # melainkan didefinisikan langsung di freight.sea.booking (lihat
-    # komentar FF-JS-Simplify di booking.py). Karena HBL tidak otomatis
-    # mewarisi field ini lewat mixin, didefinisikan ulang di sini agar
-    # view_sea_hbl_form (yang sudah mereferensikan field "eta") bisa load,
-    # dan agar nilainya bisa ikut di-copy dari Booking lewat
-    # _copy_booking_data_to_hbl saat action_convert_to_hbl dijalankan.
     etd = fields.Date(string="ETD")
     eta = fields.Date(string="ETA")
-
-    # NOTE: field khusus HBL, tidak ada di mixin (Booking tidak butuh field ini).
-    # Dulu didefinisikan di model perantara freight.sea.hbl.shipment.info,
-    # sekarang dipindahkan langsung ke sini karena model perantara dihapus.
-    # Saling eksklusif dengan stuffing_location_id (dari mixin) berdasarkan
-    # freight_type -- lihat kondisi invisible di views/sea/hbl/hbl.xml.
     warehouse_location_id = fields.Many2one(
         "stock.warehouse",
         string="Warehouse Location",
     )
-
-    # NOTE (FF-21): field baru untuk report "Shipping Instruction".
-    # Diisi manual oleh staff, BUKAN hasil konversi angka-ke-kata otomatis --
-    # sesuai contoh lampiran PDF, isinya berupa catatan bebas (mis. "PLS
-    # ISSUED SEAWAYBILL"), bukan selalu representasi jumlah paket.
     total_packages_remark = fields.Char(
         string="Total No. of Packages/Units (in words)"
     )
@@ -253,13 +208,6 @@ class SeaHBL(models.Model):
         domain="[('category_id.name', '=', 'Sales Team')]"
     )
 
-    # Notify Party
-    # NOTE: field notify_id dan notify_address digantikan oleh notify_party_id
-    # dan notify_party_address dari freight.sea.bl.info.mixin (FF-29).
-
-    # Delivery & Freight
-    # NOTE: delivery_agent_id dan delivery_agent_address dipindahkan ke
-    # freight.sea.bl.info.mixin (FF-29).
     freight = fields.Selection(
         selection=[
             ("prepaid", "Prepaid"),
