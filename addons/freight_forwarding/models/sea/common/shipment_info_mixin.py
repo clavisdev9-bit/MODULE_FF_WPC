@@ -61,7 +61,7 @@ class FreightShipmentInfoMixin(models.AbstractModel):
         "freight.sea.booking.vessel.schedule",
         string="Vessel Schedule",
     )
-    eta_jkt = fields.Date(string="ETA on JKT")
+    eta_jkt = fields.Datetime(string="ETA JKT")
     etd = fields.Date(string="ETD")
     eta = fields.Date(string="ETA")
     via_etd = fields.Date(string="Via ETD")
