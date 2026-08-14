@@ -125,7 +125,7 @@ class SeaBooking(models.Model):
         copy=False,
     )
     booking_date = fields.Datetime(string="Date & Time")
-    bl_no = fields.Char(string="B/L No.")
+    hbl_no = fields.Char(string="B/L No.")
     job_no = fields.Char(string="Job No.")
     nomination_cargo = fields.Boolean(string="Nomination Cargo")
     container_type = fields.Selection(
@@ -159,23 +159,10 @@ class SeaBooking(models.Model):
         string="Sales Orders",
     )
 
-    # Shipment Details
-    # NOTE (FF-22): port_of_loading_id, port_of_discharge_id, commodity_id,
-    # dan eta_jkt juga ada di freight.sea.shipment.info.mixin. Karena Booking
-    # sudah mendefinisikan field ini sendiri (dengan required=True dan string
-    # custom), definisi di sini yang dipakai. Field ini TIDAK ditambahkan lagi
-    # di tab "Shipment Details"/"Vessel Schedule" baru supaya tidak duplikat
-    # di view.
-    port_of_loading_id = fields.Many2one(
-        "freight.port", string="Origin Port (POL)", required=True
-    )
-    port_of_discharge_id = fields.Many2one(
-        "freight.port", string="Destination Port (POD)", required=True
-    )
-    # FF-JS-Simplify (MoM 13-08-2026): moved from the header to the
-    # "Shipment Info" tab in the view; labels shortened to "ETD"/"ETA".
-    etd = fields.Date(string="ETD")
-    eta = fields.Date(string="ETA")
+    # Location & Route
+    # NOTE: port_of_loading_id, port_of_discharge_id, commodity_id, etd, eta,
+    # eta_jkt ada di freight.sea.shipment.info.mixin (ditampilkan di tab
+    # Shipment Info). Definisi di sini hanya untuk field yang khas Booking.
     destination_country_id = fields.Many2one(
         "res.country", string="Destination Country"
     )
@@ -187,13 +174,11 @@ class SeaBooking(models.Model):
     delivery_type_id = fields.Many2one(
         "freight.delivery.type", string="Delivery Type", required=True
     )
-    commodity_id = fields.Many2one("freight.commodity", string="Commodity")
 
     # Vessel Information
     pod_port_id = fields.Many2one("freight.port", string="Port of Delivery")
     vessel_id = fields.Many2one("freight.vessel", string="Vessel Name", required=True)
     voyage_no = fields.Char(string="Voyage No.")
-    eta_jkt = fields.Date(string="ETA on JKT")
 
     # Notebook
     # NOTE (FF-22): field shipment_info_ids (One2many ke

@@ -8,11 +8,17 @@
             <field name="arch" type="xml">
                 <form string="Sea Booking">
                     <header>
-                        <button name="action_confirm" string="Confirm Booking" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                        <button name="action_convert_to_hbl" type="object" string="Convert to Jobsheet" class="oe_highlight" invisible="hbl_count &gt; 0 or state != 'confirmed'"/>
-                        <button name="action_cancel" string="Cancel" type="object" invisible="state in ('cancelled', 'confirmed')"/>
-                        <button name="action_draft" string="Set to Draft" type="object" invisible="state == 'draft'"/>
-                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
+                        <button name="action_confirm" string="Confirm Booking" type="object"
+                            class="oe_highlight" invisible="state != 'draft'" />
+                        <button name="action_convert_to_hbl" type="object"
+                            string="Convert to Jobsheet" class="oe_highlight"
+                            invisible="hbl_count &gt; 0 or state != 'confirmed'" />
+                        <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('cancelled', 'confirmed')" />
+                        <button name="action_draft" string="Set to Draft" type="object"
+                            invisible="state == 'draft'" />
+                        <field name="state" widget="statusbar"
+                            statusbar_visible="draft,confirmed,cancelled" />
                     </header>
                     <sheet>
                         <div name="button_box" class="oe_button_box">
@@ -40,47 +46,48 @@
                         </h1>
                         <group string="Header Information">
                             <group>
-                                <field name="freight_type"/>
-                                <field name="booking_date"/>
-                                <field name="bl_no"/>
-                                <field name="job_no"/>
-                                <field name="nomination_cargo"/>
+                                <field name="freight_type" />
+                                <field name="container_type" />
+                                <field name="hbl_no" />
+                                <field name="job_no" />
+                                <field name="nomination_cargo" />
+
+                            </group>
+                            <group>
+                                <field name="booking_date" />
+                                <field name="job_date" />
+                                <field name="railing" />
                                 <field name="commodity_id"/>
                                 <field name="shipment_type_id" />
-                                <field name="delivery_type_id"/>
-                            </group>
-                            <group>
-                                <field name="container_type"/>
-                                <field name="job_date"/>
-                                <field name="railing"/>
+                                <field name="delivery_type_id" />
                             </group>
                         </group>
 
                         <separator />
 
-                        <group string="Customer &amp; Sales">
+                        <group>
                             <group>
-                                <field name="partner_id"/>
-                                <field name="customer_reference"/>
-                                <field name="phone"/>
-                                <field name="email" widget="email"/>
+                                <field name="partner_id" />
+                                <field name="customer_reference" />
+                                <field name="phone" />
+                                <field name="email" widget="email" />
                             </group>
                             <group>
-                                <field name="payment_term_id"/>
-                                <field name="salesman_id"/>
+                                <field name="payment_term_id" />
+                                <field name="salesman_id" />
                             </group>
                         </group>
 
                         <separator />
 
-                        <group string="Routing">
+                        <group>
                             <group>
-                                <field name="from_city"/>
-                                <field name="to_city"/>
+                                <field name="from_city" />
+                                <field name="to_city" />
                             </group>
                             <group>
-                                <field name="origin_country_id"/>
-                                <field name="destination_country_id"/>
+                                <field name="origin_country_id" />
+                                <field name="destination_country_id" />
                             </group>
                         </group>
 
@@ -107,9 +114,11 @@
                                         <field name="notify_party_address" readonly="1" nolabel="0" />
                                     </group>
                                     <group string="Delivery Agent">
-                                        <field name="delivery_agent_id" widget="res_partner_many2one"
+                                        <field name="delivery_agent_id"
+                                            widget="res_partner_many2one"
                                             context="{'res_partner_search_mode': 'customer', 'show_address': 0}" />
-                                        <field name="delivery_agent_address" readonly="1" nolabel="0" />
+                                        <field name="delivery_agent_address" readonly="1"
+                                            nolabel="0" />
                                     </group>
                                 </group>
                             </page>
@@ -118,18 +127,28 @@
                                     <group>
                                         <field name="place_of_receipt_id" />
                                         <field name="place_of_delivery_id" />
+                                        <field name="port_of_loading_id" />
+                                        <field name="port_of_discharge_id" />
+                                    </group>
+                                    <group>
+                                        <field name="eta_jkt" />
+                                        <field name="etd" />
+                                        <field name="eta" />
+                                        <field name="via_port_id" />
+                                        <field name="terminal_id" />
+                                    </group>
+                                </group>
+
+                                <separator/>
+
+                                <group>
+                                    <group>
                                         <field name="feeder_vessel_id" />
                                         <field name="feeder_voyage_no" />
                                         <field name="mother_vessel_id" />
                                         <field name="mother_voyage_no" />
                                     </group>
                                     <group>
-                                        <field name="eta" />
-                                        <field name="etd" />
-                                        <field name="port_of_loading_id" string="Port of Loading" />
-                                        <field name="port_of_discharge_id" string="Port of Discharge" />
-                                        <field name="via_port_id" />
-                                        <field name="terminal_id" />
                                         <field name="shipping_line_id" />
                                         <field name="shipping_line_ref_no" />
                                         <field name="coloader_id" />
@@ -170,8 +189,7 @@
                                             </group>
                                         </form>
                                     </field>
-                                    <field name="etd" />
-                                    <field name="eta" />
+                                    <field name="etd_eta" />
                                     <field name="via_etd" />
                                     <field name="via_eta" />
                                 </group>
@@ -185,6 +203,11 @@
                             </page> -->
 
                             <page string="Vessel Details">
+                                <group string="Booking &amp; Agent Information">
+                                    <field name="principle_agent_id" />
+                                    <field name="shipping_agent_id" />
+                                    <field name="scn_code" />
+                                </group>
 
                                 <group string="Stuffing Warehouse &amp; SMK">
                                     <group>
@@ -219,7 +242,7 @@
                                     </group>
                                     <field name="depot_instruction" />
                                 </group>
-                                
+
                                 <group string="General Instructions">
                                     <field name="general_instruction" />
                                 </group>
@@ -229,7 +252,7 @@
                             </page>
                         </notebook>
                     </sheet>
-                    <chatter/>
+                    <chatter />
                 </form>
             </field>
         </record>
@@ -241,7 +264,7 @@
             <field name="arch" type="xml">
                 <list>
                     <field name="name" />
-                    <field name="sale_order_ids" widget="many2many_tags"/>
+                    <field name="sale_order_ids" widget="many2many_tags" />
                     <field name="partner_id" />
                     <field name="container_type" />
                     <field name="freight_type" />
@@ -264,8 +287,10 @@
                     <field name="container_type" />
                     <field name="freight_type" />
                     <separator />
-                    <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'import')]" />
-                    <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'export')]" />
+                    <filter name="filter_import" string="Import"
+                        domain="[('freight_type', '=', 'import')]" />
+                    <filter name="filter_export" string="Export"
+                        domain="[('freight_type', '=', 'export')]" />
                     <filter name="filter_fc" string="Full Container"
                         domain="[('container_type', '=', 'fcl')]" />
                     <filter name="filter_lc" string="Less Than Container"
@@ -308,7 +333,8 @@
             <field name="res_model">freight.sea.booking</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="view_sea_booking_search" />
-            <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'consol')]</field>
+            <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=',
+                'consol')]</field>
         </record>
 
         <record id="action_sea_booking_export_fcl" model="ir.actions.act_window">
@@ -332,7 +358,8 @@
             <field name="res_model">freight.sea.booking</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="view_sea_booking_search" />
-            <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'consol')]</field>
+            <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=',
+                'consol')]</field>
         </record>
 
     </data>

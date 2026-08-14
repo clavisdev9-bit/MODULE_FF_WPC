@@ -53,7 +53,7 @@ class SeaHBL(models.Model):
     job_city_id = fields.Many2one("res.city", string="Job City")
     master_job_no = fields.Char(string="Master Job No.")
     no_of_original_bl = fields.Char(string="No. of Original B/L")
-    mbl_no = fields.Char(string="MBL No.", related="booking_id.bl_no", store=True, readonly=False)
+    mbl_no = fields.Char(string="MBL No.")
     shipment_type = fields.Selection(
         selection=[("sea", "Sea"), ("air", "Air"), ("multimodal", "Multimodal")],
         string="Shipment Type",

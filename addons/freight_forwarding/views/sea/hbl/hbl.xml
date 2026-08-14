@@ -70,7 +70,6 @@
                             <field name="commodity_id" />
                             <field name="shipment_type"/>
                             <field name="delivery_type_id"/>
-                            
                         </group>
                     </group>
 
@@ -101,8 +100,8 @@
                         <group string="Delivery &amp; Freight">
                             <field name="delivery_agent_id" />
                             <field name="delivery_agent_address" readonly="1" />
-                            <field name="freight" string="Delivery Type"/>
-                            <field name="freight_terms" string="Terms of Shipment"/>
+                            <field name="freight"/>
+                            <field name="freight_terms"/>
                         </group>
                     </group>
                     <notebook>
@@ -111,19 +110,19 @@
                                 <group>
                                     <field name="place_of_receipt_id" />
                                     <field name="place_of_delivery_id" />
-                                </group>
-                                <group>
                                     <field name="port_of_loading_id" />
                                     <field name="port_of_discharge_id" />
                                 </group>
                                 <group>
-                                    <field name="eta_jkt" string="ETA JKT"/>
-                                    <field name="etd" string="ETD"/>
-                                    <field name="eta" string="ETA"/>
+                                    <field name="eta_jkt" />
+                                    <field name="etd" />
+                                    <field name="eta" />
                                     <field name="via_port_id" />
                                     <field name="terminal_id" />
                                 </group>
                             </group>
+
+                            <separator/>
 
                             <group>
                                 <group>
@@ -139,18 +138,14 @@
                                     <field name="coloader_ref_no" />
                                 </group>
                             </group>
-
-                            <group>
-                                <field name="warehouse_location_id" invisible="freight_type != 'import'" />
-                            </group>
                         </page>
 
-                        <page string="Footer Remarks">
+                        <!-- <page string="Footer Remarks">
                             <group>
                                 <field name="booking_remark_id" />
                                 <field name="warehouse_remark" />
                             </group>
-                        </page>
+                        </page> -->
 
                         <page string="Vessel Details">
                             <group string="Stuffing Warehouse &amp; SMK" invisible="freight_type == 'import'">
