@@ -51,6 +51,10 @@ class SeaHBL(models.Model):
     )
     job_date = fields.Date(string="Job Date")
     job_city_id = fields.Many2one("res.city", string="Job City")
+    from_city = fields.Many2one("res.city", string="From")
+    origin_country_id = fields.Many2one("res.country", string="Origin Country")
+    to_city = fields.Many2one("res.city", string="To")
+    destination_country_id = fields.Many2one("res.country", string="Destination Country")
     master_job_no = fields.Char(string="Master Job No.")
     no_of_original_bl = fields.Char(string="No. of Original B/L")
     mbl_no = fields.Char(string="MBL No.")
@@ -150,10 +154,17 @@ class SeaHBL(models.Model):
         for rec in self:
             rec.booking_count = 1 if rec.booking_id else 0
 
+    @api.onchange("from_city")
+    def _onchange_from_city(self):
+        for rec in self:
+            if rec.from_city.country_id:
+                rec.origin_country_id = rec.from_city.country_id
+
     @api.onchange("to_city")
     def _onchange_to_city(self):
         for rec in self:
-            rec.destination_country_id = rec.to_city.country_id
+            if rec.to_city.country_id:
+                rec.destination_country_id = rec.to_city.country_id
 
     def action_active(self):
         for rec in self:
