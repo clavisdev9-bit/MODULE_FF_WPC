@@ -38,7 +38,7 @@
                         <h1>
                             <field name="name" readonly="1" />
                         </h1>
-                        <group>
+                        <group string="Header Information">
                             <group>
                                 <field name="freight_type"/>
                                 <field name="booking_date"/>
@@ -46,6 +46,8 @@
                                 <field name="job_no"/>
                                 <field name="nomination_cargo"/>
                                 <field name="commodity_id"/>
+                                <field name="shipment_type_id" />
+                                <field name="delivery_type_id"/>
                             </group>
                             <group>
                                 <field name="container_type"/>
@@ -57,7 +59,7 @@
 
                         <separator />
 
-                        <group>
+                        <group string="Customer &amp; Sales">
                             <group>
                                 <field name="partner_id"/>
                                 <field name="customer_reference"/>
@@ -72,20 +74,14 @@
 
                         <separator />
 
-                        <group>
+                        <group string="Routing">
                             <group>
-                                <!--<field name="port_of_loading_id" required="1"/>-->
-                                <!--<field name="port_of_discharge_id" required="1"/>-->
                                 <field name="from_city"/>
-                                <field name="origin_country_id"/>
                                 <field name="to_city"/>
-                                <field name="destination_country_id"/>
-                                <!--<field name="pod_port_id"/>-->
                             </group>
                             <group>
-                                <!-- FF-JS-Simplify: ETA/ETD moved to the Shipment Info tab
-                                     per MoM 13-08-2026 -->
-                                <field name="delivery_type_id"/>
+                                <field name="origin_country_id"/>
+                                <field name="destination_country_id"/>
                             </group>
                         </group>
 
@@ -121,7 +117,6 @@
                             <page string="Shipment Info">
                                 <group>
                                     <group>
-                                        <field name="shipment_type_id" />
                                         <field name="place_of_receipt_id" />
                                         <field name="place_of_delivery_id" />
                                         <field name="feeder_vessel_id" />
@@ -130,8 +125,6 @@
                                         <field name="mother_voyage_no" />
                                     </group>
                                     <group>
-                                        <!-- FF-JS-Simplify: ETA/ETD moved here from the header
-                                             per MoM 13-08-2026 -->
                                         <field name="eta" />
                                         <field name="etd" />
                                         <field name="port_of_loading_id" string="Port of Loading" />
@@ -238,27 +231,6 @@
                             </page>
                             <page string="Cargo Info">
                                 <field name="cargo_info_ids" nolabel="1" />
-                            </page>
-                            <!-- <page string="Purchase Order">
-                                <field name="purchase_order_ids" nolabel="1">
-                                    <list>
-                                        <field name="name"/>
-                                        <field name="partner_id"/>
-                                        <field name="currency_id"/>
-                                        <field name="amount_total"/>
-                                        <field name="state"/>
-                                    </list>
-                                </field>
-                            </page> -->
-                            <page string="Sales Orders">
-                                <field name="sale_order_ids">
-                                    <list>
-                                        <field name="name"/>
-                                        <field name="currency_id"/>
-                                        <field name="amount_total"/>
-                                        <field name="state"/>
-                                    </list>
-                                </field>
                             </page>
                         </notebook>
                     </sheet>
