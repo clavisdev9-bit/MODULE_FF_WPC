@@ -30,7 +30,6 @@
                         </table>
                     </div>
 
-                    <!-- FOOTER: repeat di setiap halaman, nomor halaman otomatis -->
                     <div class="footer">
                         <div style="text-align:center; font-size:9pt; font-family: Arial, Helvetica, sans-serif; color:#555; border-top: 1px solid #ccc; padding-top: 4px;">
                             Page <span class="page"/> of <span class="topage"/>
@@ -40,8 +39,8 @@
                     <div class="page">
                         <style>
                             * { box-sizing: border-box; }
-                            @page { margin-bottom: 18mm; }
-                            @page :first { margin-bottom: 18mm; }
+                            @page { margin-bottom: 30mm; }
+                            @page :first { margin-bottom: 30mm; }
                             .page { font-size: 12pt; color: #222; padding-bottom: 40px; }
                             .page span { font-size: inherit; }
                             .container-fluid { width: 100%; }
@@ -51,7 +50,7 @@
                             .table td, .table th {
                                 font-size: 12pt !important;
                                 padding: 8px 10px !important;
-                                vertical-align: top;
+                                vertical-align: top !important;
                                 line-height: 1.6;
                                 border: 1px solid #000;
                                 word-wrap: break-word;
@@ -62,8 +61,8 @@
                             .si-label { font-weight: bold; font-size: 12pt; margin-bottom: 2px; color: #333; }
                             .si-title { text-align: center; font-weight: bold; font-size: 14pt; margin: 0; color: #333; }
                             .si-inline { display: table; width: 100%; }
-                            .si-inline-row { display: table-row; }
-                            .si-inline-label { display: table-cell; font-weight: bold; white-space: nowrap; padding-bottom: 4px; padding-right: 6px; color: #333; }
+                            .si-inline-row { display: table-row; line-height: 1.35; }
+                            .si-inline-label { display: table-cell; font-weight: bold; white-space: nowrap; padding-bottom: 2px; padding-right: 6px; color: #333; }
                             .si-inline-colon { display: table-cell; width: 14px; }
                             .si-inline-value { display: table-cell; }
 
@@ -81,7 +80,7 @@
                             <!-- Row 0: Empty spacer row -->
                             <table class="table mb-0">
                                 <tr>
-                                    <td colspan="2">&#160;</td>
+                                    <td colspan="2" style="padding: 3px 10px !important; line-height: 1;">&#160;</td>
                                 </tr>
                             </table>
 
@@ -98,7 +97,7 @@
                                             <span t-field="doc.shipper_id.phone" />
                                         </div>
                                     </td>
-                                    <td style="width:45%; border-left: 1px solid #000; border-top: none;" rowspan="3">
+                                    <td style="width:45%; border-left: 1px solid #000; border-top: none; vertical-align: top;" rowspan="3">
                                         <div class="si-inline">
                                             <div class="si-inline-row">
                                                 <div class="si-inline-label">Date</div>
@@ -233,7 +232,7 @@
                                     </td>
                                 </tr>
                             </table>
-                            
+
                             <table class="table mb-0 mt-0">
                                 <thead>
                                     <tr>

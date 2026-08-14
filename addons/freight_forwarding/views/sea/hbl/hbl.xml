@@ -101,20 +101,25 @@
                         <group string="Delivery &amp; Freight">
                             <field name="delivery_agent_id" />
                             <field name="delivery_agent_address" readonly="1" />
-                            <field name="freight" />
+                            <field name="freight" string="Delivery Type"/>
+                            <field name="freight_terms" string="Terms of Shipment"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Shipment Details">
+                        <page string="Shipment Info">
                             <group>
                                 <group>
-                                    <field name="shipment_type_id" />
                                     <field name="place_of_receipt_id" />
                                     <field name="place_of_delivery_id" />
                                 </group>
                                 <group>
                                     <field name="port_of_loading_id" />
                                     <field name="port_of_discharge_id" />
+                                </group>
+                                <group>
+                                    <field name="eta_jkt" string="ETA JKT"/>
+                                    <field name="etd_eta" string="ETD"/>
+                                    <field name="eta" string="ETA"/>
                                     <field name="via_port_id" />
                                     <field name="terminal_id" />
                                 </group>
@@ -136,48 +141,7 @@
                             </group>
 
                             <group>
-                                <field name="stuffing_location_id" invisible="freight_type == 'import'" />
                                 <field name="warehouse_location_id" invisible="freight_type != 'import'" />
-                            </group>
-                        </page>
-
-                        <page string="Agent &amp; Terms">
-                            <group>
-                                <group>
-                                    <field name="forward_agent_id" />
-                                    <field name="letter_of_credit" />
-                                </group>
-                                <group>
-                                    <field name="freight_terms" />
-                                    <field name="other_charges_terms" />
-                                    <field name="ship_mode" />
-                                    <field name="service_level" />
-                                </group>
-                            </group>
-                        </page>
-
-                        <page string="Vessel Schedule">
-                            <group>
-                                <field name="vessel_schedule_id">
-                                    <form>
-                                        <group>
-                                            <field name="vessel_id" />
-                                            <field name="name" />
-                                            <field name="voyage_no" />
-                                            <field name="arrival" />
-                                            <field name="berthing" />
-                                            <field name="departure" />
-                                            <field name="closing" />
-                                            <field name="terminal_id" />
-                                            <field name="status" />
-                                            <field name="open_stack" />
-                                        </group>
-                                    </form>
-                                </field>
-                                <field name="eta_jkt" />
-                                <field name="etd_eta" />
-                                <field name="via_etd" />
-                                <field name="via_eta" />
                             </group>
                         </page>
 
@@ -189,12 +153,6 @@
                         </page>
 
                         <page string="Vessel Details">
-                            <group string="Booking &amp; Agent Information">
-                                <field name="principle_agent_id" />
-                                <field name="shipping_agent_id" />
-                                <field name="scn_code" />
-                            </group>
-
                             <group string="Stuffing Warehouse &amp; SMK" invisible="freight_type == 'import'">
                                 <group>
                                     <field name="warehouse_id" />

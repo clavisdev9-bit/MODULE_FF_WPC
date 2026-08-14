@@ -172,8 +172,10 @@ class SeaBooking(models.Model):
     port_of_discharge_id = fields.Many2one(
         "freight.port", string="Destination Port (POD)", required=True
     )
-    etd = fields.Date(string="ETD (Departure)")
-    eta = fields.Date(string="ETA (Arrival)")
+    # FF-JS-Simplify (MoM 13-08-2026): moved from the header to the
+    # "Shipment Info" tab in the view; labels shortened to "ETD"/"ETA".
+    etd = fields.Date(string="ETD")
+    eta = fields.Date(string="ETA")
     destination_country_id = fields.Many2one(
         "res.country", string="Destination Country"
     )
@@ -261,7 +263,10 @@ class SeaBooking(models.Model):
             "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
             "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
             "stuffing_date", "contact_id", "yard_id", "depot_id",
-            "depot_instruction", "general_instruction"
+            "depot_instruction", "general_instruction",
+            # Ditambahkan agar ETD/ETA ikut ter-copy dari Booking ke HBL
+            # saat action_convert_to_hbl dijalankan (lihat FIX-ETA-HBL).
+            "etd", "eta",
         ]
         hbl_update = {}
         for field in vessel_fields:

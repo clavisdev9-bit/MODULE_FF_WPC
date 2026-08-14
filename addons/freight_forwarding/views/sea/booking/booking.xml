@@ -83,8 +83,8 @@
                                 <!--<field name="pod_port_id"/>-->
                             </group>
                             <group>
-                                <field name="etd"/>
-                                <field name="eta"/>
+                                <!-- FF-JS-Simplify: ETA/ETD moved to the Shipment Info tab
+                                     per MoM 13-08-2026 -->
                                 <field name="delivery_type_id"/>
                             </group>
                         </group>
@@ -128,9 +128,12 @@
                                         <field name="feeder_voyage_no" />
                                         <field name="mother_vessel_id" />
                                         <field name="mother_voyage_no" />
-                                        <field name="stuffing_location_id" />
                                     </group>
                                     <group>
+                                        <!-- FF-JS-Simplify: ETA/ETD moved here from the header
+                                             per MoM 13-08-2026 -->
+                                        <field name="eta" />
+                                        <field name="etd" />
                                         <field name="port_of_loading_id" string="Port of Loading" />
                                         <field name="port_of_discharge_id" string="Port of Discharge" />
                                         <field name="via_port_id" />
