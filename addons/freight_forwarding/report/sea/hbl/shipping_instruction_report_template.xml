@@ -225,7 +225,7 @@
                                                 </td>
                                                 <td style="width:45%; padding:8px 10px !important; border:none; border-left: 1px solid #000;">
                                                     <div class="si-label" style="white-space: nowrap;">No. of Original B/L</div>
-                                                    <div><span t-field="doc.original_bl_no" /></div>
+                                                    <div><span t-field="doc.no_of_original_bl" /></div>
                                                 </td>
                                             </tr>
                                         </table>
