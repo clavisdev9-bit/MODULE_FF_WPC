@@ -65,7 +65,7 @@
 
                         <separator />
 
-                        <group>
+                        <group string="Customer">
                             <group>
                                 <field name="partner_id" />
                                 <field name="customer_reference" />
@@ -80,13 +80,13 @@
 
                         <separator />
 
-                        <group>
+                        <group string="Route">
                             <group>
                                 <field name="from_city" />
-                                <field name="to_city" />
+                                <field name="origin_country_id" />
                             </group>
                             <group>
-                                <field name="origin_country_id" />
+                                <field name="to_city" />
                                 <field name="destination_country_id" />
                             </group>
                         </group>

@@ -104,6 +104,18 @@
                             <field name="freight_terms"/>
                         </group>
                     </group>
+
+                    <group string="Route">
+                        <group>
+                            <field name="from_city"/>
+                            <field name="origin_country_id"/>
+                        </group>
+                        <group>
+                            <field name="to_city"/>
+                            <field name="destination_country_id"/>
+                        </group>
+                    </group>
+                    
                     <notebook>
                         <page string="Shipment Info">
                             <group>

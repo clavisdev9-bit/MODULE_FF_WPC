@@ -249,15 +249,31 @@ class SeaBooking(models.Model):
             "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
             "stuffing_date", "contact_id", "yard_id", "depot_id",
             "depot_instruction", "general_instruction",
-            # Ditambahkan agar ETD/ETA ikut ter-copy dari Booking ke HBL
-            # saat action_convert_to_hbl dijalankan (lihat FIX-ETA-HBL).
-            "etd", "eta",
         ]
         hbl_update = {}
         for field in vessel_fields:
             if not hbl[field] and booking[field]:
                 val = booking[field]
                 hbl_update[field] = val.id if hasattr(val, 'id') else val
+                
+        # Explicitly map ETD, ETA, ETA JKT
+        if not hbl.etd and booking.etd:
+            hbl_update['etd'] = booking.etd
+        if not hbl.eta and booking.eta:
+            hbl_update['eta'] = booking.eta
+        if not hbl.eta_jkt and booking.eta_jkt:
+            hbl_update['eta_jkt'] = booking.eta_jkt
+            
+        # Explicitly map routing fields
+        if not hbl.from_city and booking.from_city:
+            hbl_update['from_city'] = booking.from_city.id
+        if not hbl.origin_country_id and booking.origin_country_id:
+            hbl_update['origin_country_id'] = booking.origin_country_id.id
+        if not hbl.to_city and booking.to_city:
+            hbl_update['to_city'] = booking.to_city.id
+        if not hbl.destination_country_id and booking.destination_country_id:
+            hbl_update['destination_country_id'] = booking.destination_country_id.id
+
         if hbl_update:
             hbl.write(hbl_update)
 
@@ -291,6 +307,13 @@ class SeaBooking(models.Model):
                     "job_date": self.job_date,
                     "master_job_no": self.job_no,
                     "salesman_id": self.salesman_id.id if self.salesman_id else False,
+                    "from_city": self.from_city.id if self.from_city else False,
+                    "origin_country_id": self.origin_country_id.id if self.origin_country_id else False,
+                    "to_city": self.to_city.id if self.to_city else False,
+                    "destination_country_id": self.destination_country_id.id if self.destination_country_id else False,
+                    "eta_jkt": self.eta_jkt,
+                    "etd": self.etd,
+                    "eta": self.eta,
                 }
             )
 
