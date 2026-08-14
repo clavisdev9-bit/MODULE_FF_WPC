@@ -292,7 +292,7 @@
                                                 <div class="bl-label">NUMBER OF ORIGINAL B/L OF
                                                     LADING ISSUED</div>
                                                 <div class="bl-field-sm">
-                                                    <span t-field="doc.original_bl_no" />
+                                                    <span t-field="doc.no_of_original_bl" />
                                                 </div>
                                             </td>
                                         </tr>
