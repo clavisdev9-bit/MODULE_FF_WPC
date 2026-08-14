@@ -62,7 +62,8 @@ class FreightShipmentInfoMixin(models.AbstractModel):
         string="Vessel Schedule",
     )
     eta_jkt = fields.Date(string="ETA on JKT")
-    etd_eta = fields.Datetime(string="ETD/ETA")
+    etd = fields.Date(string="ETD")
+    eta = fields.Date(string="ETA")
     via_etd = fields.Date(string="Via ETD")
     via_eta = fields.Date(string="Via ETA")
 
