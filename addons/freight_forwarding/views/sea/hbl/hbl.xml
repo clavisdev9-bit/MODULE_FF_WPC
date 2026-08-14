@@ -118,7 +118,7 @@
                                 </group>
                                 <group>
                                     <field name="eta_jkt" string="ETA JKT"/>
-                                    <field name="etd_eta" string="ETD"/>
+                                    <field name="etd" string="ETD"/>
                                     <field name="eta" string="ETA"/>
                                     <field name="via_port_id" />
                                     <field name="terminal_id" />
