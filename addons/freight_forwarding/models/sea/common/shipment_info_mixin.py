@@ -36,12 +36,9 @@ class FreightShipmentInfoMixin(models.AbstractModel):
         domain="[('category_id.name', '=', 'Forward Agent')]",
     )
     letter_of_credit = fields.Char(string="Letter of Credit")
-    freight_terms = fields.Selection(
-        selection=[
-            ("prepaid", "Prepaid"),
-            ("collect", "Collect"),
-        ],
-        string="Freight Terms",
+    freight_terms = fields.Many2one(
+        "account.incoterms",
+        string="Terms of Shipment",
     )
     other_charges_terms = fields.Selection(
         selection=[
