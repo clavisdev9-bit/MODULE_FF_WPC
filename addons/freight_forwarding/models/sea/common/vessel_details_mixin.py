@@ -49,20 +49,14 @@ class FreightVesselDetailsMixin(models.AbstractModel):
         string="Yard Address",
         readonly=True,
     )
-    depot_id = fields.Many2one(
-        "res.partner",
+    depot_id = fields.Char(
         string="Depot",
-        domain="[('category_id.name', '=', 'Depot')]",
     )
     depot_code = fields.Char(
-        related="depot_id.ref",
         string="Depot Code",
-        readonly=True,
     )
     depot_address = fields.Char(
-        related="depot_id.contact_address",
         string="Depot Address",
-        readonly=True,
     )
     depot_instruction = fields.Many2one(
         "freight.instruction",
