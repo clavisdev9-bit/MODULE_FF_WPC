@@ -244,26 +244,31 @@ class SeaBooking(models.Model):
         # jadi tidak perlu proses copy antar model perantara lagi.
 
 
-        vessel_fields = [
+        vessel_details_fields = [
             "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
             "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
             "stuffing_date", "contact_id", "yard_id", "depot_id",
             "depot_instruction", "general_instruction",
         ]
+        
+        shipment_info_fields = [
+            # Shipment Info fields (only those in the view)
+            "place_of_receipt_id", "place_of_delivery_id",
+            "port_of_loading_id", "port_of_discharge_id", "via_port_id",
+            "terminal_id", "feeder_vessel_id", "feeder_voyage_no",
+            "mother_vessel_id", "mother_voyage_no", "shipping_line_id",
+            "shipping_line_ref_no", "coloader_id", "coloader_ref_no",
+            
+            # Dates
+            "etd", "eta", "eta_jkt",
+        ]
+        
         hbl_update = {}
-        for field in vessel_fields:
+        for field in vessel_details_fields + shipment_info_fields:
             if not hbl[field] and booking[field]:
                 val = booking[field]
                 hbl_update[field] = val.id if hasattr(val, 'id') else val
                 
-        # Explicitly map ETD, ETA, ETA JKT
-        if not hbl.etd and booking.etd:
-            hbl_update['etd'] = booking.etd
-        if not hbl.eta and booking.eta:
-            hbl_update['eta'] = booking.eta
-        if not hbl.eta_jkt and booking.eta_jkt:
-            hbl_update['eta_jkt'] = booking.eta_jkt
-            
         # Explicitly map routing fields
         if not hbl.from_city and booking.from_city:
             hbl_update['from_city'] = booking.from_city.id
