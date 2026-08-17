@@ -234,7 +234,7 @@
                             </field>
                         </page>
                         <page string="Sales Orders">
-                            <field name="sale_order_ids" nolabel="1">
+                            <field name="sale_order_ids" nolabel="1" context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea'}">
                                 <list>
                                     <field name="name"/>
                                     <field name="currency_id"/>
