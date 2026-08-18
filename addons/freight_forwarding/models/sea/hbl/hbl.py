@@ -26,7 +26,51 @@ class SeaHBL(models.Model):
     )
     job_no = fields.Char(string="Job No.", required=True, default=lambda self: "New", copy=False, readonly=True)
     hbl_no = fields.Char(string="HBL No.", copy=False)
-    
+    partner_id = fields.Many2one(
+        "res.partner",
+        string="Consignee / To",
+        related="consignee_id",
+        store=False,
+        readonly=True,
+    )
+    partner_tel = fields.Char(string="Consignee Tel", compute="_compute_partner_contact_fields", readonly=True, store=False)
+    partner_fax = fields.Char(string="Consignee Fax", compute="_compute_partner_contact_fields", readonly=True, store=False)
+    notice_date = fields.Date(string="Notice Date")
+    vessel_voy = fields.Char(string="Vessel / Voyage")
+    bl_no = fields.Char(string="B/L No.")
+    carrier_id = fields.Many2one(
+        "res.partner",
+        string="Carrier / Shipping Line",
+        related="shipping_line_id",
+        store=False,
+        readonly=True,
+    )
+    pol_id = fields.Many2one(
+        "freight.port",
+        string="Port of Loading",
+        related="port_of_loading_id",
+        store=False,
+        readonly=True,
+    )
+    pod_id = fields.Many2one(
+        "freight.port",
+        string="Port of Discharge",
+        related="port_of_discharge_id",
+        store=False,
+        readonly=True,
+    )
+    do_ready_date = fields.Date(string="DO Ready On")
+    port_code = fields.Char(string="Port Code")
+    container_seal_ids = fields.Char(string="Container / Seal No.", compute="_compute_container_seal_ids", store=False)
+    cargo_line_ids = fields.One2many(
+        "freight.sea.hbl.cargo.info",
+        "hbl_id",
+        string="Cargo Lines",
+        related="cargo_info_ids",
+        readonly=True,
+    )
+    remarks = fields.Text(string="Remarks")
+
     sales_order_count = fields.Integer(string="Sales Order Count", compute="_compute_sales_order_count")
     booking_count = fields.Integer(string="Booking Count", compute="_compute_booking_count")
 
@@ -133,6 +177,21 @@ class SeaHBL(models.Model):
         readonly=False,
         store=True,
     )
+
+    @api.depends("cargo_info_ids")
+    def _compute_container_seal_ids(self):
+        for rec in self:
+            items = []
+            for cargo in rec.cargo_info_ids:
+                if cargo.container_no or cargo.seal_no:
+                    items.append(f"{cargo.container_no or ''}/{cargo.seal_no or ''}".strip("/"))
+            rec.container_seal_ids = ", ".join(items)
+
+    @api.depends("consignee_id")
+    def _compute_partner_contact_fields(self):
+        for rec in self:
+            rec.partner_tel = rec.consignee_id.phone or False if rec.consignee_id else False
+            rec.partner_fax = rec.consignee_id.fax or False if rec.consignee_id else False
 
     @api.onchange("yard_id")
     def _onchange_yard_id(self):
