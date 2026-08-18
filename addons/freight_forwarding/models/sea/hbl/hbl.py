@@ -96,6 +96,8 @@ class SeaHBL(models.Model):
         string="Freight",
     )
     
+    remark = fields.Text(string="Remark")
+    
     warehouse_location_id = fields.Many2one("stock.warehouse", string="Warehouse Location")
     total_packages_remark = fields.Char(string="Total No. of Packages/Units (in words)")
     pbm = fields.Char(string="PBM")
@@ -219,8 +221,14 @@ class SeaHBL(models.Model):
                 vals.get("job_date") or fields.Date.context_today(self)
             )
             if not vals.get("job_no") or vals.get("job_no") == "New":
+                freight_type = vals.get("freight_type")
+                if not freight_type and vals.get("booking_id"):
+                    booking = self.env["freight.sea.booking"].browse(vals.get("booking_id"))
+                    freight_type = booking.freight_type
+
+                seq_code = "freight.sea.hbl.job_no.exp" if freight_type == "export" else "freight.sea.hbl.job_no.imp"
                 vals["job_no"] = self.env["ir.sequence"].next_by_code(
-                    "freight.sea.hbl.job_no", sequence_date=sequence_date
+                    seq_code, sequence_date=sequence_date
                 ) or "New"
                 
         records = super().create(vals_list)

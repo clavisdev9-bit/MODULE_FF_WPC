@@ -102,6 +102,7 @@
                             <field name="delivery_agent_address" readonly="1" />
                             <field name="freight"/>
                             <field name="freight_terms"/>
+                            <field name="remark"/>
                         </group>
                     </group>
 

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_cover_jobsheet_document">
+        <t t-call="web.basic_layout">
+            <style>
+                .jobsheet-page {
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 20px;
+                }
+                .header-title {
+                    font-weight: bold;
+                    margin: 0;
+                    padding: 0;
+                }
+                .header-section {
+                    text-align: center;
+                    margin-bottom: 24px;
+                }
+                .info-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    border: 0;
+                }
+                .info-table td {
+                    padding-bottom: 16px;
+                }
+                .checkbox-box {
+                    width: 25px;
+                    height: 25px;
+                    border: 1px solid black;
+                }
+                .fw-bold {
+                    font-weight: bold;
+                }
+            </style>
+            
+            <div class="page jobsheet-page">
+                
+                <t t-set="report_header">
+                    <div class="header-section">
+                        <h3 class="header-title">PT. WINDU PERSADA CARGO</h3>
+                        <h4 class="header-title">ORDER SHEET</h4>
+                        <h4 class="header-title">
+                            <t t-if="o.freight_type == 'export'">SEA EXPORT</t>
+                            <t t-else="">SEA IMPORT</t>
+                        </h4>
+                    </div>
+                </t>
+
+                <!-- Header Halaman 1 -->
+                <t t-out="report_header"/>
+
+                <!-- Info Table Halaman 1 -->
+                <table class="info-table">
+                    <tbody>
+                        <tr>
+                            <td style="width: 20%;">JOB NO.</td>
+                            <td style="width: 3%;">:</td>
+                            <td style="width: 47%;" class="fw-bold"><span t-field="o.job_no"/></td>
+                            <td style="width: 10%;"></td>
+                            <td style="width: 3%;"></td>
+                            <td style="width: 17%;"></td>
+                        </tr>
+                        <tr>
+                            <td>CONSIGNEE</td>
+                            <td>:</td>
+                            <td><span t-field="o.consignee_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>CUSTOMER</td>
+                            <td>:</td>
+                            <td><span t-field="o.customer_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>SHIPPER</td>
+                            <td>:</td>
+                            <td><span t-field="o.shipper_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>AGENT</td>
+                            <td>:</td>
+                            <td><span t-field="o.delivery_agent_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>CARRIER</td>
+                            <td>:</td>
+                            <td><span t-field="o.shipping_line_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>WAREHOUSE</td>
+                            <td>:</td>
+                            <td><span t-field="o.warehouse_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="height: 15px;"></td>
+                        </tr>
+                        <tr>
+                            <td>MB/L NO.</td>
+                            <td>:</td>
+                            <td><span t-field="o.mbl_no"/></td>
+                            <td>ETA</td>
+                            <td>:</td>
+                            <td><span t-field="o.eta" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/></td>
+                        </tr>
+                        <tr>
+                            <td>HB/L NO.</td>
+                            <td>:</td>
+                            <td><span t-field="o.hbl_no"/></td>
+                            <td>ETD</td>
+                            <td>:</td>
+                            <td><span t-field="o.etd" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/></td>
+                        </tr>
+                        <tr>
+                            <td>POD</td>
+                            <td>:</td>
+                            <td><span t-field="o.port_of_discharge_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>POL</td>
+                            <td>:</td>
+                            <td><span t-field="o.port_of_loading_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>VIA</td>
+                            <td>:</td>
+                            <td><span t-field="o.via_port_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>QTY</td>
+                            <td>:</td>
+                            <td>
+                                <t t-set="total_qty" t-value="sum(c.quantity for c in o.cargo_info_ids)"/>
+                                <t t-esc="total_qty"/> CASES
+                            </td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>VESSEL</td>
+                            <td>:</td>
+                            <td><span t-field="o.feeder_vessel_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>VOYAGE NO</td>
+                            <td>:</td>
+                            <td><span t-field="o.feeder_voyage_no"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>MOTHER VESSEL</td>
+                            <td>:</td>
+                            <td><span t-field="o.mother_vessel_id.name"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>CONTAINER</td>
+                            <td>:</td>
+                            <td>
+                                <t t-foreach="o.cargo_info_ids" t-as="cargo">
+                                    <span t-field="cargo.container_no"/>/<span t-field="cargo.seal_no"/>/<span t-field="cargo.container_type_id.code"/><t t-if="not cargo_last">, </t>
+                                </t>
+                            </td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <td>REMARK</td>
+                            <td>:</td>
+                            <td><span t-field="o.remark"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="page-break-after: always;"/>
+
+                <!-- Header Halaman 2 -->
+                <div style="margin-top: 30px;">
+                    <t t-out="report_header"/>
+                </div>
+                
+                <!-- Halaman 2 (Checklist) -->
+                <table style="width: 100%; border: 0; margin-top: 50px;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top;">
+                            <table class="table table-borderless table-sm info-table">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 40px;"><div class="checkbox-box"></div></td>
+                                        <td>PRE ALERT</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>MANIFEST ADJUSTMENT</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>DRAFT PIB</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>PIB CONFIRMED</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>PIB PAYMENT</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>CUSTOMS DOCS</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="mt-4 ms-2">
+                                <!-- <div class="mb-2">CUSTOMS DOCS</div> -->
+                                <div style="font-size: 16px; padding-left: 24px;">
+                                    * HB/L COPY NON NEGOTIABLE, MBL, MANIFEST<br/>
+                                    * S. PERNYATAAN TELEX RELEASE FRM F/F<br/>
+                                    * S.PERNYATAAN KEABSAHAN DOC (B/L)<br/>
+                                    * PIB ASLI<br/>
+                                    * SSPCP, BPN<br/>
+                                    * BUKTI SETORAN BANK<br/>
+                                    * D/O ASLI<br/>
+                                    * CIPL ASLI
+                                </div>
+                            </div>
+                        </td>
+                        <td style="width: 50%; vertical-align: top;">
+                            <table class="table table-borderless table-sm info-table">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 40px;"><div class="checkbox-box"></div></td>
+                                        <td>DELIVERY / PU DATE</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>SPPB</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>SEND PROOF OF DLVRY</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>COLLECT D/O</td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="checkbox-box"></div></td>
+                                        <td>OTHERS :</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                
+            </div>
+        </t>
+    </template>
+
+    <template id="report_cover_jobsheet">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="freight_forwarding.report_cover_jobsheet_document" t-lang="o.env.user.lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>
