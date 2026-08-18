@@ -20,9 +20,10 @@
                             .table, .table th, .table td { border: 1px solid #000 !important; }
                             .table td, .table th { font-size: 12pt !important; padding: 6px 8px
                             !important; vertical-align: top; }
+                            .table tbody tr { page-break-inside: avoid; break-inside: avoid; }
 
                             /* ── BL-specific ── */
-                            .bl-label { font-size: 10pt; font-weight: bold; margin-bottom: 4px; }
+                            .bl-label { font-size: 12pt; font-weight: bold; margin-bottom: 4px; }
                             .bl-field-sm { min-height: 24px; }
                             .bl-field-lg { min-height: 60px; }
                             .bl-field-xl { min-height: 120px; }
@@ -128,6 +129,15 @@
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
                             }
+
+                            /* ── FF-36: cargo particulars data rows - no border between
+                                 rows (only outer/column borders), padding restored to match
+                                 the roomier spacing of the previous single-cell layout ── */
+                            .bl-cargo-row td {
+                                border-top: none !important;
+                                border-bottom: none !important;
+                                padding: 10px 8px !important;
+                            }
                         </style>
                         <div class="container-fluid">
                             <!-- Header -->
@@ -157,7 +167,13 @@
                                                 <div class="">
                                                     <span t-field="doc.shipper_id.name" />
                                                     <br />
+                                                    <!-- FF-36 poin G: alamat lengkap -->
                                                     <span t-field="doc.shipper_id.street" />
+                                                    <t t-if="doc.shipper_id.street2">, <span t-field="doc.shipper_id.street2" /></t>
+                                                    <t t-if="doc.shipper_id.city">, <span t-field="doc.shipper_id.city" /></t>
+                                                    <t t-if="doc.shipper_id.state_id">, <span t-field="doc.shipper_id.state_id.name" /></t>
+                                                    <t t-if="doc.shipper_id.zip"> <span t-field="doc.shipper_id.zip" /></t>
+                                                    <t t-if="doc.shipper_id.country_id">, <span t-field="doc.shipper_id.country_id.name" /></t>
                                                     <br />
                                                     <span t-field="doc.shipper_id.phone" />
                                                     <br />
@@ -173,7 +189,7 @@
                                         </tr>
                                         <tr>
                                             <td class="align-top">
-                                                <div class="bl-label mt-2">EXPORT REFERENCES</div>
+                                                <div class="bl-label mt-2">REFERENCES</div>
                                                 <div class="bl-field-sm">
                                                     <span t-field="doc.customer_ref" />
                                                 </div>
@@ -186,6 +202,11 @@
                                                     <span t-field="doc.consignee_id.name" />
                                                     <br />
                                                     <span t-field="doc.consignee_id.street" />
+                                                    <t t-if="doc.consignee_id.street2">, <span t-field="doc.consignee_id.street2" /></t>
+                                                    <t t-if="doc.consignee_id.city">, <span t-field="doc.consignee_id.city" /></t>
+                                                    <t t-if="doc.consignee_id.state_id">, <span t-field="doc.consignee_id.state_id.name" /></t>
+                                                    <t t-if="doc.consignee_id.zip"> <span t-field="doc.consignee_id.zip" /></t>
+                                                    <t t-if="doc.consignee_id.country_id">, <span t-field="doc.consignee_id.country_id.name" /></t>
                                                     <br />
                                                     <span t-field="doc.consignee_id.phone" />
                                                     <br />
@@ -209,9 +230,11 @@
                                         <tr>
                                             <td class="align-top">
                                                 <div class="bl-label">CONTAINER NO.</div>
-                                                <div class="bl-field-sm">
+                                                <div class="bl-field-sm">>
                                                     <t t-foreach="doc.cargo_info_ids" t-as="cargo">
                                                         <span t-field="cargo.container_no" />
+                                                        <t t-if="cargo.seal_no"> / <span t-field="cargo.seal_no" /></t>
+                                                        <t t-if="cargo.container_type_id"> / <span t-field="cargo.container_type_id.name" /></t>
                                                         <br />
                                                     </t>
                                                 </div>
@@ -239,6 +262,11 @@
                                                         <span t-field="doc.notify_party_id" />
                                                         <br />
                                                         <span t-field="doc.notify_party_id.street" />
+                                                        <t t-if="doc.notify_party_id.street2">, <span t-field="doc.notify_party_id.street2" /></t>
+                                                        <t t-if="doc.notify_party_id.city">, <span t-field="doc.notify_party_id.city" /></t>
+                                                        <t t-if="doc.notify_party_id.state_id">, <span t-field="doc.notify_party_id.state_id.name" /></t>
+                                                        <t t-if="doc.notify_party_id.zip"> <span t-field="doc.notify_party_id.zip" /></t>
+                                                        <t t-if="doc.notify_party_id.country_id">, <span t-field="doc.notify_party_id.country_id.name" /></t>
                                                         <br />
                                                         <span t-field="doc.notify_party_id.phone" />
                                                         <br />
@@ -253,6 +281,11 @@
                                                         <span t-field="doc.delivery_agent_id.name" />
                                                         <br />
                                                         <span t-field="doc.delivery_agent_id.street" />
+                                                        <t t-if="doc.delivery_agent_id.street2">, <span t-field="doc.delivery_agent_id.street2" /></t>
+                                                        <t t-if="doc.delivery_agent_id.city">, <span t-field="doc.delivery_agent_id.city" /></t>
+                                                        <t t-if="doc.delivery_agent_id.state_id">, <span t-field="doc.delivery_agent_id.state_id.name" /></t>
+                                                        <t t-if="doc.delivery_agent_id.zip"> <span t-field="doc.delivery_agent_id.zip" /></t>
+                                                        <t t-if="doc.delivery_agent_id.country_id">, <span t-field="doc.delivery_agent_id.country_id.name" /></t>
                                                     </t>
                                                 </div>
                                             </td>
@@ -313,116 +346,56 @@
                                     </table>
                                     <table
                                         class="table table-bordered border-dark mb-0 mt-3 no-left-border no-right-border">
-                                        <tr class="bg-light text-center fw-bold py-1 mt-3">
-                                            <td colspan="5">
-                                                <div class="bl-label pt-1 pb-1">
-                                                    PARTICULARS FURNISHED BY SHIPPER
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="align-top" style="width: 20%;">
-                                                <div class="bl-label">MARKS AND NUMBERS</div>
-                                            </td>
-                                            <td class="align-top" style="width: 10%;">
-                                                <div class="bl-label">NO. OF CONT OR OTHER PKGS</div>
-                                            </td>
-                                            <td class="align-top" style="width: 40%;">
-                                                <div class="bl-label">DESCRIPTION OF PACKAGES AND
-                                                    GOODS</div>
-                                            </td>
-                                            <td class="align-top" style="width: 15%;">
-                                                <div class="bl-label">GROSS WEIGHT</div>
-                                            </td>
-                                            <td class="align-top" style="width: 15%;">
-                                                <div class="bl-label">MEASUREMENT</div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="align-top">
-                                                <div class="bl-field-xl">
-                                                    <div>
-                                                        <strong>Shipper Name: </strong>
-                                                        <span t-field="doc.shipper_id.name" />
+                                        <thead>
+                                            <tr class="bg-light text-center fw-bold py-1 mt-3">
+                                                <td colspan="5">
+                                                    <div class="bl-label pt-1 pb-1">
+                                                        PARTICULARS FURNISHED BY SHIPPER
                                                     </div>
-
-                                                    <t t-foreach="doc.cargo_info_ids" t-as="cargo">
-                                                        <div style="margin-top: 10px;">
-                                                            <div t-if="cargo.gross_weight">
-                                                                <strong>Gross Weight: </strong>
-                                                                <span t-field="cargo.gross_weight" />
-                                                            </div>
-                                                            <div t-if="cargo.net_weight">
-                                                                <strong>Net Weight: </strong>
-                                                                <span t-field="cargo.net_weight" />
-                                                            </div>
-                                                            <div t-if="cargo.volume">
-                                                                <strong>Measurement: </strong>
-                                                                <span t-field="cargo.volume" />
-                                                            </div>
-                                                            <div t-if="cargo.total_volume">
-                                                                <strong>Total Volume (CBM): </strong>
-                                                                <span t-field="cargo.total_volume" />
-                                                            </div>
-                                                            <div t-if="cargo.container_no">
-                                                                <strong>C/No: </strong>
-                                                                <span t-field="cargo.container_no" />
-                                                            </div>
-                                                            <div t-if="cargo.seal_no">
-                                                                <strong>Seal: </strong>
-                                                                <br />
-                                                                <span t-field="cargo.seal_no" />
-                                                            </div>
-                                                        </div>
-                                                    </t>
-                                                </div>
-                                            </td>
-                                            <td class="align-top">
-                                                <div class="bl-field-xl">
-                                                    <t t-set="cargo" t-value="doc.cargo_info_ids" />
-                                                    <t t-set="cargo1"
-                                                        t-value="doc.cargo_info_ids[:1]" />
-                                                    <div>
-                                                        <strong>Summary Qty:</strong>
-                                                        <span t-esc="sum(cargo.mapped('quantity'))" />
-                                                        <span t-if="cargo1"
-                                                            t-field="cargo1.package_type_id.name" />
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="align-top">
-                                                <div class="bl-field-xl">
-                                                    <t t-foreach="doc.cargo_info_ids"
-                                                        t-as="cargo_line">
-                                                        <div style="margin-bottom: 15px;">
-                                                            <span
-                                                                t-field="cargo_line.description_of_goods" />
-                                                        </div>
-                                                    </t>
-                                                </div>
-                                            </td>
-
-                                            <td class="align-top">
-                                                <div class="bl-field-xl">
-                                                    <t t-set="cargo" t-value="doc.cargo_info_ids" />
-                                                    <div>
-                                                        <strong>Summary Gross Weight (kg):</strong>
-                                                        <span
-                                                            t-esc="sum(cargo.mapped('gross_weight'))" />
-                                                        KGS </div>
-                                                </div>
-                                            </td>
-                                            <td class="align-top">
-                                                <div class="bl-field-xl">
-                                                    <t t-set="cargo" t-value="doc.cargo_info_ids" />
-                                                    <div>
-                                                        <strong>Summary Volume (CBM):</strong>
-                                                        <span
-                                                            t-esc="sum(cargo.mapped('volume'))" />
-                                                        CBM </div>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="align-top" style="width: 20%;">
+                                                    <div class="bl-label">MARKS AND NUMBERS</div>
+                                                </td>
+                                                <td class="align-top" style="width: 13%;">
+                                                    <div class="bl-label">NO. OF<br/><span style="white-space: nowrap;">CONT&#160;OR</span><br/>OTHER PKGS</div>
+                                                </td>
+                                                <td class="align-top" style="width: 37%;">
+                                                    <div class="bl-label">DESCRIPTION OF PACKAGES AND
+                                                        GOODS</div>
+                                                </td>
+                                                <td class="align-top" style="width: 15%;">
+                                                    <div class="bl-label">GROSS WEIGHT</div>
+                                                </td>
+                                                <td class="align-top" style="width: 15%;">
+                                                    <div class="bl-label">MEASUREMENT</div>
+                                                </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="doc.cargo_info_ids" t-as="cargo">
+                                                <tr class="bl-cargo-row">
+                                                    <td class="align-top">
+                                                        <span t-field="cargo.marks_and_no" />
+                                                    </td>
+                                                    <td class="align-top">
+                                                        <span t-field="cargo.quantity" />
+                                                        <span t-field="cargo.package_type_id.name" />
+                                                    </td>
+                                                    <td class="align-top">
+                                                        <span t-field="cargo.description_of_goods" />
+                                                    </td>
+                                                    <td class="align-top">
+                                                        <span t-field="cargo.gross_weight" /> KGS
+                                                    </td>
+                                                    <td class="align-top">
+                                                        <span t-if="cargo.total_volume" t-field="cargo.total_volume" />
+                                                        <span t-elif="cargo.volume" t-field="cargo.volume" /> CBM
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
                                     </table>
                                     <!-- Bottom Section -->
                                     <table
@@ -445,7 +418,8 @@
                                                             DATE</td>
                                                         <td class="fw-bold text-center"
                                                             style="border: none !important; border-bottom: 1px solid #000 !important; padding: 0 6px; vertical-align: bottom;">
-                                                            <span t-field="doc.job_date"
+                                                            <!-- FF-36 poin E: sumber tanggal diganti ke ETD -->
+                                                            <span t-field="doc.etd"
                                                                 t-options="{&quot;widget&quot;: &quot;date&quot;, &quot;format&quot;: &quot;MMMM d, y&quot;}" />
                                                         </td>
                                                     </tr>
@@ -457,7 +431,7 @@
                                                     SHIPPED ON BOARD THE VESSEL
                                                 </div>
                                                 <div class="fw-bold fs-6 mt-2">
-                                                    <span t-field="doc.job_date"
+                                                    <span t-field="doc.etd"
                                                         t-options="{&quot;widget&quot;: &quot;date&quot;, &quot;format&quot;: &quot;MMMM d, y&quot;}" />
                                                 </div>
                                             </td>

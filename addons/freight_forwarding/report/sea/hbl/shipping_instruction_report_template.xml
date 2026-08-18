@@ -5,6 +5,9 @@
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.basic_layout">
                     <t t-set="company" t-value="doc.env.company"/>
+                    <t t-set="si_shipper" t-value="doc.shipper_id if doc.actual_shipper else doc.env.company.partner_id"/>
+                    <t t-set="si_consignee" t-value="doc.consignee_id if doc.actual_shipper else doc.delivery_agent_id"/>
+
                     <div class="header" style="padding-top: 24px; padding-bottom: 14px;">
                         <style>
                             * { box-sizing: border-box; }
@@ -41,7 +44,7 @@
                             * { box-sizing: border-box; }
                             @page { margin-bottom: 30mm; }
                             @page :first { margin-bottom: 30mm; }
-                            .page { font-size: 12pt; color: #222; padding-bottom: 40px; }
+                            .page { font-size: 12pt; color: #222; padding-bottom: 12px; }
                             .page span { font-size: inherit; }
                             .container-fluid { width: 100%; }
 
@@ -65,6 +68,42 @@
                             .si-inline-label { display: table-cell; font-weight: bold; white-space: nowrap; padding-bottom: 2px; padding-right: 6px; color: #333; }
                             .si-inline-colon { display: table-cell; width: 14px; }
                             .si-inline-value { display: table-cell; }
+
+                            .si-total-row td {
+                                font-weight: bold;
+                                background-color: #f2f2f2;
+                                border-top: 2px solid #000 !important;
+                                border-bottom: 2px solid #000 !important;
+                                padding-top: 10px !important;
+                                padding-bottom: 10px !important;
+                            }
+                            .si-total-row td:first-child {
+                                border-left: 4px solid #333 !important;
+                            }
+                            .si-total-label {
+                                font-size: 13pt;
+                                letter-spacing: 1px;
+                                color: #000;
+                            }
+                            .si-total-value {
+                                font-size: 13pt;
+                                color: #000;
+                            }
+                            .si-total-unit {
+                                font-weight: normal;
+                                font-size: 10pt;
+                                color: #555;
+                            }
+                            .si-total-breakdown {
+                                font-weight: normal;
+                                font-size: 10pt;
+                                color: #444;
+                                line-height: 1.5;
+                            }
+                            .si-total-divider {
+                                border-top: 1px solid #999;
+                                margin: 4px 0;
+                            }
 
                             strong { color: #333; }
 
@@ -90,11 +129,16 @@
                                     <td style="width:55%; border-top: none;">
                                         <div class="si-label">Shipper</div>
                                         <div>
-                                            <span t-field="doc.shipper_id.name" /><br />
-                                            <span t-field="doc.shipper_id.street" />
-                                            <span t-if="doc.shipper_id.city">, <span t-field="doc.shipper_id.city" /></span>
+                                            <span t-field="si_shipper.name" /><br />
+                                            <!-- PART C: full address (street, street2, city, state, zip, country) -->
+                                            <span t-field="si_shipper.street" />
+                                            <t t-if="si_shipper.street2">, <span t-field="si_shipper.street2" /></t>
+                                            <t t-if="si_shipper.city">, <span t-field="si_shipper.city" /></t>
+                                            <t t-if="si_shipper.state_id">, <span t-field="si_shipper.state_id.name" /></t>
+                                            <t t-if="si_shipper.zip"> <span t-field="si_shipper.zip" /></t>
+                                            <t t-if="si_shipper.country_id">, <span t-field="si_shipper.country_id.name" /></t>
                                             <br />
-                                            <span t-field="doc.shipper_id.phone" />
+                                            <span t-field="si_shipper.phone" />
                                         </div>
                                     </td>
                                     <td style="width:45%; border-left: 1px solid #000; border-top: none; vertical-align: top;" rowspan="3">
@@ -161,9 +205,16 @@
                                     <td style="width:55%;">
                                         <div class="si-label">Consignee</div>
                                         <div>
-                                            <span t-field="doc.consignee_id.name" /><br />
-                                            <span t-field="doc.consignee_id.city" /><br />
-                                            <span t-field="doc.consignee_id.phone" />
+                                            <span t-field="si_consignee.name" /><br />
+                                            <!-- PART C: full address -->
+                                            <span t-field="si_consignee.street" />
+                                            <t t-if="si_consignee.street2">, <span t-field="si_consignee.street2" /></t>
+                                            <t t-if="si_consignee.city">, <span t-field="si_consignee.city" /></t>
+                                            <t t-if="si_consignee.state_id">, <span t-field="si_consignee.state_id.name" /></t>
+                                            <t t-if="si_consignee.zip"> <span t-field="si_consignee.zip" /></t>
+                                            <t t-if="si_consignee.country_id">, <span t-field="si_consignee.country_id.name" /></t>
+                                            <br />
+                                            <span t-field="si_consignee.phone" />
                                         </div>
                                     </td>
                                 </tr>
@@ -179,7 +230,14 @@
                                             </t>
                                             <t t-else="">
                                                 <span t-field="doc.notify_party_id.name" /><br />
-                                                <span t-field="doc.notify_party_id.city" /><br />
+                                                <!-- PART C: full address -->
+                                                <span t-field="doc.notify_party_id.street" />
+                                                <t t-if="doc.notify_party_id.street2">, <span t-field="doc.notify_party_id.street2" /></t>
+                                                <t t-if="doc.notify_party_id.city">, <span t-field="doc.notify_party_id.city" /></t>
+                                                <t t-if="doc.notify_party_id.state_id">, <span t-field="doc.notify_party_id.state_id.name" /></t>
+                                                <t t-if="doc.notify_party_id.zip"> <span t-field="doc.notify_party_id.zip" /></t>
+                                                <t t-if="doc.notify_party_id.country_id">, <span t-field="doc.notify_party_id.country_id.name" /></t>
+                                                <br />
                                                 <span t-field="doc.notify_party_id.phone" />
                                             </t>
                                         </div>
@@ -233,6 +291,16 @@
                                 </tr>
                             </table>
 
+                            <!-- PART A: pre-compute totals for the cargo table footer -->
+                            <t t-set="package_totals" t-value="{}"/>
+                            <t t-foreach="doc.cargo_info_ids" t-as="_cargo_for_total">
+                                <t t-set="_pt_name" t-value="_cargo_for_total.package_type_id.name or ''"/>
+                                <t t-set="package_totals" t-value="package_totals.update({_pt_name: package_totals.get(_pt_name, 0) + _cargo_for_total.quantity}) or package_totals"/>
+                            </t>
+                            <t t-set="total_quantity" t-value="sum(doc.cargo_info_ids.mapped('quantity'))"/>
+                            <t t-set="total_gross_weight" t-value="sum(doc.cargo_info_ids.mapped('gross_weight'))"/>
+                            <t t-set="total_measurement" t-value="sum(doc.cargo_info_ids.mapped('total_volume')) + sum(doc.cargo_info_ids.mapped('volume'))"/>
+
                             <table class="table mb-0 mt-0">
                                 <thead>
                                     <tr>
@@ -264,8 +332,36 @@
                                             </td>
                                         </tr>
                                     </t>
+
+                                    <!-- PART A: TOTAL row -->
+                                    <tr class="si-total-row" style="page-break-inside: avoid; break-inside: avoid;">
+                                        <td style="width:20%; border-left: 1px solid #000; border-right: none; vertical-align: middle !important;">
+                                            <span class="si-total-label">TOTAL</span>
+                                        </td>
+                                        <td style="width:20%; border-left: none; border-right: none; vertical-align: middle !important;">
+                                            <t t-if="len(package_totals) > 1">
+                                                <div class="si-total-breakdown">
+                                                    <t t-foreach="package_totals.items()" t-as="pt_item">
+                                                        <span style="font-weight: bold; color: #000; font-size: 13pt !important;" t-esc="pt_item[1]" t-options="{'widget': 'float', 'precision': 0}" /> <span style="font-size: 13pt !important; color: #555;" t-esc="pt_item[0]" /><br />
+                                                    </t>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="si-total-value"><span t-esc="total_quantity" t-options="{'widget': 'float', 'precision': 0}" /></span>
+                                                <span class="si-total-unit"> <span t-esc="list(package_totals.keys())[0] if package_totals else ''" /></span>
+                                            </t>
+                                        </td>
+                                        <td style="width:45%; border-left: none; border-right: none;">&#160;</td>
+                                        <td style="width:25%; border-left: none; border-right: 1px solid #000; padding-left: 24px !important; vertical-align: middle !important;">
+                                            <span class="si-total-value"><span t-esc="total_gross_weight" t-options="{'widget': 'float', 'precision': 1}" /></span>
+                                            <span class="si-total-unit"> KGS</span><br />
+                                            <span class="si-total-value"><span t-esc="total_measurement" t-options="{'widget': 'float', 'precision': 1}" /></span>
+                                            <span class="si-total-unit"> CBM</span>
+                                        </td>
+                                    </tr>
+
                                     <tr>
-                                        <td colspan="4" class="text-center" style="border-top: hidden !important; border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: none;">
+                                        <td colspan="4" class="text-center" style="border-top: hidden !important; border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: none; vertical-align: middle !important; padding: 56px 10px 16px 10px !important; line-height: 1.2 !important;">
                                             SHIPPED ON BOARD DATED: 
                                             <span t-field="doc.booking_id.booking_date"
                                                 t-options="{'widget': 'date'}" />
@@ -274,7 +370,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="4" style="border-left: 1px solid #000; border-right: 1px solid #000; border-top: none; border-bottom: 1px solid #000; padding: 0; height: 12mm; line-height: 12mm; font-size: 1px;">&#160;</td>
+                                        <td colspan="4" style="border-left: 1px solid #000; border-right: 1px solid #000; border-top: none; border-bottom: 1px solid #000; padding: 0; height: 6mm; line-height: 6mm; font-size: 1px;">&#160;</td>
                                     </tr>
                                 </tfoot>
 
