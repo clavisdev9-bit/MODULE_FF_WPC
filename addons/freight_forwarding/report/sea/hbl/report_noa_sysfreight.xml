@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="noa_sysfreight_paperformat" model="report.paperformat">
-        <field name="name">NOA SYSFREIGHT A4</field>
+        <field name="name">Notice of Arrival A4</field>
         <field name="default">False</field>
         <field name="format">A4</field>
         <field name="page_height">0</field>
@@ -17,7 +17,7 @@
     </record>
 
     <record id="noa_sysfreight_report" model="ir.actions.report">
-        <field name="name">NOA SYSFREIGHT</field>
+        <field name="name">Notice of Arrival</field>
         <field name="model">freight.sea.hbl</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">freight_forwarding.noa_sysfreight_report_template</field>
