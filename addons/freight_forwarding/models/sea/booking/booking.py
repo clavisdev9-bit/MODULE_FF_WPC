@@ -254,7 +254,7 @@ class SeaBooking(models.Model):
         vessel_details_fields = [
             "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
             "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
-            "stuffing_date", "contact_id", "yard_id", "depot_id",
+            "stuffing_date", "contact_id", "yard_id", "depot_id", "depot_code", "depot_address",
             "depot_instruction", "general_instruction",
         ]
         
@@ -281,6 +281,10 @@ class SeaBooking(models.Model):
                 val = booking[field]
                 hbl_update[field] = val.id if hasattr(val, 'id') else val
                 
+        # Explicitly map customer reference (booking: customer_reference -> hbl: customer_ref)
+        if not hbl.customer_ref and booking.customer_reference:
+            hbl_update['customer_ref'] = booking.customer_reference
+
         # Explicitly map routing fields
         if not hbl.from_city and booking.from_city:
             hbl_update['from_city'] = booking.from_city.id
@@ -323,6 +327,12 @@ class SeaBooking(models.Model):
                     "commodity_id": self.commodity_id.id if self.commodity_id else False,
                     "delivery_type_id": self.delivery_type_id.id if self.delivery_type_id else False,
                     "customer_id": self.partner_id.id,
+                    "customer_ref": self.customer_reference,
+                    "shipper_id": self.shipper_id.id if self.shipper_id else False,
+                    "consignee_id": self.consignee_id.id if self.consignee_id else False,
+                    "notify_party_id": self.notify_party_id.id if self.notify_party_id else False,
+                    "notify_same_as_consignee": self.notify_same_as_consignee,
+                    "delivery_agent_id": self.delivery_agent_id.id if self.delivery_agent_id else False,
                     "term_payment": self.payment_term_id.id,
                     "job_date": self.job_date,
                     "master_job_no": self.job_no,
