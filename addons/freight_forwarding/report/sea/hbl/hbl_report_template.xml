@@ -215,7 +215,14 @@
                                             </td>
                                             <td class="align-top">
                                                 <div class="bl-label">FREIGHT PAYABLE AT</div>
-                                                <div class="bl-field-sm" />
+                                                <div class="bl-field-sm">
+                                                    <t t-if="doc.freight == 'prepaid'">
+                                                        <span t-if="doc.place_of_receipt_id" t-field="doc.place_of_receipt_id.name" />
+                                                    </t>
+                                                    <t t-elif="doc.freight == 'collect'">
+                                                        <span t-if="doc.place_of_delivery_id" t-field="doc.place_of_delivery_id.name" />
+                                                    </t>
+                                                </div>
                                             </td>
                                         </tr>
                                         <tr>
@@ -230,7 +237,7 @@
                                         <tr>
                                             <td class="align-top">
                                                 <div class="bl-label">CONTAINER NO.</div>
-                                                <div class="bl-field-sm">>
+                                                <div class="bl-field-sm">
                                                     <t t-foreach="doc.cargo_info_ids" t-as="cargo">
                                                         <span t-field="cargo.container_no" />
                                                         <t t-if="cargo.seal_no"> / <span t-field="cargo.seal_no" /></t>
