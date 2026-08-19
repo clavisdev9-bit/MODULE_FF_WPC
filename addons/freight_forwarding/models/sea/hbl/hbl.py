@@ -108,7 +108,8 @@ class SeaHBL(models.Model):
     )
     bl_surrendered = fields.Boolean(string="BL Surrendered")
     delivery_type_id = fields.Many2one("freight.delivery.type", string="Delivery Type")
-    do_ready_on = fields.Selection([('yes', 'Yes'), ('no', 'No')], string="Do Ready On")
+    # do_ready_on = fields.Selection([('yes', 'Yes'), ('no', 'No')], string="Do Ready On")
+    do_ready_on = fields.Boolean(string="Do Ready On")
     company_id = fields.Many2one(
         "res.company",
         string="Company",
