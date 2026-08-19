@@ -102,13 +102,11 @@ class SeaHBL(models.Model):
     master_job_no = fields.Char(string="Master Job No.")
     no_of_original_bl = fields.Char(string="No. of Original B/L")
     mbl_no = fields.Char(string="MBL No.")
-    shipment_type = fields.Selection(
-        selection=[("sea", "Sea"), ("air", "Air"), ("multimodal", "Multimodal")],
-        string="Shipment Type",
-    )
     bl_surrendered = fields.Boolean(string="BL Surrendered")
+    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
     delivery_type_id = fields.Many2one("freight.delivery.type", string="Delivery Type")
-    do_ready_on = fields.Selection([('yes', 'Yes'), ('no', 'No')], string="Do Ready On")
+    # do_ready_on = fields.Selection([('yes', 'Yes'), ('no', 'No')], string="Do Ready On")
+    do_ready_on = fields.Boolean(string="Do Ready On")
     company_id = fields.Many2one(
         "res.company",
         string="Company",
@@ -160,26 +158,6 @@ class SeaHBL(models.Model):
     vendor_credit_note_ids = fields.One2many("freight.sea.hbl.vendor.credit.note", "hbl_id", string="Vendor Credit Note")
     cash_purchase_ids = fields.One2many("freight.sea.hbl.cash.purchase", "hbl_id", string="Cash Purchase")
 
-    yard_id = fields.Many2one(
-        "stock.warehouse",
-        string="Yard",
-        domain=[],
-    )
-    yard_code = fields.Char(
-        string="Yard Code",
-        related=None,
-        compute=False,
-        readonly=False,
-        store=True,
-    )
-    yard_address = fields.Char(
-        string="Yard Address",
-        related=None,
-        compute=False,
-        readonly=False,
-        store=True,
-    )
-
     @api.depends("cargo_info_ids")
     def _compute_container_seal_ids(self):
         for rec in self:
@@ -194,16 +172,6 @@ class SeaHBL(models.Model):
         for rec in self:
             rec.partner_tel = rec.consignee_id.phone or False if rec.consignee_id else False
             rec.partner_fax = rec.consignee_id.fax or False if rec.consignee_id else False
-
-    @api.onchange("yard_id")
-    def _onchange_yard_id(self):
-        for rec in self:
-            rec.yard_code = rec.yard_id.code or False
-            rec.yard_address = (
-                rec.yard_id.partner_id._display_address()
-                if rec.yard_id.partner_id
-                else False
-            )
 
     @api.depends("sale_order_ids")
     def _compute_sales_order_count(self):

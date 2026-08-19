@@ -11,10 +11,40 @@ def migrate(cr, version):
        pada tabel freight_sea_booking_shipment_info dan freight_sea_hbl_shipment_info
     3. Bersihkan kolom legacy yang pernah dibuat sebagai Char sebelum dijadikan FK
        ke account.incoterms dan freight.location.
+    4. Bersihkan orphan selection metadata untuk field yang diubah menjadi Boolean (misal do_ready_on).
     """
     _migrate_vessel_flag(cr)
     _migrate_shipment_type_fk(cr)
     _migrate_legacy_fk_columns(cr)
+    _clean_orphan_selection_fields(cr)
+
+
+def _clean_orphan_selection_fields(cr):
+    """Hapus metadata selection untuk field yang telah diubah ke Boolean agar tidak error saat upgrade."""
+    _logger.info("Migration: cleaning orphan ir_model_fields_selection records...")
+    cr.execute("""
+        DELETE FROM ir_model_data
+        WHERE model = 'ir.model.fields.selection'
+          AND res_id IN (
+              SELECT s.id
+              FROM ir_model_fields_selection s
+              JOIN ir_model_fields f ON s.field_id = f.id
+              WHERE f.model = 'freight.sea.hbl' AND f.name = 'do_ready_on'
+          )
+    """)
+    cr.execute("""
+        DELETE FROM ir_model_fields_selection
+        WHERE field_id IN (
+            SELECT id FROM ir_model_fields
+            WHERE model = 'freight.sea.hbl' AND name = 'do_ready_on'
+        )
+    """)
+    cr.execute("""
+        UPDATE ir_model_fields
+        SET ttype = 'boolean'
+        WHERE model = 'freight.sea.hbl' AND name = 'do_ready_on'
+    """)
+    _logger.info("Migration: orphan selection records cleaned successfully.")
 
 
 def _migrate_vessel_flag(cr):

@@ -19,7 +19,7 @@
     <record id="noa_sysfreight_report" model="ir.actions.report">
         <field name="name">Notice of Arrival</field>
         <field name="model">freight.sea.hbl</field>
-        <field name="report_type">qweb-pdf</field>
+        <field name="report_type">qweb-html</field>
         <field name="report_name">freight_forwarding.noa_sysfreight_report_template</field>
         <field name="paperformat_id" ref="noa_sysfreight_paperformat"/>
         <field name="binding_model_id" ref="freight_forwarding.model_freight_sea_hbl"/>
