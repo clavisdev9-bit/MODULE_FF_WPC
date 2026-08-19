@@ -68,7 +68,7 @@
                             <field name="hbl_no"/>
                             <field name="bl_surrendered"/>
                             <field name="commodity_id" />
-                            <field name="shipment_type"/>
+                            <field name="shipment_type_id"/>
                             <field name="delivery_type_id"/>
                         </group>
                     </group>
@@ -94,6 +94,7 @@
 
                     <group>
                         <group string="Notify Party">
+                            <field name="notify_same_as_consignee" />
                             <field name="notify_party_id" />
                             <field name="notify_party_address" readonly="1" />
                         </group>
@@ -204,11 +205,6 @@
                                     <field name="depot_code" />
                                     <field name="depot_address" />
                                 </group>
-                                <field name="depot_instruction" />
-                            </group>
-
-                            <group string="General Instructions">
-                                <field name="general_instruction" />
                             </group>
                         </page>
                         <page string="Cargo Info">

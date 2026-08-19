@@ -102,11 +102,8 @@ class SeaHBL(models.Model):
     master_job_no = fields.Char(string="Master Job No.")
     no_of_original_bl = fields.Char(string="No. of Original B/L")
     mbl_no = fields.Char(string="MBL No.")
-    shipment_type = fields.Selection(
-        selection=[("sea", "Sea"), ("air", "Air"), ("multimodal", "Multimodal")],
-        string="Shipment Type",
-    )
     bl_surrendered = fields.Boolean(string="BL Surrendered")
+    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
     delivery_type_id = fields.Many2one("freight.delivery.type", string="Delivery Type")
     # do_ready_on = fields.Selection([('yes', 'Yes'), ('no', 'No')], string="Do Ready On")
     do_ready_on = fields.Boolean(string="Do Ready On")
