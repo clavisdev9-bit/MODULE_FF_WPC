@@ -125,7 +125,7 @@ class SeaBooking(models.Model):
         copy=False,
     )
     booking_date = fields.Datetime(string="Date & Time")
-    bl_no = fields.Char(string="B/L No.")
+    hbl_no = fields.Char(string="B/L No.")
     job_no = fields.Char(string="Job No.")
     nomination_cargo = fields.Boolean(string="Nomination Cargo")
     container_type = fields.Selection(
@@ -159,21 +159,10 @@ class SeaBooking(models.Model):
         string="Sales Orders",
     )
 
-    # Shipment Details
-    # NOTE (FF-22): port_of_loading_id, port_of_discharge_id, commodity_id,
-    # dan eta_jkt juga ada di freight.sea.shipment.info.mixin. Karena Booking
-    # sudah mendefinisikan field ini sendiri (dengan required=True dan string
-    # custom), definisi di sini yang dipakai. Field ini TIDAK ditambahkan lagi
-    # di tab "Shipment Details"/"Vessel Schedule" baru supaya tidak duplikat
-    # di view.
-    port_of_loading_id = fields.Many2one(
-        "freight.port", string="Origin Port (POL)", required=True
-    )
-    port_of_discharge_id = fields.Many2one(
-        "freight.port", string="Destination Port (POD)", required=True
-    )
-    etd = fields.Date(string="ETD (Departure)")
-    eta = fields.Date(string="ETA (Arrival)")
+    # Location & Route
+    # NOTE: port_of_loading_id, port_of_discharge_id, commodity_id, etd, eta,
+    # eta_jkt ada di freight.sea.shipment.info.mixin (ditampilkan di tab
+    # Shipment Info). Definisi di sini hanya untuk field yang khas Booking.
     destination_country_id = fields.Many2one(
         "res.country", string="Destination Country"
     )
@@ -185,13 +174,11 @@ class SeaBooking(models.Model):
     delivery_type_id = fields.Many2one(
         "freight.delivery.type", string="Delivery Type", required=True
     )
-    commodity_id = fields.Many2one("freight.commodity", string="Commodity")
 
     # Vessel Information
     pod_port_id = fields.Many2one("freight.port", string="Port of Delivery")
     vessel_id = fields.Many2one("freight.vessel", string="Vessel Name", required=True)
     voyage_no = fields.Char(string="Voyage No.")
-    eta_jkt = fields.Date(string="ETA on JKT")
 
     # Notebook
     # NOTE (FF-22): field shipment_info_ids (One2many ke
@@ -257,17 +244,41 @@ class SeaBooking(models.Model):
         # jadi tidak perlu proses copy antar model perantara lagi.
 
 
-        vessel_fields = [
+        vessel_details_fields = [
             "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
             "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
             "stuffing_date", "contact_id", "yard_id", "depot_id",
-            "depot_instruction", "general_instruction"
+            "depot_instruction", "general_instruction",
         ]
+        
+        shipment_info_fields = [
+            # Shipment Info fields (only those in the view)
+            "place_of_receipt_id", "place_of_delivery_id",
+            "port_of_loading_id", "port_of_discharge_id", "via_port_id",
+            "terminal_id", "feeder_vessel_id", "feeder_voyage_no",
+            "mother_vessel_id", "mother_voyage_no", "shipping_line_id",
+            "shipping_line_ref_no", "coloader_id", "coloader_ref_no",
+            
+            # Dates
+            "etd", "eta", "eta_jkt",
+        ]
+        
         hbl_update = {}
-        for field in vessel_fields:
+        for field in vessel_details_fields + shipment_info_fields:
             if not hbl[field] and booking[field]:
                 val = booking[field]
                 hbl_update[field] = val.id if hasattr(val, 'id') else val
+                
+        # Explicitly map routing fields
+        if not hbl.from_city and booking.from_city:
+            hbl_update['from_city'] = booking.from_city.id
+        if not hbl.origin_country_id and booking.origin_country_id:
+            hbl_update['origin_country_id'] = booking.origin_country_id.id
+        if not hbl.to_city and booking.to_city:
+            hbl_update['to_city'] = booking.to_city.id
+        if not hbl.destination_country_id and booking.destination_country_id:
+            hbl_update['destination_country_id'] = booking.destination_country_id.id
+
         if hbl_update:
             hbl.write(hbl_update)
 
@@ -301,6 +312,13 @@ class SeaBooking(models.Model):
                     "job_date": self.job_date,
                     "master_job_no": self.job_no,
                     "salesman_id": self.salesman_id.id if self.salesman_id else False,
+                    "from_city": self.from_city.id if self.from_city else False,
+                    "origin_country_id": self.origin_country_id.id if self.origin_country_id else False,
+                    "to_city": self.to_city.id if self.to_city else False,
+                    "destination_country_id": self.destination_country_id.id if self.destination_country_id else False,
+                    "eta_jkt": self.eta_jkt,
+                    "etd": self.etd,
+                    "eta": self.eta,
                 }
             )
 
