@@ -136,6 +136,7 @@ class SeaBooking(models.Model):
     job_date = fields.Date(string="Job Date")
     import_job_no = fields.Char(string="Import Job Number (Optional)")
     railing = fields.Boolean(string="Railing")
+    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
 
     # Customer & Contact Data
     partner_id = fields.Many2one(
@@ -244,6 +245,12 @@ class SeaBooking(models.Model):
         # jadi tidak perlu proses copy antar model perantara lagi.
 
 
+        header_fields = [
+            "shipment_type_id",
+            "delivery_type_id",
+            "commodity_id",
+        ]
+
         vessel_details_fields = [
             "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
             "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
@@ -263,8 +270,13 @@ class SeaBooking(models.Model):
             "etd", "eta", "eta_jkt",
         ]
         
+        bl_info_fields = [
+            "shipper_id", "consignee_id", "notify_party_id", "notify_same_as_consignee",
+            "delivery_agent_id",
+        ]
+
         hbl_update = {}
-        for field in vessel_details_fields + shipment_info_fields:
+        for field in header_fields + bl_info_fields + vessel_details_fields + shipment_info_fields:
             if not hbl[field] and booking[field]:
                 val = booking[field]
                 hbl_update[field] = val.id if hasattr(val, 'id') else val
@@ -307,6 +319,9 @@ class SeaBooking(models.Model):
                     "booking_id": self.id,
                     "freight_type": self.freight_type,
                     "container_type": self.container_type,
+                    "shipment_type_id": self.shipment_type_id.id if self.shipment_type_id else False,
+                    "commodity_id": self.commodity_id.id if self.commodity_id else False,
+                    "delivery_type_id": self.delivery_type_id.id if self.delivery_type_id else False,
                     "customer_id": self.partner_id.id,
                     "term_payment": self.payment_term_id.id,
                     "job_date": self.job_date,

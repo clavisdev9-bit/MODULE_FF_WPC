@@ -103,3 +103,31 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
         self.assertEqual(result.get("res_model"), "freight.sea.hbl",
             msg="Action harus mengarah ke model freight.sea.hbl")
         self.assertEqual(result.get("view_mode"), "form")
+
+    def test_convert_copies_bl_info(self):
+        """Field-field B/L info (termasuk notify_same_as_consignee) di-copy ke HBL saat convert."""
+        booking = self._create_booking(
+            consignee_id=self.partner.id,
+            notify_party_id=self.partner.id,
+            notify_same_as_consignee=True,
+        )
+        booking.action_convert_to_hbl()
+
+        hbl = booking.hbl_ids[0]
+        self.assertEqual(hbl.consignee_id, self.partner)
+        self.assertEqual(hbl.notify_party_id, self.partner)
+        self.assertTrue(hbl.notify_same_as_consignee)
+
+    def test_convert_copies_shipment_type(self):
+        """shipment_type_id (Many2one freight.shipment.type) tersalin otomatis ke HBL saat convert (FF-52)."""
+        shipment_type = self.env["freight.shipment.type"].create({
+            "name": "FCL / FCL",
+        })
+        booking = self._create_booking(shipment_type_id=shipment_type.id)
+        booking.action_convert_to_hbl()
+
+        hbl = booking.hbl_ids[0]
+        self.assertEqual(hbl.shipment_type_id, shipment_type,
+            msg="shipment_type_id harus ter-copy dari Booking ke HBL")
+
+
