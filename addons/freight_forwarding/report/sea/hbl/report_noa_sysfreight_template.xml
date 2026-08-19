@@ -245,7 +245,7 @@
                                 <td class="noa-value"><t t-esc="doc.hbl_no or ''"/></td>
                                 <td class="noa-label">DO READY ON</td>
                                 <td class="noa-colon">:</td>
-                                <td class="noa-value"><t t-esc="doc.do_ready_date or ''"/></td>
+                                <td class="noa-value"><t t-esc="'Yes' if doc.do_ready_on else ''"/></td>
                             </tr>
                             <tr>
                                 <td class="noa-label">ETA</td>
