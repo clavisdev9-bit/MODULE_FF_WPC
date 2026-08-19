@@ -105,3 +105,19 @@ class TestSeaBlInfoNotifySameAsConsignee(FreightTestBase):
         self.assertEqual(hbl.notify_party_id, partner_other,
             msg="notify_party_id harus sinkron dengan consignee_id baru saat notify_same_as_consignee aktif")
 
+
+class TestSeaHblYard(FreightTestBase):
+    """Verifikasi related yard_code dan yard_address di HBL (FF-53)."""
+
+    def test_hbl_yard_code_and_address_related(self):
+        """yard_code dan yard_address di Jobsheet otomatis terisi dari Yard (stock.warehouse)."""
+        warehouse = self.env["stock.warehouse"].create({
+            "name": "Test Yard Warehouse",
+            "code": "TYW01",
+        })
+        hbl = self._create_hbl(yard_id=warehouse.id)
+        self.assertEqual(hbl.yard_code, "TYW01")
+        if warehouse.partner_id.contact_address:
+            self.assertEqual(hbl.yard_address, warehouse.partner_id.contact_address)
+
+
