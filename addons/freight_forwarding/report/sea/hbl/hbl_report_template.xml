@@ -4,46 +4,61 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.basic_layout">
+                    <!-- Dynamic multi-page calculations (Smart Threshold) -->
+                    <t t-set="cargo_count" t-value="len(doc.cargo_info_ids) if doc.cargo_info_ids else 0"/>
+                    <t t-set="total_pkgs" t-value="sum(doc.cargo_info_ids.mapped('quantity')) if doc.cargo_info_ids else 0"/>
+                    <t t-set="total_gw" t-value="sum(doc.cargo_info_ids.mapped('gross_weight')) if doc.cargo_info_ids else 0.0"/>
+                    <t t-set="total_cbm" t-value="sum(doc.cargo_info_ids.mapped('total_volume')) or sum(doc.cargo_info_ids.mapped('volume')) if doc.cargo_info_ids else 0.0"/>
+                    <t t-set="first_cargo" t-value="doc.cargo_info_ids[0] if cargo_count &gt; 0 else False"/>
+                    <t t-set="desc_text" t-value="(first_cargo.description_of_goods or '') if first_cargo else ''"/>
+                    <t t-set="marks_text" t-value="(first_cargo.marks_and_no or '') if first_cargo else ''"/>
+                    <t t-set="desc_len" t-value="len(desc_text)"/>
+                    <t t-set="marks_len" t-value="len(marks_text)"/>
+                    <t t-set="desc_lines" t-value="desc_text.count('\n') + 1 if desc_text else 0"/>
+                    <t t-set="marks_lines" t-value="marks_text.count('\n') + 1 if marks_text else 0"/>
+                    <t t-set="has_attachment" t-value="cargo_count &gt; 1 or desc_len &gt; 250 or desc_lines &gt; 6 or marks_len &gt; 150 or marks_lines &gt; 5"/>
+
+                    <!-- ================= PAGE 1: ORIGINAL B/L ================= -->
                     <div class="page">
                         <style>
                             /* ── Base ── */
                             * { box-sizing: border-box; }
-                            .page { font-size: 12pt; }
+                            .page { font-size: 9.5pt; text-transform: uppercase; }
                             .page span { font-size: inherit; }
                             .page h1, .page h2, .page h3,
                             .page h4, .page h5, .page h6 { margin: 0; padding: 0; line-height: 1.2;
                             }
-                            .container-fluid { width: 100%; }
+                            .container-fluid { width: 100%; padding: 0; }
 
                             /* ── Table ── */
                             .table { width: 100%; border-collapse: collapse; }
                             .table, .table th, .table td { border: 1px solid #000 !important; }
-                            .table td, .table th { font-size: 12pt !important; padding: 6px 8px
+                            .table td, .table th { font-size: 9.5pt !important; padding: 4px 6px
                             !important; vertical-align: top; }
                             .table tbody tr { page-break-inside: avoid; break-inside: avoid; }
 
                             /* ── BL-specific ── */
-                            .bl-label { font-size: 12pt; font-weight: bold; margin-bottom: 4px; }
-                            .bl-field-sm { min-height: 24px; }
-                            .bl-field-lg { min-height: 60px; }
-                            .bl-field-xl { min-height: 120px; }
-                            .bl-company { font-size: 18pt; color: navy; }
+                            .bl-label { font-size: 9pt; font-weight: bold; margin-bottom: 2px; }
+                            .bl-field-sm { min-height: 20px; }
+                            .bl-field-lg { min-height: 50px; }
+                            .bl-field-xl { min-height: 100px; }
+                            .bl-company { font-size: 15pt; color: navy; }
                             .bl-type { background-color: navy; color: white; }
                             .bl-terms { font-size: 8pt; }
 
                             /* ── Bootstrap spacing ── */
-                            .p-3 { padding: 1rem; }
-                            .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-                            .pt-1 { padding-top: 0.25rem; }
-                            .pb-1 { padding-bottom: 0.25rem; }
-                            .mt-1 { margin-top: 0.25rem; }
-                            .mt-2 { margin-top: 0.5rem; }
-                            .mt-3 { margin-top: 1rem; }
-                            .mt-4 { margin-top: 1.5rem; }
+                            .p-3 { padding: 6px 8px; }
+                            .px-2 { padding-left: 4px; padding-right: 4px; }
+                            .pt-1 { padding-top: 2px; }
+                            .pb-1 { padding-bottom: 2px; }
+                            .mt-1 { margin-top: 2px; }
+                            .mt-2 { margin-top: 4px; }
+                            .mt-3 { margin-top: 6px; }
+                            .mt-4 { margin-top: 10px; }
                             .mb-0 { margin-bottom: 0; }
-                            .mb-2 { margin-bottom: 0.5rem; }
-                            .mb-3 { margin-bottom: 1rem; }
-                            .me-2 { margin-right: 0.5rem; }
+                            .mb-2 { margin-bottom: 4px; }
+                            .mb-3 { margin-bottom: 6px; }
+                            .me-2 { margin-right: 4px; }
                             .ms-auto { margin-left: auto; }
 
                             /* ── Bootstrap typography ── */
@@ -51,8 +66,8 @@
                             .text-center { text-align: center; }
                             .text-start { text-align: left; }
                             .fw-bold { font-weight: bold; }
-                            .fs-5 { font-size: 1.25rem; }
-                            .fs-6 { font-size: 1rem; }
+                            .fs-5 { font-size: 10.5pt; }
+                            .fs-6 { font-size: 9.5pt; }
                             .lh-1 { line-height: 1; }
                             .text-nowrap { white-space: nowrap; }
                             .d-block { display: block; }
@@ -86,11 +101,19 @@
                             .align-bottom { vertical-align: bottom; }
 
                             /* ── Legal clause ── */
-                            .legal-clause { font-size: 9pt; font-weight: normal; }
-                            .legal-clause p { font-size: 9pt; font-weight: normal; }
+                            .legal-clause { font-size: 7.5pt; font-weight: normal; text-transform: none !important; }
+                            .legal-clause p {
+                                text-align: justify;
+                                text-indent: 1.5em;
+                                margin-bottom: 0;
+                                line-height: 1.2;
+                                font-size: 7.5pt;
+                                font-weight: normal;
+                                text-transform: none !important;
+                            }
 
                             /* ── Signature ── */
-                            .bl-company-sign { font-size: 18pt; font-weight: bold; }
+                            .bl-company-sign { font-size: 12pt; font-weight: bold; }
 
                             /* ── Layout wrapper (2-col) — table, bukan flex (wkhtmltopdf) ── */
                             .layout-wrapper { display: table; width: 100%; border-collapse:
@@ -103,6 +126,12 @@
                             .no-left-border tr > td:first-child { border-left: hidden !important; }
                             .no-right-border tr > th:last-child,
                             .no-right-border tr > td:last-child { border-right: hidden !important; }
+                            .no-bottom-border,
+                            .no-bottom-border tr:last-child > td,
+                            .no-bottom-border tr:last-child > th { border-bottom: hidden !important; }
+                            .no-top-border,
+                            .no-top-border tr:first-child > td,
+                            .no-top-border tr:first-child > th { border-top: hidden !important; }
                             .hide-side-borders { overflow: hidden; padding: 1px 0; }
                             .hide-side-borders table {
                             width: calc(100% + 4px) !important;
@@ -113,16 +142,6 @@
                             .no-outer-borders { width: 100%; }
                             .no-outer-borders tr > *:first-child { border-left: 0 !important; }
                             .no-outer-borders tr > *:last-child { border-right: 0 !important; }
-
-                            /* ── Legal clause (old, merged above) ── */
-                            .legal-clause p {
-                            text-align: justify;
-                            text-indent: 2.5em;
-                            margin-bottom: 0;
-                            line-height: 1.3;
-                            font-size: 9pt;
-                            font-weight: normal;
-                            }
 
                             /* ── Page break ── */
                             .section-nobreak {
@@ -136,7 +155,26 @@
                             .bl-cargo-row td {
                                 border-top: none !important;
                                 border-bottom: none !important;
-                                padding: 10px 8px !important;
+                                padding: 6px 6px !important;
+                                height: 30mm !important;
+                            }
+
+                            .inner-desc-table {
+                                width: 100%;
+                                height: 26mm !important;
+                                min-height: 26mm !important;
+                                border-collapse: collapse !important;
+                                border: none !important;
+                            }
+                            .inner-desc-table tr,
+                            .inner-desc-table td {
+                                border: none !important;
+                                padding: 0 !important;
+                            }
+
+                            .bl-partner-cell {
+                                height: 30mm !important;
+                                min-height: 30mm !important;
                             }
                         </style>
                         <div class="container-fluid">
@@ -160,7 +198,7 @@
                                 <!-- Main Information Table -->
                                 <div class="">
                                     <table
-                                        class="table table-bordered border-dark mb-0 no-left-border no-right-border">
+                                        class="table table-bordered border-dark mb-0 no-left-border no-right-border no-bottom-border">
                                         <tr>
                                             <td colspan="2" rowspan="2" class="align-top w-50">
                                                 <div class="bl-label">SHIPPER/EXPORTER</div>
@@ -174,10 +212,9 @@
                                                     <t t-if="doc.shipper_id.state_id">, <span t-field="doc.shipper_id.state_id.name" /></t>
                                                     <t t-if="doc.shipper_id.zip"> <span t-field="doc.shipper_id.zip" /></t>
                                                     <t t-if="doc.shipper_id.country_id">, <span t-field="doc.shipper_id.country_id.name" /></t>
-                                                    <br />
-                                                    <span t-field="doc.shipper_id.phone" />
-                                                    <br />
-                                                    <span t-field="doc.shipper_id.vat" />
+                                                    <t t-set="shipper_tel" t-value="(doc.shipper_id.mobile + (' / ' + doc.shipper_id.phone if doc.shipper_id.phone and doc.shipper_id.phone != doc.shipper_id.mobile else '')) if doc.shipper_id.mobile else doc.shipper_id.phone"/>
+                                                    <t t-if="shipper_tel"><br />TEL: <span t-esc="shipper_tel" /></t>
+                                                    <t t-if="doc.shipper_id.vat"><br />TAX ID: <span t-field="doc.shipper_id.vat" /></t>
                                                 </div>
                                             </td>
                                             <td class="align-top w-50">
@@ -196,7 +233,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td colspan="2" rowspan="3" class="align-top">
+                                            <td colspan="2" rowspan="2" class="align-top bl-partner-cell">
                                                 <div class="bl-label">CONSIGNEE</div>
                                                 <div class="">
                                                     <span t-field="doc.consignee_id.name" />
@@ -207,10 +244,9 @@
                                                     <t t-if="doc.consignee_id.state_id">, <span t-field="doc.consignee_id.state_id.name" /></t>
                                                     <t t-if="doc.consignee_id.zip"> <span t-field="doc.consignee_id.zip" /></t>
                                                     <t t-if="doc.consignee_id.country_id">, <span t-field="doc.consignee_id.country_id.name" /></t>
-                                                    <br />
-                                                    <span t-field="doc.consignee_id.phone" />
-                                                    <br />
-                                                    <span t-field="doc.consignee_id.vat" />
+                                                    <t t-set="consignee_tel" t-value="(doc.consignee_id.mobile + (' / ' + doc.consignee_id.phone if doc.consignee_id.phone and doc.consignee_id.phone != doc.consignee_id.mobile else '')) if doc.consignee_id.mobile else doc.consignee_id.phone"/>
+                                                    <t t-if="consignee_tel"><br />TEL: <span t-esc="consignee_tel" /></t>
+                                                    <t t-if="doc.consignee_id.vat"><br />TAX ID: <span t-field="doc.consignee_id.vat" /></t>
                                                 </div>
                                             </td>
                                             <td class="align-top">
@@ -230,11 +266,42 @@
                                                 <div class="bl-label">TYPE OF SERVICE</div>
                                                 <div class="bl-field-sm">
                                                     <span t-field="doc.container_type" />
-
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
+                                            <td colspan="2" rowspan="2" class="align-top bl-partner-cell">
+                                                <div class="bl-label">NOTIFY PARTY</div>
+                                                <div class="">
+                                                    <t t-set="same_name"
+                                                        t-value="doc.notify_party_id == doc.consignee_id" />
+                                                    <t t-set="same_addr"
+                                                        t-value="doc.notify_party_id.street == doc.consignee_id.street" />
+                                                    <t t-set="same_phone"
+                                                        t-value="doc.notify_party_id.phone == doc.consignee_id.phone and doc.notify_party_id.mobile == doc.consignee_id.mobile" />
+                                                    <t t-set="same_vat"
+                                                        t-value="doc.notify_party_id.vat == doc.consignee_id.vat" />
+                                                    <t
+                                                        t-if="same_name and same_addr and same_phone and same_vat">
+                                                        <span
+                                                            style="font-weight: bold; font-size: 9.5pt;">SAME
+                                                            AS CONSIGNEE</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span t-field="doc.notify_party_id" />
+                                                        <br />
+                                                        <span t-field="doc.notify_party_id.street" />
+                                                        <t t-if="doc.notify_party_id.street2">, <span t-field="doc.notify_party_id.street2" /></t>
+                                                        <t t-if="doc.notify_party_id.city">, <span t-field="doc.notify_party_id.city" /></t>
+                                                        <t t-if="doc.notify_party_id.state_id">, <span t-field="doc.notify_party_id.state_id.name" /></t>
+                                                        <t t-if="doc.notify_party_id.zip"> <span t-field="doc.notify_party_id.zip" /></t>
+                                                        <t t-if="doc.notify_party_id.country_id">, <span t-field="doc.notify_party_id.country_id.name" /></t>
+                                                        <t t-set="notify_tel" t-value="(doc.notify_party_id.mobile + (' / ' + doc.notify_party_id.phone if doc.notify_party_id.phone and doc.notify_party_id.phone != doc.notify_party_id.mobile else '')) if doc.notify_party_id.mobile else doc.notify_party_id.phone"/>
+                                                        <t t-if="notify_tel"><br />TEL: <span t-esc="notify_tel" /></t>
+                                                        <t t-if="doc.notify_party_id.vat"><br />TAX ID: <span t-field="doc.notify_party_id.vat" /></t>
+                                                    </t>
+                                                </div>
+                                            </td>
                                             <td class="align-top">
                                                 <div class="bl-label">CONTAINER NO.</div>
                                                 <div class="bl-field-sm">
@@ -248,51 +315,22 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td colspan="2" class="align-top">
-                                                <div class="bl-label">NOTIFY PARTY</div>
-                                                <div class="">
-                                                    <t t-set="same_name"
-                                                        t-value="doc.notify_party_id == doc.consignee_id" />
-                                                    <t t-set="same_addr"
-                                                        t-value="doc.notify_party_id.street == doc.consignee_id.street" />
-                                                    <t t-set="same_phone"
-                                                        t-value="doc.notify_party_id.phone == doc.consignee_id.phone" />
-                                                    <t t-set="same_vat"
-                                                        t-value="doc.notify_party_id.vat == doc.consignee_id.vat" />
-                                                    <t
-                                                        t-if="same_name and same_addr and same_phone and same_vat">
-                                                        <span
-                                                            style="font-weight: bold; font-size: 10pt;">SAME
-                                                            AS CONSIGNEE</span>
-                                                    </t>
-                                                    <t t-else="">
-                                                        <span t-field="doc.notify_party_id" />
-                                                        <br />
-                                                        <span t-field="doc.notify_party_id.street" />
-                                                        <t t-if="doc.notify_party_id.street2">, <span t-field="doc.notify_party_id.street2" /></t>
-                                                        <t t-if="doc.notify_party_id.city">, <span t-field="doc.notify_party_id.city" /></t>
-                                                        <t t-if="doc.notify_party_id.state_id">, <span t-field="doc.notify_party_id.state_id.name" /></t>
-                                                        <t t-if="doc.notify_party_id.zip"> <span t-field="doc.notify_party_id.zip" /></t>
-                                                        <t t-if="doc.notify_party_id.country_id">, <span t-field="doc.notify_party_id.country_id.name" /></t>
-                                                        <br />
-                                                        <span t-field="doc.notify_party_id.phone" />
-                                                        <br />
-                                                        <span t-field="doc.notify_party_id.vat" />
-                                                    </t>
-                                                </div>
-                                            </td>
-                                            <td rowspan="2" class="align-top">
+                                            <td class="align-top">
                                                 <div class="bl-label">DELIVERY AGENT</div>
                                                 <div class="">
-                                                    <t t-if="doc.delivery_agent_id">
-                                                        <span t-field="doc.delivery_agent_id.name" />
+                                                    <t t-set="del_agent" t-value="doc.company_id.partner_id if doc.freight_type == 'import' else doc.delivery_agent_id"/>
+                                                    <t t-if="del_agent">
+                                                        <span t-field="del_agent.name" />
                                                         <br />
-                                                        <span t-field="doc.delivery_agent_id.street" />
-                                                        <t t-if="doc.delivery_agent_id.street2">, <span t-field="doc.delivery_agent_id.street2" /></t>
-                                                        <t t-if="doc.delivery_agent_id.city">, <span t-field="doc.delivery_agent_id.city" /></t>
-                                                        <t t-if="doc.delivery_agent_id.state_id">, <span t-field="doc.delivery_agent_id.state_id.name" /></t>
-                                                        <t t-if="doc.delivery_agent_id.zip"> <span t-field="doc.delivery_agent_id.zip" /></t>
-                                                        <t t-if="doc.delivery_agent_id.country_id">, <span t-field="doc.delivery_agent_id.country_id.name" /></t>
+                                                        <span t-field="del_agent.street" />
+                                                        <t t-if="del_agent.street2">, <span t-field="del_agent.street2" /></t>
+                                                        <t t-if="del_agent.city">, <span t-field="del_agent.city" /></t>
+                                                        <t t-if="del_agent.state_id">, <span t-field="del_agent.state_id.name" /></t>
+                                                        <t t-if="del_agent.zip"> <span t-field="del_agent.zip" /></t>
+                                                        <t t-if="del_agent.country_id">, <span t-field="del_agent.country_id.name" /></t>
+                                                        <t t-set="del_tel" t-value="(del_agent.mobile + (' / ' + del_agent.phone if del_agent.phone and del_agent.phone != del_agent.mobile else '')) if del_agent.mobile else del_agent.phone"/>
+                                                        <t t-if="del_tel"><br />TEL: <span t-esc="del_tel" /></t>
+                                                        <t t-if="del_agent.vat"><br />TAX ID: <span t-field="del_agent.vat" /></t>
                                                     </t>
                                                 </div>
                                             </td>
@@ -312,6 +350,13 @@
                                                     <span t-field="doc.place_of_receipt_id.name" />
                                                 </div>
                                             </td>
+                                            <td rowspan="3" class="align-top">
+                                                <div class="bl-label">NUMBER OF ORIGINAL B/L OF
+                                                    LADING ISSUED</div>
+                                                <div class="bl-field-sm">
+                                                    <span t-field="doc.no_of_original_bl" />
+                                                </div>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td class="align-top">
@@ -326,13 +371,6 @@
                                                 <div class="bl-label">PORT OF LOADING</div>
                                                 <div class="bl-field-sm">
                                                     <span t-field="doc.port_of_loading_id.name" />
-                                                </div>
-                                            </td>
-                                            <td rowspan="2" class="align-top">
-                                                <div class="bl-label">NUMBER OF ORIGINAL B/L OF
-                                                    LADING ISSUED</div>
-                                                <div class="bl-field-sm">
-                                                    <span t-field="doc.no_of_original_bl" />
                                                 </div>
                                             </td>
                                         </tr>
@@ -352,7 +390,7 @@
                                         </tr>
                                     </table>
                                     <table
-                                        class="table table-bordered border-dark mb-0 mt-3 no-left-border no-right-border">
+                                        class="table table-bordered border-dark mb-0 mt-0 no-left-border no-right-border">
                                         <thead>
                                             <tr class="bg-light text-center fw-bold py-1 mt-3">
                                                 <td colspan="5">
@@ -381,32 +419,127 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-foreach="doc.cargo_info_ids" t-as="cargo">
+                                            <t t-if="has_attachment">
                                                 <tr class="bl-cargo-row">
                                                     <td class="align-top">
-                                                        <span t-field="cargo.marks_and_no" />
+                                                        <span class="fw-bold">AS PER ATTACHMENT</span>
                                                     </td>
                                                     <td class="align-top">
-                                                        <span t-field="cargo.quantity" />
-                                                        <span t-field="cargo.package_type_id.name" />
+                                                        <span t-esc="total_pkgs" />
+                                                        <t t-if="doc.cargo_info_ids and doc.cargo_info_ids[0].package_type_id">
+                                                            <span t-esc="doc.cargo_info_ids[0].package_type_id.name" />
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span>PKGS</span>
+                                                        </t>
                                                     </td>
                                                     <td class="align-top">
-                                                        <span t-field="cargo.description_of_goods" />
+                                                        <table class="inner-desc-table">
+                                                            <tr>
+                                                                <td style="vertical-align: top !important;">
+                                                                    <span class="fw-bold">AS PER ATTACHMENT</span>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="vertical-align: bottom !important;">
+                                                                    <div class="bl-cargo-footer" style="font-size: 8.5pt; line-height: 1.3;">
+                                                                        <div>SHIPPER'S LOAD, STOW, WEIGHT, COUNT &amp; SEAL</div>
+                                                                        <t t-if="doc.freight">
+                                                                            <div>FREIGHT <span t-esc="doc.freight.upper()" /></div>
+                                                                        </t>
+                                                                        <t t-if="doc.bl_surrendered">
+                                                                            <div>B/L SURRENDERED<t t-if="doc.port_of_loading_id"> IN <span t-esc="(doc.port_of_loading_id.name or '').upper()" /></t></div>
+                                                                        </t>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
                                                     </td>
                                                     <td class="align-top">
-                                                        <span t-field="cargo.gross_weight" /> KGS
+                                                        <span t-esc="total_gw" /> KGS
                                                     </td>
                                                     <td class="align-top">
-                                                        <span t-if="cargo.total_volume" t-field="cargo.total_volume" />
-                                                        <span t-elif="cargo.volume" t-field="cargo.volume" /> CBM
+                                                        <span t-esc="total_cbm" /> CBM
                                                     </td>
                                                 </tr>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-if="not doc.cargo_info_ids">
+                                                    <tr class="bl-cargo-row">
+                                                        <td class="align-top" />
+                                                        <td class="align-top" />
+                                                        <td class="align-top">
+                                                            <table class="inner-desc-table">
+                                                                <tr>
+                                                                    <td style="vertical-align: top !important;" />
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="vertical-align: bottom !important;">
+                                                                        <div class="bl-cargo-footer" style="font-size: 8.5pt; line-height: 1.3;">
+                                                                            <div>SHIPPER'S LOAD, STOW, WEIGHT, COUNT &amp; SEAL</div>
+                                                                            <t t-if="doc.freight">
+                                                                                <div>FREIGHT <span t-esc="doc.freight.upper()" /></div>
+                                                                            </t>
+                                                                            <t t-if="doc.bl_surrendered">
+                                                                                <div>B/L SURRENDERED<t t-if="doc.port_of_loading_id"> IN <span t-esc="(doc.port_of_loading_id.name or '').upper()" /></t></div>
+                                                                            </t>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                        <td class="align-top" />
+                                                        <td class="align-top" />
+                                                    </tr>
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-foreach="doc.cargo_info_ids" t-as="cargo">
+                                                        <tr class="bl-cargo-row">
+                                                            <td class="align-top">
+                                                                <span t-field="cargo.marks_and_no" />
+                                                            </td>
+                                                            <td class="align-top">
+                                                                <span t-field="cargo.quantity" />
+                                                                <span t-field="cargo.package_type_id.name" />
+                                                            </td>
+                                                            <td class="align-top">
+                                                                <table class="inner-desc-table">
+                                                                    <tr>
+                                                                        <td style="vertical-align: top !important;">
+                                                                            <span t-field="cargo.description_of_goods" />
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="vertical-align: bottom !important;">
+                                                                            <div class="bl-cargo-footer" style="font-size: 8.5pt; line-height: 1.3;">
+                                                                                <div>SHIPPER'S LOAD, STOW, WEIGHT, COUNT &amp; SEAL</div>
+                                                                                <t t-if="doc.freight">
+                                                                                    <div>FREIGHT <span t-esc="doc.freight.upper()" /></div>
+                                                                                </t>
+                                                                                <t t-if="doc.bl_surrendered">
+                                                                                    <div>B/L SURRENDERED<t t-if="doc.port_of_loading_id"> IN <span t-esc="(doc.port_of_loading_id.name or '').upper()" /></t></div>
+                                                                                </t>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                            <td class="align-top">
+                                                                <span t-field="cargo.gross_weight" /> KGS
+                                                            </td>
+                                                            <td class="align-top">
+                                                                <span t-if="cargo.total_volume" t-field="cargo.total_volume" />
+                                                                <span t-elif="cargo.volume" t-field="cargo.volume" /> CBM
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </t>
                                             </t>
                                         </tbody>
                                     </table>
                                     <!-- Bottom Section -->
                                     <table
-                                        class="table table-bordered mb-3 mt-0 no-left-border no-right-border">
+                                        class="table table-bordered mb-0 mt-0 no-left-border no-right-border">
                                         <tr style="border-top: 0 hidden !important;">
                                             <td class="align-bottom w-50 p-3"
                                                 style="border-top: 0 !important;">
@@ -425,7 +558,6 @@
                                                             DATE</td>
                                                         <td class="fw-bold text-center"
                                                             style="border: none !important; border-bottom: 1px solid #000 !important; padding: 0 6px; vertical-align: bottom;">
-                                                            <!-- FF-36 poin E: sumber tanggal diganti ke ETD -->
                                                             <span t-field="doc.etd"
                                                                 t-options="{&quot;widget&quot;: &quot;date&quot;, &quot;format&quot;: &quot;MMMM d, y&quot;}" />
                                                         </td>
@@ -448,7 +580,7 @@
                                 <div class="row gx-0 layout-wrapper section-nobreak">
                                     <div class="col-6 p-0">
                                         <table
-                                            class="table table-bordered border-dark mb-0 no-left-border"
+                                            class="table table-bordered border-dark mb-0 no-left-border no-top-border"
                                             style="height: 100%;">
                                             <thead>
                                                 <tr>
@@ -524,7 +656,7 @@
                                         <div class="ms-auto text-end w-75 mt-3">
                                             <div class="bl-company-sign">WPC LOGISTICS (S) PTE LTD</div>
                                             <table
-                                                style="width: 100%; border-collapse: collapse; margin-top: 24px;">
+                                                style="width: 100%; border-collapse: collapse; margin-top: 50px;">
                                                 <tr>
                                                     <td
                                                         style="white-space: nowrap; padding-right: 6px; vertical-align: bottom; width: 1%;">
@@ -543,7 +675,133 @@
                             </div>
                         </div>
                     </div>
-                    <p style="page-break-after: always;" />
+
+                    <!-- ================= PAGE 2: TERMS AND CONDITIONS ================= -->
+                    <t t-call="freight_forwarding.hbl_terms_and_conditions"/>
+
+                    <!-- ================= PAGE 3: ATTACHMENT (CONDITIONAL) ================= -->
+                    <t t-if="has_attachment">
+                        <div class="page hbl-attachment-page" style="page-break-before: always; font-size: 10pt; font-family: sans-serif; color: #000;">
+                            <style>
+                                .att-list-table {
+                                    width: 100%;
+                                    border-collapse: collapse;
+                                    margin-top: 10px;
+                                }
+                                .att-list-table th {
+                                    border-top: 1.5px solid #000 !important;
+                                    border-bottom: 1.5px solid #000 !important;
+                                    border-left: none !important;
+                                    border-right: none !important;
+                                    padding: 5px 4px;
+                                    font-weight: bold;
+                                    text-align: left;
+                                    font-size: 10pt;
+                                }
+                                .att-list-table th:first-child {
+                                    border-left: 1.5px solid #000 !important;
+                                }
+                                .att-list-table th:last-child {
+                                    border-right: 1.5px solid #000 !important;
+                                }
+                                .att-list-table td {
+                                    border: none !important;
+                                    padding: 4px 4px;
+                                    font-size: 10pt;
+                                    line-height: 1.2;
+                                    vertical-align: top;
+                                }
+                            </style>
+
+                            <!-- Title -->
+                            <div style="font-size: 13pt; font-weight: bold; margin-bottom: 10px;">
+                                WPC OCEAN LINE LIMITED - ATTACHMENT LIST
+                            </div>
+
+                            <!-- Header Info -->
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10pt;">
+                                <tr>
+                                    <td style="width: 14%; font-weight: bold; padding: 2px 0; border: none !important;">B/L NO.</td>
+                                    <td style="width: 2%; font-weight: bold; padding: 2px 0; border: none !important;">:</td>
+                                    <td style="width: 34%; padding: 2px 0; border: none !important;">
+                                        <span t-field="doc.hbl_no"/>
+                                    </td>
+                                    <td style="width: 18%; font-weight: bold; padding: 2px 0; border: none !important;">Port of Loading</td>
+                                    <td style="width: 2%; font-weight: bold; padding: 2px 0; border: none !important;">:</td>
+                                    <td style="width: 30%; padding: 2px 0; border: none !important;">
+                                        <span t-if="doc.port_of_loading_id" t-field="doc.port_of_loading_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; padding: 2px 0; border: none !important;">VESSEL</td>
+                                    <td style="font-weight: bold; padding: 2px 0; border: none !important;">:</td>
+                                    <td style="padding: 2px 0; border: none !important;">
+                                        <t t-if="doc.mother_vessel_id">
+                                            <span t-field="doc.mother_vessel_id.name"/>
+                                            <t t-if="doc.mother_voyage_no"> * <span t-field="doc.mother_voyage_no"/></t>
+                                        </t>
+                                        <t t-elif="doc.feeder_vessel_id">
+                                            <span t-field="doc.feeder_vessel_id.name"/>
+                                            <t t-if="doc.feeder_voyage_no"> * <span t-field="doc.feeder_voyage_no"/></t>
+                                        </t>
+                                    </td>
+                                    <td style="font-weight: bold; padding: 2px 0; border: none !important;">Port of Discharge</td>
+                                    <td style="font-weight: bold; padding: 2px 0; border: none !important;">:</td>
+                                    <td style="padding: 2px 0; border: none !important;">
+                                        <span t-if="doc.port_of_discharge_id" t-field="doc.port_of_discharge_id.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Table -->
+                            <table class="att-list-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%;">Marks and Numbers</th>
+                                        <th style="width: 22%;">NO. OF CONT. OR OTHER PKGS</th>
+                                        <th style="width: 53%;">Description of Goods</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.cargo_info_ids" t-as="c">
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <t t-if="c.marks_and_no">
+                                                        <span t-field="c.marks_and_no"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span>N/M</span>
+                                                    </t>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <span t-field="c.quantity"/>
+                                                    <t t-if="c.package_type_id">
+                                                        <span t-field="c.package_type_id.name"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span>PKGS</span>
+                                                    </t>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <span t-field="c.description_of_goods"/>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+
+                            <!-- Bottom border line and End of Attachment -->
+                            <div style="border-top: 1.5px solid #000; margin-top: 10px; padding-top: 6px; font-size: 10pt;">
+                                End of Attachment
+                            </div>
+                        </div>
+                    </t>
                 </t>
             </t>
         </t>
