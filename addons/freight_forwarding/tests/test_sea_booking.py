@@ -103,3 +103,76 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
         self.assertEqual(result.get("res_model"), "freight.sea.hbl",
             msg="Action harus mengarah ke model freight.sea.hbl")
         self.assertEqual(result.get("view_mode"), "form")
+
+    def test_convert_copies_bl_info(self):
+        """Field-field B/L info (termasuk notify_same_as_consignee) di-copy ke HBL saat convert."""
+        booking = self._create_booking(
+            consignee_id=self.partner.id,
+            notify_party_id=self.partner.id,
+            notify_same_as_consignee=True,
+        )
+        booking.action_convert_to_hbl()
+
+        hbl = booking.hbl_ids[0]
+        self.assertEqual(hbl.consignee_id, self.partner)
+        self.assertEqual(hbl.notify_party_id, self.partner)
+        self.assertTrue(hbl.notify_same_as_consignee)
+
+    def test_convert_copies_shipment_type(self):
+        """shipment_type_id (Many2one freight.shipment.type) tersalin otomatis ke HBL saat convert (FF-52)."""
+        shipment_type = self.env["freight.shipment.type"].create({
+            "name": "FCL / FCL",
+        })
+        booking = self._create_booking(shipment_type_id=shipment_type.id)
+        booking.action_convert_to_hbl()
+
+        hbl = booking.hbl_ids[0]
+        self.assertEqual(hbl.shipment_type_id, shipment_type,
+            msg="shipment_type_id harus ter-copy dari Booking ke HBL")
+
+    def test_convert_copies_customer_reference_and_depot(self):
+        """customer_reference disalin ke customer_ref, dan depot (id, code, address) disalin ke HBL (FF-53)."""
+        booking = self._create_booking(
+            customer_reference="CUST-REF-12345",
+            depot_id="DEPOT-A",
+            depot_code="DPT01",
+            depot_address="Jl. Depot Raya No. 1",
+        )
+        booking.action_convert_to_hbl()
+
+        hbl = booking.hbl_ids[0]
+        self.assertEqual(hbl.customer_ref, "CUST-REF-12345",
+            msg="customer_reference Booking harus tersalin ke customer_ref HBL")
+        self.assertEqual(hbl.depot_id, "DEPOT-A")
+        self.assertEqual(hbl.depot_code, "DPT01")
+        self.assertEqual(hbl.depot_address, "Jl. Depot Raya No. 1")
+
+    def test_convert_copies_all_parties_and_routing(self):
+        """shipper, consignee, notify, delivery agent, commodity, delivery_type, shipment_type disalin (FF-53)."""
+        shipper = self.env["res.partner"].create({"name": "Shipper Test"})
+        consignee = self.env["res.partner"].create({"name": "Consignee Test"})
+        notify = self.env["res.partner"].create({"name": "Notify Test"})
+        delivery_agent = self.env["res.partner"].create({"name": "Agent Test"})
+        shipment_type = self.env["freight.shipment.type"].create({"name": "LCL / LCL"})
+
+        booking = self._create_booking(
+            shipper_id=shipper.id,
+            consignee_id=consignee.id,
+            notify_party_id=notify.id,
+            delivery_agent_id=delivery_agent.id,
+            commodity_id=self.commodity.id,
+            delivery_type_id=self.delivery_type.id,
+            shipment_type_id=shipment_type.id,
+        )
+        booking.action_convert_to_hbl()
+
+        hbl = booking.hbl_ids[0]
+        self.assertEqual(hbl.shipper_id, shipper)
+        self.assertEqual(hbl.consignee_id, consignee)
+        self.assertEqual(hbl.notify_party_id, notify)
+        self.assertEqual(hbl.delivery_agent_id, delivery_agent)
+        self.assertEqual(hbl.commodity_id, self.commodity)
+        self.assertEqual(hbl.delivery_type_id, self.delivery_type)
+        self.assertEqual(hbl.shipment_type_id, shipment_type)
+
+

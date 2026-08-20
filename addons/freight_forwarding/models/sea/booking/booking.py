@@ -125,7 +125,7 @@ class SeaBooking(models.Model):
         copy=False,
     )
     booking_date = fields.Datetime(string="Date & Time")
-    bl_no = fields.Char(string="B/L No.")
+    hbl_no = fields.Char(string="B/L No.")
     job_no = fields.Char(string="Job No.")
     nomination_cargo = fields.Boolean(string="Nomination Cargo")
     container_type = fields.Selection(
@@ -136,6 +136,7 @@ class SeaBooking(models.Model):
     job_date = fields.Date(string="Job Date")
     import_job_no = fields.Char(string="Import Job Number (Optional)")
     railing = fields.Boolean(string="Railing")
+    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
 
     # Customer & Contact Data
     partner_id = fields.Many2one(
@@ -159,21 +160,10 @@ class SeaBooking(models.Model):
         string="Sales Orders",
     )
 
-    # Shipment Details
-    # NOTE (FF-22): port_of_loading_id, port_of_discharge_id, commodity_id,
-    # dan eta_jkt juga ada di freight.sea.shipment.info.mixin. Karena Booking
-    # sudah mendefinisikan field ini sendiri (dengan required=True dan string
-    # custom), definisi di sini yang dipakai. Field ini TIDAK ditambahkan lagi
-    # di tab "Shipment Details"/"Vessel Schedule" baru supaya tidak duplikat
-    # di view.
-    port_of_loading_id = fields.Many2one(
-        "freight.port", string="Origin Port (POL)", required=True
-    )
-    port_of_discharge_id = fields.Many2one(
-        "freight.port", string="Destination Port (POD)", required=True
-    )
-    etd = fields.Date(string="ETD (Departure)")
-    eta = fields.Date(string="ETA (Arrival)")
+    # Location & Route
+    # NOTE: port_of_loading_id, port_of_discharge_id, commodity_id, etd, eta,
+    # eta_jkt ada di freight.sea.shipment.info.mixin (ditampilkan di tab
+    # Shipment Info). Definisi di sini hanya untuk field yang khas Booking.
     destination_country_id = fields.Many2one(
         "res.country", string="Destination Country"
     )
@@ -185,13 +175,11 @@ class SeaBooking(models.Model):
     delivery_type_id = fields.Many2one(
         "freight.delivery.type", string="Delivery Type", required=True
     )
-    commodity_id = fields.Many2one("freight.commodity", string="Commodity")
 
     # Vessel Information
     pod_port_id = fields.Many2one("freight.port", string="Port of Delivery")
     vessel_id = fields.Many2one("freight.vessel", string="Vessel Name", required=True)
     voyage_no = fields.Char(string="Voyage No.")
-    eta_jkt = fields.Date(string="ETA on JKT")
 
     # Notebook
     # NOTE (FF-22): field shipment_info_ids (One2many ke
@@ -257,17 +245,56 @@ class SeaBooking(models.Model):
         # jadi tidak perlu proses copy antar model perantara lagi.
 
 
-        vessel_fields = [
+        header_fields = [
+            "shipment_type_id",
+            "delivery_type_id",
+            "commodity_id",
+        ]
+
+        vessel_details_fields = [
             "principle_agent_id", "shipping_agent_id", "scn_code", "warehouse_id",
             "smk_code1", "smk_code2", "close_date", "cargo_receipt_date",
-            "stuffing_date", "contact_id", "yard_id", "depot_id",
-            "depot_instruction", "general_instruction"
+            "stuffing_date", "contact_id", "yard_id", "depot_id", "depot_code", "depot_address",
+            "depot_instruction", "general_instruction",
         ]
+        
+        shipment_info_fields = [
+            # Shipment Info fields (only those in the view)
+            "place_of_receipt_id", "place_of_delivery_id",
+            "port_of_loading_id", "port_of_discharge_id", "via_port_id",
+            "terminal_id", "feeder_vessel_id", "feeder_voyage_no",
+            "mother_vessel_id", "mother_voyage_no", "shipping_line_id",
+            "shipping_line_ref_no", "coloader_id", "coloader_ref_no",
+            
+            # Dates
+            "etd", "eta", "eta_jkt",
+        ]
+        
+        bl_info_fields = [
+            "shipper_id", "consignee_id", "notify_party_id", "notify_same_as_consignee",
+            "delivery_agent_id",
+        ]
+
         hbl_update = {}
-        for field in vessel_fields:
+        for field in header_fields + bl_info_fields + vessel_details_fields + shipment_info_fields:
             if not hbl[field] and booking[field]:
                 val = booking[field]
                 hbl_update[field] = val.id if hasattr(val, 'id') else val
+                
+        # Explicitly map customer reference (booking: customer_reference -> hbl: customer_ref)
+        if not hbl.customer_ref and booking.customer_reference:
+            hbl_update['customer_ref'] = booking.customer_reference
+
+        # Explicitly map routing fields
+        if not hbl.from_city and booking.from_city:
+            hbl_update['from_city'] = booking.from_city.id
+        if not hbl.origin_country_id and booking.origin_country_id:
+            hbl_update['origin_country_id'] = booking.origin_country_id.id
+        if not hbl.to_city and booking.to_city:
+            hbl_update['to_city'] = booking.to_city.id
+        if not hbl.destination_country_id and booking.destination_country_id:
+            hbl_update['destination_country_id'] = booking.destination_country_id.id
+
         if hbl_update:
             hbl.write(hbl_update)
 
@@ -296,11 +323,27 @@ class SeaBooking(models.Model):
                     "booking_id": self.id,
                     "freight_type": self.freight_type,
                     "container_type": self.container_type,
+                    "shipment_type_id": self.shipment_type_id.id if self.shipment_type_id else False,
+                    "commodity_id": self.commodity_id.id if self.commodity_id else False,
+                    "delivery_type_id": self.delivery_type_id.id if self.delivery_type_id else False,
                     "customer_id": self.partner_id.id,
+                    "customer_ref": self.customer_reference,
+                    "shipper_id": self.shipper_id.id if self.shipper_id else False,
+                    "consignee_id": self.consignee_id.id if self.consignee_id else False,
+                    "notify_party_id": self.notify_party_id.id if self.notify_party_id else False,
+                    "notify_same_as_consignee": self.notify_same_as_consignee,
+                    "delivery_agent_id": self.delivery_agent_id.id if self.delivery_agent_id else False,
                     "term_payment": self.payment_term_id.id,
                     "job_date": self.job_date,
                     "master_job_no": self.job_no,
                     "salesman_id": self.salesman_id.id if self.salesman_id else False,
+                    "from_city": self.from_city.id if self.from_city else False,
+                    "origin_country_id": self.origin_country_id.id if self.origin_country_id else False,
+                    "to_city": self.to_city.id if self.to_city else False,
+                    "destination_country_id": self.destination_country_id.id if self.destination_country_id else False,
+                    "eta_jkt": self.eta_jkt,
+                    "etd": self.etd,
+                    "eta": self.eta,
                 }
             )
 

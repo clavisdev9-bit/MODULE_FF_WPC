@@ -30,6 +30,10 @@ class FreightBlInfoMixin(models.AbstractModel):
     )
 
     # Notify Party
+    notify_same_as_consignee = fields.Boolean(
+        string="Same as Consignee",
+        default=False,
+    )
     notify_party_id = fields.Many2one(
         "res.partner",
         string="Notify Party",
@@ -85,3 +89,9 @@ class FreightBlInfoMixin(models.AbstractModel):
     def _compute_delivery_agent_address(self):
         for rec in self:
             rec.delivery_agent_address = self._build_partner_address(rec.delivery_agent_id)
+
+    @api.onchange("notify_same_as_consignee", "consignee_id")
+    def _onchange_notify_same_as_consignee(self):
+        if self.notify_same_as_consignee:
+            self.notify_party_id = self.consignee_id
+

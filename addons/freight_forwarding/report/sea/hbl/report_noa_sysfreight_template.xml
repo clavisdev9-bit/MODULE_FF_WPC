@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="noa_sysfreight_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
+                    <t t-set="company" t-value="doc.env.company"/>
+                    <t t-set="delivery_agent" t-value="doc.delivery_agent_id or False"/>
+
+                    <div class="page noa-page">
+                        <style>
+
+                            * { box-sizing: border-box; }
+                            .noa-page {
+                                font-size: 9.5pt;
+                                font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif;
+                                font-weight: normal;
+                                color: #000;
+                            }
+                            .noa-page span { font-size: inherit; }
+                            .noa-page h1, .noa-page h2, .noa-page h3,
+                            .noa-page h4, .noa-page h5, .noa-page h6 { margin: 0; padding: 0; line-height: 1.2; }
+
+                            .noa-page { margin-top: 0 !important; padding-top: 0 !important; overflow: visible !important; height: auto !important; }
+
+                            /* ── Company Header (table layout - flexbox is unreliable in wkhtmltopdf) ── */
+                            .noa-header-table { width: 100%; height: auto !important; border-collapse: collapse; margin: 0 0 6px 0; padding: 0; overflow: visible !important; }
+                            .noa-header-table td { border: none !important; padding: 0 !important; margin: 0 !important; vertical-align: top; height: auto !important; overflow: visible !important; }
+                            .noa-logo-cell { width: 1%; white-space: nowrap; }
+                            .noa-logo-cell img { height: 100px; width: auto; display: block; margin: 0; padding: 0; }
+                            .noa-header-text { padding-left: 14px !important; padding-top: 4px !important; }
+                            .noa-header-table td.noa-header-text { padding-left: 14px !important; }
+                            .noa-company-name {
+                                font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif;
+                                font-size: 15pt;
+                                font-weight: bold;
+                                margin: 0 0 3px 0;
+                                line-height: 1.15;
+                            }
+                            .noa-company-address {
+                                font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif;
+                                font-size: 12pt;
+                                font-weight: normal;
+                                line-height: 1.3;
+                                white-space: normal;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .noa-company-contact {
+                                font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif;
+                                font-size: 12pt;
+                                font-weight: normal;
+                                line-height: 1.3;
+                                white-space: normal;
+                                margin: 0;
+                                padding: 0;
+                            }
+
+                            /* ── ARRIVAL NOTICE Title ── */
+                            /* Intentionally NOT Verdana: this title box keeps its own bold
+                               monospace look (Courier New), separate from the Verdana body font
+                               used everywhere else in the report. Do not change this to Verdana. */
+                            .noa-title-wrap { text-align: center; margin: 14px 0 16px 0; }
+                            .noa-page .noa-title-box {
+                                display: inline-block;
+                                border: 2px solid #000;
+                                font-family: 'Courier New', Courier, monospace;
+                                font-size: 14pt;
+                                font-weight: bold;
+                                letter-spacing: 1px;
+                                white-space: nowrap;
+                                padding: 2pt 50pt;
+                            }
+
+                            /* ── Plain (borderless) field tables ── */
+                            .noa-plain-table { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+                            .noa-plain-table td {
+                                border: none !important;
+                                padding: 1px 4px;
+                                font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif;
+                                font-size: 12pt;
+                                font-weight: normal;
+                                vertical-align: top;
+                            }
+                            .noa-plain-table td.noa-label { white-space: nowrap; width: 13%; font-weight: normal; }
+                            .noa-plain-table td.noa-colon { width: 1%; white-space: nowrap; padding-left: 0; padding-right: 4px; }
+                            .noa-plain-table td.noa-value { width: 36%; }
+
+                            /* nested table used inside the TO cell for DATE / TEL / FAX */
+                            .noa-inner-table { width: 100%; border-collapse: collapse; }
+                            .noa-inner-table td { border: none !important; padding: 1px 4px; font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif; font-size: 12pt; font-weight: normal; vertical-align: top; }
+                            .noa-inner-table td.noa-label { white-space: nowrap; width: 34%; }
+                            .noa-inner-table td.noa-colon { width: 3%; white-space: nowrap; padding-left: 0; padding-right: 4px; }
+
+                            .noa-hr { border: none; border-top: 1px solid #000; margin: 5px 0; }
+
+                            /* ── Container / Seal ── */
+                            .noa-container-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+                            .noa-container-table td { border: none !important; padding: 1px 4px; font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif; font-size: 12pt; font-weight: normal; vertical-align: top; }
+
+                            /* ── Cargo Table ── */
+                            .noa-cargo-table { width: 100%; border-collapse: collapse; margin: 4px 0 10px 0; table-layout: fixed; border: none; }
+                            .noa-cargo-table, .noa-cargo-table thead, .noa-cargo-table tbody,
+                            .noa-cargo-table tr, .noa-cargo-table td, .noa-cargo-table th { border: none; }
+                            .noa-cargo-table tbody tr { page-break-inside: avoid; }
+                            .noa-cargo-table tbody tr:last-child td { border-bottom: none !important; }
+                            .noa-cargo-table th {
+                                border: none !important;
+                                padding: 3px 6px 4px 4px;
+                                font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif;
+                                font-size: 12pt;
+                                font-weight: normal;
+                                text-decoration: underline;
+                                text-align: left;
+                                white-space: nowrap;
+                            }
+                            .noa-cargo-table th.noa-cargo-weight,
+                            .noa-cargo-table th.noa-cargo-volume { text-align: left; }
+                            /* Give the WEIGHT and VOLUME columns a clean visual separation without
+                               disturbing the table width or the numeric alignment underneath each header. */
+                            .noa-cargo-table th.noa-cargo-weight { padding-right: 18px; }
+                            .noa-cargo-table th.noa-cargo-volume { padding-left: 8px; }
+                            .noa-cargo-table td {
+                                border: none;
+                                padding: 4px 6px 4px 4px;
+                                font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif;
+                                font-size: 12pt;
+                                font-weight: normal;
+                                vertical-align: top;
+                                word-wrap: break-word;
+                                overflow-wrap: break-word;
+                            }
+                            .noa-cargo-marking { width: 16%; }
+                            .noa-cargo-description { width: 57%; }
+                            .noa-cargo-weight { width: 14%; }
+                            .noa-cargo-volume { width: 13%; }
+                            .noa-cargo-table td.noa-cargo-weight,
+                            .noa-cargo-table td.noa-cargo-volume { text-align: right; }
+                            .noa-cargo-table td.noa-cargo-weight { padding-right: 18px; }
+                            .noa-cargo-table td.noa-cargo-volume { padding-left: 8px; }
+
+                            /* ── PKGS and Description record: quantity fixed at a constant X-position (under the "G" of "PKGS"), description starts at column's left edge ── */
+                            .noa-pkgs-record { width: 100%; }
+                            .noa-qty-type { text-align: left; padding-left: 1.15em; }
+                            .noa-description { text-align: left; padding-left: 0; }
+
+                            /* ── Remarks ── */
+                            .noa-remarks-title { font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif; font-size: 12pt; font-weight: normal; margin-bottom: 4px; }
+                            .noa-remarks-box { min-height: 140px; margin-bottom: 4px; font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif; font-size: 12pt; font-weight: normal; }
+                            .noa-remarks-content { font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif; font-size: 12pt; font-weight: normal; margin-bottom: 8px; line-height: 1.5; }
+
+                            /* ── Closing ── */
+                            .noa-closing { font-family: Verdana, "DejaVu Sans", "Liberation Sans", Geneva, sans-serif; font-size: 12pt; font-weight: normal; margin-top: 4px; }
+                            .noa-closing-text { margin: 2px 0; line-height: 1.5; }
+                        </style>
+
+                        <!-- HEADER -->
+                        <table class="noa-header-table">
+                            <tr>
+                                <td class="noa-logo-cell">
+                                    <img t-if="company and company.logo" t-att-src="image_data_uri(company.logo)"/>
+                                </td>
+                                <td class="noa-header-text">
+                                    <div class="noa-company-name"><t t-esc="company.name"/></div>
+                                    <div class="noa-company-address">
+                                        <t t-if="company.street"><t t-esc="company.street"/></t>
+                                        <t t-if="company.street2">, <t t-esc="company.street2"/></t>
+                                        <t t-if="company.city">, <t t-esc="company.city"/></t>
+                                        <t t-if="company.zip"> <t t-esc="company.zip"/></t>
+                                        <t t-if="company.country_id"> - <t t-esc="company.country_id.name"/></t>
+                                    </div>
+                                    <div class="noa-company-contact">
+                                        <t t-if="company.phone">Telp: <t t-esc="company.phone"/></t>
+                                        <t t-if="'fax' in company._fields and company.fax"> Fax: <t t-esc="company.fax"/></t>
+                                        <t t-if="company.website">, Homepage: <t t-esc="company.website"/></t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ARRIVAL NOTICE TITLE -->
+                        <div class="noa-title-wrap">
+                            <span class="noa-title-box">ARRIVAL NOTICE</span>
+                        </div>
+
+                        <!-- JOB NO / TO -->
+                        <table class="noa-plain-table">
+                            <tr>
+                                <td class="noa-label">JOB NO.</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value" colspan="4"><t t-esc="doc.job_no or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="noa-label" style="vertical-align: top;">TO</td>
+                                <td class="noa-colon" style="vertical-align: top;">:</td>
+                                <td class="noa-value" colspan="4" style="vertical-align: top;">
+                                    <t t-if="'customer_id' in doc._fields and doc.customer_id">
+                                        <t t-esc="doc.customer_id.name"/><br/>
+                                        <t t-if="doc.customer_id.street"><t t-esc="doc.customer_id.street"/></t>
+                                        <t t-if="doc.customer_id.street2">, <t t-esc="doc.customer_id.street2"/></t><br/>
+                                        <t t-if="doc.customer_id.city"><t t-esc="doc.customer_id.city"/></t>
+                                        <t t-if="doc.customer_id.zip"> <t t-esc="doc.customer_id.zip"/></t>
+                                        <t t-if="doc.customer_id.country_id">, <t t-esc="doc.customer_id.country_id.name"/></t>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <hr class="noa-hr"/>
+
+                        <!-- VESSEL / MBL / BL / ETA / CARRIER / WAREHOUSE  ―  POL / POD / DO READY ON / PORT CODE -->
+                        <table class="noa-plain-table">
+                            <tr>
+                                <td class="noa-label">VESSEL/VOY</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value">
+                                    <t t-if="doc.mother_vessel_id">
+                                        <t t-esc="doc.mother_vessel_id.name"/>
+                                        <t t-if="doc.mother_voyage_no">/<t t-esc="doc.mother_voyage_no"/></t>
+                                    </t>
+                                    <t t-elif="'feeder_vessel_id' in doc._fields and doc.feeder_vessel_id">
+                                        <t t-esc="doc.feeder_vessel_id.name"/>
+                                        <t t-if="'feeder_voyage_no' in doc._fields and doc.feeder_voyage_no">/<t t-esc="doc.feeder_voyage_no"/></t>
+                                    </t>
+                                </td>
+                                <td class="noa-label">POL</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value">
+                                    <t t-esc="(doc.port_of_loading_id.name if doc.port_of_loading_id else '') or ''"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="noa-label">MBL NO.</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value"><t t-esc="doc.mbl_no or ''"/></td>
+                                <td class="noa-label">POD</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value">
+                                    <t t-esc="(doc.port_of_discharge_id.name if doc.port_of_discharge_id else '') or ''"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="noa-label">BL NO.</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value"><t t-esc="doc.hbl_no or ''"/></td>
+                                <td class="noa-label">DO READY ON</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value"><t t-esc="'Yes' if doc.do_ready_on else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="noa-label">ETA</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value"><t t-esc="doc.eta or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="noa-label">CARRIER</td>
+                                <td class="noa-colon">:</td>
+                                <td class="noa-value" colspan="4">
+                                    <t t-set="is_lcl" t-value="'container_type' in doc._fields and doc.container_type == 'lcl'"/>
+                                    <t t-set="carrier_partner" t-value="doc.coloader_id if (is_lcl and 'coloader_id' in doc._fields and doc.coloader_id) else doc.shipping_line_id"/>
+                                    <t t-if="carrier_partner">
+                                        <t t-set="carrier_name" t-value="(carrier_partner.name or '').strip()"/>
+                                        <t t-set="carrier_code" t-value="(carrier_partner.code or '').strip() if 'code' in carrier_partner._fields else ''"/>
+                                        <t t-set="carrier_short_name" t-value="(carrier_partner.short_name or '').strip() if 'short_name' in carrier_partner._fields else ''"/>
+                                        <t t-set="carrier_suffix" t-value="(' (%s - %s)' % (carrier_code, carrier_short_name)) if (carrier_code and carrier_short_name) else ((' (%s)' % carrier_code) if carrier_code else ((' (%s)' % carrier_short_name) if carrier_short_name else ''))"/>
+                                        <t t-esc="(carrier_name + carrier_suffix).strip()"/>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="noa-label" style="vertical-align: top;">WAREHOUSE</td>
+                                <td class="noa-colon" style="vertical-align: top;">:</td>
+                                <td class="noa-value" colspan="4" style="vertical-align: top;">
+                                    <t t-if="'container_type' in doc._fields and doc.container_type == 'fcl' and 'yard_id' in doc._fields and doc.yard_id">
+                                        <t t-esc="doc.yard_id.name"/>
+                                        <t t-if="'partner_id' in doc.yard_id._fields and doc.yard_id.partner_id">
+                                            <t t-set="yard_partner" t-value="doc.yard_id.partner_id"/>
+                                            <br/>
+                                            <t t-if="yard_partner.street"><t t-esc="yard_partner.street"/></t>
+                                            <t t-if="yard_partner.street2">, <t t-esc="yard_partner.street2"/></t><br/>
+                                            <t t-if="yard_partner.city"><t t-esc="yard_partner.city"/></t>
+                                            <t t-if="yard_partner.zip"> <t t-esc="yard_partner.zip"/></t>
+                                            <t t-if="yard_partner.country_id">, <t t-esc="yard_partner.country_id.name"/></t>
+                                        </t>
+                                    </t>
+                                    <t t-elif="doc.warehouse_id">
+                                        <t t-esc="doc.warehouse_id.name"/>
+                                        <t t-if="doc.warehouse_id.partner_id">
+                                            <t t-set="wh_partner" t-value="doc.warehouse_id.partner_id"/>
+                                            <br/>
+                                            <t t-if="wh_partner.street"><t t-esc="wh_partner.street"/></t>
+                                            <t t-if="wh_partner.street2">, <t t-esc="wh_partner.street2"/></t><br/>
+                                            <t t-if="wh_partner.city"><t t-esc="wh_partner.city"/></t>
+                                            <t t-if="wh_partner.zip"> <t t-esc="wh_partner.zip"/></t>
+                                            <t t-if="wh_partner.country_id">, <t t-esc="wh_partner.country_id.name"/></t>
+                                        </t>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- CONTAINER / SEAL INFORMATION -->
+                        <table class="noa-container-table">
+                            <tr>
+                                <td class="noa-label" style="width: 16%; white-space: nowrap;">CONTAINER NO/SEAL NO.</td>
+                                <td style="width: 1%;">:</td>
+                                <td>
+                                    <t t-esc="doc.container_seal_ids or ''"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <hr class="noa-hr"/>
+
+                        <!-- CARGO TABLE -->
+                        <table class="noa-cargo-table">
+                            <colgroup>
+                                <col style="width: 16%;"/>
+                                <col style="width: 57%;"/>
+                                <col style="width: 14%;"/>
+                                <col style="width: 13%;"/>
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="noa-cargo-marking">MARKING</th>
+                                    <th class="noa-cargo-description">PKGS &amp; <span>DESCRIPTION OF GOODS</span></th>
+                                    <th class="noa-cargo-weight">WEIGHT (KGS)</th>
+                                    <th class="noa-cargo-volume">VOLUME (M3)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.cargo_info_ids" t-as="cargo">
+                                    <tr>
+                                        <td class="noa-cargo-marking">
+                                            <t t-esc="cargo.marks_and_no or ''"/>
+                                        </td>
+                                        <td class="noa-cargo-description">
+                                            <div class="noa-pkgs-record">
+                                                <div class="noa-qty-type" t-if="cargo.quantity">
+                                                    <t t-esc="cargo.quantity"/>
+                                                </div>
+                                                <div class="noa-description"><t t-esc="cargo.description_of_goods or ''"/></div>
+                                            </div>
+                                        </td>
+                                        <td class="noa-cargo-weight">
+                                            <t t-esc="cargo.gross_weight or 0"/>
+                                        </td>
+                                        <td class="noa-cargo-volume">
+                                            <t t-if="cargo.total_volume"><t t-esc="cargo.total_volume"/></t>
+                                            <t t-elif="cargo.volume"><t t-esc="cargo.volume"/></t>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- REMARKS -->
+                        <hr class="noa-hr"/>
+                        <div class="noa-remarks-title">REMARKS :</div>
+                        <div class="noa-remarks-box">
+                            <t t-if="doc.remarks"><t t-esc="doc.remarks"/></t>
+                        </div>
+                        <div class="noa-remarks-content">
+                            WE THANK YOU FOR YOUR CO-OPERATION
+                        </div>
+
+                        <!-- CLOSING -->
+                        <div class="noa-closing">
+                            <div class="noa-closing-text">YOURS FAITHFULLY</div>
+                            <div class="noa-closing-text" style="margin-top: 20px;"><t t-esc="company.name"/></div>
+                            <div class="noa-closing-text">INWARD / OPERATION DEPARTMENT</div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

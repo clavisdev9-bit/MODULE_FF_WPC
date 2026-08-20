@@ -6,9 +6,8 @@ class FreightShipmentInfoMixin(models.AbstractModel):
     _description = "Freight Shipment Info Mixin"
 
     # Shipment Details
-    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
-    place_of_receipt_id = fields.Many2one("freight.port", string="Place of Receipt")
-    place_of_delivery_id = fields.Many2one("freight.port", string="Place of Delivery")
+    place_of_receipt_id = fields.Many2one("res.city", string="Place of Receipt")
+    place_of_delivery_id = fields.Many2one("res.city", string="Place of Delivery")
     port_of_loading_id = fields.Many2one("freight.port", string="Port of Loading")
     port_of_discharge_id = fields.Many2one("freight.port", string="Port of Discharge")
     via_port_id = fields.Many2one("freight.port", string="Via Port")
@@ -36,12 +35,9 @@ class FreightShipmentInfoMixin(models.AbstractModel):
         domain="[('category_id.name', '=', 'Forward Agent')]",
     )
     letter_of_credit = fields.Char(string="Letter of Credit")
-    freight_terms = fields.Selection(
-        selection=[
-            ("prepaid", "Prepaid"),
-            ("collect", "Collect"),
-        ],
-        string="Freight Terms",
+    freight_terms = fields.Many2one(
+        "account.incoterms",
+        string="Terms of Shipment",
     )
     other_charges_terms = fields.Selection(
         selection=[
@@ -64,8 +60,9 @@ class FreightShipmentInfoMixin(models.AbstractModel):
         "freight.sea.booking.vessel.schedule",
         string="Vessel Schedule",
     )
-    eta_jkt = fields.Date(string="ETA on JKT")
-    etd_eta = fields.Datetime(string="ETD/ETA")
+    eta_jkt = fields.Datetime(string="ETA JKT")
+    etd = fields.Date(string="ETD")
+    eta = fields.Date(string="ETA")
     via_etd = fields.Date(string="Via ETD")
     via_eta = fields.Date(string="Via ETA")
 

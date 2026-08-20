@@ -9,9 +9,42 @@ def migrate(cr, version):
     1. Konversi freight_vessel.flag dari varchar ke integer (Many2one res.country)
     2. Migrasi FK shipment_type_id dari freight_delivery_type ke freight_shipment_type
        pada tabel freight_sea_booking_shipment_info dan freight_sea_hbl_shipment_info
+    3. Bersihkan kolom legacy yang pernah dibuat sebagai Char sebelum dijadikan FK
+       ke account.incoterms dan freight.location.
+    4. Bersihkan orphan selection metadata untuk field yang diubah menjadi Boolean (misal do_ready_on).
     """
     _migrate_vessel_flag(cr)
     _migrate_shipment_type_fk(cr)
+    _migrate_legacy_fk_columns(cr)
+    _clean_orphan_selection_fields(cr)
+
+
+def _clean_orphan_selection_fields(cr):
+    """Hapus metadata selection untuk field yang telah diubah ke Boolean agar tidak error saat upgrade."""
+    _logger.info("Migration: cleaning orphan ir_model_fields_selection records...")
+    cr.execute("""
+        DELETE FROM ir_model_data
+        WHERE model = 'ir.model.fields.selection'
+          AND res_id IN (
+              SELECT s.id
+              FROM ir_model_fields_selection s
+              JOIN ir_model_fields f ON s.field_id = f.id
+              WHERE f.model = 'freight.sea.hbl' AND f.name = 'do_ready_on'
+          )
+    """)
+    cr.execute("""
+        DELETE FROM ir_model_fields_selection
+        WHERE field_id IN (
+            SELECT id FROM ir_model_fields
+            WHERE model = 'freight.sea.hbl' AND name = 'do_ready_on'
+        )
+    """)
+    cr.execute("""
+        UPDATE ir_model_fields
+        SET ttype = 'boolean'
+        WHERE model = 'freight.sea.hbl' AND name = 'do_ready_on'
+    """)
+    _logger.info("Migration: orphan selection records cleaned successfully.")
 
 
 def _migrate_vessel_flag(cr):
@@ -80,3 +113,26 @@ def _migrate_shipment_type_fk(cr):
             _logger.info(
                 "Migration: %s FK already correct or not found, skipping.", table
             )
+
+
+def _migrate_legacy_fk_columns(cr):
+    """Drop legacy varchar columns that previously blocked FK creation."""
+    tables = ['freight_sea_booking', 'freight_sea_hbl']
+    columns = ['freight_terms', 'depot_id', 'freight_terms_new', 'depot_code', 'depot_id_new']
+
+    for table in tables:
+        for column in columns:
+            cr.execute("""
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = %s AND column_name = %s
+            """, (table, column))
+            if cr.fetchone():
+                _logger.warning(
+                    "Migration: dropping legacy column %s on %s before FK re-init",
+                    column,
+                    table,
+                )
+                cr.execute(
+                    "ALTER TABLE {} DROP COLUMN IF EXISTS {}".format(table, column)
+                )

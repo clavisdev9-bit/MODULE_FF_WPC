@@ -51,70 +51,92 @@
                         </button>
                     </div>
                     <h1>
-                        <field name="hbl_no" readonly="1" />
+                        <field name="job_no" readonly="1" />
                     </h1>
                     <group string="Header Information">
                         <group>
                             <field name="freight_type"/>
                             <field name="container_type"/>
                             <field name="booking_id"/>
-                            <field name="job_no" />
+                            <field name="master_job_no"/>
                             <field name="job_date"/>
+                            <field name="job_city_id"/>
                         </group>
                         <group>
-                            <field name="job_city_id"/>
-                            <field name="master_job_no"/>
-                            <field name="original_bl_no"/>
-                            <field name="master_bl_no"/>
-                            <field name="shipment_type"/>
+                            <field name="no_of_original_bl"/>
+                            <field name="mbl_no"/>
+                            <field name="hbl_no"/>
                             <field name="bl_surrendered"/>
+                            <field name="commodity_id" />
+                            <field name="shipment_type_id"/>
+                            <field name="delivery_type_id"/>
                         </group>
                     </group>
 
                     <group string="Customer &amp; Sales">
                         <group>
                             <field name="customer_id"/>
-                            <field name="customer_ref" readonly="1"/>
+                            <field name="customer_ref"/>
                             <field name="shipper_id"/>
                             <field name="shipper_address" readonly="1"/>
+                            <field name="actual_shipper"/>
+                            <field name="do_ready_on"/>
                         </group>
                         <group>
                             <field name="consignee_id" />
                             <field name="consignee_address" readonly="1" />
                             <field name="term_payment"/>
                             <field name="salesman_id"/>
-                            <field name="export_sales_team_id"/>
+                            <!-- <field name="export_sales_team_id"/> -->
                             <field name="analytic_account_id"/>
                         </group>
                     </group>
 
                     <group>
                         <group string="Notify Party">
+                            <field name="notify_same_as_consignee" />
                             <field name="notify_party_id" />
                             <field name="notify_party_address" readonly="1" />
                         </group>
                         <group string="Delivery &amp; Freight">
                             <field name="delivery_agent_id" />
                             <field name="delivery_agent_address" readonly="1" />
-                            <field name="freight" />
+                            <field name="freight"/>
+                            <field name="freight_terms"/>
+                            <field name="remark"/>
                         </group>
                     </group>
+
+                    <group string="Route">
+                        <group>
+                            <field name="from_city"/>
+                            <field name="origin_country_id"/>
+                        </group>
+                        <group>
+                            <field name="to_city"/>
+                            <field name="destination_country_id"/>
+                        </group>
+                    </group>
+                    
                     <notebook>
-                        <page string="Shipment Details">
+                        <page string="Shipment Info">
                             <group>
                                 <group>
-                                    <field name="shipment_type_id" />
                                     <field name="place_of_receipt_id" />
                                     <field name="place_of_delivery_id" />
-                                    <field name="commodity_id" />
-                                </group>
-                                <group>
                                     <field name="port_of_loading_id" />
                                     <field name="port_of_discharge_id" />
+                                </group>
+                                <group>
+                                    <field name="eta_jkt" />
+                                    <field name="etd" />
+                                    <field name="eta" />
                                     <field name="via_port_id" />
                                     <field name="terminal_id" />
                                 </group>
                             </group>
+
+                            <separator/>
 
                             <group>
                                 <group>
@@ -130,67 +152,16 @@
                                     <field name="coloader_ref_no" />
                                 </group>
                             </group>
-
-                            <group>
-                                <field name="stuffing_location_id" invisible="freight_type == 'import'" />
-                                <field name="warehouse_location_id" invisible="freight_type != 'import'" />
-                            </group>
                         </page>
 
-                        <page string="Agent &amp; Terms">
-                            <group>
-                                <group>
-                                    <field name="forward_agent_id" />
-                                    <field name="letter_of_credit" />
-                                </group>
-                                <group>
-                                    <field name="freight_terms" />
-                                    <field name="other_charges_terms" />
-                                    <field name="ship_mode" />
-                                    <field name="service_level" />
-                                </group>
-                            </group>
-                        </page>
-
-                        <page string="Vessel Schedule">
-                            <group>
-                                <field name="vessel_schedule_id">
-                                    <form>
-                                        <group>
-                                            <field name="vessel_id" />
-                                            <field name="name" />
-                                            <field name="voyage_no" />
-                                            <field name="arrival" />
-                                            <field name="berthing" />
-                                            <field name="departure" />
-                                            <field name="closing" />
-                                            <field name="terminal_id" />
-                                            <field name="status" />
-                                            <field name="open_stack" />
-                                        </group>
-                                    </form>
-                                </field>
-                                <field name="eta_jkt" />
-                                <field name="etd_eta" />
-                                <field name="via_etd" />
-                                <field name="via_eta" />
-                            </group>
-                        </page>
-
-                        <page string="Footer Remarks">
+                        <!-- <page string="Footer Remarks">
                             <group>
                                 <field name="booking_remark_id" />
                                 <field name="warehouse_remark" />
                             </group>
-                        </page>
+                        </page> -->
 
                         <page string="Vessel Details">
-                            <group string="Booking &amp; Agent Information">
-                                <field name="principle_agent_id" />
-                                <field name="shipping_agent_id" />
-                                <field name="scn_code" />
-                            </group>
-
                             <group string="Stuffing Warehouse &amp; SMK" invisible="freight_type == 'import'">
                                 <group>
                                     <field name="warehouse_id" />
@@ -234,11 +205,6 @@
                                     <field name="depot_code" />
                                     <field name="depot_address" />
                                 </group>
-                                <field name="depot_instruction" />
-                            </group>
-
-                            <group string="General Instructions">
-                                <field name="general_instruction" />
                             </group>
                         </page>
                         <page string="Cargo Info">
@@ -265,7 +231,7 @@
                             </field>
                         </page>
                         <page string="Sales Orders">
-                            <field name="sale_order_ids" nolabel="1">
+                            <field name="sale_order_ids" nolabel="1" context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea'}">
                                 <list>
                                     <field name="name"/>
                                     <field name="currency_id"/>
