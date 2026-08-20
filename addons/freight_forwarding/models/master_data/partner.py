@@ -8,11 +8,11 @@ class Partner(models.Model):
         string='City',
         domain="[('country_id', '=?', country_id), ('state_id', '=?', state_id)]"
     )
-    city = fields.Char(related='city_id.name', string='City', store=True, readonly=False)
 
     @api.onchange('city_id')
     def _onchange_city_id(self):
         if self.city_id:
+            self.city = self.city_id.name
             if self.city_id.state_id:
                 self.state_id = self.city_id.state_id
             if self.city_id.country_id:
@@ -33,3 +33,19 @@ class Partner(models.Model):
             super()._onchange_country_id()
         if self.country_id and self.city_id and self.city_id.country_id and self.city_id.country_id != self.country_id:
             self.city_id = False
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('city_id') and not vals.get('city'):
+                city = self.env['res.city'].browse(vals['city_id'])
+                if city:
+                    vals['city'] = city.name
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if vals.get('city_id') and not vals.get('city'):
+            city = self.env['res.city'].browse(vals['city_id'])
+            if city:
+                vals['city'] = city.name
+        return super().write(vals)
