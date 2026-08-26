@@ -3,46 +3,66 @@
     <template id="hbl_terms_and_conditions">
         <div class="page hbl-terms-page">
             <style>
+                .hbl-terms-page,
+                .hbl-terms-page *,
+                .hbl-terms-page p,
+                .hbl-terms-page span,
+                .hbl-terms-page td,
+                .hbl-terms-page table {
+                    text-transform: none !important;
+                    font-size: 3.2pt !important;
+                    line-height: 0.95 !important;
+                    font-family: Arial, Helvetica, sans-serif !important;
+                    color: #000000 !important;
+                    box-sizing: border-box !important;
+                }
                 .hbl-terms-page {
-                    page-break-before: always;
-                    font-size: 5.5pt;
-                    line-height: 1.35;
-                    font-family: sans-serif;
-                    color: #000;
+                    page-break-before: always !important;
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+                .hbl-terms-page b,
+                .hbl-terms-page strong {
+                    font-weight: bold !important;
+                    font-size: 3.3pt !important;
+                    text-transform: uppercase !important;
                 }
                 .terms-table {
-                    width: 100%;
-                    border-collapse: collapse;
+                    width: 100% !important;
+                    border-collapse: collapse !important;
                     border: none !important;
+                    table-layout: fixed !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
                 }
                 .terms-col {
-                    width: 33.33%;
-                    vertical-align: top;
-                    padding: 0 3px;
+                    width: 33.33% !important;
+                    vertical-align: top !important;
+                    padding: 0 2px !important;
                     border: none !important;
-                    text-align: justify;
-                    font-size: inherit;
-                    line-height: inherit;
+                    text-align: justify !important;
                 }
                 .terms-col:first-child {
-                    padding-left: 0;
+                    padding-left: 0 !important;
                 }
                 .terms-col:last-child {
-                    padding-right: 0;
+                    padding-right: 0 !important;
                 }
                 .terms-col p {
-                    margin-top: 0;
-                    margin-bottom: 4px;
-                    text-align: justify;
-                    line-height: inherit;
-                }
-                .terms-col b, .terms-col strong {
-                    font-weight: bold;
+                    margin: 0 0 1px 0 !important;
+                    padding: 0 !important;
+                    text-align: justify !important;
+                    font-size: 3.2pt !important;
+                    line-height: 0.95 !important;
+                    text-transform: none !important;
                 }
             </style>
             <table class="terms-table">
                 <tr>
-                    <!-- COLUMN 1 -->
+                    <!-- COLUMN 1: Clauses 1 to 6(3)(B)(i) -->
                     <td class="terms-col">
                         <p><b>1. DEFINITIONS</b><br/>
                         &#8220;Carrier&#8221; means the Company stated on the front of this Bill of Lading or issuer of this bill of lading as being the Carrier and on whose behalf this Bill of Lading has been signed. &#8220;Merchant&#8221; means and includes the shipper, the consignor, the receiver of the Goods, the holder of this Bill of Lading, any person owning or entitled to the possession of the Goods or this Bill of Lading, any person having a present or future interest in the Goods or any person acting on behalf of any of the above mentioned persons.<br/>
@@ -93,7 +113,7 @@
                         (i) The liability of the Carrier shall be determined by the provisions contained in any international convention or national law of the country, which provisions: (a) Cannot be departed from by private contract to the detriment of the Merchant, and (b) Would have applied if the Merchant had made a separate and direct contract with the Carrier in respect of the particular stage of Carriage where the loss or damage occurred and had received as evidence thereof any particular document which must be issued in order to make such international convention or national law applicable;</p>
                     </td>
 
-                    <!-- COLUMN 2 -->
+                    <!-- COLUMN 2: Clauses 6(3)(B)(ii) to 12 -->
                     <td class="terms-col">
                         <p>(ii) with respect to the transportation in the United States of America or in Canada to the Port of Loading or from the Port of Discharge, the responsibility of the Carrier shall be to procure transportation by carriers (one or more) and such transportation shall be subject to the inland carriers&#8217; contracts of carriage and tariffs and any law compulsorily applicable. The Carrier guarantees the fulfillment of such inland carriers&#8217; obligations under their contracts and tariffs.<br/>
                         (iii) Where neither (i) or (ii) above apply, any liability of the Carrier shall be determined by 6(3)(A) above.<br/>
@@ -133,10 +153,7 @@
                         <p><b>9. TEMPERATURE CONTROLLED CARGO</b><br/>
                         (1) The Merchant undertakes not to tender for transportation any Goods which require temperature control without previously giving written notice of their nature and particular temperature range to be maintained and in the case of a temperature controlled Container stuffed by or on behalf of the Merchant further undertakes that the Goods have been properly stuffed in the Container and that its thermostatic controls have been properly set by the Merchant before receipt of the Goods by the Carrier. If the said requirements are not complied with, the Carrier shall not be liable for any loss of or damage to the Goods by such non-compliance.<br/>
                         (2) The Carrier shall not be liable for any loss of or damage to the Goods arising from defects, derangement, breakdown, stoppage of the temperature controlling machinery, plant, insulation or any apparatus of the Container, provided that the Carrier shall before or at the beginning of the Carriage exercise due diligence to maintain the temperature controlled Container in an efficient state.</p>
-                    </td>
 
-                    <!-- COLUMN 3 -->
-                    <td class="terms-col">
                         <p><b>10. INSPECTION OF GOODS</b><br/>
                         The Carrier or any person authorised by the Carrier shall be entitled, but under no obligation, to open any Container or package at any time and to inspect the Goods.</p>
 
@@ -152,7 +169,10 @@
                         use any means of transport or storage whatsoever; load or carry the Goods on any vessel whether named on the front hereof or not; transfer the Goods from one conveyance to another including transshipping or carrying the same on another vessel than that named on the front hereof or by any other means of transport whatsoever; at any place unpack and remove Goods which have been stuffed in or on a Container and forward the same in any manner whatsoever; proceed at any speed and by any route in his discretion (whether or not the nearest or most direct or customary or advertised route) and proceed to or stay at any place whatsoever once or more often and in any order; load or unload the Goods from any conveyance at any place (whether or not the place is a port named on the front hereof as the intended Port of Loading or intended Port of Discharge); comply with any orders or recommendations given by any government or authority or any person or body acting or purporting to act as or on behalf of such government or authority or having under the terms of the insurance on the conveyance employed by the Carrier the right to give orders or directions; permit the vessel to proceed with or without pilots, to tow or be towed or to be dry-docked; permit the vessel to carry livestock, Goods of all kinds, dangerous or otherwise, contraband, explosives, munitions or warlike stores and sail armed or unarmed.<br/>
                         (2) The liberties Set Out in (1) above may be invoked by the Carrier for any purposes whatsoever whether or not connected with the Carriage of the Goods.<br/>
                         Anything done in accordance with (1) above or any delay arising therefrom shall be deemed to be within the contractual Carriage and shall not be a deviation of whatsoever nature or degree.</p>
+                    </td>
 
+                    <!-- COLUMN 3: Clauses 13 to 20 -->
+                    <td class="terms-col">
                         <p><b>13. DECK CARGO AND LIVESTOCK</b><br/>
                         (1) Goods of any description whether Containerised or not may be stowed on or under deck without notice to the Merchant and such stowages shall not be a deviation of whatsoever nature or degree. Subject to (2) below, such Goods whether carried on deck or under deck shall participate in General Average and such Goods (other than livestock) shall be deemed to be within the definition of Goods for the purposes of the Hague Rules or any legislation making such Rules or the Hague-Visby Rules compulsorily applicable (such as COGSA or CDGWA) to this Bill of Lading.<br/>
                         (2) Goods (not being Goods stuffed in or on Containers other than open flats or pallets) which are stated on the front of this Bill of Lading to be carried on deck and which are so carried (and livestock, whether or not carried on deck) are carried without responsibility on the part of the Carrier for loss or damage of whatsoever nature arising during carriage by sea or inland waterway whether caused by unseaworthiness or negligence or any other cause whatsoever. The Merchant shall defend, indemnify and hold harmless the Carrier against all and any extra cost incurred for any reason whatsoever in connection with carriage of livestock.</p>
