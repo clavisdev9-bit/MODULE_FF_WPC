@@ -19,7 +19,7 @@
     <record id="shipping_instruction_report" model="ir.actions.report">
         <field name="name">Shipping Instruction</field>
         <field name="model">freight.sea.hbl</field>
-        <field name="report_type">qweb-pdf</field>
+        <field name="report_type">qweb-html</field>
         <field name="report_name">freight_forwarding.shipping_instruction_report_template</field>
         <field name="paperformat_id" ref="shipping_instruction_paperformat"/>
         <field name="binding_model_id" ref="freight_forwarding.model_freight_sea_hbl"/>
