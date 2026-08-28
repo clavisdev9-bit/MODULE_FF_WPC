@@ -114,7 +114,6 @@
         "views/sea/master_data/footer_remark.xml",
         "views/sea/master_data/instruction.xml",
         "views/sea/master_data/terms_and_condition.xml",
-        "views/sea/master_data/partner.xml",
         # Menu
         "views/menu.xml",
         "views/menus/air/master_data/menu.xml",

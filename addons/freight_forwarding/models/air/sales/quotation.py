@@ -45,8 +45,9 @@ class AirQuotation(models.Model):
         "date_order",
         "write_date",
         "picking_policy",
-        "effective_date",
+        "valid_from",
         "container_type",
+        "terms_and_conditions",
     )
 
     # =========================================================

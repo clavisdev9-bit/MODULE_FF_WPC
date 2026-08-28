@@ -62,15 +62,15 @@
                     </style>
 
                     <div class="header">
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;">
                             <tr>
                                 <td style="width: 40%; vertical-align: top; padding: 0;">
                                     <img t-if="doc.company_id.logo" t-att-src="image_data_uri(doc.company_id.logo)" alt="WPC Logistics"
-                                        style="max-height: 130px; width: auto; display: block;" />
+                                        style="max-height: 100px; width: auto; display: block;" />
                                 </td>
                                 <td
-                                    style="width: 60%; vertical-align: top; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif; color: #000; font-size: 15px; padding: 0;">
-                                    <strong style="font-size: 18px; color: #085294;" t-field="doc.company_id.name"></strong>
+                                    style="width: 60%; vertical-align: top; text-align: right; line-height: 1.3; font-family: 'Arial', sans-serif; color: #000; font-size: 13px; padding: 0;">
+                                    <strong style="font-size: 16px; color: #085294;" t-field="doc.company_id.name"></strong>
                                     <br />
                                     <span t-if="doc.company_id.street" t-field="doc.company_id.street"/>
                                     <span t-if="doc.company_id.street2"> <span t-field="doc.company_id.street2"/></span>
@@ -92,27 +92,27 @@
                         </table>
 
                         <table
-                            style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-family: 'Arial', sans-serif; font-weight: bold; font-size: 16px;">
+                            style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-family: 'Arial', sans-serif; font-weight: bold; font-size: 14px;">
                             <tr>
-                                <td style="padding: 4px; color: #000;"> Sea Freight from <span
+                                <td style="padding: 3px 4px; color: #000;"> Sea Freight from <span
                                         t-if="doc.quotation_title" t-field="doc.quotation_title" />
                                 <span
                                         t-else="">TBD to TBD</span>
                                 </td>
                                 <td
-                                    style="padding: 4px; color: #000; text-align: right; white-space: nowrap; width: 1%;">
+                                    style="padding: 3px 4px; color: #000; text-align: right; white-space: nowrap; width: 1%;">
                                     Page <span class="page" /> of <span class="topage" />
                                 </td>
                             </tr>
                         </table>
 
                         <table
-                            style="width: 100%; margin-top: 8px; margin-bottom: 8px; border-collapse: collapse; font-family: 'Arial', sans-serif;">
+                            style="width: 100%; margin-top: 6px; margin-bottom: 6px; border-collapse: collapse; font-family: 'Arial', sans-serif;">
                             <tr>
-                                <!-- Kolom kiri: data customer -->
+                                <!-- Kolom kiri: data customer dengan height konsisten & font compact -->
                                 <td
-                                    style="vertical-align: top; padding: 5px; font-size: 16px; width: 58%;">
-                                    <span t-field="doc.partner_id.name" />
+                                    style="vertical-align: top; padding: 4px 6px; font-size: 13px; line-height: 1.25; width: 58%; height: 75px; min-height: 75px;">
+                                    <strong><span t-field="doc.partner_id.name" /></strong>
                                     <t t-if="doc.partner_id.street">
                                         <br />
                                         <span t-field="doc.partner_id.street" />
@@ -132,14 +132,14 @@
                                     </t>
                                     <t t-if="doc.partner_id.country_id">
                                         <br />
-                                        <span t-field="doc.partner_id.country_id" />
+                                        <span t-field="doc.partner_id.country_id.name" />
                                     </t>
                                 </td>
 
                                 <!-- Kolom kanan: tabel quote -->
                                 <td style="vertical-align: top; width: 42%; padding-left: 0;">
                                     <table class="table-ait"
-                                        style="width: 100%; margin-bottom: 0; border: 1px solid #000; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                                        style="width: 100%; margin-bottom: 0; border: 1px solid #000; border-collapse: collapse; table-layout: fixed; margin-top: 0; font-size: 13px;">
                                         <tr>
                                             <td class="header-gray"
                                                 style="width: 32%; border: 1px solid #000; font-weight: 700; color: #000; text-align: left; padding: 4px 8px; white-space: nowrap;">QUOTE
@@ -195,9 +195,9 @@
                                     </t>
                                 </td>
                                 <td>
-                                    <span t-field="doc.effective_date"
+                                    <span t-field="doc.valid_from"
                                         t-options="{&quot;widget&quot;: &quot;date&quot;}" />
-                                    <t t-if="not doc.effective_date">
+                                    <t t-if="not doc.valid_from">
                                         <span>&#160;</span>
                                     </t>
                                 </td>
@@ -515,8 +515,8 @@
                                     style="border-bottom: 1px solid #000 !important; padding: 8px;">QUOTATION
                                     ADDITIONAL CONDITIONS</div>
                                 <div class="p-2" style="padding: 8px;">
-                                    <div t-if="doc.terms_and_condition_id.description"
-                                        t-field="doc.terms_and_condition_id.description" />
+                                    <div t-if="doc.terms_and_conditions"
+                                        t-field="doc.terms_and_conditions" />
                                     <div t-else="">
                                         <ul style="padding-left: 15px; margin: 0;">
                                             <li>All rates are based on current valid pricing and
