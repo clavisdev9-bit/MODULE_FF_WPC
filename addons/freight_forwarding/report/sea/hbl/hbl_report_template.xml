@@ -408,8 +408,8 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td class="align-top" style="width: 20%;">
-                                                    <div class="bl-label">MARKS AND NUMBERS</div>
+                                                <td class="align-top text-center" style="width: 20%;">
+                                                    <div class="bl-label text-center">CONTAINER NO &amp; SEAL NO<br/>MARKS AND NO</div>
                                                 </td>
                                                 <td class="align-top" style="width: 13%;">
                                                     <div class="bl-label">NO. OF<br/><span style="white-space: nowrap;">CONT&#160;OR</span><br/>OTHER PKGS</div>
@@ -789,7 +789,7 @@
                             <table class="att-list-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 25%;">Marks and Numbers</th>
+                                        <th style="width: 25%; text-align: center;">Container No &amp; Seal No<br/>Marks and No</th>
                                         <th style="width: 22%;">NO. OF CONT. OR OTHER PKGS</th>
                                         <th style="width: 53%;">Description of Goods</th>
                                     </tr>
