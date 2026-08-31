@@ -64,8 +64,8 @@ class FreightQuotation(models.AbstractModel):
     delivery_type_id = fields.Many2one(
         "freight.delivery.type", string="Delivery Type", required=True
     )
-    effective_date = fields.Date(string="Effective Date")
-    # validity_date = fields.Date(string="Expiry Date")
+    valid_from = fields.Date(string="Valid From")
+    # validity_date = fields.Date(string="Valid To")
     reference_number = fields.Char(string="Reference Number")
     commodity_id = fields.Many2one(
         "freight.commodity", string="Commodity", required=True
@@ -151,12 +151,7 @@ class FreightQuotation(models.AbstractModel):
     footer = fields.Char(string="Footer")
 
     # Terms and Condition
-    terms_and_condition_id = fields.Many2one(
-        "freight.terms.conditions", string="Terms and Condition"
-    )
-    description = fields.Text(
-        related="terms_and_condition_id.description", string="Description"
-    )
+    terms_and_conditions = fields.Text(string="Terms & Conditions")
 
     # =========================================================
     # Common Methods

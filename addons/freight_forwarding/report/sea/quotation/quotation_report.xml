@@ -14,12 +14,13 @@
         <field name="header_line">False</field>
         <field name="header_spacing">4</field>
         <field name="dpi">90</field>
+        <field name="disable_shrinking" eval="False"/>
     </record>
 
     <record id="quotation_report" model="ir.actions.report">
         <field name="name">Quotation Report</field>
         <field name="model">sale.order</field>
-        <field name="report_type">qweb-pdf</field>
+        <field name="report_type">qweb-html</field>
         <field name="report_name">freight_forwarding.quotation_report_template</field>
         <field name="paperformat_id" ref="quotation_paperformat" />
         <field name="binding_model_id" ref="sale.model_sale_order" />

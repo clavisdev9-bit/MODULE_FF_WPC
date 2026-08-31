@@ -25,11 +25,6 @@
 
                     <!-- ================= PAGE 1: ORIGINAL B/L ================= -->
                     <div class="page hbl-main-page">
-                        <script type="text/javascript">
-                            if (typeof window !== 'undefined' &amp;&amp; !window.navigator.userAgent.includes('wkhtmltopdf') &amp;&amp; !window.navigator.userAgent.includes('QtWebProcess')) {
-                                document.documentElement.classList.add('is-web-preview');
-                            }
-                        </script>
                         <style>
                             /* ── Base Default (Dipakai oleh wkhtmltopdf agar PDF 100% bersih tanpa border/margin abu-abu) ── */
                             * { box-sizing: border-box; }
@@ -38,32 +33,6 @@
                             .hbl-main-page h1, .hbl-main-page h2, .hbl-main-page h3,
                             .hbl-main-page h4, .hbl-main-page h5, .hbl-main-page h6 { margin: 0; padding: 0; line-height: 1.25; }
                             .container-fluid { width: 100%; padding: 0; }
-
-                            /* ── Simulasi A4 Khusus Web Preview (Hanya aktif di browser asli via class is-web-preview) ── */
-                            html.is-web-preview, html.is-web-preview body, html.is-web-preview .o_report_html_container, html.is-web-preview .o_content {
-                                background-color: #525659 !important;
-                                padding: 20px 0 !important;
-                                margin: 0 !important;
-                            }
-                            html.is-web-preview .page,
-                            html.is-web-preview .hbl-terms-page,
-                            html.is-web-preview .hbl-attachment-page {
-                                width: 210mm !important;
-                                max-width: 210mm !important;
-                                min-height: 297mm !important;
-                                margin: 0 auto 30px auto !important;
-                                padding: 5mm !important;
-                                background: #ffffff !important;
-                                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
-                                border: 1px solid #d0d0d0 !important;
-                                box-sizing: border-box !important;
-                                position: relative !important;
-                            }
-                            html.is-web-preview .container-fluid {
-                                width: 100% !important;
-                                max-width: 100% !important;
-                                padding: 0 !important;
-                            }
 
                             /* ── Table ── */
                             .table { width: 100%; border-collapse: collapse; }
@@ -408,8 +377,8 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td class="align-top" style="width: 20%;">
-                                                    <div class="bl-label">MARKS AND NUMBERS</div>
+                                                <td class="align-top text-center" style="width: 20%;">
+                                                    <div class="bl-label text-center">CONTAINER NO &amp; SEAL NO<br/>MARKS AND NO</div>
                                                 </td>
                                                 <td class="align-top" style="width: 13%;">
                                                     <div class="bl-label">NO. OF<br/><span style="white-space: nowrap;">CONT&#160;OR</span><br/>OTHER PKGS</div>
@@ -789,7 +758,7 @@
                             <table class="att-list-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 25%;">Marks and Numbers</th>
+                                        <th style="width: 25%; text-align: center;">Container No &amp; Seal No<br/>Marks and No</th>
                                         <th style="width: 22%;">NO. OF CONT. OR OTHER PKGS</th>
                                         <th style="width: 53%;">Description of Goods</th>
                                     </tr>

@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!-- ========================================== -->
+        <!-- UOM CATEGORIES (FREIGHT FORWARDING)        -->
+        <!-- ========================================== -->
+
+        <record id="uom_category_freight" model="uom.category">
+            <field name="name">Freight</field>
+        </record>
+
+        <record id="uom_category_fcl" model="uom.category">
+            <field name="name">FCL</field>
+        </record>
+
+        <record id="uom_category_container" model="uom.category">
+            <field name="name">Container</field>
+        </record>
+
+        <record id="uom_category_air" model="uom.category">
+            <field name="name">Air</field>
+        </record>
+
+        <record id="uom_category_trucking" model="uom.category">
+            <field name="name">Trucking</field>
+        </record>
+
+        <record id="uom_category_warehouse" model="uom.category">
+            <field name="name">Warehouse</field>
+        </record>
+
+        <record id="uom_category_documentation" model="uom.category">
+            <field name="name">Documentation</field>
+        </record>
+
+        <record id="uom_category_sea" model="uom.category">
+            <field name="name">Sea</field>
+        </record>
+
+        <record id="uom_category_customs" model="uom.category">
+            <field name="name">Customs</field>
+        </record>
+
+        <record id="uom_category_general" model="uom.category">
+            <field name="name">General</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- UOM UNITS (FREIGHT FORWARDING)             -->
+        <!-- ========================================== -->
+
+        <!-- Category: Freight -->
+        <!-- KG: Kilogram (Air freight / handling berdasarkan berat) -->
+        <record id="uom_freight_kg" model="uom.uom">
+            <field name="name">KG</field>
+            <field name="category_id" ref="uom_category_freight"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- KGS: Kilograms (Freight berdasarkan berat) -->
+        <record id="uom_freight_kgs" model="uom.uom">
+            <field name="name">KGS</field>
+            <field name="category_id" ref="uom_category_freight"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- CBM: Cubic Meter (LCL / volume cargo) -->
+        <record id="uom_freight_cbm" model="uom.uom">
+            <field name="name">CBM</field>
+            <field name="category_id" ref="uom_category_freight"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- M3: Cubic Meter (LCL / warehouse / volume) -->
+        <record id="uom_freight_m3" model="uom.uom">
+            <field name="name">M3</field>
+            <field name="category_id" ref="uom_category_freight"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- W/M: Weight or Measurement (LCL sea freight) -->
+        <record id="uom_freight_w_m" model="uom.uom">
+            <field name="name">W/M</field>
+            <field name="category_id" ref="uom_category_freight"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- RT: Revenue Ton (LCL / project cargo) -->
+        <record id="uom_freight_rt" model="uom.uom">
+            <field name="name">RT</field>
+            <field name="category_id" ref="uom_category_freight"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Ton: Metric Ton (Heavy cargo / sea freight) -->
+        <record id="uom_freight_ton" model="uom.uom">
+            <field name="name">Ton</field>
+            <field name="category_id" ref="uom_category_freight"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1000.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: FCL -->
+        <!-- 20FT: 20 Feet Container (Ocean freight FCL) -->
+        <record id="uom_fcl_20ft" model="uom.uom">
+            <field name="name">20FT</field>
+            <field name="category_id" ref="uom_category_fcl"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- 40FT: 40 Feet Container (Ocean freight FCL) -->
+        <record id="uom_fcl_40ft" model="uom.uom">
+            <field name="name">40FT</field>
+            <field name="category_id" ref="uom_category_fcl"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- 40HC: 40 Feet High Cube (Ocean freight FCL) -->
+        <record id="uom_fcl_40hc" model="uom.uom">
+            <field name="name">40HC</field>
+            <field name="category_id" ref="uom_category_fcl"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- 45HC: 45 Feet High Cube (Ocean freight FCL) -->
+        <record id="uom_fcl_45hc" model="uom.uom">
+            <field name="name">45HC</field>
+            <field name="category_id" ref="uom_category_fcl"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: Container -->
+        <!-- Container: Per Container (THC / seal / local charges) -->
+        <record id="uom_container_container" model="uom.uom">
+            <field name="name">Container</field>
+            <field name="category_id" ref="uom_category_container"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: Air -->
+        <!-- AWB: Air Waybill (AWB documentation fee) -->
+        <record id="uom_air_awb" model="uom.uom">
+            <field name="name">AWB</field>
+            <field name="category_id" ref="uom_category_air"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- HAWB: House Air Waybill (HAWB documentation) -->
+        <record id="uom_air_hawb" model="uom.uom">
+            <field name="name">HAWB</field>
+            <field name="category_id" ref="uom_category_air"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- MAWB: Master Air Waybill (MAWB documentation) -->
+        <record id="uom_air_mawb" model="uom.uom">
+            <field name="name">MAWB</field>
+            <field name="category_id" ref="uom_category_air"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Shipment: Per Shipment (Air freight admin / handling) -->
+        <record id="uom_air_shipment" model="uom.uom">
+            <field name="name">Shipment</field>
+            <field name="category_id" ref="uom_category_air"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: Trucking -->
+        <!-- Trip: Per Trip (Trucking delivery / pickup) -->
+        <record id="uom_trucking_trip" model="uom.uom">
+            <field name="name">Trip</field>
+            <field name="category_id" ref="uom_category_trucking"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Truck: Per Truck (Truck service) -->
+        <record id="uom_trucking_truck" model="uom.uom">
+            <field name="name">Truck</field>
+            <field name="category_id" ref="uom_category_trucking"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Unit: Per Unit (Vehicle / equipment) -->
+        <record id="uom_trucking_unit" model="uom.uom">
+            <field name="name">Unit</field>
+            <field name="category_id" ref="uom_category_trucking"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Day: Per Day (Vehicle rental / standby) -->
+        <record id="uom_trucking_day" model="uom.uom">
+            <field name="name">Day</field>
+            <field name="category_id" ref="uom_category_trucking"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Hour: Per Hour (Waiting / overtime) -->
+        <record id="uom_trucking_hour" model="uom.uom">
+            <field name="name">Hour</field>
+            <field name="category_id" ref="uom_category_trucking"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- KM: Per Kilometer (Distance-based trucking) -->
+        <record id="uom_trucking_km" model="uom.uom">
+            <field name="name">KM</field>
+            <field name="category_id" ref="uom_category_trucking"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: Warehouse -->
+        <!-- Pallet: Per Pallet (Pallet handling) -->
+        <record id="uom_warehouse_pallet" model="uom.uom">
+            <field name="name">Pallet</field>
+            <field name="category_id" ref="uom_category_warehouse"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Carton: Per Carton (Carton handling) -->
+        <record id="uom_warehouse_carton" model="uom.uom">
+            <field name="name">Carton</field>
+            <field name="category_id" ref="uom_category_warehouse"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- CTN: Carton (Carton handling / storage) -->
+        <record id="uom_warehouse_ctn" model="uom.uom">
+            <field name="name">CTN</field>
+            <field name="category_id" ref="uom_category_warehouse"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Package: Per Package (General cargo handling) -->
+        <record id="uom_warehouse_package" model="uom.uom">
+            <field name="name">Package</field>
+            <field name="category_id" ref="uom_category_warehouse"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- PKG: Package (General cargo handling) -->
+        <record id="uom_warehouse_pkg" model="uom.uom">
+            <field name="name">PKG</field>
+            <field name="category_id" ref="uom_category_warehouse"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Day: Per Day (Storage) -->
+        <record id="uom_warehouse_day" model="uom.uom">
+            <field name="name">Day</field>
+            <field name="category_id" ref="uom_category_warehouse"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Month: Per Month (Long-term storage) -->
+        <record id="uom_warehouse_month" model="uom.uom">
+            <field name="name">Month</field>
+            <field name="category_id" ref="uom_category_warehouse"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: Documentation -->
+        <!-- Shipment: Per Shipment (Admin / documentation fee) -->
+        <record id="uom_documentation_shipment" model="uom.uom">
+            <field name="name">Shipment</field>
+            <field name="category_id" ref="uom_category_documentation"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Job: Per Job (Operational job fee) -->
+        <record id="uom_documentation_job" model="uom.uom">
+            <field name="name">Job</field>
+            <field name="category_id" ref="uom_category_documentation"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Set: Per Set (Document set) -->
+        <record id="uom_documentation_set" model="uom.uom">
+            <field name="name">Set</field>
+            <field name="category_id" ref="uom_category_documentation"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- DOC: Per Document (Documentation fee) -->
+        <record id="uom_documentation_doc" model="uom.uom">
+            <field name="name">DOC</field>
+            <field name="category_id" ref="uom_category_documentation"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: Sea -->
+        <!-- BL: Bill of Lading (B/L documentation) -->
+        <record id="uom_sea_bl" model="uom.uom">
+            <field name="name">BL</field>
+            <field name="category_id" ref="uom_category_sea"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- HBL: House Bill of Lading (HBL documentation) -->
+        <record id="uom_sea_hbl" model="uom.uom">
+            <field name="name">HBL</field>
+            <field name="category_id" ref="uom_category_sea"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- MBL: Master Bill of Lading (MBL documentation) -->
+        <record id="uom_sea_mbl" model="uom.uom">
+            <field name="name">MBL</field>
+            <field name="category_id" ref="uom_category_sea"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: Customs -->
+        <!-- Shipment: Per Shipment (Customs clearance) -->
+        <record id="uom_customs_shipment" model="uom.uom">
+            <field name="name">Shipment</field>
+            <field name="category_id" ref="uom_category_customs"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Job: Per Job (Customs clearance job) -->
+        <record id="uom_customs_job" model="uom.uom">
+            <field name="name">Job</field>
+            <field name="category_id" ref="uom_category_customs"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Document: Per Document (Import declaration / customs document) -->
+        <record id="uom_customs_document" model="uom.uom">
+            <field name="name">Document</field>
+            <field name="category_id" ref="uom_category_customs"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Declaration: Per Declaration (Import declaration) -->
+        <record id="uom_customs_declaration" model="uom.uom">
+            <field name="name">Declaration</field>
+            <field name="category_id" ref="uom_category_customs"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Entry: Per Entry (Customs entry) -->
+        <record id="uom_customs_entry" model="uom.uom">
+            <field name="name">Entry</field>
+            <field name="category_id" ref="uom_category_customs"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Category: General -->
+        <!-- PCS: Pieces (General cargo quantity) -->
+        <record id="uom_general_pcs" model="uom.uom">
+            <field name="name">PCS</field>
+            <field name="category_id" ref="uom_category_general"/>
+            <field name="uom_type">reference</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Lot: Per Lot (One group of services) -->
+        <record id="uom_general_lot" model="uom.uom">
+            <field name="name">Lot</field>
+            <field name="category_id" ref="uom_category_general"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Service: Per Service (Lump service charge) -->
+        <record id="uom_general_service" model="uom.uom">
+            <field name="name">Service</field>
+            <field name="category_id" ref="uom_category_general"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+        <!-- Lump Sum: Lump Sum (Fixed total charge) -->
+        <record id="uom_general_lump_sum" model="uom.uom">
+            <field name="name">Lump Sum</field>
+            <field name="category_id" ref="uom_category_general"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor_inv">1.0</field>
+            <field name="rounding">0.001</field>
+        </record>
+
+    </data>
+</odoo>
