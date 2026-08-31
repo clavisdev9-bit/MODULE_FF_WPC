@@ -18,47 +18,50 @@
                     <t t-set="marks_lines" t-value="marks_text.count('\n') + 1 if marks_text else 0"/>
                     <t t-set="has_attachment" t-value="cargo_count &gt; 1 or desc_len &gt; 250 or desc_lines &gt; 6 or marks_len &gt; 150 or marks_lines &gt; 5"/>
 
+                    <!-- Dynamic Height Auto-Balancing for Page 1 Footer Alignment -->
+                    <t t-set="is_same_notify" t-value="doc.notify_party_id == doc.consignee_id"/>
+                    <t t-set="cargo_row_height" t-value="112 if is_same_notify else 98"/>
+                    <t t-set="inner_desc_height" t-value="int(cargo_row_height - 4)"/>
+
                     <!-- ================= PAGE 1: ORIGINAL B/L ================= -->
-                    <div class="page">
+                    <div class="page hbl-main-page">
                         <style>
-                            /* ── Base ── */
+                            /* ── Base Default (Dipakai oleh wkhtmltopdf agar PDF 100% bersih tanpa border/margin abu-abu) ── */
                             * { box-sizing: border-box; }
-                            .page { font-size: 9.5pt; text-transform: uppercase; }
-                            .page span { font-size: inherit; }
-                            .page h1, .page h2, .page h3,
-                            .page h4, .page h5, .page h6 { margin: 0; padding: 0; line-height: 1.2;
-                            }
+                            .hbl-main-page { font-size: 9.5pt; text-transform: uppercase; line-height: 1.35; width: 100%; margin: 0; padding: 0; background: none; box-shadow: none; border: none; }
+                            .hbl-main-page span { font-size: inherit; }
+                            .hbl-main-page h1, .hbl-main-page h2, .hbl-main-page h3,
+                            .hbl-main-page h4, .hbl-main-page h5, .hbl-main-page h6 { margin: 0; padding: 0; line-height: 1.25; }
                             .container-fluid { width: 100%; padding: 0; }
 
                             /* ── Table ── */
                             .table { width: 100%; border-collapse: collapse; }
                             .table, .table th, .table td { border: 1px solid #000 !important; }
-                            .table td, .table th { font-size: 9.5pt !important; padding: 4px 6px
-                            !important; vertical-align: top; }
+                            .table td, .table th { font-size: 9pt !important; padding: 2.5px 4px !important; line-height: 1.35; vertical-align: top; }
                             .table tbody tr { page-break-inside: avoid; break-inside: avoid; }
 
                             /* ── BL-specific ── */
-                            .bl-label { font-size: 9pt; font-weight: bold; margin-bottom: 2px; }
-                            .bl-field-sm { min-height: 20px; }
-                            .bl-field-lg { min-height: 50px; }
-                            .bl-field-xl { min-height: 100px; }
-                            .bl-company { font-size: 15pt; color: navy; }
+                            .bl-label { font-size: 8.5pt; font-weight: bold; margin-bottom: 1px; line-height: 1.25; }
+                            .bl-field-sm { min-height: 14px; }
+                            .bl-field-lg { min-height: 30px; }
+                            .bl-field-xl { min-height: 60px; }
+                            .bl-company { font-size: 14pt; color: navy; }
                             .bl-type { background-color: navy; color: white; }
-                            .bl-terms { font-size: 8pt; }
+                            .bl-terms { font-size: 7.5pt; }
 
                             /* ── Bootstrap spacing ── */
-                            .p-3 { padding: 6px 8px; }
-                            .px-2 { padding-left: 4px; padding-right: 4px; }
-                            .pt-1 { padding-top: 2px; }
-                            .pb-1 { padding-bottom: 2px; }
-                            .mt-1 { margin-top: 2px; }
-                            .mt-2 { margin-top: 4px; }
-                            .mt-3 { margin-top: 6px; }
-                            .mt-4 { margin-top: 10px; }
+                            .p-3 { padding: 3px 5px !important; }
+                            .px-2 { padding-left: 3px; padding-right: 3px; }
+                            .pt-1 { padding-top: 1px; }
+                            .pb-1 { padding-bottom: 1px; }
+                            .mt-1 { margin-top: 1px; }
+                            .mt-2 { margin-top: 2px; }
+                            .mt-3 { margin-top: 3px; }
+                            .mt-4 { margin-top: 5px; }
                             .mb-0 { margin-bottom: 0; }
-                            .mb-2 { margin-bottom: 4px; }
-                            .mb-3 { margin-bottom: 6px; }
-                            .me-2 { margin-right: 4px; }
+                            .mb-2 { margin-bottom: 2px; }
+                            .mb-3 { margin-bottom: 3px; }
+                            .me-2 { margin-right: 3px; }
                             .ms-auto { margin-left: auto; }
 
                             /* ── Bootstrap typography ── */
@@ -66,8 +69,8 @@
                             .text-center { text-align: center; }
                             .text-start { text-align: left; }
                             .fw-bold { font-weight: bold; }
-                            .fs-5 { font-size: 10.5pt; }
-                            .fs-6 { font-size: 9.5pt; }
+                            .fs-5 { font-size: 10pt; }
+                            .fs-6 { font-size: 9pt; }
                             .lh-1 { line-height: 1; }
                             .text-nowrap { white-space: nowrap; }
                             .d-block { display: block; }
@@ -87,39 +90,33 @@
                             .d-flex { display: -webkit-box; display: -webkit-flex; display: flex; }
                             .flex-column { -webkit-flex-direction: column; flex-direction: column; }
                             .flex-grow-1 { -webkit-flex-grow: 1; flex-grow: 1; }
-                            .align-items-end { -webkit-align-items: flex-end; align-items: flex-end;
-                            }
-                            .align-items-center { -webkit-align-items: center; align-items: center;
-                            }
-                            .justify-content-between { -webkit-justify-content: space-between;
-                            justify-content: space-between; }
-                            .justify-content-center { -webkit-justify-content: center;
-                            justify-content: center; }
+                            .align-items-end { -webkit-align-items: flex-end; align-items: flex-end; }
+                            .align-items-center { -webkit-align-items: center; align-items: center; }
+                            .justify-content-between { -webkit-justify-content: space-between; justify-content: space-between; }
+                            .justify-content-center { -webkit-justify-content: center; justify-content: center; }
 
                             /* ── Bootstrap vertical align ── */
                             .align-top { vertical-align: top; }
                             .align-bottom { vertical-align: bottom; }
 
                             /* ── Legal clause ── */
-                            .legal-clause { font-size: 7.5pt; font-weight: normal; text-transform: none !important; }
+                            .legal-clause { font-size: 6.6pt; font-weight: normal; text-transform: none !important; }
                             .legal-clause p {
                                 text-align: justify;
-                                text-indent: 1.5em;
+                                text-indent: 1em;
                                 margin-bottom: 0;
-                                line-height: 1.2;
-                                font-size: 7.5pt;
+                                line-height: 1.22;
+                                font-size: 6.6pt;
                                 font-weight: normal;
                                 text-transform: none !important;
                             }
 
                             /* ── Signature ── */
-                            .bl-company-sign { font-size: 12pt; font-weight: bold; }
+                            .bl-company-sign { font-size: 11pt; font-weight: bold; }
 
                             /* ── Layout wrapper (2-col) — table, bukan flex (wkhtmltopdf) ── */
-                            .layout-wrapper { display: table; width: 100%; border-collapse:
-                            collapse; }
-                            .layout-wrapper > .col-6 { display: table-cell; width: 50%; box-sizing:
-                            border-box; vertical-align: top; }
+                            .layout-wrapper { display: table; width: 100%; border-collapse: collapse; }
+                            .layout-wrapper > .col-6 { display: table-cell; width: 50%; box-sizing: border-box; vertical-align: top; }
 
                             /* ── Border helpers ── */
                             .no-left-border tr > th:first-child,
@@ -134,9 +131,9 @@
                             .no-top-border tr:first-child > th { border-top: hidden !important; }
                             .hide-side-borders { overflow: hidden; padding: 1px 0; }
                             .hide-side-borders table {
-                            width: calc(100% + 4px) !important;
-                            margin-left: -1px !important;
-                            margin-right: -1px !important;
+                                width: calc(100% + 4px) !important;
+                                margin-left: -1px !important;
+                                margin-right: -1px !important;
                             }
 
                             .no-outer-borders { width: 100%; }
@@ -145,24 +142,18 @@
 
                             /* ── Page break ── */
                             .section-nobreak {
-                            page-break-inside: avoid !important;
-                            break-inside: avoid !important;
+                                page-break-inside: avoid !important;
+                                break-inside: avoid !important;
                             }
 
-                            /* ── FF-36: cargo particulars data rows - no border between
-                                 rows (only outer/column borders), padding restored to match
-                                 the roomier spacing of the previous single-cell layout ── */
                             .bl-cargo-row td {
                                 border-top: none !important;
                                 border-bottom: none !important;
-                                padding: 6px 6px !important;
-                                height: 30mm !important;
+                                padding: 3px 4px !important;
                             }
 
                             .inner-desc-table {
                                 width: 100%;
-                                height: 26mm !important;
-                                min-height: 26mm !important;
                                 border-collapse: collapse !important;
                                 border: none !important;
                             }
@@ -173,8 +164,7 @@
                             }
 
                             .bl-partner-cell {
-                                height: 30mm !important;
-                                min-height: 30mm !important;
+                                min-height: 14mm !important;
                             }
                         </style>
                         <div class="container-fluid">
@@ -270,7 +260,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td colspan="2" rowspan="2" class="align-top bl-partner-cell">
+                                            <td colspan="2" class="align-top bl-partner-cell">
                                                 <div class="bl-label">NOTIFY PARTY</div>
                                                 <div class="">
                                                     <t t-set="same_name"
@@ -302,19 +292,6 @@
                                                     </t>
                                                 </div>
                                             </td>
-                                            <td class="align-top">
-                                                <div class="bl-label">CONTAINER NO.</div>
-                                                <div class="bl-field-sm">
-                                                    <t t-foreach="doc.cargo_info_ids" t-as="cargo">
-                                                        <span t-field="cargo.container_no" />
-                                                        <t t-if="cargo.seal_no"> / <span t-field="cargo.seal_no" /></t>
-                                                        <t t-if="cargo.container_type_id"> / <span t-field="cargo.container_type_id.name" /></t>
-                                                        <br />
-                                                    </t>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
                                             <td class="align-top">
                                                 <div class="bl-label">DELIVERY AGENT</div>
                                                 <div class="">
@@ -400,8 +377,8 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td class="align-top" style="width: 20%;">
-                                                    <div class="bl-label">MARKS AND NUMBERS</div>
+                                                <td class="align-top text-center" style="width: 20%;">
+                                                    <div class="bl-label text-center">CONTAINER NO &amp; SEAL NO<br/>MARKS AND NO</div>
                                                 </td>
                                                 <td class="align-top" style="width: 13%;">
                                                     <div class="bl-label">NO. OF<br/><span style="white-space: nowrap;">CONT&#160;OR</span><br/>OTHER PKGS</div>
@@ -420,7 +397,7 @@
                                         </thead>
                                         <tbody>
                                             <t t-if="has_attachment">
-                                                <tr class="bl-cargo-row">
+                                                <tr class="bl-cargo-row" t-att-style="'height: ' + str(cargo_row_height) + 'mm !important; min-height: ' + str(cargo_row_height) + 'mm !important;'">
                                                     <td class="align-top">
                                                         <span class="fw-bold">AS PER ATTACHMENT</span>
                                                     </td>
@@ -434,7 +411,7 @@
                                                         </t>
                                                     </td>
                                                     <td class="align-top">
-                                                        <table class="inner-desc-table">
+                                                        <table class="inner-desc-table" t-att-style="'height: ' + str(inner_desc_height) + 'mm !important; min-height: ' + str(inner_desc_height) + 'mm !important;'">
                                                             <tr>
                                                                 <td style="vertical-align: top !important;">
                                                                     <span class="fw-bold">AS PER ATTACHMENT</span>
@@ -442,7 +419,7 @@
                                                             </tr>
                                                             <tr>
                                                                 <td style="vertical-align: bottom !important;">
-                                                                    <div class="bl-cargo-footer" style="font-size: 8.5pt; line-height: 1.3;">
+                                                                    <div class="bl-cargo-footer" style="font-size: 9pt; line-height: 1.3;">
                                                                         <div>SHIPPER'S LOAD, STOW, WEIGHT, COUNT &amp; SEAL</div>
                                                                         <t t-if="doc.freight">
                                                                             <div>FREIGHT <span t-esc="doc.freight.upper()" /></div>
@@ -465,17 +442,17 @@
                                             </t>
                                             <t t-else="">
                                                 <t t-if="not doc.cargo_info_ids">
-                                                    <tr class="bl-cargo-row">
+                                                    <tr class="bl-cargo-row" t-att-style="'height: ' + str(cargo_row_height) + 'mm !important; min-height: ' + str(cargo_row_height) + 'mm !important;'">
                                                         <td class="align-top" />
                                                         <td class="align-top" />
                                                         <td class="align-top">
-                                                            <table class="inner-desc-table">
+                                                            <table class="inner-desc-table" t-att-style="'height: ' + str(inner_desc_height) + 'mm !important; min-height: ' + str(inner_desc_height) + 'mm !important;'">
                                                                 <tr>
-                                                                    <td style="vertical-align: top !important;" />
+                                                                  <td style="vertical-align: top !important;" />
                                                                 </tr>
                                                                 <tr>
                                                                     <td style="vertical-align: bottom !important;">
-                                                                        <div class="bl-cargo-footer" style="font-size: 8.5pt; line-height: 1.3;">
+                                                                        <div class="bl-cargo-footer" style="font-size: 9pt; line-height: 1.3;">
                                                                             <div>SHIPPER'S LOAD, STOW, WEIGHT, COUNT &amp; SEAL</div>
                                                                             <t t-if="doc.freight">
                                                                                 <div>FREIGHT <span t-esc="doc.freight.upper()" /></div>
@@ -494,16 +471,30 @@
                                                 </t>
                                                 <t t-else="">
                                                     <t t-foreach="doc.cargo_info_ids" t-as="cargo">
-                                                        <tr class="bl-cargo-row">
+                                                        <tr class="bl-cargo-row" t-att-style="'height: ' + str(cargo_row_height) + 'mm !important; min-height: ' + str(cargo_row_height) + 'mm !important;'">
                                                             <td class="align-top">
-                                                                <span t-field="cargo.marks_and_no" />
+                                                                <t t-if="cargo.container_no">
+                                                                    <div class="fw-bold">
+                                                                        <span t-field="cargo.container_no" />
+                                                                        <t t-if="cargo.seal_no"> / <span t-field="cargo.seal_no" /></t>
+                                                                        <t t-if="cargo.container_type_id"> / <span t-field="cargo.container_type_id.name" /></t>
+                                                                    </div>
+                                                                </t>
+                                                                <div>
+                                                                    <t t-if="cargo.marks_and_no">
+                                                                        <span t-field="cargo.marks_and_no" />
+                                                                    </t>
+                                                                    <t t-elif="not cargo.container_no">
+                                                                        <span>N/M</span>
+                                                                    </t>
+                                                                </div>
                                                             </td>
                                                             <td class="align-top">
                                                                 <span t-field="cargo.quantity" />
                                                                 <span t-field="cargo.package_type_id.name" />
                                                             </td>
                                                             <td class="align-top">
-                                                                <table class="inner-desc-table">
+                                                                <table class="inner-desc-table" t-att-style="'height: ' + str(inner_desc_height) + 'mm !important; min-height: ' + str(inner_desc_height) + 'mm !important;'">
                                                                     <tr>
                                                                         <td style="vertical-align: top !important;">
                                                                             <span t-field="cargo.description_of_goods" />
@@ -511,7 +502,7 @@
                                                                     </tr>
                                                                     <tr>
                                                                         <td style="vertical-align: bottom !important;">
-                                                                            <div class="bl-cargo-footer" style="font-size: 8.5pt; line-height: 1.3;">
+                                                                            <div class="bl-cargo-footer" style="font-size: 9pt; line-height: 1.3;">
                                                                                 <div>SHIPPER'S LOAD, STOW, WEIGHT, COUNT &amp; SEAL</div>
                                                                                 <t t-if="doc.freight">
                                                                                     <div>FREIGHT <span t-esc="doc.freight.upper()" /></div>
@@ -591,14 +582,14 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr>
-                                                    <td />
-                                                    <td class="text-center">
+                                                <tr style="height: 100%;">
+                                                    <td style="height: 100%;" />
+                                                    <td class="text-center" style="height: 100%;">
                                                         <span t-if="doc.freight == 'prepaid'">
                                                             <span t-field="doc.freight" />
                                                         </span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center" style="height: 100%;">
                                                         <span t-if="doc.freight == 'collect'">
                                                             <span t-field="doc.freight" />
                                                         </span>
@@ -607,68 +598,78 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div class="col-6 p-3">
-                                        <div class="legal-clause">
-                                            <p>
-                                                Received by the Carrier from the shipper in apparent
-                                                good order
-                                                and condition unless otherwise
-                                                indicated herein, the goods, or the container(s) or
-                                                package(s)
-                                                said to contain the cargo herein mentioned
-                                                to be carried subject to all the terms and
-                                                conditions provided
-                                                for on the face and back of this Bill of
-                                                Lading by the vessel named herein or any substitute
-                                                at the
-                                                Carrier's option and/or other means of
-                                                transport, from the place of receipt or the port of
-                                                loading to
-                                                the port of discharge or the place of delivery
-                                                shown herein and there to be delivered unto order or
-                                                assigns.
-                                            </p>
-                                            <p>
-                                                In accepting this Bill of Lading, the Merchant
-                                                agrees to be
-                                                bound by all the stipulations, exceptions,
-                                                terms and conditions on the face and back hereof,
-                                                whether
-                                                written, typed, stamped or printed, as fully as
-                                                if signed by the Merchant, and local custom or
-                                                privilege to the
-                                                contrary notwithstanding, and agrees that
-                                                all agreements or freight engagements for and in
-                                                connection with
-                                                the carriage of the goods are
-                                                superseded by this Bill of Lading.
-                                            </p>
-                                            <p>
-                                                In witness whereof, the undersigned, on behalf of
-                                                WPC OCEAN LINE
-                                                LIMITED.
-                                                has signed three (3) Bill(s) of Lading stated above,
-                                                all of this
-                                                tenor and date, one of which being
-                                                accomplished the others to stand void.
-                                            </p>
-                                        </div>
-                                        <div class="ms-auto text-end w-75 mt-3">
-                                            <div class="bl-company-sign">WPC LOGISTICS (S) PTE LTD</div>
-                                            <table
-                                                style="width: 100%; border-collapse: collapse; margin-top: 50px;">
-                                                <tr>
-                                                    <td
-                                                        style="white-space: nowrap; padding-right: 6px; vertical-align: bottom; width: 1%;">
-                                                        By</td>
-                                                    <td style="border-bottom: 1px solid #000;"></td>
-                                                </tr>
-                                            </table>
-                                            <div class="mt-1 bl-label text-center">
-                                                <span class="d-block">AS AGENT FOR CARRIER</span>
-                                                <span class="d-block">WPC OCEAN LINE LIMITED</span>
-                                            </div>
-                                        </div>
+                                    <div class="col-6 p-3" style="height: 100%;">
+                                        <table style="width: 100%; height: 100%; min-height: 100%; border-collapse: collapse; border: none !important;">
+                                            <tr>
+                                                <td style="vertical-align: top; border: none !important; padding: 0;">
+                                                    <div class="legal-clause">
+                                                        <p>
+                                                            Received by the Carrier from the shipper in apparent
+                                                            good order
+                                                            and condition unless otherwise
+                                                            indicated herein, the goods, or the container(s) or
+                                                            package(s)
+                                                            said to contain the cargo herein mentioned
+                                                            to be carried subject to all the terms and
+                                                            conditions provided
+                                                            for on the face and back of this Bill of
+                                                            Lading by the vessel named herein or any substitute
+                                                            at the
+                                                            Carrier's option and/or other means of
+                                                            transport, from the place of receipt or the port of
+                                                            loading to
+                                                            the port of discharge or the place of delivery
+                                                            shown herein and there to be delivered unto order or
+                                                            assigns.
+                                                        </p>
+                                                        <p>
+                                                            In accepting this Bill of Lading, the Merchant
+                                                            agrees to be
+                                                            bound by all the stipulations, exceptions,
+                                                            terms and conditions on the face and back hereof,
+                                                            whether
+                                                            written, typed, stamped or printed, as fully as
+                                                            if signed by the Merchant, and local custom or
+                                                            privilege to the
+                                                            contrary notwithstanding, and agrees that
+                                                            all agreements or freight engagements for and in
+                                                            connection with
+                                                            the carriage of the goods are
+                                                            superseded by this Bill of Lading.
+                                                        </p>
+                                                        <p>
+                                                            In witness whereof, the undersigned, on behalf of
+                                                            WPC OCEAN LINE
+                                                            LIMITED.
+                                                            has signed three (3) Bill(s) of Lading stated above,
+                                                            all of this
+                                                            tenor and date, one of which being
+                                                            accomplished the others to stand void.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="vertical-align: bottom; border: none !important; padding: 0;">
+                                                    <div class="ms-auto text-end w-75 mt-2">
+                                                        <div class="bl-company-sign">WPC LOGISTICS (S) PTE LTD</div>
+                                                        <table
+                                                            style="width: 100%; border-collapse: collapse; margin-top: 24px;">
+                                                            <tr>
+                                                                <td
+                                                                    style="white-space: nowrap; padding-right: 6px; vertical-align: bottom; width: 1%;">
+                                                                    By</td>
+                                                                <td style="border-bottom: 1px solid #000;"></td>
+                                                            </tr>
+                                                        </table>
+                                                        <div class="mt-1 bl-label text-center">
+                                                            <span class="d-block">AS AGENT FOR CARRIER</span>
+                                                            <span class="d-block">WPC OCEAN LINE LIMITED</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </div>
                                 </div>
                                 <!-- Footer -->
@@ -757,7 +758,7 @@
                             <table class="att-list-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 25%;">Marks and Numbers</th>
+                                        <th style="width: 25%; text-align: center;">Container No &amp; Seal No<br/>Marks and No</th>
                                         <th style="width: 22%;">NO. OF CONT. OR OTHER PKGS</th>
                                         <th style="width: 53%;">Description of Goods</th>
                                     </tr>
@@ -766,11 +767,18 @@
                                     <t t-foreach="doc.cargo_info_ids" t-as="c">
                                         <tr>
                                             <td>
+                                                <t t-if="c.container_no">
+                                                    <div style="font-weight: bold;">
+                                                        <span t-field="c.container_no"/>
+                                                        <t t-if="c.seal_no"> / <span t-field="c.seal_no"/></t>
+                                                        <t t-if="c.container_type_id"> / <span t-field="c.container_type_id.name"/></t>
+                                                    </div>
+                                                </t>
                                                 <div>
                                                     <t t-if="c.marks_and_no">
                                                         <span t-field="c.marks_and_no"/>
                                                     </t>
-                                                    <t t-else="">
+                                                    <t t-elif="not c.container_no">
                                                         <span>N/M</span>
                                                     </t>
                                                 </div>

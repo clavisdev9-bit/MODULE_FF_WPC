@@ -43,8 +43,8 @@
                     <field name="pricelist_id" readonly="state in ['cancel', 'sale']"
                         groups="!product.group_product_pricelist" />
                     <field name="delivery_type_id" />
-                    <field name="effective_date" />
-                    <field name="validity_date" string="Expiry Date" />
+                    <field name="valid_from" />
+                    <field name="validity_date" string="Valid To" />
                     <field name="reference_number" />
                     <field name="commodity_id" />
                 </group>
@@ -157,10 +157,7 @@
                 </page>
 
                 <page string="Terms &amp; Conditions">
-                    <group>
-                        <field name="terms_and_condition_id" />
-                        <field name="description" />
-                    </group>
+                    <field name="terms_and_conditions" placeholder="Terms and conditions..." nolabel="1"/>
                 </page>
 
                 <page string="Cargo Info">
