@@ -8,19 +8,19 @@
                     <t t-set="si_shipper" t-value="doc.shipper_id if doc.actual_shipper else doc.env.company.partner_id"/>
                     <t t-set="si_consignee" t-value="doc.consignee_id if doc.actual_shipper else doc.delivery_agent_id"/>
 
-                    <div class="header" style="padding-top: 24px; padding-bottom: 14px;">
+                    <div class="header" style="padding-top: 10px; padding-bottom: 6px;">
                         <style>
                             * { box-sizing: border-box; }
-                            .si-header-company { font-size: 18pt; font-weight: bold; color: #333; font-family: Arial, Helvetica, sans-serif; }
-                            .si-header-sub { font-size: 14pt; font-weight: 500; line-height: 1.5; color: #333; font-family: Arial, Helvetica, sans-serif; }
+                            .si-header-company { font-size: 15pt; font-weight: bold; color: #333; font-family: Arial, Helvetica, sans-serif; }
+                            .si-header-sub { font-size: 10pt; font-weight: 500; line-height: 1.3; color: #333; font-family: Arial, Helvetica, sans-serif; }
                         </style>
-                        <table style="width:100%; border-collapse: collapse; border: none !important; margin-bottom: 6px;">
+                        <table style="width:100%; border-collapse: collapse; border: none !important; margin-bottom: 3px;">
                             <tr>
-                                <td style="border:none !important; width: 150px; padding-right: 0px; vertical-align: top;">
+                                <td style="border:none !important; width: 90px; padding-right: 0px; vertical-align: top;">
                                     <img t-if="company and company.logo" t-att-src="image_data_uri(company.logo)"
-                                        style="height: 165px; width: auto; display: block;" />
+                                        style="height: 100px; width: auto; display: block;" />
                                 </td>
-                                <td style="border:none !important; vertical-align: top; padding-top: 6px;">
+                                <td style="border:none !important; vertical-align: top; padding-top: 4px;">
                                     <div class="si-header-company"><t t-esc="company.name"/></div>
                                     <div class="si-header-sub">
                                         <t t-esc="company.street"/><t t-if="company.street2">, <t t-esc="company.street2"/></t><t t-if="company.city">, <t t-esc="company.city"/></t><t t-if="company.zip"> <t t-esc="company.zip"/></t>
@@ -34,7 +34,7 @@
                     </div>
 
                     <div class="footer">
-                        <div style="text-align:center; font-size:9pt; font-family: Arial, Helvetica, sans-serif; color:#555; border-top: 1px solid #ccc; padding-top: 4px;">
+                        <div style="text-align:center; font-size:7pt; font-family: Arial, Helvetica, sans-serif; color:#555; border-top: 1px solid #ccc; padding-top: 2px;">
                             Page <span class="page"/> of <span class="topage"/>
                         </div>
                     </div>
@@ -42,67 +42,64 @@
                     <div class="page">
                         <style>
                             * { box-sizing: border-box; }
-                            @page { margin-bottom: 30mm; }
-                            @page :first { margin-bottom: 30mm; }
-                            .page { font-size: 12pt; color: #222; padding-bottom: 12px; }
+                            @page { margin-bottom: 14mm; }
+                            @page :first { margin-bottom: 14mm; }
+                            .page { font-size: 9pt; color: #222; padding-bottom: 6px; }
                             .page span { font-size: inherit; }
                             .container-fluid { width: 100%; }
 
                             .table { width: 100%; border-collapse: collapse; table-layout: fixed; }
                             .table tbody tr { page-break-inside: avoid; break-inside: avoid; }
                             .table td, .table th {
-                                font-size: 12pt !important;
-                                padding: 8px 10px !important;
+                                font-size: 9pt !important;
+                                padding: 4px 6px !important;
                                 vertical-align: top !important;
-                                line-height: 1.6;
+                                line-height: 1.25;
                                 border: 1px solid #000;
                                 word-wrap: break-word;
                                 overflow-wrap: break-word;
                                 word-break: break-word;
                             }
 
-                            .si-label { font-weight: bold; font-size: 12pt; margin-bottom: 2px; color: #333; }
-                            .si-title { text-align: center; font-weight: bold; font-size: 14pt; margin: 0; color: #333; }
+                            .si-label { font-weight: bold; font-size: 9pt; margin-bottom: 1px; color: #333; }
+                            .si-title { text-align: center; font-weight: bold; font-size: 11pt; margin: 0; color: #333; }
                             .si-inline { display: table; width: 100%; }
-                            .si-inline-row { display: table-row; line-height: 1.35; }
-                            .si-inline-label { display: table-cell; font-weight: bold; white-space: nowrap; padding-bottom: 2px; padding-right: 6px; color: #333; }
-                            .si-inline-colon { display: table-cell; width: 14px; }
+                            .si-inline-row { display: table-row; line-height: 1.15; }
+                            .si-inline-label { display: table-cell; font-weight: bold; white-space: nowrap; padding-bottom: 1px; padding-right: 5px; color: #333; }
+                            .si-inline-colon { display: table-cell; width: 10px; }
                             .si-inline-value { display: table-cell; }
 
                             .si-total-row td {
                                 font-weight: bold;
                                 background-color: #f2f2f2;
-                                border-top: 2px solid #000 !important;
-                                border-bottom: 2px solid #000 !important;
-                                padding-top: 10px !important;
-                                padding-bottom: 10px !important;
-                            }
-                            .si-total-row td:first-child {
-                                border-left: 4px solid #333 !important;
+                                border-top: 1px solid #000 !important;
+                                border-bottom: 1px solid #000 !important;
+                                padding-top: 5px !important;
+                                padding-bottom: 5px !important;
                             }
                             .si-total-label {
-                                font-size: 13pt;
-                                letter-spacing: 1px;
+                                font-size: 10pt;
+                                letter-spacing: 0.5px;
                                 color: #000;
                             }
                             .si-total-value {
-                                font-size: 13pt;
+                                font-size: 10pt;
                                 color: #000;
                             }
                             .si-total-unit {
                                 font-weight: normal;
-                                font-size: 10pt;
+                                font-size: 8pt;
                                 color: #555;
                             }
                             .si-total-breakdown {
                                 font-weight: normal;
-                                font-size: 10pt;
+                                font-size: 8pt;
                                 color: #444;
-                                line-height: 1.5;
+                                line-height: 1.3;
                             }
                             .si-total-divider {
                                 border-top: 1px solid #999;
-                                margin: 4px 0;
+                                margin: 2px 0;
                             }
 
                             strong { color: #333; }
@@ -119,7 +116,7 @@
                             <!-- Row 0: Empty spacer row -->
                             <table class="table mb-0">
                                 <tr>
-                                    <td colspan="2" style="padding: 3px 10px !important; line-height: 1;">&#160;</td>
+                                    <td colspan="2" style="padding: 1px 6px !important; line-height: 1;">&#160;</td>
                                 </tr>
                             </table>
 
@@ -277,11 +274,11 @@
                                     <td style="padding:0 !important; border-bottom: none;">
                                         <table style="width:100%; border-collapse:collapse; table-layout: fixed;">
                                             <tr>
-                                                <td style="width:55%; padding:8px 10px !important; border:none;">
+                                                <td style="width:55%; padding:4px 6px !important; border:none;">
                                                     <div class="si-label">Place of Delivery</div>
                                                     <div><span t-field="doc.place_of_delivery_id.name" /></div>
                                                 </td>
-                                                <td style="width:45%; padding:8px 10px !important; border:none; border-left: 1px solid #000;">
+                                                <td style="width:45%; padding:4px 6px !important; border:none; border-left: 1px solid #000;">
                                                     <div class="si-label" style="white-space: nowrap;">No. of Original B/L</div>
                                                     <div><span t-field="doc.no_of_original_bl" /></div>
                                                 </td>
@@ -307,7 +304,7 @@
                                         <td style="width:20%; border-top: 1px solid #000; border-bottom: none; border-right: none;"><div class="si-label">Container / Seal<br /><span style="white-space: nowrap;">No. Marks &amp; Nos.</span></div></td>
                                         <td style="width:20%; border-top: 1px solid #000; border-bottom: none; border-left: none; border-right: none;"><div class="si-label">No. and Kind of Package</div></td>
                                         <td style="width:45%; border-top: 1px solid #000; border-bottom: none; border-left: none; border-right: none;"><div class="si-label">Description of Goods</div></td>
-                                        <td style="width:25%; border-top: 1px solid #000; border-bottom: none; border-left: none;"><div class="si-label" style="padding-left: 14px;">Weight<br />Measurement</div></td>
+                                        <td style="width:25%; border-top: 1px solid #000; border-bottom: none; border-left: none;"><div class="si-label" style="padding-left: 8px;">Weight<br />Measurement</div></td>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -325,7 +322,7 @@
                                             <td style="width:45%; border-top: none; border-bottom: none; border-left: none; border-right: none;">
                                                 <span t-field="cargo.description_of_goods" />
                                             </td>
-                                            <td style="width:25%; border-top: none; border-bottom: none; border-left: none; padding-left: 24px !important;">
+                                            <td style="width:25%; border-top: none; border-bottom: none; border-left: none; padding-left: 12px !important;">
                                                 <span t-field="cargo.gross_weight" /> KGS<br />
                                                 <span t-if="cargo.total_volume" t-field="cargo.total_volume" />
                                                 <span t-elif="cargo.volume" t-field="cargo.volume" /> CBM
@@ -342,7 +339,7 @@
                                             <t t-if="len(package_totals) > 1">
                                                 <div class="si-total-breakdown">
                                                     <t t-foreach="package_totals.items()" t-as="pt_item">
-                                                        <span style="font-weight: bold; color: #000; font-size: 13pt !important;" t-esc="pt_item[1]" t-options="{'widget': 'float', 'precision': 0}" /> <span style="font-size: 13pt !important; color: #555;" t-esc="pt_item[0]" /><br />
+                                                        <span style="font-weight: bold; color: #000; font-size: 10pt !important;" t-esc="pt_item[1]" t-options="{'widget': 'float', 'precision': 0}" /> <span style="font-size: 10pt !important; color: #555;" t-esc="pt_item[0]" /><br />
                                                     </t>
                                                 </div>
                                             </t>
@@ -352,7 +349,7 @@
                                             </t>
                                         </td>
                                         <td style="width:45%; border-left: none; border-right: none;">&#160;</td>
-                                        <td style="width:25%; border-left: none; border-right: 1px solid #000; padding-left: 24px !important; vertical-align: middle !important;">
+                                        <td style="width:25%; border-left: none; border-right: 1px solid #000; padding-left: 12px !important; vertical-align: middle !important;">
                                             <span class="si-total-value"><span t-esc="total_gross_weight" t-options="{'widget': 'float', 'precision': 1}" /></span>
                                             <span class="si-total-unit"> KGS</span><br />
                                             <span class="si-total-value"><span t-esc="total_measurement" t-options="{'widget': 'float', 'precision': 1}" /></span>
@@ -361,7 +358,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td colspan="4" class="text-center" style="border-top: hidden !important; border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: none; vertical-align: middle !important; padding: 56px 10px 16px 10px !important; line-height: 1.2 !important;">
+                                        <td colspan="4" class="text-center" style="border-top: hidden !important; border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: none; vertical-align: middle !important; padding: 24px 6px 8px 6px !important; line-height: 1.2 !important;">
                                             SHIPPED ON BOARD DATED: 
                                             <span t-field="doc.booking_id.booking_date"
                                                 t-options="{'widget': 'date'}" />
@@ -370,15 +367,15 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="4" style="border-left: 1px solid #000; border-right: 1px solid #000; border-top: none; border-bottom: 1px solid #000; padding: 0; height: 6mm; line-height: 6mm; font-size: 1px;">&#160;</td>
+                                        <td colspan="4" style="border-left: 1px solid #000; border-right: 1px solid #000; border-top: none; border-bottom: 1px solid #000; padding: 0; height: 3mm; line-height: 3mm; font-size: 1px;">&#160;</td>
                                     </tr>
                                 </tfoot>
 
                             </table>
 
                             <!-- Total number of packages -->
-                            <div style="width: 100%; border: 1px solid #000; border-top: none; box-sizing: border-box; padding: 8px 10px; page-break-inside: avoid; break-inside: avoid;">
-                                <div style="font-weight: normal; font-size: 12pt; margin-bottom: 2px;">Total number of packages or units (in words)</div>
+                            <div style="width: 100%; border: 1px solid #000; border-top: none; box-sizing: border-box; padding: 4px 6px; page-break-inside: avoid; break-inside: avoid;">
+                                <div style="font-weight: normal; font-size: 9pt; margin-bottom: 1px;">Total number of packages or units (in words)</div>
                                 <div>
                                     <span t-field="doc.total_packages_remark" />
                                 </div>

@@ -54,6 +54,8 @@
         "report/sea/hbl/shipping_instruction_report.xml",
         "report/sea/hbl/report_noa_sysfreight_template.xml",
         "report/sea/hbl/report_noa_sysfreight.xml",
+        "report/sea/hbl/cargo_manifest_report_template.xml",
+        "report/sea/hbl/cargo_manifest_report.xml",
         # Sea Quotation
         "views/sea/sales/quotation_type.xml",
         "views/sea/sales/quotation.xml",
