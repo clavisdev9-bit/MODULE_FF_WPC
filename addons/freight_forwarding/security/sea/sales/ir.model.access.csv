@@ -34,3 +34,6 @@ access_freight_quotation_type_admin,Freight Quotation Type Admin,model_freight_q
 access_freight_sea_quotation_migration_wizard_admin,Freight Sea Quotation Migration Wizard Admin,model_freight_sea_quotation_migration_wizard,base.group_system,1,1,1,1
 access_freight_sea_quotation_cargo_info_user,Freight Sea Quotation Cargo Info User,model_freight_sea_quotation_cargo_info,base.group_user,1,1,1,0
 access_freight_sea_quotation_cargo_info_admin,Freight Sea Quotation Cargo Info Admin,model_freight_sea_quotation_cargo_info,base.group_system,1,1,1,1
+access_freight_sea_booking_shipment_info_user,Freight Sea Booking Shipment Info User,model_freight_sea_booking_shipment_info,base.group_user,1,1,1,0
+access_freight_sea_booking_shipment_info_admin,Freight Sea Booking Shipment Info Admin,model_freight_sea_booking_shipment_info,base.group_system,1,1,1,1
+
