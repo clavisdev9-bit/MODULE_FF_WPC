@@ -20,6 +20,11 @@ class FreightQuotation(models.AbstractModel):
     _description = "Freight Quotation Mixin"
 
     is_freight_quotation = fields.Boolean(string="Is Freight Quotation", default=False)
+    sea_hbl_id = fields.Many2one(
+        "freight.sea.hbl",
+        string="Sea Jobsheet",
+        index=True,
+    )
 
 
     # =========================================================
@@ -316,6 +321,29 @@ class FreightQuotation(models.AbstractModel):
             self.env["sale.order"].invalidate_model()
         return result
 
+    def _get_sea_hbl_analytic_account(self):
+        self.ensure_one()
+        if hasattr(self, "sea_hbl_id") and self.sea_hbl_id and self.sea_hbl_id.analytic_account_id:
+            return self.sea_hbl_id.analytic_account_id
+        hbl = self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)], limit=1)
+        if hbl and hbl.analytic_account_id:
+            return hbl.analytic_account_id
+        if self.env.context.get("default_sea_hbl_id"):
+            hbl = self.env["freight.sea.hbl"].browse(self.env.context.get("default_sea_hbl_id"))
+            if hbl and hbl.analytic_account_id:
+                return hbl.analytic_account_id
+        return False
+
+    def _prepare_invoice(self):
+        invoice_vals = super()._prepare_invoice()
+        if hasattr(self, "sea_hbl_id") and self.sea_hbl_id:
+            invoice_vals["sea_hbl_id"] = self.sea_hbl_id.id
+        else:
+            hbl = self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)], limit=1)
+            if hbl:
+                invoice_vals["sea_hbl_id"] = hbl.id
+        return invoice_vals
+
     def get_report_logo_src(self):
         logo_path = get_module_resource(
             "freight_forwarding", "static", "description", "logo.png"
@@ -325,3 +353,37 @@ class FreightQuotation(models.AbstractModel):
                 encoded = base64.b64encode(f.read()).decode("utf-8")
             return "data:image/png;base64," + encoded
         return ""
+
+
+class SaleOrderLine(models.Model):
+    _inherit = "sale.order.line"
+
+    def _get_sea_hbl_analytic_account(self):
+        self.ensure_one()
+        if self.order_id and hasattr(self.order_id, "_get_sea_hbl_analytic_account"):
+            acc = self.order_id._get_sea_hbl_analytic_account()
+            if acc:
+                return acc
+        if self.env.context.get("default_sea_hbl_id"):
+            hbl = self.env["freight.sea.hbl"].browse(self.env.context.get("default_sea_hbl_id"))
+            if hbl and hbl.analytic_account_id:
+                return hbl.analytic_account_id
+        return False
+
+    @api.depends("product_id", "order_id.sea_hbl_id")
+    def _compute_analytic_distribution(self):
+        super()._compute_analytic_distribution()
+        for line in self:
+            if not line.analytic_distribution and line.display_type not in ("line_section", "line_note"):
+                analytic_account = line._get_sea_hbl_analytic_account()
+                if analytic_account:
+                    line.analytic_distribution = {str(analytic_account.id): 100.0}
+
+    def _prepare_invoice_line(self, **optional_values):
+        res = super()._prepare_invoice_line(**optional_values)
+        if not res.get("analytic_distribution"):
+            analytic_account = self._get_sea_hbl_analytic_account()
+            if analytic_account:
+                res["analytic_distribution"] = {str(analytic_account.id): 100.0}
+        return res
+

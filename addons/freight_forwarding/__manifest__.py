@@ -151,5 +151,6 @@
         "tests/test_booking_convert_wizard.py",
         "tests/test_sea_hbl.py",
         "tests/test_sea_quotation.py",
+        "tests/test_analytic_sync.py",
     ],
 }

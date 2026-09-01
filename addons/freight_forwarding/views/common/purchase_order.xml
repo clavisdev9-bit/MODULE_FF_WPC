@@ -20,6 +20,9 @@
                     />
                 </button>
             </div>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="sea_hbl_id" invisible="not sea_hbl_id" readonly="1"/>
+            </xpath>
         </field>
     </record>
 </odoo>

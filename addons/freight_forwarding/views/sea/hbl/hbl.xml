@@ -40,6 +40,15 @@
                                 <span class="o_stat_text">Sales Orders</span>
                             </div>
                         </button>
+                        <button name="action_view_purchase_orders"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-credit-card"
+                            invisible="purchase_order_count == 0">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Purchase Orders</span>
+                            </div>
+                        </button>
                         <button name="action_view_booking"
                             type="object"
                             class="oe_stat_button"
@@ -220,8 +229,8 @@
                             </field>
                         </page>
                         <page string="Purchase Order">
-                            <field name="purchase_order_ids" nolabel="1">
-                                <list>
+                            <field name="purchase_order_ids" nolabel="1" context="{'default_sea_hbl_id': id}">
+                                <list editable="bottom" open_form_view="1">
                                     <field name="name"/>
                                     <field name="partner_id"/>
                                     <field name="currency_id"/>
@@ -231,8 +240,8 @@
                             </field>
                         </page>
                         <page string="Sales Orders">
-                            <field name="sale_order_ids" nolabel="1" context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea'}">
-                                <list>
+                            <field name="sale_order_ids" nolabel="1" context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea', 'default_sea_hbl_id': id}">
+                                <list editable="bottom" open_form_view="1">
                                     <field name="name"/>
                                     <field name="currency_id"/>
                                     <field name="amount_total"/>

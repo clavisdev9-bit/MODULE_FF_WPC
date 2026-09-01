@@ -72,6 +72,7 @@ class SeaHBL(models.Model):
     remarks = fields.Text(string="Remarks")
 
     sales_order_count = fields.Integer(string="Sales Order Count", compute="_compute_sales_order_count")
+    purchase_order_count = fields.Integer(string="Purchase Order Count", compute="_compute_purchase_order_count")
     booking_count = fields.Integer(string="Booking Count", compute="_compute_booking_count")
 
     freight_type = fields.Selection(
@@ -178,6 +179,11 @@ class SeaHBL(models.Model):
         for rec in self:
             rec.sales_order_count = len(rec.sale_order_ids)
 
+    @api.depends("purchase_order_ids")
+    def _compute_purchase_order_count(self):
+        for rec in self:
+            rec.purchase_order_count = len(rec.purchase_order_ids)
+
     @api.depends("booking_id")
     def _compute_booking_count(self):
         for rec in self:
@@ -224,7 +230,32 @@ class SeaHBL(models.Model):
             "view_mode": "form" if len(orders) == 1 else "list,form",
             "domain": [("id", "in", orders.ids)],
             "res_id": orders.id if len(orders) == 1 else False,
-            "context": dict(self.env.context),
+            "context": dict(
+                self.env.context,
+                default_sea_hbl_id=self.id,
+                default_is_freight_quotation=True,
+                default_freight_business_type="sea",
+                form_view_ref="freight_forwarding.view_sea_quotation_form",
+            ),
+        }
+
+    def action_view_purchase_orders(self):
+        self.ensure_one()
+        orders = self.purchase_order_ids
+        if not orders:
+            return False
+
+        return {
+            "name": "Purchase Orders",
+            "type": "ir.actions.act_window",
+            "res_model": "purchase.order",
+            "view_mode": "form" if len(orders) == 1 else "list,form",
+            "domain": [("id", "in", orders.ids)],
+            "res_id": orders.id if len(orders) == 1 else False,
+            "context": dict(
+                self.env.context,
+                default_sea_hbl_id=self.id,
+            ),
         }
 
     def action_view_booking(self):
@@ -287,9 +318,12 @@ class SeaHBL(models.Model):
             
             distribution = {str(rec.analytic_account_id.id): 100.0}
             
+            # 1. Sync to Sales Orders & Lines
             if rec.sale_order_ids:
                 for so in rec.sale_order_ids:
-                    if hasattr(so, 'analytic_account_id') and not so.analytic_account_id:
+                    if hasattr(so, "sea_hbl_id") and not so.sea_hbl_id:
+                        so.sea_hbl_id = rec.id
+                    if hasattr(so, "analytic_account_id") and not so.analytic_account_id:
                         so.analytic_account_id = rec.analytic_account_id.id
                     for line in so.order_line:
                         if not line.analytic_distribution:
@@ -297,14 +331,54 @@ class SeaHBL(models.Model):
                                 "UPDATE sale_order_line SET analytic_distribution = %s WHERE id = %s",
                                 (json.dumps(distribution), line.id)
                             )
-                            line.invalidate_recordset(['analytic_distribution'])
+                            line.invalidate_recordset(["analytic_distribution"])
                             
+            # 2. Sync to Purchase Orders & Lines
             if rec.purchase_order_ids:
                 for po in rec.purchase_order_ids:
+                    if hasattr(po, "sea_hbl_id") and not po.sea_hbl_id:
+                        po.sea_hbl_id = rec.id
                     for line in po.order_line:
                         if not line.analytic_distribution:
                             self.env.cr.execute(
                                 "UPDATE purchase_order_line SET analytic_distribution = %s WHERE id = %s",
                                 (json.dumps(distribution), line.id)
                             )
-                            line.invalidate_recordset(['analytic_distribution'])
+                            line.invalidate_recordset(["analytic_distribution"])
+
+            # 3. Sync to Invoices / Vendor Bills (account.move & lines)
+            moves = self.env["account.move"]
+            if rec.purchase_order_ids:
+                moves |= rec.purchase_order_ids.mapped("invoice_ids")
+            if rec.sale_order_ids:
+                moves |= rec.sale_order_ids.mapped("invoice_ids")
+            moves |= self.env["account.move"].search([("sea_hbl_id", "=", rec.id)])
+            
+            # Document list references
+            doc_fields = [
+                "vendor_invoice_ids", "invoice_ids", "debit_note_ids", "credit_note_ids",
+                "vendor_debit_note_ids", "vendor_credit_note_ids", "cash_purchase_ids", "provision_cost_ids"
+            ]
+            ref_attr_names = [
+                "vendor_invoice_reference", "invoice_reference", "debit_note_reference", "credit_note_reference",
+                "vendor_debit_note_reference", "vendor_credit_note_reference", "cash_purchase_reference", "provision_cost_reference"
+            ]
+            for doc_field in doc_fields:
+                if hasattr(rec, doc_field) and getattr(rec, doc_field):
+                    for doc_item in getattr(rec, doc_field):
+                        for ref_name in ref_attr_names:
+                            if hasattr(doc_item, ref_name):
+                                val = getattr(doc_item, ref_name)
+                                if val:
+                                    moves |= val
+
+            for move in moves:
+                if hasattr(move, "sea_hbl_id") and not move.sea_hbl_id:
+                    move.sea_hbl_id = rec.id
+                for line in move.invoice_line_ids:
+                    if not line.analytic_distribution and line.display_type not in ("line_section", "line_note"):
+                        self.env.cr.execute(
+                            "UPDATE account_move_line SET analytic_distribution = %s WHERE id = %s",
+                            (json.dumps(distribution), line.id)
+                        )
+                        line.invalidate_recordset(["analytic_distribution"])
