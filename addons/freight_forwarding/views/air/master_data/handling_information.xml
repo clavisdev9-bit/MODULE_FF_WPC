@@ -4,11 +4,13 @@
         <field name="name">freight.air.handling.information.form</field>
         <field name="model">freight.air.handling.information</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Handling Information">
                 <sheet>
                     <group>
-                        <field name="title"/>
+                        <field name="code"/>
+                        <field name="name"/>
                         <field name="description"/>
+                        <field name="active" widget="boolean_toggle"/>
                     </group>
                 </sheet>
             </form>
@@ -19,9 +21,11 @@
         <field name="name">freight.air.handling.information.list</field>
         <field name="model">freight.air.handling.information</field>
         <field name="arch" type="xml">
-            <list>
-                <field name="title"/>
+            <list string="Handling Information">
+                <field name="code"/>
+                <field name="name"/>
                 <field name="description"/>
+                <field name="active"/>
             </list>
         </field>
     </record>
@@ -31,4 +35,10 @@
         <field name="res_model">freight.air.handling.information</field>
         <field name="view_mode">list,form</field>
     </record>
+
+    <menuitem id="menu_freight_air_handling_info"
+        name="Handling Information"
+        parent="menu_sub_parent_air_master_data"
+        action="action_freight_air_handling_information"
+        sequence="75"/>
 </odoo>

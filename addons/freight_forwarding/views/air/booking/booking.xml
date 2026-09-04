@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- FORM VIEW -->
+        <record id="view_freight_air_booking_form" model="ir.ui.view">
+            <field name="name">freight.air.booking.form</field>
+            <field name="model">freight.air.booking</field>
+            <field name="arch" type="xml">
+                <form string="Air Booking">
+                    <header>
+                        <button name="action_confirm" string="Confirm" type="object"
+                            class="oe_highlight" invisible="state != 'draft'" />
+                        <button name="action_create_hawb" string="Create Jobsheet" type="object"
+                            class="oe_highlight" invisible="state != 'confirmed'" />
+                        <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state not in ('draft','confirmed')" />
+                        <button name="action_draft" string="Set to Draft" type="object"
+                            invisible="state != 'cancelled'" />
+                        <field name="state" widget="statusbar"
+                            statusbar_visible="draft,confirmed,cancelled" />
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_hawbs" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="hawb_count == 0">
+                                <div class="o_stat_info">
+                                    <span class="o_stat_text">Jobsheet</span>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" />
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Parties">
+                                <field name="partner_id" string="Customer" />
+                                <label for="is_nomination" string="Nomination"/>
+                                <div class="o_row">
+                                    <field name="is_nomination" />
+                                    <field name="nomination_remark" placeholder="Nomination Remark..." invisible="not is_nomination"/>
+                                </div>
+                                <field name="booking_from" />
+                                <field name="email" />
+                                <field name="customer_reference" />
+                                <field name="shipper_id" string="Shipper" />
+                                <field name="shipper_address" readonly="1" />
+                                <field name="consignee_id" string="Consignee" />
+                                <field name="consignee_address" readonly="1" />
+                                <field name="coloader_id" string="Coloader" />
+                                <field name="overseas_agent_id" string="Overseas Agent" />
+                                <field name="agent_id" string="Agent" />
+                                <field name="notify_party_id" />
+                                <field name="notify_address" readonly="1" />
+                            </group>
+                            <group string="Shipment Info">
+                                <field name="booking_date" />
+                                <field name="quotation_id" />
+                                <field name="job_no" />
+                                <field name="awb_no" />
+                                <field name="mawb_no" />
+                                <field name="freight_type" invisible="1" />
+                                <field name="shipment_type" />
+                                <field name="ship_mode" />
+                                <field name="payment_term_id" string="Credit Term" />
+                                <field name="wt_val" />
+                                <field name="other" />
+                                <field name="service_level" />
+                                <field name="delivery_type" />
+                                <field name="company_id" groups="base.group_multi_company"
+                                    invisible="1" />
+                                <field name="salesman_id" invisible="1" />
+                            </group>
+                        </group>
+                        <group string="Routing &amp; Flights">
+                            <group>
+                                <field name="departure_id" />
+                                <field name="destination_id" />
+                                <field name="origin_country_id" />
+                            </group>
+
+                            <group>
+                                <field name="flight_routing_ids" nolabel="1">
+                                    <list editable="bottom">
+                                        <field name="airport_dest_id" />
+                                        <field name="airline_id" />
+                                        <field name="flight_no" />
+                                        <field name="flight_date" />
+                                    </list>
+                                </field>
+                            </group>
+                        </group>
+
+                        <group string="Cargo">
+                            <group colspan="2">
+                                <field name="commodity_id" />
+                            </group>
+                            <group>
+                                <field name="pcs" />
+                                <field name="gross_weight" />
+                            </group>
+                            <group>
+                                <field name="uom_id" />
+                                <field name="charge_weight" />
+                            </group>
+                        </group>
+
+                        <separator />
+
+                        <notebook>
+                            <page string="Dimension" name="dimension">
+                                <field name="dimension_ids">
+                                    <list editable="bottom">
+                                        <field name="sequence" widget="handle" />
+                                        <field name="qty" />
+                                        <field name="uom_id" />
+                                        <field name="length" />
+                                        <field name="width" />
+                                        <field name="height" />
+                                        <field name="volume" sum="Total Volume" />
+                                    </list>
+                                </field>
+                                <group class="oe_subtotal_footer">
+                                    <label for="total_pcs" class="fw-bold" />
+                                    <field name="total_pcs" nolabel="1" />
+                                    <label for="total_m3" class="fw-bold" />
+                                    <field name="total_m3" nolabel="1" />
+                                    <label for="total_dimension" class="fw-bold" />
+                                    <field name="total_dimension" nolabel="1" />
+                                    <label for="volumetric_weight" class="fw-bold" />
+                                    <field name="volumetric_weight" nolabel="1" />
+                                </group>
+                            </page>
+                            <page string="Remarks" name="remarks">
+                                <group>
+                                    <field name="booking_remark" />
+                                    <field name="footnote" />
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter />
+                </form>
+            </field>
+        </record>
+
+        <!-- LIST VIEW -->
+        <record id="view_freight_air_booking_tree" model="ir.ui.view">
+            <field name="name">freight.air.booking.list</field>
+            <field name="model">freight.air.booking</field>
+            <field name="arch" type="xml">
+                <list string="Air Bookings" decoration-info="state == 'draft'"
+                    decoration-success="state == 'confirmed'">
+                    <field name="name" />
+                    <field name="booking_date" />
+                    <field name="partner_id" />
+                    <field name="departure_id" />
+                    <field name="destination_id" />
+                    <field name="state" widget="badge" decoration-info="state == 'draft'"
+                        decoration-success="state == 'confirmed'" />
+                </list>
+            </field>
+        </record>
+
+        <!-- ACTION -->
+        <record id="action_freight_air_booking" model="ir.actions.act_window">
+            <field name="name">Air Bookings</field>
+            <field name="res_model">freight.air.booking</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'default_freight_type': 'export'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first Air Booking!
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

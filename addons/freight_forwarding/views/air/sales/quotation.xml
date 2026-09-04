@@ -1,40 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- ============================================================
-         FORM VIEW
-         Identik dengan Sea Quotation kecuali:
-         - Tidak ada smart button Booking / HBL (sea-specific)
-         - Tidak ada container_type (sea-specific)
-         - Tidak ada tombol Convert to Booking / Jobsheet (sea-specific)
-         - Tab Shipment Info hanya field dari mixin (airport/airline menyusul)
+    <!-- ===========================================================         FORM VIEW (Air Quotation - sale.order)
+         Meniru struktur Sea Quotation, hanya menampilkan field
+         yang ada pada model Air Quotation (tanpa container_type / port sea).
     ============================================================ -->
     <record id="view_air_quotation_form" model="ir.ui.view">
         <field name="name">freight.air.quotation.form</field>
-        <field name="model">freight.air.quotation</field>
-        <field name="mode">primary</field>
+        <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='warehouse_id']" position="attributes">
                 <attribute name="options">{'no_create': False, 'no_create_edit': False, 'no_open': False}</attribute>
             </xpath>
 
+            <xpath expr="//sheet" position="inside">
+                <field name="is_freight_quotation" invisible="1" />
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_air_bookings"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-plane"
+                    invisible="not is_freight_quotation or freight_business_type != 'air' or booking_count == 0">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Booking</span>
+                    </div>
+                </button>
+                <button name="action_view_hawbs"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-file-text-o"
+                    invisible="not is_freight_quotation or freight_business_type != 'air' or hawb_count == 0">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Jobsheet</span>
+                    </div>
+                </button>
+                <button name="action_view_currency_variants"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-money"
+                    invisible="not is_freight_quotation or freight_business_type != 'air' or variant_count == 0">
+                    <field name="variant_count" widget="statinfo" string="Variants" />
+                </button>
+            </xpath>
+
             <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="freight_type" />
-                <field name="container_type" />
-                <field name="quotation_title" />
+                <field name="freight_type" invisible="not is_freight_quotation" />
+                <field name="quotation_title" invisible="not is_freight_quotation" />
             </xpath>
 
-            <!-- Fields setelah partner_id: kontak -->
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="email" />
-                <field name="phone" />
-                <field name="contact_person" />
-                <field name="salesman_id" />
+                <field name="email" invisible="not is_freight_quotation" />
+                <field name="phone" invisible="not is_freight_quotation" />
+                <field name="contact_person" invisible="not is_freight_quotation" />
+                <field name="salesman_id" invisible="not is_freight_quotation" />
             </xpath>
 
-            <!-- Ganti group order_details dengan field custom -->
             <xpath expr="//group[@name='order_details']" position="replace">
-                <group>
+                <group name="freight_order_details" invisible="not is_freight_quotation">
                     <field name="currency_id" />
                     <field name="currency_rate" />
                     <field name="pricelist_id" />
@@ -50,47 +74,63 @@
                 </group>
             </xpath>
 
-            <!-- Tambah grup Address setelah sale_header -->
             <xpath expr="//group[@name='sale_header']" position="after">
-                <group string="Address">
+                <group string="Address" invisible="not is_freight_quotation">
                     <group>
-                        <span>Source</span>
+                        <span>Pickup</span>
                         <div class="o_address_format">
-                            <field name="source_street" placeholder="Street..."
+                            <field name="pickup_street" placeholder="Street..."
                                 class="o_address_street" />
-                            <field name="source_street2" placeholder="Street 2..."
+                            <field name="pickup_street2" placeholder="Street 2..."
                                 class="o_address_street" />
-                            <field name="source_city" placeholder="City"
+                            <field name="pickup_city" placeholder="City"
                                 class="o_address_city" />
-                            <field name="source_state_id" placeholder="State"
+                            <field name="pickup_state_id" placeholder="State"
                                 class="o_address_state" />
-                            <field name="source_zip" placeholder="ZIP"
+                            <field name="pickup_zip" placeholder="ZIP"
                                 class="o_address_zip" />
-                            <field name="source_country_id" placeholder="Country"
+                            <field name="pickup_country_id" placeholder="Country"
                                 class="o_address_country" />
                         </div>
                     </group>
-                    <group>
-                        <span>Destination</span>
-                        <div class="o_address_format">
-                            <field name="destination_street" placeholder="Street..."
+                    <group name="studio_group_7a4382">
+                        <span>Delivery</span>
+                        <div class="o_address_format" name="studio_div_8cbbbf">
+                            <field name="delivery_street" placeholder="Street..."
                                 class="o_address_street" />
-                            <field name="destination_street2" placeholder="Street 2..."
+                            <field name="delivery_street2" placeholder="Street 2..."
                                 class="o_address_street" />
-                            <field name="destination_city" placeholder="City"
+                            <field name="delivery_city" placeholder="City"
                                 class="o_address_city" />
-                            <field name="destination_state_id" placeholder="State"
+                            <field name="delivery_state_id" placeholder="State"
                                 class="o_address_state" />
-                            <field name="destination_zip" placeholder="ZIP"
+                            <field name="delivery_zip" placeholder="ZIP"
                                 class="o_address_zip" />
-                            <field name="destination_country_id" placeholder="Country"
+                            <field name="delivery_country_id" placeholder="Country"
                                 class="o_address_country" />
                         </div>
                     </group>
                 </group>
             </xpath>
 
-            <!-- Extra Info di tab Other Information -->
+            <xpath expr="//header" position="inside">
+                <field name="original_quotation_id" invisible="1"/>
+                <button
+                    name="action_convert_to_jobsheet_direct"
+                    type="object"
+                    string="Create Jobsheet"
+                    class="oe_highlight"
+                    invisible="not is_freight_quotation or freight_business_type != 'air' or freight_type != 'import' or state != 'sale' or booking_count &gt; 0 or hawb_count &gt; 0"
+                />
+                <button
+                    name="action_convert_to_booking_direct"
+                    type="object"
+                    string="Create Booking"
+                    class="oe_highlight"
+                    invisible="not is_freight_quotation or freight_business_type != 'air' or freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hawb_count &gt; 0"
+                />
+            </xpath>
+
             <xpath expr="//page[@name='other_information']" position="inside">
                 <group string="Extra Info">
                     <group>
@@ -98,6 +138,8 @@
                         <field name="quantity" />
                         <field name="has_insurance" />
                         <field name="insurance_id" invisible="has_insurance == False" />
+                        <field name="loose_quantity" />
+                        <field name="uom_id" />
                     </group>
                     <group>
                         <field name="actual_weight" />
@@ -107,63 +149,10 @@
                 </group>
             </xpath>
 
-            <!-- Tab tambahan setelah customer_signature -->
             <xpath expr="//page[@name='customer_signature']" position="after">
-
-                <!-- <page string="Dimension">
-                    <group>
-                        <group>
-                            <field name="loose_quantity" />
-                            <field name="pcs" />
-                            <field name="uom_id" />
-                        </group>
-                        <group>
-                            <field name="length" />
-                            <field name="width" />
-                            <field name="height" />
-                            <field name="dimension" />
-                        </group>
-                    </group>
-                </page> -->
-
-                <!-- Shipment Info: hanya field dari mixin.
-                     Field airport/airline akan ditambahkan di iterasi berikutnya. -->
-                <page string="Shipment Info">
-                    <group>
-                        <group string="Routing Information">
-                            <label for="est_transit_time_days" string="Est. Transit Time"/>
-                            <div class="o_row">
-                                <field name="est_transit_time_days" nolabel="1" class="oe_inline"/>
-                                <span class="oe_inline">Days</span>
-                            </div>
-                            <field name="est_transit_time_note" placeholder="Remark (optional)" />
-                            <field name="frequency" />
-                            <field name="note" widget="text" />
-                        </group>
-                        <group string="Commercial Information">
-                            <field name="origin_id" />
-                            <field name="destination_id" />
-                            <field name="frt_collect" />
-                        </group>
-                    </group>
-                </page>
-
-                <page string="Header &amp; Footer">
-                    <group>
-                        <field name="header" />
-                        <field name="special_instruction" />
-                        <field name="footer" />
-                    </group>
-                </page>
-
-                <page string="Terms &amp; Conditions">
+                <page string="Terms &amp; Conditions" invisible="not is_freight_quotation">
                     <field name="terms_and_conditions" placeholder="Terms and conditions..." nolabel="1"/>
                 </page>
-
-                <page string="Cargo Info">
-                    <field name="cargo_info_ids" />
-                </page>
-
             </xpath>
         </field>
     </record>
@@ -171,13 +160,19 @@
     <!-- ============================================================
          LIST VIEW
     ============================================================ -->
-    <record id="view_air_quotation_list" model="ir.ui.view">
-        <field name="name">freight.air.quotation.list</field>
-        <field name="model">freight.air.quotation</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="sale.view_quotation_tree" />
+    <record id="view_air_quotation_list_custom" model="ir.ui.view">
+        <field name="name">freight.air.quotation.list.custom</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
-            <data />
+            <list>
+                <field name="name" string="Number" decoration-bf="1" />
+                <field name="create_date" string="Creation Date" />
+                <field name="freight_type" string="Quotation Type" />
+                <field name="partner_id" string="Customer" />
+                <field name="user_id" string="Salesperson" />
+                <field name="amount_total" string="Total" />
+                <field name="state" string="Status" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'sale'"/>
+            </list>
         </field>
     </record>
 
@@ -186,7 +181,7 @@
     ============================================================ -->
     <record id="view_air_quotation_search" model="ir.ui.view">
         <field name="name">freight.air.quotation.search</field>
-        <field name="model">freight.air.quotation</field>
+        <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <search string="Air Quotation">
                 <field name="name" string="Quotation Number"/>
@@ -209,11 +204,25 @@
     ============================================================ -->
     <record id="action_freight_air_quotation" model="ir.actions.act_window">
         <field name="name">Air Quotation</field>
-        <field name="res_model">freight.air.quotation</field>
+        <field name="res_model">sale.order</field>
         <field name="view_mode">list,form</field>
-        <field name="view_id" ref="view_air_quotation_list"/>
-        <field name="views" eval="[(ref('view_air_quotation_list'), 'list'), (ref('view_air_quotation_form'), 'form')]"/>
+        <field name="view_id" ref="view_air_quotation_list_custom"/>
         <field name="search_view_id" ref="view_air_quotation_search"/>
-        <field name="context">{'search_default_my_quotation': 1}</field>
+        <field name="domain">[('freight_business_type', '=', 'air'), ('is_freight_quotation', '=', True)]</field>
+        <field name="context">{'search_default_my_quotation': 1, 'default_freight_business_type': 'air', 'default_is_freight_quotation': True}</field>
+    </record>
+
+    <record id="action_freight_air_quotation_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_air_quotation_list_custom"/>
+        <field name="act_window_id" ref="action_freight_air_quotation"/>
+    </record>
+
+    <record id="action_freight_air_quotation_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_air_quotation_form"/>
+        <field name="act_window_id" ref="action_freight_air_quotation"/>
     </record>
 </odoo>

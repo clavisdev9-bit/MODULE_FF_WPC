@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FORM VIEW -->
+    <record id="view_freight_air_hawb_form" model="ir.ui.view">
+        <field name="name">freight.air.hawb.form</field>
+        <field name="model">freight.air.hawb</field>
+        <field name="arch" type="xml">
+            <form string="Air Jobsheet (HAWB)">
+                <header>
+                    <button name="action_active" string="Activate" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_close" string="Close" type="object" class="oe_highlight" invisible="state != 'active'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state not in ('draft','active')"/>
+                    <button name="action_draft" string="Set to Draft" type="object" invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,closed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sales_orders"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-file-text-o"
+                            invisible="sales_order_count == 0">
+                            <field name="sales_order_count" widget="statinfo" string="Sales Orders" />
+                        </button>
+                        <button name="action_view_purchase_orders"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-credit-card"
+                            invisible="purchase_order_count == 0">
+                            <field name="purchase_order_count" widget="statinfo" string="Purchase Orders" />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="job_no"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="hawb_no"/>
+                            <field name="smawb_no"/>
+                            <field name="mawb_no"/>
+                            <field name="booking_id"/>
+                        </group>
+                        <group>
+                            <field name="job_date"/>
+                            <field name="freight_type"/>
+                            <field name="partner_id" string="Customer"/>
+                            <label for="is_nomination" string="Nomination"/>
+                            <div class="o_row">
+                                <field name="is_nomination"/>
+                                <field name="nomination_remark" placeholder="Nomination Remark..." invisible="not is_nomination"/>
+                            </div>
+                            <field name="customer_ref"/>
+                            <field name="salesman_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- TAB 1: AWB INFO -->
+                        <page string="Awb Info" name="awb_info">
+                            <group>
+                                <group string="Parties">
+                                    <field name="shipper_id" string="Shipper"/>
+                                    <field name="shipper_address" readonly="1"/>
+                                    <field name="shipper_account_no"/>
+
+                                    <field name="consignee_id" string="Consignee"/>
+                                    <field name="consignee_address" readonly="1"/>
+                                    <field name="consignee_account_no"/>
+
+                                    <label for="notify_party_id" string="Notify Party"/>
+                                    <div class="o_row">
+                                        <field name="notify_party_id"/>
+                                        <button name="action_same_as_consignee" string="Same As Consignee" type="object" class="btn-link"/>
+                                    </div>
+                                    <field name="notify_address" readonly="1"/>
+                                    <field name="notify_is_bank"/>
+                                </group>
+
+                                <group string="Agents &amp; Terms">
+                                    <field name="term_payment"/>
+                                    <field name="awb_prefix"/>
+                                    <field name="overseas_agent_id"/>
+                                    <field name="agent_id" string="Agent"/>
+                                    <field name="iata_code"/>
+                                    <field name="agent_account_no"/>
+                                    <field name="note"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- TAB 2: SHIPMENT INFO -->
+                        <page string="Shipment Info" name="shipment_info">
+                            <group string="Routing &amp; Flight Legs">
+                                <group>
+                                    <field name="departure_id" string="Airport of Departure"/>
+                                    <field name="destination_id" string="Airport of Destination"/>
+                                    <field name="destination_date" string="Destination Date"/>
+                                    <field name="origin_country_id"/>
+                                    <field name="ship_mode"/>
+                                    <field name="delivery_type"/>
+                                </group>
+                                <group>
+                                    <field name="flight_routing_ids" nolabel="1">
+                                        <list editable="bottom">
+                                            <field name="airport_dest_id" string="Carrier To"/>
+                                            <field name="airline_id" string="By"/>
+                                            <field name="flight_no"/>
+                                            <field name="flight_date" string="On"/>
+                                            <field name="eta_date" string="ETA"/>
+                                        </list>
+                                    </field>
+                                </group>
+                            </group>
+
+                            <group>
+                                <group string="Currency &amp; Charges">
+                                    <field name="currency_id"/>
+                                    <field name="currency_rate"/>
+                                    <field name="wt_val" string="Weight Value"/>
+                                    <field name="wt_val_billing_party_id"/>
+                                    <field name="other_delivery" string="Other"/>
+                                    <field name="other_billing_party_id"/>
+                                    <field name="collect_currency_id"/>
+                                    <field name="collect_currency_rate"/>
+                                </group>
+
+                                <group string="Values, Customs &amp; Insurance">
+                                    <field name="declared_value_carriage"/>
+                                    <label for="declared_value_customs" string="Customs Value"/>
+                                    <div class="o_row">
+                                        <field name="custom_currency_id" placeholder="Currency" class="oe_inline"/>
+                                        <field name="declared_value_customs" placeholder="Declared Value / N.C.V" class="oe_inline"/>
+                                    </div>
+                                    <field name="customs_local_amt"/>
+                                    <field name="is_dg_cargo"/>
+                                    <field name="insurance_currency_id"/>
+                                    <field name="insurance_amount"/>
+                                    <field name="insurance_local_amount"/>
+                                    <field name="permit_no"/>
+                                    <field name="print_dimension"/>
+                                </group>
+                            </group>
+
+                            <group string="Instructions">
+                                <group>
+                                    <field name="handling_information_id"/>
+                                    <field name="handling_information"/>
+                                </group>
+                                <group>
+                                    <field name="accounting_information"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- TAB 3: DIMENSION -->
+                        <page string="Dimension" name="dimension">
+                            <group>
+                                <group>
+                                    <field name="vol_weight_ratio"/>
+                                    <field name="ratio_uom_id"/>
+                                </group>
+                                <group>
+                                    <field name="is_round_up"/>
+                                    <field name="weight_uom_id"/>
+                                </group>
+                            </group>
+
+                            <field name="dimension_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="qty" string="Pcs/Rcp"/>
+                                    <field name="uom_id"/>
+                                    <field name="length"/>
+                                    <field name="width"/>
+                                    <field name="height"/>
+                                    <field name="volume" string="Dimension" sum="Total Dimension"/>
+                                </list>
+                            </field>
+
+                            <group class="oe_subtotal_footer">
+                                <label for="total_pcs" class="fw-bold"/>
+                                <field name="total_pcs" nolabel="1"/>
+                                <label for="total_m3" class="fw-bold"/>
+                                <field name="total_m3" nolabel="1"/>
+                                <label for="total_dimension" class="fw-bold"/>
+                                <field name="total_dimension" nolabel="1"/>
+                                <label for="volumetric_weight" class="fw-bold"/>
+                                <field name="volumetric_weight" nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <!-- TAB 4: JOB COSTING - PURCHASE ORDER -->
+                        <page string="Purchase Order" name="purchase_orders">
+                            <field name="purchase_order_ids" nolabel="1" context="{'default_air_hawb_id': id}">
+                                <list editable="bottom" open_form_view="1">
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="currency_id"/>
+                                    <field name="amount_total"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- TAB 5: JOB COSTING - SALES ORDERS -->
+                        <page string="Sales Orders" name="sales_orders">
+                            <field name="sale_order_ids" nolabel="1" context="{'form_view_ref': 'freight_forwarding.view_air_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'air', 'default_air_hawb_id': id}">
+                                <list editable="bottom" open_form_view="1">
+                                    <field name="name"/>
+                                    <field name="currency_id"/>
+                                    <field name="amount_total"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- TAB 6: DOCUMENT LIST -->
+                        <page string="Document List" name="document_list">
+                            <notebook>
+                                <page string="Invoice">
+                                    <field name="invoice_ids" nolabel="1"/>
+                                </page>
+                                <page string="Debit Note">
+                                    <field name="debit_note_ids" nolabel="1"/>
+                                </page>
+                                <page string="Credit Note">
+                                    <field name="credit_note_ids" nolabel="1"/>
+                                </page>
+                                <page string="Provision Cost">
+                                    <field name="provision_cost_ids" nolabel="1"/>
+                                </page>
+                                <page string="Vendor Invoice">
+                                    <field name="vendor_invoice_ids" nolabel="1"/>
+                                </page>
+                                <page string="Vendor Debit Note">
+                                    <field name="vendor_debit_note_ids" nolabel="1"/>
+                                </page>
+                                <page string="Vendor Credit Note">
+                                    <field name="vendor_credit_note_ids" nolabel="1"/>
+                                </page>
+                                <page string="Cash Purchase">
+                                    <field name="cash_purchase_ids" nolabel="1"/>
+                                </page>
+                            </notebook>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_freight_air_hawb_tree" model="ir.ui.view">
+        <field name="name">freight.air.hawb.list</field>
+        <field name="model">freight.air.hawb</field>
+        <field name="arch" type="xml">
+            <list string="Air Jobsheets">
+                <field name="job_no"/>
+                <field name="hawb_no"/>
+                <field name="mawb_no"/>
+                <field name="partner_id"/>
+                <field name="freight_type"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_freight_air_hawb" model="ir.actions.act_window">
+        <field name="name">Air Jobsheets (HAWB)</field>
+        <field name="res_model">freight.air.hawb</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air Jobsheet
+            </p>
+        </field>
+    </record>
+
+    <!-- MENU ITEM -->
+    <menuitem id="menu_air_hawb" name="Air Jobsheet (HAWB)"
+        parent="menu_sub_parent_air_export"
+        action="action_freight_air_hawb"
+        sequence="20" />
+</odoo>

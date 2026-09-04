@@ -16,7 +16,7 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-ship"
-                    invisible="not is_freight_quotation or booking_count == 0">
+                    invisible="not is_freight_quotation or freight_business_type != 'sea' or booking_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Booking</span>
                     </div>
@@ -25,7 +25,7 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-file-text-o"
-                    invisible="not is_freight_quotation or hbl_count == 0">
+                    invisible="not is_freight_quotation or freight_business_type != 'sea' or hbl_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Jobsheet</span>
                     </div>
@@ -34,14 +34,14 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-money"
-                    invisible="not is_freight_quotation or variant_count == 0">
+                    invisible="not is_freight_quotation or freight_business_type != 'sea' or variant_count == 0">
                     <field name="variant_count" widget="statinfo" string="Variants" />
                 </button>
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="freight_type" invisible="not is_freight_quotation" />
-                <field name="container_type" invisible="not is_freight_quotation" />
+                <field name="container_type" invisible="not is_freight_quotation or freight_business_type != 'sea'" />
                 <field name="quotation_title" invisible="not is_freight_quotation" />
             </xpath>
 
@@ -114,16 +114,16 @@
                 <button
                     name="action_convert_to_jobsheet_direct"
                     type="object"
-                    string="Convert to Jobsheet"
+                    string="Create Jobsheet"
                     class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_type != 'import' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
+                    invisible="not is_freight_quotation or freight_business_type != 'sea' or freight_type != 'import' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
                 />
                 <button
                     name="action_convert_to_booking_direct"
                     type="object"
-                    string="Convert to Booking"
+                    string="Create Booking"
                     class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
+                    invisible="not is_freight_quotation or freight_business_type != 'sea' or freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
                 />
             </xpath>
 
@@ -254,10 +254,23 @@
         <field name="res_model">sale.order</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_sea_quotation_list_custom"/>
-        <field name="views" eval="[(ref('view_sea_quotation_list_custom'), 'list'), (ref('view_sea_quotation_form'), 'form')]"/>
         <field name="search_view_id" ref="view_sea_quotation_search"/>
         <field name="domain">[('freight_business_type', '=', 'sea'), ('is_freight_quotation', '=', True)]</field>
         <field name="context">{'search_default_my_quotation': 1, 'default_freight_business_type': 'sea', 'default_is_freight_quotation': True}</field>
+    </record>
+
+    <record id="action_freight_sea_quotation_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_sea_quotation_list_custom"/>
+        <field name="act_window_id" ref="action_freight_sea_quotation"/>
+    </record>
+
+    <record id="action_freight_sea_quotation_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_sea_quotation_form"/>
+        <field name="act_window_id" ref="action_freight_sea_quotation"/>
     </record>
 
     <!-- Action gear menu item: New Currency Variant -->
