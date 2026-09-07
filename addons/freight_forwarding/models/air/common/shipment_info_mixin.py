@@ -21,4 +21,9 @@ class FreightAirShipmentInfoMixin(models.AbstractModel):
     
     delivery_type = fields.Many2one('freight.delivery.type', string='Delivery Type')
     other_delivery = fields.Selection([('P', 'Prepaid'), ('C', 'Collect')], string='Other')
-    service_level = fields.Char(string='Service Level')
+    service_level = fields.Selection([
+        ('p1', 'P1'),
+        ('p2', 'P2'),
+        ('p3', 'P3'),
+        ('p4', 'P4'),
+    ], string='Service Level')
