@@ -159,6 +159,8 @@ class SeaQuotation(models.Model):
     def action_view_bookings(self):
         self.ensure_one()
         bookings = self.booking_ids
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
+        ctx.update({"default_sale_order_ids": [self.id]})
         return {
             "name": "Sea Booking",
             "type": "ir.actions.act_window",
@@ -166,12 +168,14 @@ class SeaQuotation(models.Model):
             "view_mode": "form" if len(bookings) == 1 else "list,form",
             "domain": [("id", "in", bookings.ids)],
             "res_id": bookings.id if len(bookings) == 1 else False,
-            "context": dict(self.env.context, default_sale_order_ids=[self.id]),
+            "context": ctx,
         }
 
     def action_view_hbls(self):
         self.ensure_one()
         hbls = self.sea_hbl_id or self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)])
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
+        ctx.update({"default_sale_order_ids": [self.id]})
         return {
             "name": "Sea Jobsheet",
             "type": "ir.actions.act_window",
@@ -179,7 +183,7 @@ class SeaQuotation(models.Model):
             "view_mode": "form" if len(hbls) == 1 else "list,form",
             "domain": [("id", "in", hbls.ids)],
             "res_id": hbls.id if len(hbls) == 1 else False,
-            "context": dict(self.env.context, default_sale_order_ids=[self.id]),
+            "context": ctx,
         }
 
     @api.model_create_multi

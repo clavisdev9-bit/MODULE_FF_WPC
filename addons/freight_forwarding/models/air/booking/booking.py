@@ -38,6 +38,14 @@ class FreightAirBooking(models.Model):
     payment_term_id = fields.Many2one('account.payment.term', string='Credit Term')
     salesman_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
     quotation_id = fields.Many2one('sale.order', string='Quotation No.')
+    sale_order_ids = fields.Many2many(
+        'sale.order',
+        string='Sales Orders',
+    )
+    sales_order_count = fields.Integer(
+        string='Sales Order Count',
+        compute='_compute_sales_order_count',
+    )
 
     booking_remark = fields.Text(string='Booking Remark')
     footnote = fields.Text(string='Footnote')
@@ -52,6 +60,34 @@ class FreightAirBooking(models.Model):
     dimension_ids = fields.One2many('freight.air.booking.dimension', 'booking_id', string='Dimensions')
     hawb_ids = fields.One2many('freight.air.hawb', 'booking_id', string='Air Jobsheets (HAWBs)')
     hawb_count = fields.Integer(string='Jobsheet Count', compute='_compute_hawb_count')
+
+    @api.depends('sale_order_ids')
+    def _compute_sales_order_count(self):
+        for rec in self:
+            rec.sales_order_count = len(rec.sale_order_ids)
+
+    def action_view_sales_orders(self):
+        self.ensure_one()
+        orders = self.sale_order_ids
+        if not orders:
+            return False
+
+        view_id = self.env.ref("freight_forwarding.view_air_quotation_form").id
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
+        ctx.update({
+            "default_is_freight_quotation": True,
+            "default_freight_business_type": "air",
+        })
+        return {
+            "name": _("Sales Orders"),
+            "type": "ir.actions.act_window",
+            "res_model": "sale.order",
+            "view_mode": "form" if len(orders) == 1 else "list,form",
+            "views": [(view_id, "form")] if len(orders) == 1 else [(False, "list"), (view_id, "form")],
+            "domain": [("id", "in", orders.ids)],
+            "res_id": orders.id if len(orders) == 1 else False,
+            "context": ctx,
+        }
 
     def _compute_hawb_count(self):
         for rec in self:
@@ -147,6 +183,9 @@ class FreightAirBooking(models.Model):
             'flight_routing_ids': flight_lines,
             'dimension_ids': dimension_lines,
         }
+        so_ids = self.sale_order_ids.ids if self.sale_order_ids else ([self.quotation_id.id] if self.quotation_id else [])
+        if so_ids:
+            hawb_vals['sale_order_ids'] = [(6, 0, so_ids)]
         hawb = self.env['freight.air.hawb'].create(hawb_vals)
         return {
             'name': _('Air Jobsheet (HAWB)'),
@@ -160,6 +199,8 @@ class FreightAirBooking(models.Model):
     def action_view_hawbs(self):
         self.ensure_one()
         hawbs = self.hawb_ids
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
+        ctx.update({"default_booking_id": self.id})
         return {
             'name': _('Air Jobsheets (HAWBs)'),
             'type': 'ir.actions.act_window',
@@ -167,7 +208,7 @@ class FreightAirBooking(models.Model):
             'view_mode': 'form' if len(hawbs) == 1 else 'list,form',
             'domain': [('id', 'in', hawbs.ids)],
             'res_id': hawbs.id if len(hawbs) == 1 else False,
-            'context': dict(self.env.context, default_booking_id=self.id),
+            'context': ctx,
         }
 
     action_create_jobsheet = action_create_hawb

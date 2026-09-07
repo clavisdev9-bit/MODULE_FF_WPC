@@ -146,17 +146,26 @@ class SaleOrderAirCompat(models.Model):
         string="Jobsheet Count", compute="_compute_air_hawb_count"
     )
 
+    @api.depends("air_booking_ids")
     def _compute_air_booking_count(self):
         for rec in self:
             rec.booking_count = len(rec.air_booking_ids)
 
+    @api.depends("air_hawb_id")
     def _compute_air_hawb_count(self):
         for rec in self:
-            rec.hawb_count = 1 if rec.air_hawb_id else 0
+            count = 0
+            if hasattr(rec, "air_hawb_id") and rec.air_hawb_id:
+                count = 1
+            else:
+                count = self.env["freight.air.hawb"].search_count([("sale_order_ids", "=", rec.id)])
+            rec.hawb_count = count
 
     def action_view_air_bookings(self):
         self.ensure_one()
         bookings = self.air_booking_ids
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
+        ctx.update({"default_sale_order_ids": [self.id]})
         return {
             "name": "Air Booking",
             "type": "ir.actions.act_window",
@@ -164,19 +173,24 @@ class SaleOrderAirCompat(models.Model):
             "view_mode": "form" if len(bookings) == 1 else "list,form",
             "domain": [("id", "in", bookings.ids)],
             "res_id": bookings.id if len(bookings) == 1 else False,
-            "context": dict(self.env.context),
+            "context": ctx,
         }
+
+    action_view_bookings = action_view_air_bookings
 
     def action_view_hawbs(self):
         self.ensure_one()
-        hawb = self.air_hawb_id
+        hawbs = self.air_hawb_id or self.env["freight.air.hawb"].search([("sale_order_ids", "=", self.id)])
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
+        ctx.update({"default_sale_order_ids": [self.id]})
         return {
             "name": "Air Jobsheet",
             "type": "ir.actions.act_window",
             "res_model": "freight.air.hawb",
-            "view_mode": "form",
-            "res_id": hawb.id if hawb else False,
-            "context": dict(self.env.context),
+            "view_mode": "form" if len(hawbs) == 1 else "list,form",
+            "domain": [("id", "in", hawbs.ids)],
+            "res_id": hawbs.id if len(hawbs) == 1 else False,
+            "context": ctx,
         }
 
     @api.model_create_multi
@@ -186,6 +200,10 @@ class SaleOrderAirCompat(models.Model):
             if hasattr(rec, "air_hawb_id") and rec.air_hawb_id:
                 if hasattr(rec.air_hawb_id, "sale_order_ids") and rec.id not in rec.air_hawb_id.sale_order_ids.ids:
                     rec.air_hawb_id.sale_order_ids = [(4, rec.id)]
+            if hasattr(rec, "air_booking_ids") and rec.air_booking_ids:
+                for bkg in rec.air_booking_ids:
+                    if hasattr(bkg, "sale_order_ids") and rec.id not in bkg.sale_order_ids.ids:
+                        bkg.sale_order_ids = [(4, rec.id)]
         return records
 
     def write(self, vals):
@@ -195,6 +213,11 @@ class SaleOrderAirCompat(models.Model):
                 if hasattr(rec, "air_hawb_id") and rec.air_hawb_id and hasattr(rec.air_hawb_id, "sale_order_ids"):
                     if rec.id not in rec.air_hawb_id.sale_order_ids.ids:
                         rec.air_hawb_id.sale_order_ids = [(4, rec.id)]
+        if "air_booking_ids" in vals:
+            for rec in self:
+                for bkg in rec.air_booking_ids:
+                    if hasattr(bkg, "sale_order_ids") and rec.id not in bkg.sale_order_ids.ids:
+                        bkg.sale_order_ids = [(4, rec.id)]
         return res
 
     def _prepare_booking_cargo_info_vals(self, cargo_info, booking):

@@ -5,10 +5,24 @@
         action="action_freight_air_booking_import"
         sequence="10" />
 
-    <menuitem id="menu_air_import_hawb" name="Jobsheet (HAWB)"
+    <menuitem id="menu_sub_parent_air_import_awb_preparation" name="AWB Preparation"
         parent="menu_sub_parent_air_import"
+        sequence="20" />
+
+    <menuitem id="menu_air_import_direct_awb" name="Direct AWB"
+        parent="menu_sub_parent_air_import_awb_preparation"
+        action="action_freight_air_dawb_import"
+        sequence="10" />
+
+    <menuitem id="menu_air_import_house_awb" name="House AWB"
+        parent="menu_sub_parent_air_import_awb_preparation"
         action="action_freight_air_hawb_import"
         sequence="20" />
+
+    <menuitem id="menu_air_import_master_awb" name="Master AWB"
+        parent="menu_sub_parent_air_import_awb_preparation"
+        action="action_freight_air_mawb_import"
+        sequence="30" />
 
     <!-- <menuitem id="menu_air_import_consol_awb_entry" name="Consol AWB Entry"
         parent="menu_sub_parent_air_import"

@@ -223,20 +223,22 @@ class SeaHBL(models.Model):
         if not orders:
             return False
 
+        view_id = self.env.ref("freight_forwarding.view_sea_quotation_form").id
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
+        ctx.update({
+            "default_sea_hbl_id": self.id,
+            "default_is_freight_quotation": True,
+            "default_freight_business_type": "sea",
+        })
         return {
             "name": "Sales Orders",
             "type": "ir.actions.act_window",
             "res_model": "sale.order",
             "view_mode": "form" if len(orders) == 1 else "list,form",
+            "views": [(view_id, "form")] if len(orders) == 1 else [(False, "list"), (view_id, "form")],
             "domain": [("id", "in", orders.ids)],
             "res_id": orders.id if len(orders) == 1 else False,
-            "context": dict(
-                self.env.context,
-                default_sea_hbl_id=self.id,
-                default_is_freight_quotation=True,
-                default_freight_business_type="sea",
-                form_view_ref="freight_forwarding.view_sea_quotation_form",
-            ),
+            "context": ctx,
         }
 
     def action_view_purchase_orders(self):

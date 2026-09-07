@@ -20,14 +20,27 @@
                             class="oe_stat_button"
                             icon="fa-file-text-o"
                             invisible="sales_order_count == 0">
-                            <field name="sales_order_count" widget="statinfo" string="Sales Orders" />
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Sales Orders</span>
+                            </div>
+                        </button>
+                        <button name="action_view_booking"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-plane"
+                            invisible="booking_count == 0">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Booking</span>
+                            </div>
                         </button>
                         <button name="action_view_purchase_orders"
                             type="object"
                             class="oe_stat_button"
                             icon="fa-credit-card"
                             invisible="purchase_order_count == 0">
-                            <field name="purchase_order_count" widget="statinfo" string="Purchase Orders" />
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Purchase Orders</span>
+                            </div>
                         </button>
                     </div>
                     <div class="oe_title">
@@ -35,11 +48,14 @@
                             <field name="job_no"/>
                         </h1>
                     </div>
+                    <field name="awb_type" invisible="1"/>
                     <group>
                         <group>
-                            <field name="hawb_no"/>
-                            <field name="smawb_no"/>
-                            <field name="mawb_no"/>
+                            <field name="hawb_no" invisible="awb_type != 'house'"/>
+                            <field name="smawb_no" invisible="awb_type != 'house'"/>
+                            <field name="mawb_no" string="Mawb No." invisible="awb_type != 'house'"/>
+                            <field name="direct_awb_no" invisible="awb_type != 'direct'"/>
+                            <field name="mawb_no" string="Master AWB No." invisible="awb_type != 'master'"/>
                             <field name="booking_id"/>
                         </group>
                         <group>
@@ -64,6 +80,7 @@
                                 <group string="Parties">
                                     <field name="shipper_id" string="Shipper"/>
                                     <field name="shipper_address" readonly="1"/>
+                                    <field name="known_shipper_flag" invisible="awb_type == 'house'"/>
                                     <field name="shipper_account_no"/>
 
                                     <field name="consignee_id" string="Consignee"/>
@@ -264,11 +281,13 @@
         <field name="arch" type="xml">
             <list string="Air Jobsheets">
                 <field name="job_no"/>
-                <field name="hawb_no"/>
-                <field name="mawb_no"/>
+                <field name="awb_type" widget="badge" decoration-info="awb_type == 'direct'" decoration-warning="awb_type == 'house'" decoration-success="awb_type == 'master'"/>
+                <field name="hawb_no" string="House AWB No." optional="show"/>
+                <field name="direct_awb_no" string="Direct AWB No." optional="hide"/>
+                <field name="mawb_no" string="Master AWB No." optional="show"/>
                 <field name="partner_id"/>
                 <field name="freight_type"/>
-                <field name="state"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'active'" decoration-muted="state == 'closed'"/>
             </list>
         </field>
     </record>
@@ -281,6 +300,7 @@
             <search string="Search Air Jobsheets">
                 <field name="job_no" string="Job No." />
                 <field name="hawb_no" string="House AWB No." />
+                <field name="direct_awb_no" string="Direct AWB No." />
                 <field name="mawb_no" string="Mawb No." />
                 <field name="booking_id" string="Booking No." />
                 <field name="partner_id" string="Customer" />
@@ -291,11 +311,16 @@
                 <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'export')]" />
                 <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'import')]" />
                 <separator />
+                <filter name="filter_direct" string="Direct AWB" domain="[('awb_type', '=', 'direct')]" />
+                <filter name="filter_house" string="House AWB" domain="[('awb_type', '=', 'house')]" />
+                <filter name="filter_master" string="Master AWB" domain="[('awb_type', '=', 'master')]" />
+                <separator />
                 <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]" />
                 <filter name="filter_active" string="Active" domain="[('state', '=', 'active')]" />
                 <filter name="filter_closed" string="Closed" domain="[('state', '=', 'closed')]" />
                 <separator />
                 <group expand="0" string="Group By">
+                    <filter name="group_awb_type" string="AWB Type" domain="[]" context="{'group_by': 'awb_type'}" />
                     <filter name="group_customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}" />
                     <filter name="group_type" string="Freight Type" domain="[]" context="{'group_by': 'freight_type'}" />
                     <filter name="group_state" string="Status" domain="[]" context="{'group_by': 'state'}" />
@@ -307,11 +332,11 @@
 
     <!-- ACTION ALL -->
     <record id="action_freight_air_hawb" model="ir.actions.act_window">
-        <field name="name">Air Jobsheets (HAWB)</field>
+        <field name="name">Air Jobsheets (AWB)</field>
         <field name="res_model">freight.air.hawb</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_freight_air_hawb_search" />
-        <field name="context">{'default_freight_type': 'export'}</field>
+        <field name="context">{'default_freight_type': 'export', 'default_awb_type': 'house'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new Air Jobsheet
@@ -319,32 +344,92 @@
         </field>
     </record>
 
-    <!-- ACTION EXPORT HAWB -->
+    <!-- ACTION EXPORT HOUSE AWB -->
     <record id="action_freight_air_hawb_export" model="ir.actions.act_window">
-        <field name="name">Air Export Jobsheets (HAWB)</field>
+        <field name="name">Air Export House AWB</field>
         <field name="res_model">freight.air.hawb</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_freight_air_hawb_search" />
-        <field name="domain">[('freight_type', '=', 'export')]</field>
-        <field name="context">{'default_freight_type': 'export'}</field>
+        <field name="domain">[('freight_type', '=', 'export'), ('awb_type', '=', 'house')]</field>
+        <field name="context">{'default_freight_type': 'export', 'default_awb_type': 'house'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new Air Export Jobsheet
+                Create a new Air Export House AWB
             </p>
         </field>
     </record>
 
-    <!-- ACTION IMPORT HAWB -->
-    <record id="action_freight_air_hawb_import" model="ir.actions.act_window">
-        <field name="name">Air Import Jobsheets (HAWB)</field>
+    <!-- ACTION EXPORT DIRECT AWB -->
+    <record id="action_freight_air_dawb_export" model="ir.actions.act_window">
+        <field name="name">Air Export Direct AWB</field>
         <field name="res_model">freight.air.hawb</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_freight_air_hawb_search" />
-        <field name="domain">[('freight_type', '=', 'import')]</field>
-        <field name="context">{'default_freight_type': 'import'}</field>
+        <field name="domain">[('freight_type', '=', 'export'), ('awb_type', '=', 'direct')]</field>
+        <field name="context">{'default_freight_type': 'export', 'default_awb_type': 'direct'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new Air Import Jobsheet
+                Create a new Air Export Direct AWB
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION EXPORT MASTER AWB -->
+    <record id="action_freight_air_mawb_export" model="ir.actions.act_window">
+        <field name="name">Air Export Master AWB</field>
+        <field name="res_model">freight.air.hawb</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="domain">[('freight_type', '=', 'export'), ('awb_type', '=', 'master')]</field>
+        <field name="context">{'default_freight_type': 'export', 'default_awb_type': 'master'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air Export Master AWB
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION IMPORT HOUSE AWB -->
+    <record id="action_freight_air_hawb_import" model="ir.actions.act_window">
+        <field name="name">Air Import House AWB</field>
+        <field name="res_model">freight.air.hawb</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="domain">[('freight_type', '=', 'import'), ('awb_type', '=', 'house')]</field>
+        <field name="context">{'default_freight_type': 'import', 'default_awb_type': 'house'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air Import House AWB
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION IMPORT DIRECT AWB -->
+    <record id="action_freight_air_dawb_import" model="ir.actions.act_window">
+        <field name="name">Air Import Direct AWB</field>
+        <field name="res_model">freight.air.hawb</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="domain">[('freight_type', '=', 'import'), ('awb_type', '=', 'direct')]</field>
+        <field name="context">{'default_freight_type': 'import', 'default_awb_type': 'direct'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air Import Direct AWB
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION IMPORT MASTER AWB -->
+    <record id="action_freight_air_mawb_import" model="ir.actions.act_window">
+        <field name="name">Air Import Master AWB</field>
+        <field name="res_model">freight.air.hawb</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="domain">[('freight_type', '=', 'import'), ('awb_type', '=', 'master')]</field>
+        <field name="context">{'default_freight_type': 'import', 'default_awb_type': 'master'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air Import Master AWB
             </p>
         </field>
     </record>
