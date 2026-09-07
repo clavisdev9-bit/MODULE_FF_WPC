@@ -30,6 +30,21 @@
         </field>
     </record>
 
+
+    <!-- SEARCH VIEW -->
+    <record id="view_freight_air_handling_information_search" model="ir.ui.view">
+        <field name="name">freight.air.handling.information.search</field>
+        <field name="model">freight.air.handling.information</field>
+        <field name="arch" type="xml">
+            <search string="Search Handling Information">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="description"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
     <record id="action_freight_air_handling_information" model="ir.actions.act_window">
         <field name="name">Handling Information</field>
         <field name="res_model">freight.air.handling.information</field>

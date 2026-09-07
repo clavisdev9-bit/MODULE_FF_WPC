@@ -19,3 +19,4 @@ access_freight_air_hawb_vendor_credit_note,access.freight.air.hawb.vendor.credit
 access_freight_air_hawb_cash_purchase,access.freight.air.hawb.cash.purchase,model_freight_air_hawb_cash_purchase,base.group_user,1,1,1,1
 access_freight_air_handling_information,access.freight.air.handling.information,model_freight_air_handling_information,base.group_user,1,1,1,1
 
+

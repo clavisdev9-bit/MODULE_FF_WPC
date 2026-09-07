@@ -23,7 +23,7 @@ class FreightAirBooking(models.Model):
     freight_type = fields.Selection([
         ('import', 'Import'),
         ('export', 'Export')
-    ], string='Type', required=True, tracking=True)
+    ], string='Type', required=True, tracking=True, default='export')
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     partner_id = fields.Many2one('res.partner', string='Customer', required=True, tracking=True)

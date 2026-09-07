@@ -146,11 +146,15 @@
 
                             <group string="Instructions">
                                 <group>
-                                    <field name="handling_information_id"/>
-                                    <field name="handling_information"/>
+                                    <field name="handling_information_id"
+                                        options="{'no_create': True}"
+                                        placeholder="Select template..."/>
+                                    <field name="handling_information"
+                                        placeholder="Enter handling information or select from template above..."
+                                        rows="4"/>
                                 </group>
                                 <group>
-                                    <field name="accounting_information"/>
+                                    <field name="accounting_information" placeholder="Accounting information..." rows="4"/>
                                 </group>
                             </group>
                         </page>
@@ -269,11 +273,45 @@
         </field>
     </record>
 
-    <!-- ACTION -->
+    <!-- SEARCH VIEW -->
+    <record id="view_freight_air_hawb_search" model="ir.ui.view">
+        <field name="name">freight.air.hawb.search</field>
+        <field name="model">freight.air.hawb</field>
+        <field name="arch" type="xml">
+            <search string="Search Air Jobsheets">
+                <field name="job_no" string="Job No." />
+                <field name="hawb_no" string="House AWB No." />
+                <field name="mawb_no" string="Mawb No." />
+                <field name="booking_id" string="Booking No." />
+                <field name="partner_id" string="Customer" />
+                <field name="shipper_id" string="Shipper" />
+                <field name="consignee_id" string="Consignee" />
+                <field name="salesman_id" string="Salesperson" />
+                <separator />
+                <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'export')]" />
+                <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'import')]" />
+                <separator />
+                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]" />
+                <filter name="filter_active" string="Active" domain="[('state', '=', 'active')]" />
+                <filter name="filter_closed" string="Closed" domain="[('state', '=', 'closed')]" />
+                <separator />
+                <group expand="0" string="Group By">
+                    <filter name="group_customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}" />
+                    <filter name="group_type" string="Freight Type" domain="[]" context="{'group_by': 'freight_type'}" />
+                    <filter name="group_state" string="Status" domain="[]" context="{'group_by': 'state'}" />
+                    <filter name="group_job_date" string="Job Date" domain="[]" context="{'group_by': 'job_date'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION ALL -->
     <record id="action_freight_air_hawb" model="ir.actions.act_window">
         <field name="name">Air Jobsheets (HAWB)</field>
         <field name="res_model">freight.air.hawb</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="context">{'default_freight_type': 'export'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new Air Jobsheet
@@ -281,9 +319,33 @@
         </field>
     </record>
 
-    <!-- MENU ITEM -->
-    <menuitem id="menu_air_hawb" name="Air Jobsheet (HAWB)"
-        parent="menu_sub_parent_air_export"
-        action="action_freight_air_hawb"
-        sequence="20" />
+    <!-- ACTION EXPORT HAWB -->
+    <record id="action_freight_air_hawb_export" model="ir.actions.act_window">
+        <field name="name">Air Export Jobsheets (HAWB)</field>
+        <field name="res_model">freight.air.hawb</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="domain">[('freight_type', '=', 'export')]</field>
+        <field name="context">{'default_freight_type': 'export'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air Export Jobsheet
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION IMPORT HAWB -->
+    <record id="action_freight_air_hawb_import" model="ir.actions.act_window">
+        <field name="name">Air Import Jobsheets (HAWB)</field>
+        <field name="res_model">freight.air.hawb</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="domain">[('freight_type', '=', 'import')]</field>
+        <field name="context">{'default_freight_type': 'import'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air Import Jobsheet
+            </p>
+        </field>
+    </record>
 </odoo>

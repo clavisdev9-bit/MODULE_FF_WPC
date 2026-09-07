@@ -78,7 +78,7 @@ class FreightAirHawb(models.Model):
     insurance_amount = fields.Float(string='Insurance Amount')
     insurance_local_amount = fields.Float(string='Insurance Local Amount')
 
-    handling_information_id = fields.Many2one('freight.air.handling.information', string='Handling Information')
+    handling_information_id = fields.Many2one('freight.air.handling.information', string='Handling Info Template')
     handling_information = fields.Text(string='Handling Information')
     accounting_information = fields.Text(string='Accounting Information')
     permit_no = fields.Char(string='Permit No.')
