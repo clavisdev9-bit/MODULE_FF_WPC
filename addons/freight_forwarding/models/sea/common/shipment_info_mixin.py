@@ -53,7 +53,15 @@ class FreightShipmentInfoMixin(models.AbstractModel):
         ],
         string="Ship Mode",
     )
-    service_level = fields.Char(string="Service Level")
+    service_level = fields.Selection(
+        selection=[
+            ("p1", "P1"),
+            ("p2", "P2"),
+            ("p3", "P3"),
+            ("p4", "P4"),
+        ],
+        string="Service Level",
+    )
 
     # Vessel Schedule
     vessel_schedule_id = fields.Many2one(
