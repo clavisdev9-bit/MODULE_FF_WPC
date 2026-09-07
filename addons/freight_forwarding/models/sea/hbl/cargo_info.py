@@ -26,7 +26,7 @@ class SeaHBLCargoInfo(models.Model):
     )
     freight_type = fields.Selection(
         related="hbl_id.container_type",
-        string="Container Type",
+        string="Freight Type",
         store=True,
         readonly=True,
     )

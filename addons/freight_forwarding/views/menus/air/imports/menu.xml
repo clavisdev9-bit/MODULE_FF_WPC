@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <menuitem id="menu_air_import_booking" name="Booking"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_booking_import"
+        sequence="10" />
+
+    <menuitem id="menu_air_import_hawb" name="Jobsheet (HAWB)"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_hawb_import"
+        sequence="20" />
+
     <!-- <menuitem id="menu_air_import_consol_awb_entry" name="Consol AWB Entry"
         parent="menu_sub_parent_air_import"
         action="action_freight_air_booking"

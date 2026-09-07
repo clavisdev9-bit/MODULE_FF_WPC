@@ -78,7 +78,12 @@ class SeaQuotation(models.Model):
 
     def _compute_hbl_count(self):
         for rec in self:
-            rec.hbl_count = self.env["freight.sea.hbl"].search_count([("sale_order_ids", "=", rec.id)])
+            count = 0
+            if hasattr(rec, "sea_hbl_id") and rec.sea_hbl_id:
+                count = 1
+            else:
+                count = self.env["freight.sea.hbl"].search_count([("sale_order_ids", "=", rec.id)])
+            rec.hbl_count = count
 
     def _compute_variant_count(self):
         for rec in self:
@@ -166,7 +171,7 @@ class SeaQuotation(models.Model):
 
     def action_view_hbls(self):
         self.ensure_one()
-        hbls = self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)])
+        hbls = self.sea_hbl_id or self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)])
         return {
             "name": "Sea Jobsheet",
             "type": "ir.actions.act_window",
@@ -174,8 +179,25 @@ class SeaQuotation(models.Model):
             "view_mode": "form" if len(hbls) == 1 else "list,form",
             "domain": [("id", "in", hbls.ids)],
             "res_id": hbls.id if len(hbls) == 1 else False,
-            "context": dict(self.env.context),
+            "context": dict(self.env.context, default_sale_order_ids=[self.id]),
         }
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            if hasattr(rec, "sea_hbl_id") and rec.sea_hbl_id:
+                if rec.id not in rec.sea_hbl_id.sale_order_ids.ids:
+                    rec.sea_hbl_id.sale_order_ids = [(4, rec.id)]
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "sea_hbl_id" in vals:
+            for rec in self:
+                if hasattr(rec, "sea_hbl_id") and rec.sea_hbl_id and rec.id not in rec.sea_hbl_id.sale_order_ids.ids:
+                    rec.sea_hbl_id.sale_order_ids = [(4, rec.id)]
+        return res
 
     def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
         return {
