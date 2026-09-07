@@ -47,14 +47,14 @@ class SeaHBL(models.Model):
     )
     pol_id = fields.Many2one(
         "freight.port",
-        string="Port of Loading",
+        string="POL",
         related="port_of_loading_id",
         store=False,
         readonly=True,
     )
     pod_id = fields.Many2one(
         "freight.port",
-        string="Port of Discharge",
+        string="POD",
         related="port_of_discharge_id",
         store=False,
         readonly=True,
@@ -292,13 +292,15 @@ class SeaHBL(models.Model):
         records = super().create(vals_list)
         
         plan = self.env["account.analytic.plan"].search([], limit=1)
+        if not plan:
+            plan = self.env["account.analytic.plan"].create({"name": "Default"})
         for rec in records:
             if not rec.analytic_account_id:
                 analytic_acc = self.env["account.analytic.account"].create({
                     "name": rec.job_no,
-                    "plan_id": plan.id if plan else False,
-                    "partner_id": rec.customer_id.id,
-                    "company_id": rec.company_id.id,
+                    "plan_id": plan.id,
+                    "partner_id": rec.customer_id.id if rec.customer_id else False,
+                    "company_id": rec.company_id.id if rec.company_id else self.env.company.id,
                 })
                 rec.analytic_account_id = analytic_acc.id
                 

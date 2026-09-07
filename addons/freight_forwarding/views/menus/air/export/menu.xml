@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <menuitem id="menu_air_export_booking" name="Booking"
+        parent="menu_sub_parent_air_export"
+        action="action_freight_air_booking_export"
+        sequence="10" />
+
+    <menuitem id="menu_air_export_hawb" name="Jobsheet (HAWB)"
+        parent="menu_sub_parent_air_export"
+        action="action_freight_air_hawb_export"
+        sequence="20" />
+
     <!-- <menuitem id="menu_sub_parent_air_export_awb_preparation" name="AWB Preparation"
         parent="menu_sub_parent_air_export"
-        sequence="10" />
+        sequence="30" />
 
     <menuitem id="menu_air_export_direct_awb" name="Direct AWB"
         parent="menu_sub_parent_air_export_awb_preparation"

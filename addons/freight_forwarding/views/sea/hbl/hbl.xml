@@ -5,14 +5,14 @@
         <field name="model">freight.sea.hbl</field>
         <field name="arch" type="xml">
             <list>
-                <field name="hbl_no"/>
-                <field name="freight_type"/>
-                <field name="container_type"/>
-                <field name="sale_order_ids" widget="many2many_tags"/>
-                <field name="booking_id"/>
-                <field name="customer_id"/>
-                <field name="job_no"/>
-                <field name="job_date"/>
+                <field name="hbl_no" />
+                <field name="freight_type" />
+                <field name="container_type" />
+                <field name="sale_order_ids" widget="many2many_tags" />
+                <field name="booking_id" />
+                <field name="customer_id" />
+                <field name="job_no" />
+                <field name="job_date" />
             </list>
         </field>
     </record>
@@ -23,11 +23,16 @@
         <field name="arch" type="xml">
             <form string="Sea Jobsheet">
                 <header>
-                    <button name="action_active" string="Mark as Active" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_close" string="Close Jobsheet" type="object" class="oe_highlight" invisible="state != 'active'"/>
-                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('cancelled', 'closed')"/>
-                    <button name="action_draft" string="Set to Draft" type="object" invisible="state == 'draft'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,active,closed,cancelled"/>
+                    <button name="action_active" string="Mark as Active" type="object"
+                        class="oe_highlight" invisible="state != 'draft'" />
+                    <button name="action_close" string="Close Jobsheet" type="object"
+                        class="oe_highlight" invisible="state != 'active'" />
+                    <button name="action_cancel" string="Cancel" type="object"
+                        invisible="state in ('cancelled', 'closed')" />
+                    <button name="action_draft" string="Set to Draft" type="object"
+                        invisible="state == 'draft'" />
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,active,closed,cancelled" />
                 </header>
                 <sheet>
                     <div name="button_box" class="oe_button_box">
@@ -38,15 +43,6 @@
                             invisible="sales_order_count == 0">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">Sales Orders</span>
-                            </div>
-                        </button>
-                        <button name="action_view_purchase_orders"
-                            type="object"
-                            class="oe_stat_button"
-                            icon="fa-credit-card"
-                            invisible="purchase_order_count == 0">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text">Purchase Orders</span>
                             </div>
                         </button>
                         <button name="action_view_booking"
@@ -64,69 +60,75 @@
                     </h1>
                     <group string="Header Information">
                         <group>
-                            <field name="freight_type"/>
-                            <field name="container_type"/>
-                            <field name="booking_id"/>
-                            <field name="master_job_no"/>
-                            <field name="job_date"/>
-                            <field name="job_city_id"/>
+                            <field name="freight_type" />
+                            <field name="container_type" />
+                            <field name="booking_id" />
+                            <field name="master_job_no" />
+                            <field name="job_date" />
+                            <field name="job_city_id" />
                         </group>
                         <group>
-                            <field name="no_of_original_bl"/>
-                            <field name="mbl_no"/>
-                            <field name="hbl_no"/>
-                            <field name="bl_surrendered"/>
+                            <field name="no_of_original_bl" />
+                            <field name="mbl_no" />
+                            <field name="hbl_no" />
+                            <field name="bl_surrendered" />
                             <field name="commodity_id" />
-                            <field name="shipment_type_id"/>
-                            <field name="delivery_type_id"/>
+                            <field name="shipment_type_id" />
+                            <field name="delivery_type_id" />
                         </group>
                     </group>
 
                     <group string="Customer &amp; Sales">
                         <group>
-                            <field name="customer_id"/>
-                            <field name="customer_ref"/>
-                            <field name="shipper_id"/>
-                            <field name="shipper_address" readonly="1"/>
-                            <field name="actual_shipper"/>
-                            <field name="do_ready_on"/>
+                            <field name="customer_id" />
+                            <field name="customer_ref" />
+                            <field name="shipper_id" />
+                            <field name="shipper_address" readonly="1" />
+                            <field name="actual_shipper" />
+                            <field name="do_ready_on" />
                         </group>
                         <group>
                             <field name="consignee_id" />
                             <field name="consignee_address" readonly="1" />
-                            <field name="term_payment"/>
-                            <field name="salesman_id"/>
+                            <field name="term_payment" />
+                            <field name="salesman_id" />
                             <!-- <field name="export_sales_team_id"/> -->
-                            <field name="analytic_account_id"/>
+                            <field name="analytic_account_id" />
                         </group>
                     </group>
 
                     <group>
                         <group string="Notify Party">
-                            <field name="notify_same_as_consignee" />
-                            <field name="notify_party_id" />
-                            <field name="notify_party_address" readonly="1" />
+                            <!-- <field name="notify_same_as_consignee" />
+                            <field name="notify_party_id" /> -->
+                            <label for="notify_party_id" string="Notify Party"/>
+                            <div class="o_row">
+                                <field name="notify_party_id" />
+                                <button name="action_same_as_consignee" string="Same As Consignee"
+                                    type="object" class="btn-link" />
+                            </div>
+                            <field name="notify_address" readonly="1" />
                         </group>
                         <group string="Delivery &amp; Freight">
                             <field name="delivery_agent_id" />
                             <field name="delivery_agent_address" readonly="1" />
-                            <field name="freight"/>
-                            <field name="freight_terms"/>
-                            <field name="remark"/>
+                            <field name="freight" />
+                            <field name="freight_terms" />
+                            <field name="remark" />
                         </group>
                     </group>
 
                     <group string="Route">
                         <group>
-                            <field name="from_city"/>
-                            <field name="origin_country_id"/>
+                            <field name="from_city" />
+                            <field name="origin_country_id" />
                         </group>
                         <group>
-                            <field name="to_city"/>
-                            <field name="destination_country_id"/>
+                            <field name="to_city" />
+                            <field name="destination_country_id" />
                         </group>
                     </group>
-                    
+
                     <notebook>
                         <page string="Shipment Info">
                             <group>
@@ -145,7 +147,7 @@
                                 </group>
                             </group>
 
-                            <separator/>
+                            <separator />
 
                             <group>
                                 <group>
@@ -171,7 +173,8 @@
                         </page> -->
 
                         <page string="Vessel Details">
-                            <group string="Stuffing Warehouse &amp; SMK" invisible="freight_type == 'import'">
+                            <group string="Stuffing Warehouse &amp; SMK"
+                                invisible="freight_type == 'import'">
                                 <group>
                                     <field name="warehouse_id" />
                                     <field name="warehouse_address" />
@@ -229,60 +232,62 @@
                             </field>
                         </page>
                         <page string="Purchase Order">
-                            <field name="purchase_order_ids" nolabel="1" context="{'default_sea_hbl_id': id}">
+                            <field name="purchase_order_ids" nolabel="1"
+                                context="{'default_sea_hbl_id': id}">
                                 <list editable="bottom" open_form_view="1">
-                                    <field name="name"/>
-                                    <field name="partner_id"/>
-                                    <field name="currency_id"/>
-                                    <field name="amount_total"/>
-                                    <field name="state"/>
+                                    <field name="name" />
+                                    <field name="partner_id" />
+                                    <field name="currency_id" />
+                                    <field name="amount_total" />
+                                    <field name="state" />
                                 </list>
                             </field>
                         </page>
                         <page string="Sales Orders">
-                            <field name="sale_order_ids" nolabel="1" context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea', 'default_sea_hbl_id': id}">
+                            <field name="sale_order_ids" nolabel="1"
+                                context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea', 'default_sea_hbl_id': id}">
                                 <list editable="bottom" open_form_view="1">
-                                    <field name="name"/>
-                                    <field name="currency_id"/>
-                                    <field name="amount_total"/>
-                                    <field name="state"/>
+                                    <field name="name" />
+                                    <field name="currency_id" />
+                                    <field name="amount_total" />
+                                    <field name="state" />
                                 </list>
                             </field>
                         </page>
                         <page string="Tax Refund Doc">
-                            <field name="tax_refund_doc_ids" nolabel="1"/>
+                            <field name="tax_refund_doc_ids" nolabel="1" />
                         </page>
                         <page string="Document List">
                             <notebook>
                                 <page string="Invoice">
-                                    <field name="invoice_ids" nolabel="1"/>
+                                    <field name="invoice_ids" nolabel="1" />
                                 </page>
                                 <page string="Debit Note">
-                                    <field name="debit_note_ids" nolabel="1"/>
+                                    <field name="debit_note_ids" nolabel="1" />
                                 </page>
                                 <page string="Credit Note">
-                                    <field name="credit_note_ids" nolabel="1"/>
+                                    <field name="credit_note_ids" nolabel="1" />
                                 </page>
                                 <page string="Provision Cost">
-                                    <field name="provision_cost_ids" nolabel="1"/>
+                                    <field name="provision_cost_ids" nolabel="1" />
                                 </page>
                                 <page string="Vendor Invoice">
-                                    <field name="vendor_invoice_ids" nolabel="1"/>
+                                    <field name="vendor_invoice_ids" nolabel="1" />
                                 </page>
                                 <page string="Vendor Debit Note">
-                                    <field name="vendor_debit_note_ids" nolabel="1"/>
+                                    <field name="vendor_debit_note_ids" nolabel="1" />
                                 </page>
                                 <page string="Vendor Credit Note">
-                                    <field name="vendor_credit_note_ids" nolabel="1"/>
+                                    <field name="vendor_credit_note_ids" nolabel="1" />
                                 </page>
                                 <page string="Cash Purchase">
-                                    <field name="cash_purchase_ids" nolabel="1"/>
+                                    <field name="cash_purchase_ids" nolabel="1" />
                                 </page>
                             </notebook>
                         </page>
                     </notebook>
                 </sheet>
-                <chatter/>
+                <chatter />
             </form>
         </field>
     </record>
@@ -292,17 +297,20 @@
         <field name="model">freight.sea.hbl</field>
         <field name="arch" type="xml">
             <search>
-                <field name="hbl_no" string="Jobsheet No."/>
-                <field name="booking_id"/>
-                <field name="customer_id"/>
-                <field name="freight_type"/>
-                <field name="container_type"/>
-                <separator/>
-                <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'import')]"/>
-                <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'export')]"/>
-                <filter name="filter_fcl" string="FCL" domain="[('container_type', '=', 'fcl')]"/>
-                <filter name="filter_lcl" string="LCL" domain="[('container_type', '=', 'lcl')]"/>
-                <filter name="filter_consol" string="Consol" domain="[('container_type', '=', 'consol')]"/>
+                <field name="hbl_no" string="Jobsheet No." />
+                <field name="booking_id" />
+                <field name="customer_id" />
+                <field name="freight_type" />
+                <field name="container_type" />
+                <separator />
+                <filter name="filter_import" string="Import"
+                    domain="[('freight_type', '=', 'import')]" />
+                <filter name="filter_export" string="Export"
+                    domain="[('freight_type', '=', 'export')]" />
+                <filter name="filter_fcl" string="FCL" domain="[('container_type', '=', 'fcl')]" />
+                <filter name="filter_lcl" string="LCL" domain="[('container_type', '=', 'lcl')]" />
+                <filter name="filter_consol" string="Consol"
+                    domain="[('container_type', '=', 'consol')]" />
             </search>
         </field>
     </record>
@@ -311,14 +319,14 @@
         <field name="name">Sea Jobsheet</field>
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search"/>
+        <field name="search_view_id" ref="view_sea_hbl_search" />
     </record>
 
     <record id="action_sea_hbl_import_fcl" model="ir.actions.act_window">
         <field name="name">Import Jobsheet FCL</field>
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search"/>
+        <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'fcl')]</field>
     </record>
 
@@ -326,7 +334,7 @@
         <field name="name">Import Jobsheet LCL</field>
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search"/>
+        <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'lcl')]</field>
     </record>
 
@@ -334,7 +342,7 @@
         <field name="name">Import Jobsheet Consol</field>
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search"/>
+        <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'consol')]</field>
     </record>
 
@@ -342,7 +350,7 @@
         <field name="name">Export Jobsheet FCL</field>
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search"/>
+        <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'fcl')]</field>
     </record>
 
@@ -350,7 +358,7 @@
         <field name="name">Export Jobsheet LCL</field>
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search"/>
+        <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'lcl')]</field>
     </record>
 
@@ -358,7 +366,7 @@
         <field name="name">Export Jobsheet Consol</field>
         <field name="res_model">freight.sea.hbl</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search"/>
+        <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'consol')]</field>
     </record>
 </odoo>

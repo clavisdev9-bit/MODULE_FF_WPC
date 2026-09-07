@@ -39,6 +39,11 @@ class FreightBlInfoMixin(models.AbstractModel):
         string="Notify Party",
         domain="[('category_id.name', '=', 'Notify Party')]",
     )
+    notify_address = fields.Char(
+        string="Notify Address",
+        compute="_compute_notify_party_address",
+        store=False,
+    )
     notify_party_address = fields.Char(
         string="Notify Party Address",
         compute="_compute_notify_party_address",
@@ -83,15 +88,32 @@ class FreightBlInfoMixin(models.AbstractModel):
     @api.depends("notify_party_id")
     def _compute_notify_party_address(self):
         for rec in self:
-            rec.notify_party_address = self._build_partner_address(rec.notify_party_id)
+            addr = self._build_partner_address(rec.notify_party_id)
+            rec.notify_party_address = addr
+            rec.notify_address = addr
                 
     @api.depends("delivery_agent_id")
     def _compute_delivery_agent_address(self):
         for rec in self:
             rec.delivery_agent_address = self._build_partner_address(rec.delivery_agent_id)
 
-    @api.onchange("notify_same_as_consignee", "consignee_id")
-    def _onchange_notify_same_as_consignee(self):
-        if self.notify_same_as_consignee:
+    # @api.onchange("notify_same_as_consignee", "consignee_id")
+    # def _onchange_notify_same_as_consignee(self):
+    #     if self.notify_same_as_consignee:
+    #         self.notify_party_id = self.consignee_id
+            
+    @api.onchange('notify_party_id')
+    def _onchange_notify_party_id(self):
+        if self.notify_party_id and not self.notify_address:
+            addr = self.notify_party_id._display_address() if hasattr(self.notify_party_id, '_display_address') else (self.notify_party_id.street or '')
+            self.notify_address = addr
+            self.notify_party_address = addr
+
+    def action_same_as_consignee(self):
+        self.ensure_one()
+        if self.consignee_id:
             self.notify_party_id = self.consignee_id
-
+            addr = self.consignee_address or (self.consignee_id._display_address() if hasattr(self.consignee_id, '_display_address') else '')
+            self.notify_address = addr
+            self.notify_party_address = addr
+

@@ -32,6 +32,7 @@
         # Data
         "data/air/air_booking_sequence.xml",
         "data/air/air_mawb_sequence.xml",
+        "data/air/air_hawb_sequence.xml",
         "data/sea/sea_booking_sequence.xml",
         "data/sea/sea_hbl_sequence.xml",
         "data/master_data/uom_data.xml",
@@ -77,6 +78,9 @@
         "views/acct/payment_term.xml",
         "views/acct/vat_code.xml",
         # Air
+        "views/air/booking/booking.xml",
+        "views/air/hawb/document_list_views.xml",
+        "views/air/hawb/hawb.xml",
         # "views/air/air_waybill/airline.xml",
         # "views/air/air_waybill/airport.xml",
         # "views/air/air_waybill/air_booking.xml",
@@ -86,7 +90,6 @@
         # "views/air/air_waybill/document_list.xml",
         # "views/air/air_waybill/freight_items_line.xml",
         # "views/air/air_waybill/extra_info.xml",
-        # "views/air/air_waybill/handling_information.xml",
         # "views/air/air_waybill/air_waybill_transaction.xml",
         # Master Data
         "views/air/master_data/delivery_type.xml",
@@ -116,6 +119,7 @@
         "views/sea/master_data/terms_and_condition.xml",
         # Menu
         "views/menu.xml",
+        "views/air/master_data/handling_information.xml",
         "views/menus/air/master_data/menu.xml",
         "views/menus/partner.xml",
         "views/menus/acct.xml",
