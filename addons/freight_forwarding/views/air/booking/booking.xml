@@ -21,6 +21,15 @@
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
+                            <button name="action_view_sales_orders"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                invisible="sales_order_count == 0">
+                                <div class="o_stat_info">
+                                    <span class="o_stat_text">Sales Orders</span>
+                                </div>
+                            </button>
                             <button name="action_view_hawbs" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="hawb_count == 0">
                                 <div class="o_stat_info">
                                     <span class="o_stat_text">Jobsheet</span>
@@ -152,6 +161,7 @@
                 <list string="Air Bookings" decoration-info="state == 'draft'"
                     decoration-success="state == 'confirmed'">
                     <field name="name" />
+                    <field name="sale_order_ids" widget="many2many_tags" string="Sales Orders" />
                     <field name="booking_date" />
                     <field name="partner_id" />
                     <field name="departure_id" />
@@ -170,6 +180,7 @@
             <field name="arch" type="xml">
                 <search string="Search Air Bookings">
                     <field name="name" string="Booking No." />
+                    <field name="sale_order_ids" string="Sales Order" />
                     <field name="partner_id" string="Customer" />
                     <field name="departure_id" string="Departure" />
                     <field name="destination_id" string="Destination" />

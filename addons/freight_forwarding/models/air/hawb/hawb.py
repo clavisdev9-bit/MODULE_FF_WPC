@@ -18,6 +18,13 @@ class FreightAirHawb(models.Model):
     hawb_no = fields.Char(string='House AWB No.', tracking=True)
     smawb_no = fields.Char(string='SMawb No.', tracking=True)
     mawb_no = fields.Char(string='Mawb No.', tracking=True)
+    direct_awb_no = fields.Char(string='Direct AWB No.', tracking=True)
+    known_shipper_flag = fields.Char(string='Know Shipper', size=15, tracking=True)
+    awb_type = fields.Selection([
+        ('direct', 'Direct AWB'),
+        ('house', 'House AWB'),
+        ('master', 'Master AWB')
+    ], string='AWB Type', default='house', required=True, tracking=True)
     
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -118,6 +125,16 @@ class FreightAirHawb(models.Model):
     sales_order_count = fields.Integer(string='Sales Order Count', compute='_compute_sales_order_count')
     purchase_order_count = fields.Integer(string='Purchase Order Count', compute='_compute_purchase_order_count')
 
+    booking_count = fields.Integer(
+        string='Booking Count',
+        compute='_compute_booking_count',
+    )
+
+    @api.depends('booking_id')
+    def _compute_booking_count(self):
+        for rec in self:
+            rec.booking_count = 1 if rec.booking_id else 0
+
     @api.depends('sale_order_ids')
     def _compute_sales_order_count(self):
         for rec in self:
@@ -128,25 +145,41 @@ class FreightAirHawb(models.Model):
         for rec in self:
             rec.purchase_order_count = len(rec.purchase_order_ids)
 
+    def action_view_booking(self):
+        self.ensure_one()
+        if not self.booking_id:
+            return False
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith('_view_ref')}
+        return {
+            'name': _('Air Booking'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'freight.air.booking',
+            'res_id': self.booking_id.id,
+            'view_mode': 'form',
+            'context': ctx,
+        }
+
     def action_view_sales_orders(self):
         self.ensure_one()
         orders = self.sale_order_ids
         if not orders:
             return False
+        view_id = self.env.ref('freight_forwarding.view_air_quotation_form').id
+        ctx = {k: v for k, v in self.env.context.items() if not k.endswith('_view_ref')}
+        ctx.update({
+            'default_air_hawb_id': self.id,
+            'default_is_freight_quotation': True,
+            'default_freight_business_type': 'air',
+        })
         return {
             'name': _('Sales Orders'),
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order',
             'view_mode': 'form' if len(orders) == 1 else 'list,form',
+            'views': [(view_id, 'form')] if len(orders) == 1 else [(False, 'list'), (view_id, 'form')],
             'domain': [('id', 'in', orders.ids)],
             'res_id': orders.id if len(orders) == 1 else False,
-            'context': dict(
-                self.env.context,
-                default_air_hawb_id=self.id,
-                default_is_freight_quotation=True,
-                default_freight_business_type='air',
-                form_view_ref='freight_forwarding.view_air_quotation_form',
-            ),
+            'context': ctx,
         }
 
     def action_view_purchase_orders(self):
