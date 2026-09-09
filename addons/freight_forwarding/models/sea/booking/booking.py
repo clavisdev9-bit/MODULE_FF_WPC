@@ -160,10 +160,6 @@ class SeaBooking(models.Model):
         string="Sales Orders",
     )
 
-    # Location & Route
-    # NOTE: port_of_loading_id, port_of_discharge_id, commodity_id, etd, eta,
-    # eta_jkt ada di freight.sea.shipment.info.mixin (ditampilkan di tab
-    # Shipment Info). Definisi di sini hanya untuk field yang khas Booking.
     destination_country_id = fields.Many2one(
         "res.country", string="Destination Country"
     )
@@ -181,11 +177,6 @@ class SeaBooking(models.Model):
     vessel_id = fields.Many2one("freight.vessel", string="Vessel Name", required=True)
     voyage_no = fields.Char(string="Voyage No.")
 
-    # Notebook
-    # NOTE (FF-22): field shipment_info_ids (One2many ke
-    # freight.sea.booking.shipment.info) DIHAPUS. Model perantaranya sudah
-    # dihapus; field-fieldnya sekarang ada langsung di sini lewat
-    # freight.sea.shipment.info.mixin (lihat _inherit di atas).
     cargo_info_ids = fields.One2many(
         "freight.sea.booking.cargo.info",
         "booking_id",
@@ -238,11 +229,6 @@ class SeaBooking(models.Model):
             hbl_cargo_model.create(cargo_values)
 
     def _copy_booking_data_to_hbl(self, booking, hbl):
-        # NOTE (FF-22): pemanggilan copy shipment_info_ids DIHAPUS di sini
-        # karena model freight.sea.booking.shipment.info /
-        # freight.sea.hbl.shipment.info sudah tidak ada. Field-field
-        # shipment info sekarang langsung ada di Booking & HBL (lewat mixin),
-        # jadi tidak perlu proses copy antar model perantara lagi.
 
 
         header_fields = [
