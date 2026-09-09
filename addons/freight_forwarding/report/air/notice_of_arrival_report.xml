@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="notice_of_arrival_air_paperformat" model="report.paperformat">
+        <field name="name">Notice of Arrival Air A4</field>
+        <field name="default">False</field>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">12</field>
+        <field name="margin_left">18</field>
+        <field name="margin_right">18</field>
+        <field name="header_line">False</field>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="notice_of_arrival_air_report" model="ir.actions.report">
+        <field name="name">Notice Of Arrival Udara</field>
+        <field name="model">freight.air.hawb</field>
+        <field name="report_type">qweb-html</field>
+        <field name="report_name">freight_forwarding.notice_of_arrival_template</field>
+        <field name="report_file">freight_forwarding.notice_of_arrival_template</field>
+        <field name="paperformat_id" ref="notice_of_arrival_air_paperformat"/>
+        <field name="binding_model_id" ref="freight_forwarding.model_freight_air_hawb"/>
+        <field name="binding_type">report</field>
+        <field name="binding_view_types">form,list</field>
+        <field name="print_report_name">'Notice Of Arrival Udara'</field>
+    </record>
+</odoo>
