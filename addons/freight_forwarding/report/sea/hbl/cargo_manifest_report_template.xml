@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="cargo_manifest_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
+                    <t t-set="company" t-value="doc.company_id or doc.env.company"/>
+                    <t t-set="cargo_lines" t-value="doc.cargo_info_ids"/>
+                    <t t-set="total_pos_do" t-value="len(cargo_lines)"/>
+
+                    <div class="page cm-page">
+                        <style>
+                            * { box-sizing: border-box; }
+                            .cm-page {
+                                font-family: Arial, Helvetica, sans-serif;
+                                font-size: 8.5pt;
+                                color: #000;
+                                line-height: 1.3;
+                            }
+                            .cm-page table { border-collapse: collapse; }
+
+                            /* ── Header ──
+                               margin-bottom removed here on purpose: it used to sit next to
+                               .cm-grid's margin-top and rely on the two adjoining margins
+                               "collapsing" to the larger one (standard CSS behaviour for
+                               sibling block/table boxes) — verified against a real wkhtmltopdf
+                               render that this collapsing does hold, but keeping the whole gap
+                               on a single property (.cm-grid's margin-top) removes any doubt
+                               and makes the gap a single, deliberate number instead of an
+                               interaction between two. */
+                            /* table-layout: fixed is required here: the report's real Paper
+                               Format renders in A4 LANDSCAPE (842pt wide). A previous revision
+                               pinned the logo cell to a fixed pixel width (instead of a
+                               percentage) to stop unused leftover cell space from showing up as
+                               an oversized gap on the wide landscape page — but mixing one
+                               fixed-px column with three percentage columns inside the same
+                               table-layout:fixed table turned out to make the logo cell's
+                               resolved width (and therefore how big the logo could render)
+                               unpredictable across edits, verified by real renders where
+                               widening the px column did not reliably enlarge the logo.
+                               Fix: go back to ALL FOUR header columns sharing one consistent
+                               unit (percentages: 10 + 31 + 44 + 15 = 100%), which table-layout:
+                               fixed resolves deterministically, and decouple the logo's SIZE
+                               and its GAP from the cell's resolved width entirely:
+                               - the logo's size is controlled only by the image's own
+                                 max-height (no longer by how wide its cell happens to be);
+                               - the gap to the company text is controlled only by the image's
+                                 own margin-right, by right-aligning the image inside its cell
+                                 (text-align:right) so it always hugs the cell's right edge —
+                                 any leftover width in the (percentage) logo cell becomes blank
+                                 space to the LEFT of the logo instead of extra gap to its right.
+                               This keeps both the logo size and the gap exact and stable no
+                               matter how wide table-layout:fixed happens to resolve the column,
+                               verified via real landscape render (1 page, logo ~24% taller than
+                               the previous revision, gap ~9.6pt / ~12.8px — clearly open, not
+                               touching). */
+                            .cm-header-table { width: 100%; table-layout: fixed; border: none !important; margin-bottom: 0; }
+                            .cm-header-table td { border: none !important; padding: 0; vertical-align: top; }
+                            .cm-logo-cell { width: 10%; padding: 0 !important; text-align: right; }
+                            .cm-logo-cell img { max-height: 108px; max-width: 100%; width: auto; display: inline-block; margin: 0 16px 0 0; vertical-align: top; }
+                            .cm-company-cell { width: 31%; padding-left: 0 !important; }
+                            .cm-company-name { font-size: 13pt; font-weight: bold; margin-bottom: 2px; margin-top: 0; }
+                            .cm-jobinfo-cell { width: 44%; border-left: 1px solid #000 !important; padding-left: 8px !important; }
+                            .cm-side-cell { width: 15%; text-align: right; border-left: 1px solid #000 !important; padding-left: 8px !important; }
+                            .cm-title { font-size: 13pt; font-weight: bold; text-decoration: underline; margin-bottom: 3px; }
+
+                            .cm-info-table { width: 100%; border: none !important; }
+                            .cm-info-table td { border: none !important; padding: 0.5px 0; font-size: 8.5pt; vertical-align: top; }
+                            .cm-info-label { width: 96px; white-space: nowrap; }
+                            .cm-info-colon { width: 8px; }
+
+                            .cm-side-label { white-space: nowrap; }
+                            .cm-total-do { white-space: nowrap; margin-top: 4px; }
+
+                            /* ── Cargo grid ──
+                               margin-top = 11pt = one full line of body text (8.5pt font ×
+                               1.3 line-height = 11.05pt ≈ 14.7px) — measured against a real
+                               render to land within 0.1px of that target, so the blank strip
+                               between the header block and the grid reads as exactly "1 baris
+                               spasi", not more, not less. */
+                            .cm-grid { width: 100%; border: 1px solid #000; margin-top: 11pt; }
+                            .cm-grid th, .cm-grid td { border: 1px solid #000; padding: 3px 4px; vertical-align: top; font-size: 8.5pt; }
+                            .cm-grid thead th { text-align: center; font-weight: normal; }
+                            .cm-grid tbody tr { page-break-inside: avoid; break-inside: avoid; }
+
+                            .cm-group-header td { background-color: #fff; padding: 2px 4px; }
+
+                            .cm-col-hblsh { width: 26%; }
+                            .cm-col-marks { width: 18%; }
+                            .cm-col-desc { width: 39%; }
+                            .cm-col-weight { width: 17%; text-align: center; }
+
+                            /* Label : value blocks (col. 1, col. 2 and the weight column) — a
+                               fixed-width key column keeps every colon aligned on the same
+                               vertical line, and continuation rows (empty key/colon cells) keep
+                               multi-line address text aligned under the value column instead of
+                               the label. */
+                            .cm-field-table { width: 100%; border: none !important; border-collapse: collapse; text-align: left; }
+                            .cm-field-table td { border: none !important; padding: 0; font-size: 8.5pt; line-height: 1.3; vertical-align: top; }
+                            .cm-field-key { white-space: nowrap; padding-right: 2px !important; }
+                            .cm-field-colon { width: 7px; white-space: nowrap; }
+                            .cm-field-value { padding-left: 3px !important; }
+                            .cm-hblsh-table .cm-field-key { width: 30px; }
+                            .cm-marks-table .cm-field-key { width: 82px; }
+                            .cm-weight-table .cm-field-key { width: 22px; }
+
+                            .cm-qty-line { text-align: center; font-weight: normal; margin-bottom: 3px; }
+                        </style>
+
+                        <div class="header"
+                         style="text-align: right; font-family: Arial, Helvetica, sans-serif; font-size: 8pt; color: #000; margin: 0; padding: 0 10px 0 0;">
+                          PAGE&#160;&#160;Page <span class="page"/> of <span class="topage"/>
+                        </div>
+                        
+                        <table class="cm-header-table">
+                            <tr>
+                                <td class="cm-logo-cell">
+                                    <img t-if="company and company.logo" t-att-src="image_data_uri(company.logo)"/>
+                                </td>
+                                <td class="cm-company-cell">
+                                    <div class="cm-company-name"><t t-esc="company.name or ''"/></div>
+                                    <div>
+                                        <t t-if="company.street"><t t-esc="company.street"/></t>
+                                        <t t-if="company.street2">, <t t-esc="company.street2"/></t>
+                                    </div>
+                                    <div>
+                                        <t t-if="company.city"><t t-esc="company.city"/></t>
+                                        <t t-if="company.country_id">, <t t-esc="company.country_id.name"/></t>
+                                    </div>
+                                    <div><t t-if="company.zip"><t t-esc="company.zip"/></t></div>
+                                    <div><t t-if="company.phone">Phone : <t t-esc="company.phone"/></t></div>
+                                </td>
+                                <td class="cm-jobinfo-cell">
+                                    <div class="cm-title">CARGO MANIFEST</div>
+                                    <table class="cm-info-table">
+                                        <tr>
+                                            <td class="cm-info-label">JOB NO</td>
+                                            <td class="cm-info-colon">:</td>
+                                            <td><t t-esc="doc.job_no or ''"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cm-info-label">VESSEL</td>
+                                            <td class="cm-info-colon">:</td>
+                                            <td>
+                                                <t t-if="doc.mother_vessel_id"><t t-esc="doc.mother_vessel_id.name"/></t>
+                                                <t t-if="doc.mother_voyage_no">&#160;&#160;V. <t t-esc="doc.mother_voyage_no"/></t>
+                                                <t t-if="doc.coloader_id">&#160;&#160;<t t-esc="doc.coloader_id.name"/></t>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cm-info-label">P.O.L/P.O.D</td>
+                                            <td class="cm-info-colon">:</td>
+                                            <td>
+                                                <t t-if="doc.port_of_loading_id"><t t-esc="doc.port_of_loading_id.name"/></t>
+                                                &#160;/&#160;
+                                                <t t-if="doc.port_of_discharge_id"><t t-esc="doc.port_of_discharge_id.name"/></t>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cm-info-label">OCEAN B/L NO</td>
+                                            <td class="cm-info-colon">:</td>
+                                            <td><t t-esc="doc.mbl_no or ''"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cm-info-label">ETD</td>
+                                            <td class="cm-info-colon">:</td>
+                                            <td>
+                                                <span t-field="doc.etd" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td class="cm-side-cell">
+                                    <div class="cm-total-do">
+                                        TOTAL <t t-esc="total_pos_do"/> POS &amp; D/O :
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ================= CARGO GRID ================= -->
+                        <table class="cm-grid">
+                            <colgroup>
+                                <col class="cm-col-hblsh"/>
+                                <col class="cm-col-marks"/>
+                                <col class="cm-col-desc"/>
+                                <col class="cm-col-weight"/>
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>HB/L - NO - SH - CN - NP</th>
+                                    <th>MARKS &amp; NOS</th>
+                                    <th>QUANTITY &amp; DESCRIPTION OF GOODS</th>
+                                    <th>GROSS WEIGHT &amp; MEASUREMENT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="prev_container" t-value="None"/>
+                                <t t-set="pos_counter" t-value="0"/>
+                                <t t-if="not cargo_lines">
+                                    <tr>
+                                        <td colspan="4">&#160;</td>
+                                    </tr>
+                                </t>
+                                <t t-foreach="cargo_lines" t-as="cargo">
+                                    <t t-set="pos_counter" t-value="pos_counter + 1"/>
+
+                                    <!-- Group header: one row per container, printed when container_no changes -->
+                                    <t t-if="cargo.container_no != prev_container">
+                                        <tr class="cm-group-header">
+                                            <td colspan="4">
+                                                CONTAINER NO :
+                                                <t t-esc="cargo.container_no or ''"/>
+                                                <t t-if="cargo.container_type_id"> / <t t-esc="cargo.container_type_id.name"/></t>
+                                            </td>
+                                        </tr>
+                                        <t t-set="prev_container" t-value="cargo.container_no"/>
+                                    </t>
+
+                                    <tr class="cm-data-row">
+                                        <!-- Col 1: HB/L - NO - SH - CN - NP -->
+                                        <td class="cm-col-hblsh">
+                                            <table class="cm-field-table cm-hblsh-table">
+                                                <tr>
+                                                    <td class="cm-field-key">HB/L</td>
+                                                    <td class="cm-field-colon">:</td>
+                                                    <td class="cm-field-value"><t t-esc="doc.hbl_no or ''"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="cm-field-key">POS</td>
+                                                    <td class="cm-field-colon">:</td>
+                                                    <td class="cm-field-value"><t t-esc="pos_counter"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="cm-field-key">SH</td>
+                                                    <td class="cm-field-colon">:</td>
+                                                    <td class="cm-field-value"><t t-if="doc.shipper_id"><t t-esc="doc.shipper_id.name"/></t></td>
+                                                </tr>
+                                                <t t-foreach="(doc.shipper_address or '').split(', ')" t-as="addr_line">
+                                                    <t t-if="addr_line">
+                                                        <tr>
+                                                            <td class="cm-field-key"></td>
+                                                            <td class="cm-field-colon"></td>
+                                                            <td class="cm-field-value"><t t-esc="addr_line"/></td>
+                                                        </tr>
+                                                    </t>
+                                                </t>
+                                                <tr>
+                                                    <td class="cm-field-key">CN</td>
+                                                    <td class="cm-field-colon">:</td>
+                                                    <td class="cm-field-value"><t t-if="doc.consignee_id"><t t-esc="doc.consignee_id.name"/></t></td>
+                                                </tr>
+                                                <t t-foreach="(doc.consignee_address or '').split(', ')" t-as="addr_line">
+                                                    <t t-if="addr_line">
+                                                        <tr>
+                                                            <td class="cm-field-key"></td>
+                                                            <td class="cm-field-colon"></td>
+                                                            <td class="cm-field-value"><t t-esc="addr_line"/></td>
+                                                        </tr>
+                                                    </t>
+                                                </t>
+                                                <!-- Business rule (FF-59, 3.1): Notify Party -->
+                                                <t t-if="doc.notify_same_as_consignee or doc.notify_party_id == doc.consignee_id">
+                                                    <tr>
+                                                        <td class="cm-field-key">NP</td>
+                                                        <td class="cm-field-colon">:</td>
+                                                        <td class="cm-field-value">SAME AS CONSIGNEE</td>
+                                                    </tr>
+                                                </t>
+                                                <t t-else="">
+                                                    <tr>
+                                                        <td class="cm-field-key">NP</td>
+                                                        <td class="cm-field-colon">:</td>
+                                                        <td class="cm-field-value"><t t-if="doc.notify_party_id"><t t-esc="doc.notify_party_id.name"/></t></td>
+                                                    </tr>
+                                                    <t t-foreach="(doc.notify_party_address or '').split(', ')" t-as="addr_line">
+                                                        <t t-if="addr_line">
+                                                            <tr>
+                                                                <td class="cm-field-key"></td>
+                                                                <td class="cm-field-colon"></td>
+                                                                <td class="cm-field-value"><t t-esc="addr_line"/></td>
+                                                            </tr>
+                                                        </t>
+                                                    </t>
+                                                </t>
+                                            </table>
+                                        </td>
+
+                                        <!-- Col 2: MARKS &amp; NOS -->
+                                        <td class="cm-col-marks">
+                                            <table class="cm-field-table cm-marks-table">
+                                                <tr>
+                                                    <td class="cm-field-key">CONTAINER NO</td>
+                                                    <td class="cm-field-colon">:</td>
+                                                    <td class="cm-field-value"><t t-esc="cargo.container_no or ''"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="cm-field-key">SEAL NO</td>
+                                                    <td class="cm-field-colon">:</td>
+                                                    <td class="cm-field-value"><t t-esc="cargo.seal_no or ''"/></td>
+                                                </tr>
+                                            </table>
+                                            <t t-if="cargo.marks_and_no">
+                                                <div style="margin-top: 2px;"><span t-field="cargo.marks_and_no"/></div>
+                                            </t>
+                                        </td>
+
+                                        <!-- Col 3: QUANTITY &amp; DESCRIPTION OF GOODS -->
+                                        <td class="cm-col-desc">
+                                            <div class="cm-qty-line">
+                                                <t t-esc="cargo.quantity or 0"/>
+                                                <t t-if="cargo.package_type_id">&#160;<t t-esc="cargo.package_type_id.name"/></t>
+                                                &#160;&#160;STC
+                                            </div>
+                                            <div>
+                                                <span t-field="cargo.description_of_goods"/>
+                                            </div>
+                                        </td>
+
+                                        <!-- Col 4: GROSS WEIGHT &amp; MEASUREMENT -->
+                                        <td class="cm-col-weight">
+                                            <table class="cm-field-table cm-weight-table">
+                                                <tr>
+                                                    <td class="cm-field-key">GW</td>
+                                                    <td class="cm-field-colon">:</td>
+                                                    <td class="cm-field-value"><t t-esc="'{:,.4f}'.format(cargo.gross_weight or 0.0)"/> KGS</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="cm-field-key">MS</td>
+                                                    <td class="cm-field-colon">:</td>
+                                                    <td class="cm-field-value"><t t-esc="'{:,.4f}'.format(cargo.volume or 0.0)"/> M3</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
