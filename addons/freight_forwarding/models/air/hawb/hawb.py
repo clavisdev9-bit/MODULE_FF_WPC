@@ -55,11 +55,41 @@ class FreightAirHawb(models.Model):
     # -------------------------------------------------------------
     shipper_account_no = fields.Char(string='Shipper Account No.')
     consignee_account_no = fields.Char(string='Consignee Account No.')
+    consignee_postal_code = fields.Char(related='consignee_id.zip', string='Postal Code', readonly=True)
     notify_is_bank = fields.Boolean(string='Bank')
 
     iata_code = fields.Char(string='IATA Code')
     agent_account_no = fields.Char(string='Agent Account No.')
     note = fields.Text(string='Note')
+
+    # -------------------------------------------------------------
+    # AWB Info (Air Import) - Clearance/Transshipment, Appointed Agent, Contacts, Warehouse
+    # -------------------------------------------------------------
+    clearance = fields.Selection([
+        ('house', 'House'),
+        ('others', 'Others'),
+    ], string='Clearance', tracking=True)
+    is_transhipment = fields.Boolean(string='Transhipment', tracking=True)
+    origin_mawb_no = fields.Char(string='Origin MAWB No.', tracking=True)
+
+    appointed_agent_id = fields.Many2one('res.partner', string='Appointed Agent', tracking=True)
+
+    consignee_contact_id = fields.Many2one(
+        'res.partner', string='Contact Person',
+        domain="[('parent_id', '=', consignee_id)]",
+    )
+    consignee_contact_phone = fields.Char(related='consignee_contact_id.phone', string='Telephone')
+
+    agent_contact_id = fields.Many2one(
+        'res.partner', string='Contact Person',
+        domain="[('parent_id', '=', appointed_agent_id)]",
+    )
+    agent_contact_phone = fields.Char(related='agent_contact_id.phone', string='Telephone')
+
+    warehouse_id = fields.Many2one(
+        'res.partner', string='Warehouse', tracking=True,
+        domain="[('category_id.name', '=', 'Warehouse')]",
+    )
 
     # -------------------------------------------------------------
     # TAB 2: Shipment Info
@@ -90,6 +120,25 @@ class FreightAirHawb(models.Model):
     accounting_information = fields.Text(string='Accounting Information')
     permit_no = fields.Char(string='Permit No.')
     print_dimension = fields.Boolean(string='Print Dimension', default=True)
+
+    # -------------------------------------------------------------
+    # Delivery Info (Air Import) - pickup/delivery context only, not Warehouse
+    # -------------------------------------------------------------
+    transport_company_id = fields.Many2one(
+        'res.partner', string='Transport Company', tracking=True,
+        domain="[('category_id.name', '=', 'Transport Company')]",
+    )
+    transport_company_address = fields.Char(related='transport_company_id.contact_address', string='Address', readonly=True)
+
+    pickup_datetime = fields.Datetime(string='Pickup Date/Time')
+    collect_from_id = fields.Many2one('res.partner', string='Collect From')
+    collect_from_address = fields.Char(related='collect_from_id.contact_address', string='Collect From Address', readonly=True)
+
+    delivery_datetime = fields.Datetime(string='Delivery Date/Time')
+    deliver_to_id = fields.Many2one('res.partner', string='Deliver To')
+    deliver_to_address = fields.Char(related='deliver_to_id.contact_address', string='Deliver To Address', readonly=True)
+
+    delivery_instruction = fields.Text(string='Delivery Instruction')
 
     # -------------------------------------------------------------
     # TAB 3: Dimension

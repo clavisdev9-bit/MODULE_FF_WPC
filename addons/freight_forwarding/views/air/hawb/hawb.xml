@@ -49,7 +49,7 @@
                         </h1>
                     </div>
                     <field name="awb_type" invisible="1"/>
-                    <group>
+                    <group name="top_identity_group">
                         <group>
                             <field name="hawb_no" invisible="awb_type != 'house'"/>
                             <field name="smawb_no" invisible="awb_type != 'house'"/>
@@ -76,7 +76,7 @@
                     <notebook>
                         <!-- TAB 1: AWB INFO -->
                         <page string="Awb Info" name="awb_info">
-                            <group>
+                            <group name="awb_info_content">
                                 <group string="Parties">
                                     <field name="shipper_id" string="Shipper"/>
                                     <field name="shipper_address" readonly="1"/>
@@ -118,6 +118,7 @@
                                     <field name="origin_country_id"/>
                                     <field name="ship_mode"/>
                                     <field name="delivery_type"/>
+                                    <field name="coloader_id" string="Co-loader" invisible="freight_type == 'import'"/>
                                 </group>
                                 <group>
                                     <field name="flight_routing_ids" nolabel="1">
@@ -274,6 +275,121 @@
         </field>
     </record>
 
+    <!-- IMPORT FORM VIEW (inherits base/export form) -->
+    <record id="view_freight_air_hawb_form_import" model="ir.ui.view">
+        <field name="name">freight.air.hawb.form.import</field>
+        <field name="model">freight.air.hawb</field>
+        <field name="inherit_id" ref="view_freight_air_hawb_form"/>
+        <field name="arch" type="xml">
+            <!-- Header block: Job/AWB identity + Clearance/Transshipment,
+                 Credit Term/Ship Mode/Service Level moved up per reviewed layout -->
+            <xpath expr="//group[@name='top_identity_group']" position="replace">
+                <group name="top_identity_group">
+                    <group>
+                        <field name="hawb_no" invisible="awb_type != 'house'"/>
+                        <field name="smawb_no" invisible="awb_type != 'house'"/>
+                        <field name="mawb_no" string="Mawb No." invisible="awb_type != 'house'"/>
+                        <field name="direct_awb_no" invisible="awb_type != 'direct'"/>
+                        <field name="mawb_no" string="Master AWB No." invisible="awb_type != 'master'"/>
+                        <field name="clearance"/>
+                        <field name="is_transhipment"/>
+                        <field name="origin_mawb_no" invisible="not is_transhipment"/>
+                        <field name="booking_id"/>
+                    </group>
+                    <group>
+                        <field name="job_date"/>
+                        <field name="freight_type"/>
+                        <field name="partner_id" string="Customer"/>
+                        <label for="is_nomination" string="Nomination"/>
+                        <div class="o_row">
+                            <field name="is_nomination"/>
+                            <field name="nomination_remark" placeholder="Nomination Remark..." invisible="not is_nomination"/>
+                        </div>
+                        <field name="customer_ref"/>
+                        <field name="ship_mode"/>
+                        <field name="term_payment"/>
+                        <field name="service_level"/>
+                        <field name="salesman_id"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- AWB Info: Shipper / Consignee / Contact & Agent / Notify+Warehouse+Remark,
+                 per the reviewed Sysfreight Air Import AWB Entry layout -->
+            <xpath expr="//group[@name='awb_info_content']" position="replace">
+                <group name="awb_info_content">
+                    <group string="Shipper">
+                        <field name="shipper_id" string="Shipper"/>
+                        <field name="shipper_address" readonly="1"/>
+                        <field name="known_shipper_flag" invisible="awb_type == 'house'"/>
+                        <field name="shipper_account_no"/>
+                    </group>
+                    <group string="Consignee">
+                        <field name="consignee_id" string="Consignee"/>
+                        <field name="consignee_address" readonly="1"/>
+                        <field name="consignee_postal_code"/>
+                        <field name="consignee_account_no"/>
+                    </group>
+                    <group string="Contact &amp; Agent">
+                        <field name="consignee_contact_id"/>
+                        <field name="consignee_contact_phone"/>
+                        <field name="overseas_agent_id"/>
+                        <field name="appointed_agent_id"/>
+                        <field name="agent_contact_id"/>
+                        <field name="agent_contact_phone"/>
+                    </group>
+                    <group string="Notify / Warehouse / Remark">
+                        <label for="notify_party_id" string="Notify Party"/>
+                        <div class="o_row">
+                            <field name="notify_party_id"/>
+                            <button name="action_same_as_consignee" string="Same As Consignee" type="object" class="btn-link"/>
+                        </div>
+                        <field name="notify_address" readonly="1"/>
+                        <field name="notify_is_bank"/>
+                        <field name="warehouse_id"/>
+                        <field name="note" string="Remark"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- Shipment Info: cargo summary fields exist on the model (cargo info mixin)
+                 but were never rendered anywhere; Import's reviewed layout wants them shown -->
+            <xpath expr="//page[@name='shipment_info']/group[last()]" position="after">
+                <group string="Cargo Summary">
+                    <group>
+                        <field name="pcs" string="Quantity"/>
+                        <field name="uom_id"/>
+                        <field name="commodity_id"/>
+                    </group>
+                    <group>
+                        <field name="gross_weight"/>
+                        <field name="charge_weight"/>
+                        <field name="volumetric_weight"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- Delivery Info: pickup/delivery context only - Warehouse stays in AWB Info -->
+            <xpath expr="//page[@name='shipment_info']" position="after">
+                <page string="Delivery Info" name="delivery_info">
+                    <group>
+                        <field name="delivery_type"/>
+                        <field name="transport_company_id"/>
+                        <field name="transport_company_address"/>
+                        <field name="pickup_datetime"/>
+                        <field name="collect_from_id"/>
+                        <field name="collect_from_address"/>
+                        <field name="delivery_datetime"/>
+                        <field name="deliver_to_id"/>
+                        <field name="deliver_to_address"/>
+                        <field name="delivery_instruction"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
     <!-- LIST VIEW -->
     <record id="view_freight_air_hawb_tree" model="ir.ui.view">
         <field name="name">freight.air.hawb.list</field>
@@ -389,17 +505,18 @@
         </field>
     </record>
 
-    <!-- ACTION IMPORT HOUSE AWB -->
+    <!-- ACTION IMPORT AWB ENTRY / JOBSHEET (single Import entry point) -->
     <record id="action_freight_air_hawb_import" model="ir.actions.act_window">
-        <field name="name">Air Import House AWB</field>
+        <field name="name">Air Import AWB Entry</field>
         <field name="res_model">freight.air.hawb</field>
         <field name="view_mode">list,form</field>
+        <field name="views" eval="[(ref('view_freight_air_hawb_tree'), 'list'), (ref('view_freight_air_hawb_form_import'), 'form')]"/>
         <field name="search_view_id" ref="view_freight_air_hawb_search" />
-        <field name="domain">[('freight_type', '=', 'import'), ('awb_type', '=', 'house')]</field>
+        <field name="domain">[('freight_type', '=', 'import')]</field>
         <field name="context">{'default_freight_type': 'import', 'default_awb_type': 'house'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new Air Import House AWB
+                Create a new Air Import AWB Entry
             </p>
         </field>
     </record>
