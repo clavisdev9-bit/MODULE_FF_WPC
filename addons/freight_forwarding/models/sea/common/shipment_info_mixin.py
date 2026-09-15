@@ -20,7 +20,7 @@ class FreightShipmentInfoMixin(models.AbstractModel):
     shipping_line_id = fields.Many2one(
         "res.partner",
         string="Shipping Line",
-        domain="[('category_id.name', '=', 'Shipping Line')]",
+        domain="[('category_id.freight_role_code', '=', 'shipping_line')]",
     )
     shipping_line_ref_no = fields.Char(string="Shipping Line Ref No")
     coloader_id = fields.Many2one("res.partner", string="Coloader")

@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="view_freight_permit_list" model="ir.ui.view">
-        <field name="name">freight.permit.list</field>
-        <field name="model">freight.permit</field>
+    <record id="view_freight_job_type_list" model="ir.ui.view">
+        <field name="name">freight.job.type.list</field>
+        <field name="model">freight.job.type</field>
         <field name="arch" type="xml">
             <list>
                 <field name="code"/>
                 <field name="name"/>
+                <field name="module_code"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
     </record>
 
-    <record id="view_freight_permit_form" model="ir.ui.view">
-        <field name="name">freight.permit.form</field>
-        <field name="model">freight.permit</field>
+    <record id="view_freight_job_type_form" model="ir.ui.view">
+        <field name="name">freight.job.type.form</field>
+        <field name="model">freight.job.type</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
                         <field name="code"/>
                         <field name="name"/>
+                        <field name="module_code"/>
                         <field name="active" widget="boolean_toggle"/>
                     </group>
                 </sheet>
@@ -28,9 +30,9 @@
         </field>
     </record>
 
-    <record id="view_freight_permit_search" model="ir.ui.view">
-        <field name="name">freight.permit.search</field>
-        <field name="model">freight.permit</field>
+    <record id="view_freight_job_type_search" model="ir.ui.view">
+        <field name="name">freight.job.type.search</field>
+        <field name="model">freight.job.type</field>
         <field name="arch" type="xml">
             <search>
                 <field name="code"/>
@@ -41,10 +43,10 @@
         </field>
     </record>
 
-    <record id="action_freight_sea_permit" model="ir.actions.act_window">
-        <field name="name">Permit</field>
-        <field name="res_model">freight.permit</field>
+    <record id="action_freight_job_type" model="ir.actions.act_window">
+        <field name="name">Job Type</field>
+        <field name="res_model">freight.job.type</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_freight_permit_search"/>
+        <field name="search_view_id" ref="view_freight_job_type_search"/>
     </record>
 </odoo>

@@ -19,11 +19,30 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="code"/>
-                        <field name="name"/>
-                        <field name="country_id"/>
-                        <field name="active" widget="boolean_toggle"/>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="country_id"/>
+                            <field name="via_port_id"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="dg_cargo"/>
+                            <field name="symbol"/>
+                            <field name="group_code"/>
+                            <field name="region_code"/>
+                        </group>
                     </group>
+                    <notebook>
+                        <page string="Destinations" name="destinations">
+                            <field name="destination_ids">
+                                <list editable="bottom">
+                                    <field name="destination_city_id"/>
+                                    <field name="no_of_day"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

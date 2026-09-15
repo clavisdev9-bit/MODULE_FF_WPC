@@ -7,11 +7,23 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="code" />
-                        <field name="name" required="1" />
-                        <field name="imo_number" />
-                        <field name="flag" />
-                        <field name="active" />
+                        <group>
+                            <field name="code" />
+                            <field name="name" required="1" />
+                            <field name="short_name" />
+                            <field name="vessel_type" />
+                            <field name="vessel_classification" />
+                            <field name="imo_number" />
+                        </group>
+                        <group>
+                            <field name="shipping_line_id" />
+                            <field name="ship_owner_id" />
+                            <field name="nrt" />
+                            <field name="grt" />
+                            <field name="year_built" />
+                            <field name="flag" />
+                            <field name="active" />
+                        </group>
                     </group>
                 </sheet>
             </form>

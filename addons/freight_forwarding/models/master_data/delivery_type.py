@@ -10,6 +10,6 @@ class DeliveryType(models.Model):
         ("code_unique", "UNIQUE(code)", "Delivery Type Code must be unique!")
     ]
 
-    code = fields.Char(string="Delivery Type Code", required=True)
+    code = fields.Char(string="Delivery Type Code", required=True, size=10)
     name = fields.Char(string="Delivery Type Name", required=True)
     active = fields.Boolean(string="Active", default=True)

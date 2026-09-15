@@ -62,7 +62,7 @@ class SeaQuotation(models.Model):
     shipping_line_id = fields.Many2one(
         "res.partner",
         string="Shipping Line",
-        domain="[('category_id.name', '=', 'Shipping Line')]",
+        domain="[('category_id.freight_role_code', '=', 'shipping_line')]",
     )
     via2_id = fields.Many2one("freight.port", string="Via2")
     via3_id = fields.Many2one("freight.port", string="Via3")

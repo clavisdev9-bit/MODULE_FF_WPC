@@ -9,7 +9,7 @@ class ContainerType(models.Model):
     ('code_unique', 'UNIQUE(code)', 'Container Type Code must be unique!')
     ]
 
-    code = fields.Char(string='Container Type Code', required=True)
+    code = fields.Char(string='Container Type Code', required=True, size=10)
     name = fields.Char(string='Description', required=True)
 
     size_code = fields.Char(string='Size Code')
@@ -21,4 +21,5 @@ class ContainerType(models.Model):
     max_weight_kg = fields.Float(string='Max Weight kg')
 
     temperature_flag = fields.Boolean(string='Temperature Flag')
+    temperature_degree = fields.Float(string='Temperature Degree')
     active = fields.Boolean(string='Active', default=True)

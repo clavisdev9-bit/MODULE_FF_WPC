@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_partner_form_street3_street4" model="ir.ui.view">
+        <field name="name">res.partner.form.street3.street4</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='street2']" position="after">
+                <field name="street3" placeholder="Street 3..." class="o_address_street"
+                    readonly="type == 'contact' and parent_id"/>
+                <field name="street4" placeholder="Street 4..." class="o_address_street"
+                    readonly="type == 'contact' and parent_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
