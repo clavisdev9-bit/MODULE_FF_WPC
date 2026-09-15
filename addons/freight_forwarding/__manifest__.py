@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.3",
+    "version": "18.0.1.5",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -35,6 +35,8 @@
         "data/air/air_hawb_sequence.xml",
         "data/sea/sea_booking_sequence.xml",
         "data/sea/sea_hbl_sequence.xml",
+        "data/sea/sea_charge_table_sequence.xml",
+        "data/sea/sea_cost_table_sequence.xml",
         "data/master_data/uom_data.xml",
         # Action
         "views/air/master_data/partner.xml",
@@ -43,6 +45,8 @@
         "views/acct/partner.xml",
         "views/product.xml",
         "views/common/purchase_order.xml",
+        "views/common/partner_address.xml",
+        "views/common/partner_category.xml",
         # Report
         "report/sea/quotation/quotation_report_template.xml",
         "report/sea/quotation/quotation_report.xml",
@@ -55,6 +59,8 @@
         "report/sea/hbl/shipping_instruction_report.xml",
         "report/sea/hbl/report_noa_sysfreight_template.xml",
         "report/sea/hbl/report_noa_sysfreight.xml",
+        "report/sea/hbl/cargo_manifest_report_template.xml",
+        "report/sea/hbl/cargo_manifest_report.xml",
         # Sea Quotation
         "views/sea/sales/quotation_type.xml",
         "views/sea/sales/quotation.xml",
@@ -77,12 +83,13 @@
         "views/acct/area.xml",
         "views/acct/payment_term.xml",
         "views/acct/vat_code.xml",
+        "views/acct/charge_code.xml",
         # Air
         "views/air/booking/booking.xml",
         "views/air/hawb/document_list_views.xml",
         "views/air/hawb/hawb.xml",
-        # "views/air/air_waybill/airline.xml",
-        # "views/air/air_waybill/airport.xml",
+        "views/air/air_waybill/airline.xml",
+        "views/air/air_waybill/airport.xml",
         # "views/air/air_waybill/air_booking.xml",
         # "views/air/air_waybill/mawb.xml",
         # "views/air/air_waybill/custom_permit.xml",
@@ -103,11 +110,16 @@
         "views/air/master_data/city.xml",
         "views/air/master_data/country.xml",
         "views/air/master_data/incoterms.xml",
-        # 'views/air/air_waybill/airline.xml',
+        "views/master_data/job_type.xml",
+        "views/master_data/declaration.xml",
+        "views/master_data/cargo_class.xml",
+        "views/master_data/dg_class_code.xml",
         "views/sea/master_data/port.xml",
         "views/sea/master_data/carrier.xml",
         "views/sea/master_data/shipping_line.xml",
         "views/sea/master_data/vessel.xml",
+        "views/sea/master_data/charge_table.xml",
+        "views/sea/master_data/cost_table.xml",
         "views/sea/master_data/location.xml",
         "views/sea/master_data/incoterm.xml",
         "views/sea/master_data/shipment_type.xml",

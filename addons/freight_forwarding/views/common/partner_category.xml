@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_partner_category_form_freight_role" model="ir.ui.view">
+        <field name="name">res.partner.category.form.freight.role</field>
+        <field name="model">res.partner.category</field>
+        <field name="inherit_id" ref="base.view_partner_category_form"/>
+        <field name="arch" type="xml">
+            <field name="active" position="after">
+                <field name="freight_role_code"/>
+                <field name="is_freight_role"/>
+            </field>
+        </field>
+    </record>
+</odoo>

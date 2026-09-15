@@ -3,3 +3,8 @@ from . import container_type
 from . import delivery_type
 from . import incoterm
 from . import shipment_type
+from . import job_type
+from . import permit
+from . import declaration
+from . import cargo_class
+from . import dg_class_code

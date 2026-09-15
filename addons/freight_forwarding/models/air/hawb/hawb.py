@@ -20,12 +20,7 @@ class FreightAirHawb(models.Model):
     mawb_no = fields.Char(string='Mawb No.', tracking=True)
     direct_awb_no = fields.Char(string='Direct AWB No.', tracking=True)
     known_shipper_flag = fields.Char(string='Know Shipper', size=15, tracking=True)
-    awb_type = fields.Selection([
-        ('direct', 'Direct AWB'),
-        ('house', 'House AWB'),
-        ('master', 'Master AWB')
-    ], string='AWB Type', default='house', required=True, tracking=True)
-    
+
     state = fields.Selection([
         ('draft', 'Draft'),
         ('active', 'Active'),
@@ -55,6 +50,7 @@ class FreightAirHawb(models.Model):
     # -------------------------------------------------------------
     shipper_account_no = fields.Char(string='Shipper Account No.')
     consignee_account_no = fields.Char(string='Consignee Account No.')
+    consignee_postal_code = fields.Char(related='consignee_id.zip', string='Postal Code', readonly=True)
     notify_is_bank = fields.Boolean(string='Bank')
 
     iata_code = fields.Char(string='IATA Code')
@@ -62,34 +58,58 @@ class FreightAirHawb(models.Model):
     note = fields.Text(string='Note')
 
     # -------------------------------------------------------------
-    # TAB 2: Shipment Info
+    # AWB Info (Air Import) - Clearance/Transshipment, Appointed Agent, Contacts, Warehouse
     # -------------------------------------------------------------
-    destination_date = fields.Date(string='Destination Date')
+    clearance = fields.Selection([
+        ('house', 'House'),
+        ('others', 'Others'),
+    ], string='Clearance', tracking=True)
+    is_transhipment = fields.Boolean(string='Transhipment', tracking=True)
+    origin_mawb_no = fields.Char(string='Origin MAWB No.', tracking=True)
+
+    appointed_agent_id = fields.Many2one('res.partner', string='Appointed Agent', tracking=True)
+
+    contact_person_id = fields.Many2one(
+        'res.partner', string='Contact Person',
+    )
+    consignee_contact_phone = fields.Char(related='contact_person_id.phone', string='Telephone')
+
+    agent_contact_id = fields.Many2one(
+        'res.partner', string='Contact Person',
+        domain="[('parent_id', '=', appointed_agent_id)]",
+    )
+    agent_contact_phone = fields.Char(related='agent_contact_id.phone', string='Telephone')
+
+    warehouse_id = fields.Many2one(
+        'res.partner', string='Warehouse', tracking=True,
+        domain="[('category_id.name', '=', 'Warehouse')]",
+    )
+
+    # -------------------------------------------------------------
+    # TAB 2: Shipment Info (fields shared with Booking live in
+    # freight.air.shipment.info.mixin; only the hawb-specific flight
+    # routing lines stay here, since they point at a hawb-only child model)
+    # -------------------------------------------------------------
     flight_routing_ids = fields.One2many('freight.air.hawb.flight.routing', 'hawb_id', string='Flight Routings')
 
-    currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self: self.env.company.currency_id)
-    currency_rate = fields.Float(string='Currency Rate', default=1.0)
-    wt_val_billing_party_id = fields.Many2one('res.partner', string='Billing Party (Wt/Val)')
-    other_billing_party_id = fields.Many2one('res.partner', string='Billing Party (Other)')
+    # -------------------------------------------------------------
+    # Delivery Info (Air Import) - pickup/delivery context only, not Warehouse
+    # -------------------------------------------------------------
+    transport_company_id = fields.Many2one(
+        'res.partner', string='Transport Company', tracking=True,
+        domain="[('category_id.name', '=', 'Transport Company')]",
+    )
+    transport_company_address = fields.Char(related='transport_company_id.contact_address', string='Address', readonly=True)
 
-    collect_currency_id = fields.Many2one('res.currency', string='Collect Currency')
-    collect_currency_rate = fields.Float(string='Collect Currency Rate', default=1.0)
+    pickup_datetime = fields.Datetime(string='Pickup Date/Time')
+    collect_from_id = fields.Many2one('res.partner', string='Collect From')
+    collect_from_address = fields.Char(related='collect_from_id.contact_address', string='Collect From Address', readonly=True)
 
-    declared_value_carriage = fields.Char(string='Declared Value for Carriage', default='N.V.D')
-    custom_currency_id = fields.Many2one('res.currency', string='Customs Currency')
-    declared_value_customs = fields.Char(string='Customs Declared Value', default='N.C.V')
-    customs_local_amt = fields.Float(string='Customs Local Amt')
-    is_dg_cargo = fields.Boolean(string='DG Cargo')
+    delivery_datetime = fields.Datetime(string='Delivery Date/Time')
+    deliver_to_id = fields.Many2one('res.partner', string='Deliver To')
+    deliver_to_address = fields.Char(related='deliver_to_id.contact_address', string='Deliver To Address', readonly=True)
 
-    insurance_currency_id = fields.Many2one('res.currency', string='Insurance Currency')
-    insurance_amount = fields.Float(string='Insurance Amount')
-    insurance_local_amount = fields.Float(string='Insurance Local Amount')
-
-    handling_information_id = fields.Many2one('freight.air.handling.information', string='Handling Info Template')
-    handling_information = fields.Text(string='Handling Information')
-    accounting_information = fields.Text(string='Accounting Information')
-    permit_no = fields.Char(string='Permit No.')
-    print_dimension = fields.Boolean(string='Print Dimension', default=True)
+    delivery_instruction = fields.Text(string='Delivery Instruction')
 
     # -------------------------------------------------------------
     # TAB 3: Dimension
@@ -216,15 +236,15 @@ class FreightAirHawb(models.Model):
             rec.volumetric_weight = calc_vol_wt
             rec.total_vol_weight = calc_vol_wt
 
-    @api.onchange('handling_information_id')
-    def _onchange_handling_information_id(self):
-        if self.handling_information_id:
-            self.handling_information = self.handling_information_id.description or self.handling_information_id.name
-
     def action_same_as_consignee(self):
         self.ensure_one()
         if self.consignee_id:
             self.notify_party_id = self.consignee_id
+    
+    def action_same_as_customer(self):
+        self.ensure_one()
+        if self.partner_id:
+            self.consignee_id = self.partner_id
 
     @api.model_create_multi
     def create(self, vals_list):

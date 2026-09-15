@@ -20,6 +20,7 @@
                     <group>
                         <field name="code"/>
                         <field name="name"/>
+                        <field name="dutiable"/>
                         <field name="active" widget="boolean_toggle"/>
                     </group>
                 </sheet>

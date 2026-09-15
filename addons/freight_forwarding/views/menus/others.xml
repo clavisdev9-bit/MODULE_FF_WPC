@@ -4,10 +4,40 @@
         parent="menu_parent_others"
         action="action_freight_delivery_type"
         sequence="80" /> -->
-    <menuitem id="menu_commodity" name="Commodity"
+
+    <menuitem id="menu_sub_parent_others_master_data" name="Master Data"
         parent="menu_parent_others"
-        action="action_freight_commodity"
         sequence="90" />
+
+    <menuitem id="menu_freight_declaration" name="Declaration"
+        parent="menu_sub_parent_others_master_data"
+        action="action_freight_declaration"
+        sequence="10" />
+    <menuitem id="menu_sea_master_permit" name="Permit"
+        parent="menu_sub_parent_others_master_data"
+        action="action_freight_sea_permit"
+        sequence="20" />
+    <menuitem id="menu_sea_master_quotation_type" name="Quotation Type"
+        parent="menu_sub_parent_others_master_data"
+        action="action_freight_quotation_type"
+        sequence="30" />
+    <menuitem id="menu_sea_master_delivery_type" name="Delivery Type"
+        parent="menu_sub_parent_others_master_data"
+        action="action_freight_delivery_type"
+        sequence="40" />
+    <menuitem id="menu_commodity" name="Commodity"
+        parent="menu_sub_parent_others_master_data"
+        action="action_freight_commodity"
+        sequence="50" />
+    <menuitem id="menu_freight_cargo_class" name="Cargo Class"
+        parent="menu_sub_parent_others_master_data"
+        action="action_freight_cargo_class"
+        sequence="60" />
+    <menuitem id="menu_freight_dg_class_code" name="DG Class Code"
+        parent="menu_sub_parent_others_master_data"
+        action="action_freight_dg_class_code"
+        sequence="70" />
+
     <!-- <menuitem id="menu_uom" name="Unit of Measure"
         parent="menu_parent_others"
         action="uom.product_uom_form_action"

@@ -36,4 +36,14 @@
         <field name="res_model">freight.shipping.line</field>
         <field name="view_mode">list,form</field>
     </record>
+
+    <!-- Shipping Line is now managed as res.partner + category (freight_role_code
+         = 'shipping_line'), not the freight.shipping.line model above, which is
+         kept only for backward compatibility (no field references it anymore). -->
+    <record id="action_freight_shipping_line_partner" model="ir.actions.act_window">
+        <field name="name">Shipping Line</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.freight_role_code', '=', 'shipping_line')]</field>
+    </record>
 </odoo>

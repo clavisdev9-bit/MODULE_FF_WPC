@@ -30,6 +30,7 @@
                             <field name="max_volume_m3"/>
                             <field name="max_weight_kg"/>
                             <field name="temperature_flag"/>
+                            <field name="temperature_degree"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>
