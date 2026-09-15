@@ -12,3 +12,7 @@ access_freight_shipping_line,freight.shipping.line,model_freight_shipping_line,b
 access_freight_location,freight.location,model_freight_location,base.group_user,1,1,1,1
 access_freight_incoterm,freight.incoterm,model_freight_incoterm,base.group_user,1,1,1,1
 access_freight_job_type,freight.job.type,model_freight_job_type,base.group_user,1,1,1,1
+access_freight_permit,freight.permit,model_freight_permit,base.group_user,1,1,1,1
+access_freight_declaration,freight.declaration,model_freight_declaration,base.group_user,1,1,1,1
+access_freight_cargo_class,freight.cargo.class,model_freight_cargo_class,base.group_user,1,1,1,1
+access_freight_dg_class_code,freight.dg.class.code,model_freight_dg_class_code,base.group_user,1,1,1,1

@@ -5,9 +5,9 @@
         <field name="model">freight.quotation.type</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name" />
                 <field name="code" />
                 <field name="description" />
+                <field name="active" widget="boolean_toggle" />
             </list>
         </field>
     </record>
@@ -19,8 +19,8 @@
             <form string="Quotation Type">
                 <sheet>
                     <group>
-                        <field name="name" />
                         <field name="code" />
+                        <field name="active" widget="boolean_toggle" />
                     </group>
                     <group>
                         <field name="description" />

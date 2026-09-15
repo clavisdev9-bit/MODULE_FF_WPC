@@ -35,11 +35,6 @@
         action="action_freight_sea_coloader_cost"
         sequence="60" />
 
-    <menuitem id="menu_sea_master_commodity" name="Commodity"
-        parent="menu_sub_parent_sea_master_data"
-        action="action_freight_commodity"
-        sequence="70" />
-
     <menuitem id="menu_sea_master_consignee" name="Consignee"
         parent="menu_sub_parent_sea_master_data"
         action="action_freight_consignee"
@@ -54,11 +49,6 @@
         parent="menu_sub_parent_sea_master_data"
         action="action_freight_country"
         sequence="100" />
-
-    <menuitem id="menu_sea_master_delivery_type" name="Delivery Type"
-        parent="menu_sub_parent_sea_master_data"
-        action="action_freight_delivery_type"
-        sequence="110" />
 
     <menuitem id="menu_sea_master_district" name="District"
         parent="menu_sub_parent_sea_master_data"
@@ -95,20 +85,10 @@
         action="action_freight_overseas_agent"
         sequence="180" />
 
-    <menuitem id="menu_sea_master_permit" name="Permit"
-        parent="menu_sub_parent_sea_master_data"
-        action="action_freight_sea_permit"
-        sequence="190" />
-
     <menuitem id="menu_sea_master_port" name="Port"
         parent="menu_sub_parent_sea_master_data"
         action="action_freight_port"
         sequence="200" />
-
-    <menuitem id="menu_sea_master_quotation_type" name="Quotation Type"
-        parent="menu_sub_parent_sea_master_data"
-        action="action_freight_quotation_type"
-        sequence="210" />
 
     <menuitem id="menu_sea_master_salesman" name="Salesman"
         parent="menu_sub_parent_sea_master_data"
