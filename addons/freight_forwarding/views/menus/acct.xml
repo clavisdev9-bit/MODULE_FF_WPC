@@ -15,14 +15,18 @@
         parent="menu_parent_acct"
         action="action_freight_division"
         sequence="30" />
+    <menuitem id="menu_freight_job_type" name="Job Type"
+        parent="menu_parent_acct"
+        action="action_freight_job_type"
+        sequence="40" />
     <menuitem id="menu_payment_term" name="Payment Term"
         parent="menu_parent_acct"
         action="action_freight_payment_term"
-        sequence="40" />
+        sequence="50" />
     <menuitem id="menu_vat_code" name="VAT Code"
         parent="menu_parent_acct"
         action="action_freight_vat_code"
-        sequence="50" />
+        sequence="60" />
     <!-- <menuitem id="menu_vendor" name="Vendor"
         parent="menu_sub_parent_acct_partner"
         action="action_freight_vendor"

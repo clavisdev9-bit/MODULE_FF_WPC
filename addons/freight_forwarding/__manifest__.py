@@ -81,6 +81,7 @@
         "views/acct/area.xml",
         "views/acct/payment_term.xml",
         "views/acct/vat_code.xml",
+        "views/acct/charge_code.xml",
         # Air
         "views/air/booking/booking.xml",
         "views/air/hawb/document_list_views.xml",
@@ -107,6 +108,7 @@
         "views/air/master_data/city.xml",
         "views/air/master_data/country.xml",
         "views/air/master_data/incoterms.xml",
+        "views/master_data/job_type.xml",
         "views/sea/master_data/port.xml",
         "views/sea/master_data/carrier.xml",
         "views/sea/master_data/shipping_line.xml",
