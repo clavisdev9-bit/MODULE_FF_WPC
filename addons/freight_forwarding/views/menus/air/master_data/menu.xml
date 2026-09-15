@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- <menuitem id="menu_airport" name="Airport"
+    <menuitem id="menu_airport" name="Airport"
         parent="menu_sub_parent_air_master_data"
         action="action_freight_airport"
         sequence="10" />
@@ -10,7 +10,7 @@
         action="action_freight_airline"
         sequence="20" />
 
-    <menuitem id="menu_handling_charge" name="Handling Charge"
+    <!-- <menuitem id="menu_handling_charge" name="Handling Charge"
         parent="menu_sub_parent_air_master_data"
         action="action_freight_charge_code"
         sequence="30" />

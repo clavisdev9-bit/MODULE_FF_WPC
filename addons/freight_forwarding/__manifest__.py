@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.4",
+    "version": "18.0.1.5",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -85,8 +85,8 @@
         "views/air/booking/booking.xml",
         "views/air/hawb/document_list_views.xml",
         "views/air/hawb/hawb.xml",
-        # "views/air/air_waybill/airline.xml",
-        # "views/air/air_waybill/airport.xml",
+        "views/air/air_waybill/airline.xml",
+        "views/air/air_waybill/airport.xml",
         # "views/air/air_waybill/air_booking.xml",
         # "views/air/air_waybill/mawb.xml",
         # "views/air/air_waybill/custom_permit.xml",
@@ -107,7 +107,6 @@
         "views/air/master_data/city.xml",
         "views/air/master_data/country.xml",
         "views/air/master_data/incoterms.xml",
-        # 'views/air/air_waybill/airline.xml',
         "views/sea/master_data/port.xml",
         "views/sea/master_data/carrier.xml",
         "views/sea/master_data/shipping_line.xml",

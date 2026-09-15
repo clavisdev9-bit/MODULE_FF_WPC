@@ -9,7 +9,7 @@ class Airport(models.Model):
     ('code_unique', 'UNIQUE(code)', 'Airport Code must be unique!')
     ]
 
-    code = fields.Char(string='Airport Code', required = True)
+    code = fields.Char(string='Airport Code', required=True, size=3)
     name = fields.Char(string='Airport Name', required = True)
     country_id = fields.Many2one(
         'res.country',
