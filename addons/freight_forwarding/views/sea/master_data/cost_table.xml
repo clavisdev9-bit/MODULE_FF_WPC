@@ -101,6 +101,7 @@
         <field name="name">Cost Table</field>
         <field name="res_model">freight.sea.cost.table</field>
         <field name="view_mode">list,form</field>
+        <field name="domain">[]</field>
         <field name="search_view_id" ref="view_freight_sea_cost_table_search"/>
     </record>
 </odoo>
