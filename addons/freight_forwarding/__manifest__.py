@@ -35,6 +35,8 @@
         "data/air/air_hawb_sequence.xml",
         "data/sea/sea_booking_sequence.xml",
         "data/sea/sea_hbl_sequence.xml",
+        "data/sea/sea_charge_table_sequence.xml",
+        "data/sea/sea_cost_table_sequence.xml",
         "data/master_data/uom_data.xml",
         # Action
         "views/air/master_data/partner.xml",
@@ -116,6 +118,8 @@
         "views/sea/master_data/carrier.xml",
         "views/sea/master_data/shipping_line.xml",
         "views/sea/master_data/vessel.xml",
+        "views/sea/master_data/charge_table.xml",
+        "views/sea/master_data/cost_table.xml",
         "views/sea/master_data/location.xml",
         "views/sea/master_data/incoterm.xml",
         "views/sea/master_data/shipment_type.xml",
