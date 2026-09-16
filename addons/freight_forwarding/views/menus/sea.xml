@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- SALES -->
+    <menuitem id="menu_sub_parent_sea_sales" name="Sales"
+        parent="menu_parent_sea"
+        sequence="20" />
+
+    <menuitem id="menu_sea_sales_freight_quotation" name="Freight Quotation"
+        parent="menu_sub_parent_sea_sales"
+        action="action_freight_sea_quotation"
+        sequence="10" />
+
+    <!-- IMPORT -->
+    <menuitem id="menu_sub_parent_sea_import" name="Import"
+        parent="menu_parent_sea"
+        sequence="30" />
+
+    <menuitem id="menu_sea_import_job_fcl" name="Import Job FCL"
+        parent="menu_sub_parent_sea_import"
+        action="action_sea_hbl_import_fcl"
+        sequence="10" />
+    <menuitem id="menu_sea_import_job_lcl" name="Import Job LCL"
+        parent="menu_sub_parent_sea_import"
+        action="action_sea_hbl_import_lcl"
+        sequence="20" />
+    <menuitem id="menu_sea_import_job_consol" name="Import Job Consol"
+        parent="menu_sub_parent_sea_import"
+        action="action_sea_hbl_import_consol"
+        sequence="30" />
+
+    <!-- EXPORT -->
+    <menuitem id="menu_sub_parent_sea_export" name="Export"
+        parent="menu_parent_sea"
+        sequence="40" />
+
+    <menuitem id="menu_sub_parent_sea_export_booking" name="Booking"
+        parent="menu_sub_parent_sea_export"
+        sequence="20" />
+    <menuitem id="menu_sea_export_booking_fcl" name="FCL Booking"
+        parent="menu_sub_parent_sea_export_booking"
+        action="action_sea_booking_export_fcl"
+        sequence="10" />
+    <menuitem id="menu_sea_export_booking_lcl" name="LCL Booking"
+        parent="menu_sub_parent_sea_export_booking"
+        action="action_sea_booking_export_lcl"
+        sequence="20" />
+
+    <menuitem id="menu_sub_parent_sea_export_job" name="Export Job"
+        parent="menu_sub_parent_sea_export"
+        sequence="30" />
+    <menuitem id="menu_sea_export_job_fcl" name="Export Job FCL"
+        parent="menu_sub_parent_sea_export_job"
+        action="action_sea_hbl_export_fcl"
+        sequence="10" />
+    <menuitem id="menu_sea_export_job_lcl" name="Export Job LCL"
+        parent="menu_sub_parent_sea_export_job"
+        action="action_sea_hbl_export_lcl"
+        sequence="20" />
+    <menuitem id="menu_sea_export_job_consol" name="Export Job Consol"
+        parent="menu_sub_parent_sea_export_job"
+        action="action_sea_hbl_export_consol"
+        sequence="30" />
+</odoo>

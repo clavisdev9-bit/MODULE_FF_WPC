@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_freight_division" model="ir.actions.act_window">
+        <field name="name">Division</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.name', '=', 'Division')]</field>
+    </record>
+</odoo>

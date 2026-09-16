@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- SALES -->
+    <menuitem id="menu_sub_parent_air_sales" name="Sales"
+        parent="menu_parent_air"
+        sequence="30" />
+
+    <menuitem id="menu_air_sales_freight_quotation" name="Freight Quotation"
+        parent="menu_sub_parent_air_sales"
+        action="action_freight_air_quotation"
+        sequence="20" />
+
+    <!-- IMPORT -->
+    <menuitem id="menu_sub_parent_air_import" name="Import"
+        parent="menu_parent_air"
+        sequence="40" />
+    <menuitem id="menu_air_import_awb_entry" name="AWB Entry"
+        parent="menu_sub_parent_air_import"
+        action="action_freight_air_hawb_import"
+        sequence="10" />
+
+    <!-- EXPORT -->
+    <menuitem id="menu_sub_parent_air_export" name="Export"
+        parent="menu_parent_air"
+        sequence="50" />
+
+    <menuitem id="menu_air_export_booking" name="Booking"
+        parent="menu_sub_parent_air_export"
+        action="action_freight_air_booking_export"
+        sequence="10" />
+
+    <menuitem id="menu_sub_parent_air_export_awb_preparation" name="AWB Preparation"
+        parent="menu_sub_parent_air_export"
+        sequence="20" />
+
+    <menuitem id="menu_air_export_direct_awb" name="Direct AWB"
+        parent="menu_sub_parent_air_export_awb_preparation"
+        action="action_freight_air_dawb_export"
+        sequence="10" />
+
+    <menuitem id="menu_air_export_house_awb" name="House AWB"
+        parent="menu_sub_parent_air_export_awb_preparation"
+        action="action_freight_air_hawb_export"
+        sequence="20" />
+
+    <menuitem id="menu_air_export_master_awb" name="Master AWB"
+        parent="menu_sub_parent_air_export_awb_preparation"
+        action="action_freight_air_mawb_export"
+        sequence="30" />
+</odoo>
