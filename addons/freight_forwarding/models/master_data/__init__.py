@@ -1,5 +1,4 @@
 from . import commodity
-from . import container_type
 from . import delivery_type
 from . import incoterm
 from . import shipment_type
@@ -8,3 +7,7 @@ from . import permit
 from . import declaration
 from . import cargo_class
 from . import dg_class_code
+from . import quotation_type
+from . import acct
+from . import sea
+from . import air

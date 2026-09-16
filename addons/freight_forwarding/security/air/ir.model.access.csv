@@ -1,6 +1,4 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
-access_freight_airline,access.freight.airline,model_freight_airline,base.group_user,1,1,1,1
-access_freight_airport,access.freight.airport,model_freight_airport,base.group_user,1,1,1,1
 access_freight_air_booking,access.freight.air.booking,model_freight_air_booking,base.group_user,1,1,1,1
 access_freight_air_quotation,access.freight.air.quotation,model_freight_air_quotation,base.group_user,1,1,1,1
 access_freight_air_quotation_cargo_info,access.freight.air.quotation.cargo.info,model_freight_air_quotation_cargo_info,base.group_user,1,1,1,1
