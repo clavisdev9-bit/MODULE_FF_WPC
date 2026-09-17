@@ -1,7 +1,7 @@
 from odoo import api, fields, models
 
 
-class SaleOrderAirCompat(models.Model):
+class AirQuotation(models.Model):
     _inherit = "sale.order"
 
     # =========================================================
