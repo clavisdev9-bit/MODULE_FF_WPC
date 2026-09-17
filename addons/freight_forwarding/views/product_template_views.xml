@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_product_template_form_freight" model="ir.ui.view">
+        <field name="name">product.template.form.freight</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_title')]/h1" position="after">
+                <field name="x_charge_display_name" readonly="1" invisible="not is_charge_code"/>
+            </xpath>
+            <xpath expr="//page[@name='general_information']//group[@name='group_general']" position="inside">
+                <field name="is_charge_code"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Freight" name="freight" invisible="not is_charge_code">
+                    <group>
+                        <group>
+                            <field name="charge_code"/>
+                            <field name="charge_unit"/>
+                            <field name="charge_description"/>
+                        </group>
+                        <group>
+                            <field name="charge_type"/>
+                            <field name="charge_currency_id"/>
+                            <field name="charge_effective_date"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

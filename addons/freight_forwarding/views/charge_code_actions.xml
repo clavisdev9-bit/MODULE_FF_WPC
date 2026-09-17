@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_product_template_tree_freight_charge_code" model="ir.ui.view">
+        <field name="name">product.template.list.freight.charge.code</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list string="Charge Code">
+                <field name="x_charge_display_name"/>
+                <field name="charge_unit"/>
+                <field name="charge_type"/>
+                <field name="charge_currency_id"/>
+                <field name="charge_effective_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_freight_charge_code" model="ir.actions.act_window">
+        <field name="name">Charge Code</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" ref="view_product_template_tree_freight_charge_code"/>
+        <field name="domain">[('is_charge_code', '=', True)]</field>
+        <field name="context">{'default_is_charge_code': True}</field>
+    </record>
+</odoo>

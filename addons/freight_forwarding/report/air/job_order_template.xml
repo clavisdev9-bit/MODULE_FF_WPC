@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_air_order_sheet">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <t t-set="routing" t-value="o.flight_routing_ids[:1]"/>
+                    <t t-set="arrival_date" t-value="(routing and routing[0].eta_date) or o.destination_date"/>
+                    <t t-set="remark" t-value="o.customer_ref or o.note or ''"/>
+                    <div class="page air-order-sheet">
+                        <style>
+                            * { box-sizing: border-box; }
+                            .air-order-sheet { color: #000; font-family: Arial, Helvetica, sans-serif; font-size: 10pt; line-height: 1.35; }
+                            .air-order-sheet table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                            .air-order-sheet td { vertical-align: top; padding: 1px 4px 1px 0; overflow-wrap: break-word; word-wrap: break-word; }
+
+                            .order-title { text-align: center; margin-bottom: 1em; }
+                            .order-title .company-name { font-size: 13pt; font-weight: bold; margin-bottom: 2px; }
+                            .order-title .doc-title { font-size: 13pt; font-weight: bold; }
+
+                            .header-body-gap { height: 16px; line-height: 16px; font-size: 1px; }
+
+                            .section-gap { height: 14px; }
+
+                            .info-line .label,
+                            .info-block .label,
+                            .info-block-paired .label { width: 130px; white-space: nowrap; font-weight: normal; }
+                            .info-line .colon,
+                            .info-block .colon,
+                            .info-block-paired .colon { width: 12px; }
+                            .info-block-paired .label2 { width: 132px; white-space: nowrap; padding-left: 24px; font-weight: normal; }
+                            .info-block-paired .colon2 { width: 12px; }
+
+                            .check-grid { margin-bottom: 4px; }
+                            .check-grid td { width: 50%; padding: 4px 4px 4px 0; white-space: nowrap; vertical-align: middle; }
+                    
+                            .checkbox-item { display: table; }
+                            .checkbox-box { display: table-cell; width: 20px; height: 20px; border: 1px solid #000; vertical-align: middle; }
+                            .checkbox-label { display: table-cell; vertical-align: middle; padding-left: 8px; white-space: nowrap; }
+
+                            .customs-sublist { padding-left: 28px; margin-top: 2px; }
+                            .customs-sublist div { padding: 1px 0; }
+                        </style>
+
+                        <div class="order-title">
+                            <div class="company-name"><t t-esc="o.company_id.name or ''"/></div>
+                            <div class="doc-title">ORDER SHEET</div>
+                            <div class="doc-title">AIR IMPORT</div>
+                        </div>
+
+                        <div class="header-body-gap">&#160;</div>
+
+                        <table class="info-line">
+                            <tr>
+                                <td class="label">JO NO.</td><td class="colon">:</td><td class="value"><t t-esc="o.job_no or ''"/></td>
+                            </tr>
+                        </table>
+
+                        <div class="section-gap"/>
+
+                        <table class="info-block">
+                            <tr>
+                                <td class="label">CONSIGNEE</td><td class="colon">:</td><td class="value"><t t-esc="o.consignee_id.name if o.consignee_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">CUSTOMER</td><td class="colon">:</td><td class="value"><t t-esc="o.partner_id.name if o.partner_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">SHIPPER</td><td class="colon">:</td><td class="value"><t t-esc="o.shipper_id.name if o.shipper_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">AGENT</td><td class="colon">:</td><td class="value"><t t-esc="o.agent_id.name if o.agent_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">AIRLINE/FLIGHT</td><td class="colon">:</td>
+                                <td class="value">
+                                    <t t-if="routing and routing[0].airline_id"><t t-esc="routing[0].airline_id.name"/> / </t><t t-esc="routing and routing[0].flight_no or ''"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">WAREHOUSE</td><td class="colon">:</td><td class="value"></td>
+                            </tr>
+                        </table>
+
+                        <div class="section-gap"/>
+
+                        <table class="info-block-paired">
+                            <tr>
+                                <td class="label">MAWB NO.</td><td class="colon">:</td><td class="value"><t t-esc="o.mawb_no or o.smawb_no or o.direct_awb_no or ''"/></td>
+                                <td class="label2">FLIGHT DATE</td><td class="colon2">:</td><td class="value2"><span t-if="routing and routing[0].flight_date" t-field="routing[0].flight_date" t-options="{'format': 'dd/MM/yy'}"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">HAWB NO.</td><td class="colon">:</td><td class="value"><t t-esc="o.hawb_no or ''"/></td>
+                                <td class="label2">ARRIVAL DATE</td><td class="colon2">:</td><td class="value2"><span t-if="arrival_date" t-esc="arrival_date.strftime('%d/%m/%y')"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">ORIGIN</td><td class="colon">:</td><td class="value" colspan="4"><t t-esc="o.departure_id.name if o.departure_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">DESTINATON</td><td class="colon">:</td><td class="value" colspan="4"><t t-esc="o.destination_id.name if o.destination_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">QTY</td><td class="colon">:</td><td class="value" colspan="4"><t t-esc="o.total_pcs or o.pcs or 0"/> PCS</td>
+                            </tr>
+                            <tr>
+                                <td class="label">CHARGE WEIGHT</td><td class="colon">:</td><td class="value" colspan="4"><t t-esc="o.charge_weight or o.total_vol_weight or 0.0"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">GROSS WEIGHT</td><td class="colon">:</td><td class="value" colspan="4"><t t-esc="o.gross_weight or 0.0"/></td>
+                            </tr>
+                        </table>
+
+                        <div class="section-gap"/>
+
+                        <table class="info-line">
+                            <tr>
+                                <td class="label">REMARK</td><td class="colon">:</td><td class="value"><t t-esc="remark"/></td>
+                            </tr>
+                        </table>
+
+                        <div class="section-gap"/>
+
+                        <table class="check-grid">
+                            <tr>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">PRE ALERT</span></span></td>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">DELIVERY / PU DATE</span></span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">MANIFEST ADJUSTMENT</span></span></td>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">SPPB</span></span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">DRAFT PIB</span></span></td>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">SEND PROOF OF DLVRY</span></span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">PIB CONFIRMED</span></span></td>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">COLLECT D/O</span></span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">PIB PAYMENT</span></span></td>
+                                <td><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">OTHERS :</span></span></td>
+                            </tr>
+                        </table>
+
+                        <table class="check-grid">
+                            <tr>
+                                <td colspan="2"><span class="checkbox-item"><span class="checkbox-box"/><span class="checkbox-label">CUSTOMS DOCS</span></span></td>
+                            </tr>
+                        </table>
+
+                        <div class="customs-sublist">
+                            <div>* HB/L COPY NON NEGOTIABLE, MBL, MANIFEST</div>
+                            <div>* S. PERNYATAAN TELEX RELEASE FRM F/F</div>
+                            <div>* S.PERNYATAAN KEABSAHAN DOC (B/L)</div>
+                            <div>* PIB ASLI</div>
+                            <div>* SSPCP, BPN</div>
+                            <div>* BUKTI SETORAN BANK</div>
+                            <div>* D/O ASLI</div>
+                            <div>* CIPL ASLI</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

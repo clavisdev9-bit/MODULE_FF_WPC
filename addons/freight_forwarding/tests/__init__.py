@@ -4,4 +4,5 @@ from . import (
     test_booking_convert_wizard,
     test_sea_hbl,
     test_sea_quotation,
+    test_charge_code_product,
 )
