@@ -99,3 +99,24 @@ class TestSeaQuotationConvertActions(FreightTestBase):
         # Pastikan freight_type tidak dikonversi manual lagi
         self.assertEqual(new_hbl.freight_type, "import",
             msg="freight_type HBL harus sama persis dengan quotation (lowercase)")
+        # FF-72: sea_hbl_id harus ikut ter-write-back ke quotation, bukan cuma
+        # sale_order_ids milik HBL (dulu cuma bergantung ke fallback search).
+        self.assertEqual(quotation.sea_hbl_id, new_hbl,
+            msg="sea_hbl_id pada quotation harus menunjuk ke HBL yang baru dibuat")
+
+    def test_action_convert_to_jobsheet_direct_writes_back_all_variants(self):
+        """FF-72: sea_hbl_id harus terisi di SEMUA currency variant, bukan cuma
+        quotation yang diklik convert-nya."""
+        quotation = self._create_quotation(freight_type="import")
+        variant_result = quotation.action_create_currency_variant()
+        variant = self.env["sale.order"].browse(variant_result["res_id"])
+
+        result = quotation.action_convert_to_jobsheet_direct()
+        new_hbl = self.env["freight.sea.hbl"].browse(result["res_id"])
+
+        self.assertIn(quotation, new_hbl.sale_order_ids)
+        self.assertIn(variant, new_hbl.sale_order_ids)
+        self.assertEqual(quotation.sea_hbl_id, new_hbl,
+            msg="sea_hbl_id quotation asal harus menunjuk ke HBL")
+        self.assertEqual(variant.sea_hbl_id, new_hbl,
+            msg="sea_hbl_id currency variant juga harus menunjuk ke HBL yang sama")

@@ -190,6 +190,7 @@ class SeaQuotation(models.Model):
                 "company_id": self.company_id.id,
             }
         )
+        all_variants.write({"sea_hbl_id": hbl.id})
         return {
             "type": "ir.actions.act_window",
             "name": "Sea Jobsheet",
