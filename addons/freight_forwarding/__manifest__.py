@@ -42,7 +42,7 @@
         "views/transport/partner.xml",
         "views/acct/partner.xml",
         "views/common/purchase_order.xml",
-        "views/product_template_views.xml",
+        "views/product.xml",
         "views/charge_code_actions.xml",
         # Report
         "report/sea/quotation/quotation_report_template.xml",
