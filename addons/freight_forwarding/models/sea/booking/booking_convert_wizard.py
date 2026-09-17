@@ -51,45 +51,6 @@ class SeaBookingConvertWizard(models.TransientModel):
     def _get_origin_country(self, quotation):
         return quotation.pickup_country_id or quotation.pickup_city.country_id
 
-    def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
-        return {
-            "booking_id": booking.id,
-            "package_type_id": cargo_info.package_type_id.id if cargo_info.package_type_id else False,
-            "container_no": cargo_info.container_no,
-            "seal_no": cargo_info.seal_no,
-            "description_of_goods": cargo_info.description_of_goods,
-            "marks_and_no": cargo_info.marks_and_no,
-            "container_type_id": cargo_info.container_type_id.id if cargo_info.container_type_id else False,
-            "types_of_cargo": cargo_info.types_of_cargo.id if cargo_info.types_of_cargo else False,
-            "quantity": cargo_info.quantity,
-            "length": cargo_info.length,
-            "width": cargo_info.width,
-            "height": cargo_info.height,
-            "gross_weight": cargo_info.gross_weight,
-            "net_weight": cargo_info.net_weight,
-            "volume": cargo_info.volume,
-            "total_volume": cargo_info.total_volume,
-            "harmonize": cargo_info.harmonize,
-            "temperature": cargo_info.temperature,
-            "ventilation": cargo_info.ventilation,
-            "humidity": cargo_info.humidity,
-            "has_dangerous_goods": cargo_info.has_dangerous_goods,
-            "imdg_code": cargo_info.imdg_code,
-            "class_number": cargo_info.class_number,
-            "packing_group": cargo_info.packing_group,
-            "a_number": cargo_info.a_number,
-            "flash_point": cargo_info.flash_point,
-            "material_description": cargo_info.material_description,
-        }
-
-    def _copy_cargo_info_to_booking(self, quotation, booking):
-        booking_detail_model = self.env["freight.sea.booking.cargo.info"]
-
-        for cargo_info in quotation.cargo_info_ids:
-            booking_detail_model.create(
-                self._prepare_booking_cargo_info_vals(cargo_info, booking)
-            )
-
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
@@ -160,8 +121,6 @@ class SeaBookingConvertWizard(models.TransientModel):
                 "company_id": quotation.company_id.id,
             }
         )
-
-        self._copy_cargo_info_to_booking(quotation, booking)
 
         # Return action to open created booking
         return {

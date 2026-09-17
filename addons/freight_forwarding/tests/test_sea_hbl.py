@@ -4,19 +4,21 @@ from .common import FreightTestBase
 
 class TestSeaHblOndelete(FreightTestBase):
     """
-    Verifikasi behavior ondelete pada relasi quotation_id di HBL.
+    Verifikasi menghapus quotation tidak ikut menghapus HBL operasional.
 
-    BUG YANG DIPERBAIKI: quotation_id dulu pakai ondelete="cascade" —
-    menghapus quotation akan ikut menghapus HBL operasional.
-    Setelah fix: ondelete="set null" — HBL tetap ada, quotation_id jadi False.
+    Relasi HBL ke quotation sekarang lewat sale_order_ids (Many2many, bukan
+    Many2one quotation_id lagi — lihat FF-71). Many2many secara natural tidak
+    bisa cascade-delete record di sisi lain, jadi behavior "set null" yang
+    dulu dijamin lewat ondelete="set null" sekarang otomatis berlaku lewat
+    penghapusan baris relasi M2M.
     """
 
     def test_delete_quotation_does_not_delete_hbl(self):
         """
         [BUG REPRODUCTION] Menghapus quotation tidak menghapus HBL.
 
-        Sebelum fix (cascade): menghapus quotation → HBL ikut terhapus.
-        Setelah fix (set null): HBL tetap ada, quotation_id jadi False.
+        Sebelum fix (cascade M2O): menghapus quotation → HBL ikut terhapus.
+        Setelah fix (M2M sale_order_ids): HBL tetap ada, relasinya hilang.
         """
         # Arrange: buat HBL langsung dari quotation (import flow)
         quotation = self._create_quotation(freight_type="import")
@@ -34,9 +36,9 @@ class TestSeaHblOndelete(FreightTestBase):
         self.assertTrue(surviving_hbl.exists(),
             msg="HBL harus tetap ada setelah quotation dihapus")
 
-        # Assert: quotation_id di-set null, bukan cascade hapus HBL
-        self.assertFalse(surviving_hbl.quotation_id,
-            msg="quotation_id harus jadi False (set null) setelah quotation dihapus")
+        # Assert: relasi ke quotation hilang, bukan cascade hapus HBL
+        self.assertFalse(surviving_hbl.sale_order_ids,
+            msg="sale_order_ids harus kosong setelah quotation dihapus")
 
     def test_delete_booking_deletes_hbl(self):
         """Menghapus booking HARUS menghapus HBL (cascade tetap berlaku di booking_id)."""

@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.6",
+    "version": "18.0.1.7",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -38,6 +38,7 @@
         "data/sea/sea_booking_sequence.xml",
         "data/sea/sea_hbl_sequence.xml",
         "data/master_data/uom_data.xml",
+        "data/quotation/sale_order_sequence.xml",
         # Action
         "views/air/master_data/partner.xml",
         "views/sea/partner.xml",
@@ -45,6 +46,7 @@
         "views/common/purchase_order.xml",
         "views/common/partner_address.xml",
         "views/common/partner_category.xml",
+        "views/common/sale_order_list.xml",
         # Report
         "report/sea/quotation/quotation_report_template.xml",
         "report/sea/quotation/quotation_report.xml",
@@ -80,14 +82,6 @@
         "views/air/booking/booking.xml",
         "views/air/hawb/document_list_views.xml",
         "views/air/hawb/hawb.xml",
-        # "views/air/air_waybill/air_booking.xml",
-        # "views/air/air_waybill/mawb.xml",
-        # "views/air/air_waybill/custom_permit.xml",
-        # "views/air/air_waybill/package_details.xml",
-        # "views/air/air_waybill/document_list.xml",
-        # "views/air/air_waybill/freight_items_line.xml",
-        # "views/air/air_waybill/extra_info.xml",
-        # "views/air/air_waybill/air_waybill_transaction.xml",
         # Master Data
         "views/air/master_data/insurance.xml",
         "views/air/master_data/pickup.xml",
@@ -136,7 +130,6 @@
     "tests": [
         "tests/test_cargo_info_mixin.py",
         "tests/test_sea_booking.py",
-        "tests/test_booking_convert_wizard.py",
         "tests/test_sea_hbl.py",
         "tests/test_sea_quotation.py",
         "tests/test_analytic_sync.py",

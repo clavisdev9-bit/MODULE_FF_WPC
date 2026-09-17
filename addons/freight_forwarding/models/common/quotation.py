@@ -2,7 +2,7 @@ import base64
 import os
 
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.modules.module import get_module_resource
 
 
@@ -45,7 +45,6 @@ class FreightQuotation(models.AbstractModel):
             ("import", "Import"),
         ],
         string="Quotation Type",
-        required=True,
     )
     quotation_title = fields.Char(string="Quotation Title")
     contact_person = fields.Char(
@@ -67,13 +66,13 @@ class FreightQuotation(models.AbstractModel):
     # Right side header
     pricelist_id = fields.Many2one("product.pricelist", string="Pricelist")
     delivery_type_id = fields.Many2one(
-        "freight.delivery.type", string="Delivery Type", required=True
+        "freight.delivery.type", string="Delivery Type"
     )
     valid_from = fields.Date(string="Valid From")
     # validity_date = fields.Date(string="Valid To")
     reference_number = fields.Char(string="Reference Number")
     commodity_id = fields.Many2one(
-        "freight.commodity", string="Commodity", required=True
+        "freight.commodity", string="Commodity"
     )
 
     # Address — Source
@@ -182,6 +181,65 @@ class FreightQuotation(models.AbstractModel):
             if record.est_transit_time_days < 0:
                 raise ValidationError("Est. Transit Time (Days) cannot be negative.")
 
+    @api.constrains("is_freight_quotation", "freight_type", "delivery_type_id", "commodity_id")
+    def _check_freight_quotation_required_fields(self):
+        """freight_type/delivery_type_id/commodity_id hanya wajib untuk Freight Quotation,
+        agar tidak memblokir pembuatan Sales Order normal (bukan Freight) di sale.order."""
+        for record in self:
+            if not record.is_freight_quotation:
+                continue
+            missing = []
+            if not record.freight_type:
+                missing.append("Quotation Type")
+            if not record.delivery_type_id:
+                missing.append("Delivery Type")
+            if not record.commodity_id:
+                missing.append("Commodity")
+            if missing:
+                raise ValidationError(
+                    "%s is required for a Freight Quotation." % ", ".join(missing)
+                )
+
+    def _has_downstream_quotation_records(self):
+        """True jika quotation ini sudah punya Booking/Jobsheet turunan
+        (Sea maupun Air) — dipakai untuk mengunci perubahan direction."""
+        self.ensure_one()
+        return bool(
+            self.booking_count
+            or self.hbl_count
+            or getattr(self, "air_booking_count", 0)
+            or getattr(self, "hawb_count", 0)
+        )
+
+    def action_convert_quotation(self):
+        """Satu entry point publik untuk convert quotation ke downstream
+        record; branching Import/Export ditangani di sini, bukan lewat
+        dua button/action terpisah (lihat FF-71)."""
+        self.ensure_one()
+        if not self.is_freight_quotation:
+            raise UserError(
+                "This action is only available for a Freight Quotation."
+            )
+        if self.freight_type == "import":
+            return self.action_convert_to_jobsheet_direct()
+        return self.action_convert_to_booking_direct()
+
+    def action_convert_to_booking_direct(self):
+        """Dispatch eksplisit berdasarkan freight_business_type, bukan
+        lewat urutan _inherit/super() antar modul air & sea — supaya tidak
+        diam-diam salah pilih implementasi kalau urutan import berubah."""
+        self.ensure_one()
+        if self.freight_business_type == "air":
+            return self._action_convert_to_booking_direct_air()
+        return self._action_convert_to_booking_direct_sea()
+
+    def action_convert_to_jobsheet_direct(self):
+        """Dispatch eksplisit berdasarkan freight_business_type — lihat
+        action_convert_to_booking_direct."""
+        self.ensure_one()
+        if self.freight_business_type == "air":
+            return self._action_convert_to_jobsheet_direct_air()
+        return self._action_convert_to_jobsheet_direct_sea()
 
     def _sync_sale_order_rows(self):
         """
@@ -302,6 +360,18 @@ class FreightQuotation(models.AbstractModel):
         return records
 
     def write(self, vals):
+        if "freight_type" in vals:
+            for rec in self:
+                if (
+                    rec.is_freight_quotation
+                    and rec.freight_type
+                    and vals["freight_type"] != rec.freight_type
+                    and rec._has_downstream_quotation_records()
+                ):
+                    raise UserError(
+                        "Quotation Type (Import/Export) cannot be changed anymore: "
+                        "this quotation already has a Booking or Jobsheet linked to it."
+                    )
         if self._name == "sale.order":
             return super().write(vals)
         result = super().write(vals)

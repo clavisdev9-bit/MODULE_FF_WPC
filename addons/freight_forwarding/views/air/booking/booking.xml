@@ -64,7 +64,6 @@
                             </group>
                             <group string="Shipment Info">
                                 <field name="booking_date" />
-                                <field name="quotation_id" />
                                 <field name="job_no" />
                                 <field name="awb_no" />
                                 <field name="mawb_no" />

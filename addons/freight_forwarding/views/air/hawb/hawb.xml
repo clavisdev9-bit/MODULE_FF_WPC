@@ -229,7 +229,7 @@
 
                         <!-- TAB 5: JOB COSTING - SALES ORDERS -->
                         <page string="Sales Orders" name="sales_orders">
-                            <field name="sale_order_ids" nolabel="1" context="{'form_view_ref': 'freight_forwarding.view_air_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'air', 'default_air_hawb_id': id}">
+                            <field name="sale_order_ids" nolabel="1" context="{'form_view_ref': 'freight_forwarding.view_air_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'air', 'default_freight_type': freight_type, 'default_air_hawb_id': id}">
                                 <list editable="bottom" open_form_view="1">
                                     <field name="name"/>
                                     <field name="currency_id"/>

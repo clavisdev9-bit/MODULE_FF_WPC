@@ -3,6 +3,7 @@
     <record id="view_sea_quotation_form" model="ir.ui.view">
         <field name="name">freight.sea.quotation.form</field>
         <field name="model">sale.order</field>
+        <field name="mode">primary</field>
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='warehouse_id']" position="attributes">
@@ -10,13 +11,15 @@
             </xpath>
             <xpath expr="//sheet" position="inside">
                 <field name="is_freight_quotation" invisible="1" />
+                <field name="booking_count" invisible="1" />
+                <field name="hbl_count" invisible="1" />
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_bookings"
                     type="object"
                     class="oe_stat_button"
                     icon="fa-ship"
-                    invisible="not is_freight_quotation or freight_business_type != 'sea' or booking_count == 0">
+                    invisible="not is_freight_quotation or freight_type != 'export' or booking_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Booking</span>
                     </div>
@@ -25,7 +28,7 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-file-text-o"
-                    invisible="not is_freight_quotation or freight_business_type != 'sea' or hbl_count == 0">
+                    invisible="not is_freight_quotation or freight_type != 'import' or hbl_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Jobsheet</span>
                     </div>
@@ -34,14 +37,14 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-money"
-                    invisible="not is_freight_quotation or freight_business_type != 'sea' or variant_count == 0">
+                    invisible="not is_freight_quotation or variant_count == 0">
                     <field name="variant_count" widget="statinfo" string="Variants" />
                 </button>
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="freight_type" invisible="not is_freight_quotation" />
-                <field name="container_type" invisible="not is_freight_quotation or freight_business_type != 'sea'" />
+                <field name="freight_type" invisible="not is_freight_quotation" required="is_freight_quotation" readonly="state == 'sale'" />
+                <field name="container_type" invisible="not is_freight_quotation" required="is_freight_quotation" readonly="state == 'sale'" />
                 <field name="quotation_title" invisible="not is_freight_quotation" />
             </xpath>
 
@@ -61,11 +64,11 @@
                     <field name="service_level" />
                     <field name="pricelist_id" readonly="state in ['cancel', 'sale']"
                         groups="!product.group_product_pricelist" />
-                    <field name="delivery_type_id" />
+                    <field name="delivery_type_id" required="is_freight_quotation" />
                     <field name="valid_from" />
                     <field name="validity_date" string="Valid To" />
                     <field name="reference_number" />
-                    <field name="commodity_id" />
+                    <field name="commodity_id" required="is_freight_quotation" />
                 </group>
             </xpath>
 
@@ -88,9 +91,9 @@
                                 class="o_address_country" />
                         </div>
                     </group>
-                    <group name="studio_group_7a4382">
+                    <group>
                         <span>Delivery</span>
-                        <div class="o_address_format" name="studio_div_8cbbbf">
+                        <div class="o_address_format">
                             <field name="delivery_street" placeholder="Street..."
                                 class="o_address_street" />
                             <field name="delivery_street2" placeholder="Street 2..."
@@ -106,116 +109,60 @@
                         </div>
                     </group>
                 </group>
-
             </xpath>
 
             <xpath expr="//header" position="inside">
-                <field name="original_quotation_id" invisible="1"/>
+                <field name="original_quotation_id" invisible="1" />
                 <button
-                    name="action_convert_to_jobsheet_direct"
-                    type="object"
-                    string="Create Jobsheet"
-                    class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_business_type != 'sea' or freight_type != 'import' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
-                />
-                <button
-                    name="action_convert_to_booking_direct"
+                    name="action_convert_quotation"
                     type="object"
                     string="Create Booking"
                     class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_business_type != 'sea' or freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hbl_count &gt; 0"
+                    invisible="not is_freight_quotation or freight_type != 'export' or state != 'sale' or booking_count &gt; 0"
+                />
+                <button
+                    name="action_convert_quotation"
+                    type="object"
+                    string="Create Jobsheet"
+                    class="oe_highlight"
+                    invisible="not is_freight_quotation or freight_type != 'import' or state != 'sale' or hbl_count &gt; 0"
                 />
             </xpath>
 
             <xpath expr="//page[@name='other_information']" position="inside">
                 <group string="Extra Info">
-                        <group>
-                            <field name="description_of_goods" />
-                            <field name="quantity" />
-                            <field name="has_insurance" />
-                            <field name="insurance_id" invisible="has_insurance == False" />
-                            <field name="loose_quantity" />
-                            <field name="uom_id" />
-                        </group>
-                        <group>
-                            <field name="actual_weight" />
-                            <field name="volume" />
-                            <field name="chargeable_weight" />
-                        </group>
+                    <group>
+                        <field name="description_of_goods" />
+                        <field name="quantity" />
+                        <field name="has_insurance" />
+                        <field name="insurance_id" invisible="has_insurance == False" />
+                        <field name="loose_quantity" />
+                        <field name="uom_id" />
                     </group>
+                    <group>
+                        <field name="actual_weight" />
+                        <field name="volume" />
+                        <field name="chargeable_weight" />
+                    </group>
+                </group>
             </xpath>
 
             <xpath expr="//page[@name='customer_signature']" position="after">
                 <page string="Terms &amp; Conditions" invisible="not is_freight_quotation">
-                    <field name="terms_and_conditions" placeholder="Terms and conditions..." nolabel="1"/>
+                    <field name="terms_and_conditions" placeholder="Terms and conditions..." nolabel="1" />
                 </page>
             </xpath>
-
-            <!-- <xpath expr="//page[@name='customer_signature']" position="after">
-                <page string="Dimension">
-                    <group>
-                        <group>
-                            <field name="pcs" />
-                        </group>
-                        <group>
-                            <field name="length" />
-                            <field name="width" />
-                            <field name="height" />
-                            <field name="dimension" />
-                        </group>
-                    </group>
-                </page>
-
-                <page string="Shipment Info">
-                    <group>
-                        <group string="Routing Information">
-                            <field name="port_of_loading_id" />
-                            <field name="port_of_discharge_id" />
-                            <field name="via_port_id" />
-                            <field name="shipping_line_id" />
-                            <label for="est_transit_time_days" string="Est. Transit Time"/>
-                            <div class="o_row">
-                                <field name="est_transit_time_days" nolabel="1" class="oe_inline"/>
-                                <span class="oe_inline">Days</span>
-                            </div>
-                            <field name="est_transit_time_note" placeholder="Remark (optional)" />
-                            <field name="frequency" />
-                            <field name="note" widget="text" />
-                        </group>
-                        <group string="Commercial Information">
-                            <field name="origin_id" />
-                            <field name="destination_id" />
-                            <field name="via2_id" />
-                            <field name="via3_id" />
-                            <field name="frt_collect" />
-                        </group>
-                    </group>
-                </page>
-
-                <page string="Header &amp; Footer">
-                    <group>
-                        <field name="header" />
-                        <field name="special_instruction" />
-                        <field name="footer" />
-                    </group>
-                </page>
-
-
-
-                <page string="Cargo Info">
-                    <field name="cargo_info_ids" />
-                </page>
-            </xpath> -->
         </field>
     </record>
 
+    <!-- ============================================================
+         LIST VIEW
+    ============================================================ -->
     <record id="view_sea_quotation_list_custom" model="ir.ui.view">
         <field name="name">freight.sea.quotation.list.custom</field>
         <field name="model">sale.order</field>
-        <!-- Hapus mode dan inherit_id -->
         <field name="arch" type="xml">
             <list>
-                <!-- Masukkan field sesuai urutan yang Anda mau -->
                 <field name="name" string="Number" decoration-bf="1" />
                 <field name="create_date" string="Creation Date" />
                 <field name="freight_type" string="Quotation Type" />
@@ -228,6 +175,9 @@
         </field>
     </record>
 
+    <!-- ============================================================
+         SEARCH VIEW
+    ============================================================ -->
     <record id="view_sea_quotation_search" model="ir.ui.view">
         <field name="name">freight.sea.quotation.search</field>
         <field name="model">sale.order</field>
@@ -245,10 +195,16 @@
                 <filter name="filter_draft_sent" string="Quotation" domain="[('state', 'in', ['draft', 'sent'])]"/>
                 <filter name="filter_sale" string="Sales Order" domain="[('state', '=', 'sale')]"/>
                 <filter name="filter_cancel" string="Cancelled" domain="[('state', '=', 'cancel')]"/>
+                <separator/>
+                <filter name="filter_type_export" string="Export" domain="[('freight_type', '=', 'export')]"/>
+                <filter name="filter_type_import" string="Import" domain="[('freight_type', '=', 'import')]"/>
             </search>
         </field>
     </record>
 
+    <!-- ============================================================
+         ACTION — satu entry point Sea Quotation (Import & Export)
+    ============================================================ -->
     <record id="action_freight_sea_quotation" model="ir.actions.act_window">
         <field name="name">Sea Quotation</field>
         <field name="res_model">sale.order</field>
@@ -256,7 +212,7 @@
         <field name="view_id" ref="view_sea_quotation_list_custom"/>
         <field name="search_view_id" ref="view_sea_quotation_search"/>
         <field name="domain">[('freight_business_type', '=', 'sea'), ('is_freight_quotation', '=', True)]</field>
-        <field name="context">{'search_default_my_quotation': 1, 'default_freight_business_type': 'sea', 'default_is_freight_quotation': True}</field>
+        <field name="context">{'search_default_my_quotation': 1, 'default_freight_business_type': 'sea', 'default_is_freight_quotation': True, 'default_freight_type': 'export'}</field>
     </record>
 
     <record id="action_freight_sea_quotation_view_list" model="ir.actions.act_window.view">
