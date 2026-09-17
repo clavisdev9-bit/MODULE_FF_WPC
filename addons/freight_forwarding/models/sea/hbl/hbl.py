@@ -105,7 +105,7 @@ class SeaHBL(models.Model):
     mbl_no = fields.Char(string="MBL No.")
     bl_surrendered = fields.Boolean(string="BL Surrendered")
     shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
-    delivery_type_id = fields.Many2one("freight.delivery.type", string="Delivery Type")
+    delivery_type_id = fields.Many2one("account.incoterms", string="Delivery Type")
     # do_ready_on = fields.Selection([('yes', 'Yes'), ('no', 'No')], string="Do Ready On")
     do_ready_on = fields.Boolean(string="Do Ready On")
     company_id = fields.Many2one(
@@ -385,4 +385,4 @@ class SeaHBL(models.Model):
                             "UPDATE account_move_line SET analytic_distribution = %s WHERE id = %s",
                             (json.dumps(distribution), line.id)
                         )
-                        line.invalidate_recordset(["analytic_distribution"])
+                        line.invalidate_recordset(["analytic_distribution"])

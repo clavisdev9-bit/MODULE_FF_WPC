@@ -12,7 +12,7 @@ class SeaBookingConvertWizard(models.TransientModel):
 
     # Auto-filled from quotation
     customer_id = fields.Many2one("res.partner", string="Customer Name")
-    delivery_type_id = fields.Many2one("freight.delivery.type", string="Delivery Type")
+    delivery_type_id = fields.Many2one("account.incoterms", string="Delivery Type")
     origin_port_id = fields.Many2one("freight.port", string="Origin Port (POL)")
     destination_port_id = fields.Many2one("freight.port", string="Destination Port (POD)")
     destination_country_id = fields.Many2one("res.country", string="Destination Country")

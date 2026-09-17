@@ -4,6 +4,15 @@ _logger = logging.getLogger(__name__)
 
 
 def migrate(cr, version):
+    # The partner extension may already be present in the registry while an
+    # older database has not created its physical columns yet.
+    cr.execute(
+        "ALTER TABLE res_partner ADD COLUMN IF NOT EXISTS street3 VARCHAR"
+    )
+    cr.execute(
+        "ALTER TABLE res_partner ADD COLUMN IF NOT EXISTS street4 VARCHAR"
+    )
+
     """FF-71: freight.air.quotation berhenti jadi model/tabel terpisah dan
     digabung langsung ke sale.order (pola yang sama dengan Sea, lihat commit
     migrasi Sea sebelumnya di freight.sea.quotation.migration.wizard).
