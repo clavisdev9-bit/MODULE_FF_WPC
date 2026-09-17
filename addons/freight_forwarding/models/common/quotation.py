@@ -20,12 +20,6 @@ class FreightQuotation(models.AbstractModel):
     _description = "Freight Quotation Mixin"
 
     is_freight_quotation = fields.Boolean(string="Is Freight Quotation", default=False)
-    sea_hbl_id = fields.Many2one(
-        "freight.sea.hbl",
-        string="Sea Jobsheet",
-        index=True,
-    )
-
 
     # =========================================================
     # Header Information
@@ -423,6 +417,98 @@ class FreightQuotation(models.AbstractModel):
                 encoded = base64.b64encode(f.read()).decode("utf-8")
             return "data:image/png;base64," + encoded
         return ""
+
+
+class SaleOrderQuotation(models.Model):
+    """Satu-satunya tempat yang menempelkan mixin freight.quotation ke
+    sale.order. SeaQuotation dan AirQuotation (models/sea|air/sales/quotation.py)
+    sengaja hanya _inherit = "sale.order" (plain) — tidak ada satupun dari
+    keduanya yang perlu tahu soal mixin ini (lihat FF-71 structural cleanup).
+
+    Class ini juga menampung fitur currency-variant: generik, tidak menyentuh
+    field sea-specific maupun air-specific apa pun, dan sudah dipakai oleh
+    view Air maupun Sea.
+    """
+
+    _name = "sale.order"
+    _inherit = ["sale.order", "freight.quotation"]
+
+    original_quotation_id = fields.Many2one(
+        "sale.order",
+        string="Original Quotation",
+        copy=False,
+        index=True,
+    )
+    variant_ids = fields.One2many(
+        "sale.order",
+        "original_quotation_id",
+        string="Currency Variants",
+    )
+    variant_count = fields.Integer(
+        string="Variant Count",
+        compute="_compute_variant_count",
+    )
+
+    @api.depends("variant_ids", "original_quotation_id.variant_ids")
+    def _compute_variant_count(self):
+        for rec in self:
+            root = rec.original_quotation_id if rec.original_quotation_id else rec
+            rec.variant_count = len(root.variant_ids)
+
+    def action_create_currency_variant(self):
+        """
+        Buat salinan header-only yang tertaut ke quotation asal sebagai currency variant.
+        Berbeda dari Duplicate standar: tidak menyalin order lines,
+        dan otomatis tertaut lewat original_quotation_id.
+        """
+        self.ensure_one()
+        if not self.is_freight_quotation:
+            raise UserError("This action is only available for Freight Quotations.")
+        if self.original_quotation_id:
+            raise UserError("You cannot create a currency variant from a child quotation. Please create it from the parent quotation instead.")
+
+        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
+        new_variant = self.copy(default={
+            'original_quotation_id': original_id,
+            'order_line': [],
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'sale.order',
+            'res_id': new_variant.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
+    def action_view_currency_variants(self):
+        self.ensure_one()
+        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
+        domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
+
+        return {
+            "name": "Currency Variants",
+            "type": "ir.actions.act_window",
+            "res_model": "sale.order",
+            "view_mode": "list,form",
+            "domain": domain,
+            "context": dict(self.env.context, create=False),
+        }
+
+    def action_confirm(self):
+        res = super().action_confirm()
+        for rec in self:
+            if rec.is_freight_quotation:
+                original_id = rec.original_quotation_id.id if rec.original_quotation_id else rec.id
+                domain = [
+                    '|', ('id', '=', original_id), ('original_quotation_id', '=', original_id),
+                    ('id', '!=', rec.id),
+                    ('state', 'in', ['draft', 'sent'])
+                ]
+                variants = self.env["sale.order"].search(domain)
+                if variants:
+                    # Prevent infinite recursion by passing context or just rely on state filter
+                    variants.action_confirm()
+        return res
 
 
 class SaleOrderLine(models.Model):

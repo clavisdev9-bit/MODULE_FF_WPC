@@ -3,9 +3,7 @@ from odoo.exceptions import UserError
 
 
 class SeaQuotation(models.Model):
-    _name = "sale.order"
-    _inherit = ["sale.order", "freight.quotation"]
-    _description = "Sea Quotation"
+    _inherit = "sale.order"
 
     # =========================================================
     # Sea-specific Fields
@@ -22,17 +20,10 @@ class SeaQuotation(models.Model):
     hbl_count = fields.Integer(
         string="Jobsheet Count", compute="_compute_hbl_count"
     )
-
-    # Multi-currency variant tracking
-    original_quotation_id = fields.Many2one(
-        "sale.order",
-        string="Original Quotation",
-        copy=False,
+    sea_hbl_id = fields.Many2one(
+        "freight.sea.hbl",
+        string="Sea Jobsheet",
         index=True,
-    )
-    variant_count = fields.Integer(
-        string="Variant Count",
-        compute="_compute_variant_count"
     )
 
     # Container Type (sea-specific, juga di-sync ke sale_order)
@@ -77,6 +68,7 @@ class SeaQuotation(models.Model):
         for rec in self:
             rec.booking_count = len(rec.booking_ids)
 
+    @api.depends("sea_hbl_id")
     def _compute_hbl_count(self):
         for rec in self:
             count = 0
@@ -86,76 +78,9 @@ class SeaQuotation(models.Model):
                 count = self.env["freight.sea.hbl"].search_count([("sale_order_ids", "=", rec.id)])
             rec.hbl_count = count
 
-    def _compute_variant_count(self):
-        for rec in self:
-            if not rec.id:
-                rec.variant_count = 0
-                continue
-                
-            original_id = rec.original_quotation_id.id if rec.original_quotation_id else rec.id
-            domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
-            # Kurangi 1 agar tidak menghitung dirinya sendiri (hanya menghitung varian LAIN)
-            count = self.search_count(domain) - 1
-            rec.variant_count = count if count > 0 else 0
-
-    def action_create_currency_variant(self):
-        """
-        Buat salinan header-only yang tertaut ke quotation asal sebagai currency variant.
-        Berbeda dari Duplicate standar: tidak menyalin order lines,
-        dan otomatis tertaut lewat original_quotation_id.
-        """
-        self.ensure_one()
-        if not self.is_freight_quotation:
-            raise UserError("This action is only available for Freight Quotations.")
-        if self.original_quotation_id:
-            raise UserError("You cannot create a currency variant from a child quotation. Please create it from the parent quotation instead.")
-
-        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
-        new_variant = self.copy(default={
-            'original_quotation_id': original_id,
-            'order_line': [],
-        })
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'sale.order',
-            'res_id': new_variant.id,
-            'view_mode': 'form',
-            'target': 'current',
-        }
-
     # =========================================================
     # Sea-specific Actions
     # =========================================================
-
-    def action_confirm(self):
-        res = super().action_confirm()
-        for rec in self:
-            if rec.is_freight_quotation:
-                original_id = rec.original_quotation_id.id if rec.original_quotation_id else rec.id
-                domain = [
-                    '|', ('id', '=', original_id), ('original_quotation_id', '=', original_id),
-                    ('id', '!=', rec.id),
-                    ('state', 'in', ['draft', 'sent'])
-                ]
-                variants = self.env["sale.order"].search(domain)
-                if variants:
-                    # Prevent infinite recursion by passing context or just rely on state filter
-                    variants.action_confirm()
-        return res
-
-    def action_view_currency_variants(self):
-        self.ensure_one()
-        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
-        domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
-        
-        return {
-            "name": "Currency Variants",
-            "type": "ir.actions.act_window",
-            "res_model": "sale.order",
-            "view_mode": "list,form",
-            "domain": domain,
-            "context": dict(self.env.context, create=False),
-        }
 
     def action_view_bookings(self):
         self.ensure_one()
