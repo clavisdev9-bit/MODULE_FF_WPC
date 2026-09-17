@@ -37,7 +37,6 @@ class FreightAirBooking(models.Model):
 
     payment_term_id = fields.Many2one('account.payment.term', string='Credit Term')
     salesman_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
-    quotation_id = fields.Many2one('sale.order', string='Quotation No.')
     sale_order_ids = fields.Many2many(
         'sale.order',
         string='Sales Orders',
@@ -183,9 +182,8 @@ class FreightAirBooking(models.Model):
             'flight_routing_ids': flight_lines,
             'dimension_ids': dimension_lines,
         }
-        so_ids = self.sale_order_ids.ids if self.sale_order_ids else ([self.quotation_id.id] if self.quotation_id else [])
-        if so_ids:
-            hawb_vals['sale_order_ids'] = [(6, 0, so_ids)]
+        if self.sale_order_ids:
+            hawb_vals['sale_order_ids'] = [(6, 0, self.sale_order_ids.ids)]
         hawb = self.env['freight.air.hawb'].create(hawb_vals)
         return {
             'name': _('Air Jobsheet (HAWB)'),

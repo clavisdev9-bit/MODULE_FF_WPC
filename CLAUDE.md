@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Language
+
+Selalu balas ke user dalam Bahasa Indonesia di repo ini, kecuali user secara eksplisit minta bahasa lain. Kode, nama identifier, commit message, dan istilah teknis tetap boleh/harus dalam Bahasa Inggris sesuai konvensi yang sudah ada di codebase.
+
 ## What this is
 
 A single custom Odoo 18 addon, `addons/freight_forwarding`, implementing Freight Forwarding operations (Air + Sea) for Clavis Group. `enterprise/` is a vendored copy of Odoo Enterprise addons required as a dependency — not part of this module's source.

@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- ===========================================================         FORM VIEW (Air Quotation - sale.order)
-         Meniru struktur Sea Quotation, hanya menampilkan field
-         yang ada pada model Air Quotation (tanpa container_type / port sea).
-    ============================================================ -->
     <record id="view_air_quotation_form" model="ir.ui.view">
         <field name="name">freight.air.quotation.form</field>
         <field name="model">sale.order</field>
+        <field name="mode">primary</field>
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='warehouse_id']" position="attributes">
@@ -15,6 +12,8 @@
 
             <xpath expr="//sheet" position="inside">
                 <field name="is_freight_quotation" invisible="1" />
+                <field name="air_booking_count" invisible="1" />
+                <field name="hawb_count" invisible="1" />
             </xpath>
 
             <xpath expr="//div[@name='button_box']" position="inside">
@@ -22,7 +21,7 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-plane"
-                    invisible="not is_freight_quotation or freight_business_type != 'air' or booking_count == 0">
+                    invisible="not is_freight_quotation or freight_type != 'export' or air_booking_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Booking</span>
                     </div>
@@ -31,7 +30,7 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-file-text-o"
-                    invisible="not is_freight_quotation or freight_business_type != 'air' or hawb_count == 0">
+                    invisible="not is_freight_quotation or freight_type != 'import' or hawb_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Jobsheet</span>
                     </div>
@@ -40,13 +39,13 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-money"
-                    invisible="not is_freight_quotation or freight_business_type != 'air' or variant_count == 0">
+                    invisible="not is_freight_quotation or variant_count == 0">
                     <field name="variant_count" widget="statinfo" string="Variants" />
                 </button>
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="freight_type" invisible="not is_freight_quotation" />
+                <field name="freight_type" invisible="not is_freight_quotation" required="is_freight_quotation" readonly="state == 'sale'" />
                 <field name="quotation_title" invisible="not is_freight_quotation" />
             </xpath>
 
@@ -66,11 +65,11 @@
                     <field name="service_level" />
                     <field name="pricelist_id" readonly="state in ['cancel', 'sale']"
                         groups="!product.group_product_pricelist" />
-                    <field name="delivery_type_id" />
+                    <field name="delivery_type_id" required="is_freight_quotation" />
                     <field name="valid_from" />
                     <field name="validity_date" string="Valid To" />
                     <field name="reference_number" />
-                    <field name="commodity_id" />
+                    <field name="commodity_id" required="is_freight_quotation" />
                 </group>
             </xpath>
 
@@ -93,9 +92,9 @@
                                 class="o_address_country" />
                         </div>
                     </group>
-                    <group name="studio_group_7a4382">
+                    <group>
                         <span>Delivery</span>
-                        <div class="o_address_format" name="studio_div_8cbbbf">
+                        <div class="o_address_format">
                             <field name="delivery_street" placeholder="Street..."
                                 class="o_address_street" />
                             <field name="delivery_street2" placeholder="Street 2..."
@@ -116,18 +115,18 @@
             <xpath expr="//header" position="inside">
                 <field name="original_quotation_id" invisible="1"/>
                 <button
-                    name="action_convert_to_jobsheet_direct"
-                    type="object"
-                    string="Create Jobsheet"
-                    class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_business_type != 'air' or freight_type != 'import' or state != 'sale' or booking_count &gt; 0 or hawb_count &gt; 0"
-                />
-                <button
-                    name="action_convert_to_booking_direct"
+                    name="action_convert_quotation"
                     type="object"
                     string="Create Booking"
                     class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_business_type != 'air' or freight_type != 'export' or state != 'sale' or booking_count &gt; 0 or hawb_count &gt; 0"
+                    invisible="not is_freight_quotation or freight_type != 'export' or state != 'sale' or air_booking_count &gt; 0"
+                />
+                <button
+                    name="action_convert_quotation"
+                    type="object"
+                    string="Create Jobsheet"
+                    class="oe_highlight"
+                    invisible="not is_freight_quotation or freight_type != 'import' or state != 'sale' or hawb_count &gt; 0"
                 />
             </xpath>
 
@@ -195,12 +194,15 @@
                 <filter name="filter_draft_sent" string="Quotation" domain="[('state', 'in', ['draft', 'sent'])]"/>
                 <filter name="filter_sale" string="Sales Order" domain="[('state', '=', 'sale')]"/>
                 <filter name="filter_cancel" string="Cancelled" domain="[('state', '=', 'cancel')]"/>
+                <separator/>
+                <filter name="filter_type_export" string="Export" domain="[('freight_type', '=', 'export')]"/>
+                <filter name="filter_type_import" string="Import" domain="[('freight_type', '=', 'import')]"/>
             </search>
         </field>
     </record>
 
     <!-- ============================================================
-         WINDOW ACTION
+         ACTION — satu entry point Air Quotation (Import & Export)
     ============================================================ -->
     <record id="action_freight_air_quotation" model="ir.actions.act_window">
         <field name="name">Air Quotation</field>
@@ -209,7 +211,7 @@
         <field name="view_id" ref="view_air_quotation_list_custom"/>
         <field name="search_view_id" ref="view_air_quotation_search"/>
         <field name="domain">[('freight_business_type', '=', 'air'), ('is_freight_quotation', '=', True)]</field>
-        <field name="context">{'search_default_my_quotation': 1, 'default_freight_business_type': 'air', 'default_is_freight_quotation': True}</field>
+        <field name="context">{'search_default_my_quotation': 1, 'default_freight_business_type': 'air', 'default_is_freight_quotation': True, 'default_freight_type': 'export'}</field>
     </record>
 
     <record id="action_freight_air_quotation_view_list" model="ir.actions.act_window.view">

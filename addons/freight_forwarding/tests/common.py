@@ -83,8 +83,14 @@ class FreightTestBase(TransactionCase):
         return self.env["sale.order"].create(vals)
 
     def _create_booking(self, **kwargs):
-        """Buat Sea Booking dengan default nilai yang valid."""
+        """Buat Sea Booking dengan default nilai yang valid.
+
+        `quotation_id=<sale.order record atau id>` diterima sebagai shortcut
+        dan diterjemahkan ke `sale_order_ids` (field asli sejak booking
+        mendukung multi-currency quotation variant).
+        """
         FreightTestBase._booking_counter += 1
+        quotation_id = kwargs.pop("quotation_id", None)
         vals = {
             "name": f"TEST-BOOK-{FreightTestBase._booking_counter:03d}",
             "freight_type": "export",
@@ -96,11 +102,19 @@ class FreightTestBase(TransactionCase):
             "delivery_type_id": self.delivery_type.id,
         }
         vals.update(kwargs)
+        if quotation_id and "sale_order_ids" not in kwargs:
+            vals["sale_order_ids"] = [(6, 0, [quotation_id])]
         return self.env["freight.sea.booking"].create(vals)
 
     def _create_hbl(self, booking=None, **kwargs):
-        """Buat Sea HBL dengan default nilai yang valid."""
+        """Buat Sea HBL dengan default nilai yang valid.
+
+        `quotation_id=<sale.order record atau id>` diterima sebagai shortcut
+        dan diterjemahkan ke `sale_order_ids` (field asli, dipakai untuk flow
+        import langsung dari quotation tanpa booking).
+        """
         FreightTestBase._hbl_counter += 1
+        quotation_id = kwargs.pop("quotation_id", None)
         vals = {
             "hbl_no": f"TEST-HBL-{FreightTestBase._hbl_counter:03d}" if "hbl_no" not in kwargs else kwargs["hbl_no"],
             "freight_type": "export",
@@ -108,10 +122,12 @@ class FreightTestBase(TransactionCase):
         }
         if "hbl_no" in kwargs and kwargs["hbl_no"] is False:
             vals.pop("hbl_no")
-            
+
         if booking:
             vals["booking_id"] = booking.id
         vals.update(kwargs)
+        if quotation_id and "sale_order_ids" not in kwargs:
+            vals["sale_order_ids"] = [(6, 0, [quotation_id])]
         return self.env["freight.sea.hbl"].create(vals)
 
     def _create_booking_cargo_info(self, booking, **kwargs):

@@ -245,7 +245,7 @@
                         </page>
                         <page string="Sales Orders">
                             <field name="sale_order_ids" nolabel="1"
-                                context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea', 'default_sea_hbl_id': id}">
+                                context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea', 'default_freight_type': 'import', 'default_sea_hbl_id': id}">
                                 <list editable="bottom" open_form_view="1">
                                     <field name="name" />
                                     <field name="currency_id" />

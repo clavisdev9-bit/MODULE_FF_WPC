@@ -85,7 +85,7 @@ class TestSeaQuotationConvertActions(FreightTestBase):
 
         new_booking = self.env["freight.sea.booking"].browse(result["res_id"])
         self.assertTrue(new_booking.exists())
-        self.assertEqual(new_booking.quotation_id, quotation)
+        self.assertIn(quotation, new_booking.sale_order_ids)
         self.assertEqual(new_booking.freight_type, quotation.freight_type)
 
     def test_action_convert_to_jobsheet_direct(self):
@@ -95,7 +95,7 @@ class TestSeaQuotationConvertActions(FreightTestBase):
 
         new_hbl = self.env["freight.sea.hbl"].browse(result["res_id"])
         self.assertTrue(new_hbl.exists())
-        self.assertEqual(new_hbl.quotation_id, quotation)
+        self.assertIn(quotation, new_hbl.sale_order_ids)
         # Pastikan freight_type tidak dikonversi manual lagi
         self.assertEqual(new_hbl.freight_type, "import",
             msg="freight_type HBL harus sama persis dengan quotation (lowercase)")

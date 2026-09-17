@@ -43,17 +43,8 @@ class SeaQuotation(models.Model):
             ("consol", "Consol"),
         ],
         string="Container Type",
-        required=True,
     )
 
-
-
-    # Cargo Info (comodel sea-specific)
-    cargo_info_ids = fields.One2many(
-        "freight.sea.quotation.cargo.info",
-        "quotation_id",
-        string="Cargo Info",
-    )
 
     # Shipment Info — Sea-specific (port / shipping line)
     port_of_loading_id = fields.Many2one("freight.port", string="Port Of Loading")
@@ -70,6 +61,16 @@ class SeaQuotation(models.Model):
     # =========================================================
     # Sea-specific Compute Methods
     # =========================================================
+
+    @api.constrains("is_freight_quotation", "freight_business_type", "container_type")
+    def _check_sea_container_type_required(self):
+        for rec in self:
+            if (
+                rec.is_freight_quotation
+                and rec.freight_business_type == "sea"
+                and not rec.container_type
+            ):
+                raise UserError("Container Type is required for a Sea Freight Quotation.")
 
     @api.depends("booking_ids")
     def _compute_booking_count(self):
@@ -203,45 +204,7 @@ class SeaQuotation(models.Model):
                     rec.sea_hbl_id.sale_order_ids = [(4, rec.id)]
         return res
 
-    def _prepare_booking_cargo_info_vals(self, cargo_info, booking):
-        return {
-            "booking_id": booking.id,
-            "package_type_id": cargo_info.package_type_id.id if cargo_info.package_type_id else False,
-            "container_no": cargo_info.container_no,
-            "seal_no": cargo_info.seal_no,
-            "description_of_goods": cargo_info.description_of_goods,
-            "marks_and_no": cargo_info.marks_and_no,
-            "container_type_id": cargo_info.container_type_id.id if cargo_info.container_type_id else False,
-            "types_of_cargo": cargo_info.types_of_cargo.id if cargo_info.types_of_cargo else False,
-            "quantity": cargo_info.quantity,
-            "length": cargo_info.length,
-            "width": cargo_info.width,
-            "height": cargo_info.height,
-            "gross_weight": cargo_info.gross_weight,
-            "net_weight": cargo_info.net_weight,
-            "volume": cargo_info.volume,
-            "total_volume": cargo_info.total_volume,
-            "harmonize": cargo_info.harmonize,
-            "temperature": cargo_info.temperature,
-            "ventilation": cargo_info.ventilation,
-            "humidity": cargo_info.humidity,
-            "has_dangerous_goods": cargo_info.has_dangerous_goods,
-            "imdg_code": cargo_info.imdg_code,
-            "class_number": cargo_info.class_number,
-            "packing_group": cargo_info.packing_group,
-            "a_number": cargo_info.a_number,
-            "flash_point": cargo_info.flash_point,
-            "material_description": cargo_info.material_description,
-        }
-
-    def _copy_cargo_info_to_booking(self, booking):
-        booking_detail_model = self.env["freight.sea.booking.cargo.info"]
-        for cargo_info in self.cargo_info_ids:
-            booking_detail_model.create(
-                self._prepare_booking_cargo_info_vals(cargo_info, booking)
-            )
-
-    def action_convert_to_booking_direct(self):
+    def _action_convert_to_booking_direct_sea(self):
         self.ensure_one()
         original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
         domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
@@ -276,7 +239,6 @@ class SeaQuotation(models.Model):
             "company_id": self.company_id.id,
         }
         booking = self.env["freight.sea.booking"].create(booking_vals)
-        self._copy_cargo_info_to_booking(booking)
         return {
             "type": "ir.actions.act_window",
             "res_model": "freight.sea.booking",
@@ -285,7 +247,7 @@ class SeaQuotation(models.Model):
             "target": "current",
         }
 
-    def action_convert_to_jobsheet_direct(self):
+    def _action_convert_to_jobsheet_direct_sea(self):
         """Convert import quotation directly to jobsheet (HBL) without booking"""
         self.ensure_one()
         original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
