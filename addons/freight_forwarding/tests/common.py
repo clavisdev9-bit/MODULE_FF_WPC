@@ -42,11 +42,13 @@ class FreightTestBase(TransactionCase):
             "name": "Test Vessel MV-001",
         })
 
-        # Master data: Delivery Type
-        cls.delivery_type = cls.env["freight.delivery.type"].create({
-            "code": "DTD",
-            "name": "Door to Door",
-        })
+        # Master data: Delivery Type (account.incoterms native Odoo)
+        cls.delivery_type = cls.env["account.incoterms"].search([("code", "=", "DTD")], limit=1)
+        if not cls.delivery_type:
+            cls.delivery_type = cls.env["account.incoterms"].create({
+                "code": "DTD",
+                "name": "Door to Door",
+            })
 
         # Master data: Commodity
         cls.commodity = cls.env["freight.commodity"].create({
