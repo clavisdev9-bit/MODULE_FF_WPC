@@ -139,5 +139,7 @@
         "tests/test_commercial_group.py",
         "tests/test_minimal_required_fields.py",
         "tests/test_currency_variant_view.py",
+        "tests/test_generic_duplicate_commercial_group.py",
+        "tests/test_ff73_migration_regression.py",
     ],
 }

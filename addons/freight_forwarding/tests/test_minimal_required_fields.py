@@ -38,12 +38,13 @@ class TestMinimalRequiredFields(FreightTestBase):
         self.assertFalse(booking.partner_id)
 
     def test_air_booking_minimal(self):
-        """freight_type punya default='export' (bukan blocking) -- yang
-        diverifikasi di sini adalah create() tidak pernah gagal walau
-        partner_id/business field lain kosong."""
+        """FF-73 follow-up: freight_type TIDAK lagi punya default='export' --
+        create() tanpa direction harus tetap sukses (bukan blocking) DAN
+        freight_type harus tetap kosong (tidak diam-diam diklasifikasikan)."""
         booking = self.env["freight.air.booking"].create({})
         self.assertTrue(booking.exists())
         self.assertFalse(booking.partner_id)
+        self.assertFalse(booking.freight_type)
 
     def test_sea_hbl_minimal(self):
         hbl = self.env["freight.sea.hbl"].create({})
@@ -52,12 +53,16 @@ class TestMinimalRequiredFields(FreightTestBase):
         self.assertFalse(hbl.container_type)
 
     def test_air_hawb_minimal(self):
-        """freight_type punya default='export' (bukan blocking) -- yang
-        diverifikasi di sini adalah create() tidak pernah gagal walau
-        partner_id/business field lain kosong."""
+        """FF-73 follow-up: freight_type TIDAK lagi punya default='export' --
+        create() tanpa direction harus tetap sukses (bukan blocking) DAN
+        freight_type harus tetap kosong (tidak diam-diam diklasifikasikan).
+        Sebelum fix ini, freight_type diam-diam jadi 'export' walau job_no
+        (lihat TestConvertDoesNotGuessEmptyBusinessFields di bawah) memakai
+        sequence netral -- semantic inconsistency."""
         hawb = self.env["freight.air.hawb"].create({})
         self.assertTrue(hawb.exists())
         self.assertFalse(hawb.partner_id)
+        self.assertFalse(hawb.freight_type)
 
     def test_sea_quotation_to_booking_to_jobsheet_minimal(self):
         """Quotation (cukup Customer) -> Booking -> Jobsheet harus berjalan
@@ -170,3 +175,38 @@ class TestConvertDoesNotGuessEmptyBusinessFields(FreightTestBase):
         self.assertTrue(hawb.job_no)
         self.assertTrue(hawb.job_no.startswith("JKT-AJOB/"),
             msg="job_no HAWB tanpa freight_type harus pakai sequence netral, bukan AE/AI")
+
+    def test_air_booking_create_empty_diagnostic(self):
+        """FF-73 diagnostic (item 5): sebelum fix, freight.air.booking punya
+        default='export' pada freight_type -- create({}) diam-diam
+        terklasifikasi Export walau user tidak pernah memilih direction.
+        Setelah fix: freight_type harus tetap False (bukan 'export')."""
+        booking = self.env["freight.air.booking"].create({})
+        self.assertFalse(
+            booking.freight_type,
+            msg="freight.air.booking.create({}) TIDAK boleh diam-diam "
+                "terklasifikasi 'export' -- business field kosong harus tetap kosong",
+        )
+
+    def test_air_hawb_create_empty_diagnostic_freight_type_and_job_no_consistent(self):
+        """FF-73 diagnostic (item 5): kombinasi freight_type final DAN job_no
+        prefix HAWB dari create({}) harus konsisten satu sama lain.
+
+        Sebelum fix: default='export' pada field freight_type diterapkan
+        ORM SETELAH FreightAirHawb.create() override membaca vals (vals
+        kosong -> job_no pakai sequence netral JKT-AJOB/), sehingga hasil
+        akhirnya freight_type='export' TAPI job_no berprefix netral --
+        semantic inconsistency yang dilaporkan lewat assertion di bawah."""
+        hawb = self.env["freight.air.hawb"].create({})
+
+        self.assertFalse(
+            hawb.freight_type,
+            msg="freight.air.hawb.create({}) TIDAK boleh diam-diam "
+                "terklasifikasi 'export' -- business field kosong harus tetap kosong",
+        )
+        self.assertTrue(hawb.job_no.startswith("JKT-AJOB/"))
+        # Konsistensi eksplisit: kalau freight_type falsy, job_no TIDAK boleh
+        # memakai prefix Export (JKT-AE/) maupun Import (JKT-AI/).
+        if not hawb.freight_type:
+            self.assertFalse(hawb.job_no.startswith("JKT-AE/"))
+            self.assertFalse(hawb.job_no.startswith("JKT-AI/"))

@@ -30,10 +30,17 @@ class FreightAirHawb(models.Model):
     ], string='Status', readonly=True, copy=False, index=True, tracking=True, default='draft')
     
     booking_id = fields.Many2one('freight.air.booking', string='Booking No.', tracking=True)
+    # FF-73 hardening: TIDAK ada default -- lihat komentar setara di
+    # freight.air.booking.freight_type. Sebelumnya default='export' di sini
+    # menyebabkan semantic inconsistency: create({}) tanpa freight_type
+    # (vals kosong saat create() override di bawah membaca job_no sequence)
+    # tetap menghasilkan job_no NETRAL (JKT-AJOB/...) tapi freight_type akhir
+    # jadi 'export' (dari default field, diterapkan ORM SETELAH override ini
+    # membaca vals) -- job_no dan freight_type jadi tidak konsisten.
     freight_type = fields.Selection([
         ('import', 'Import'),
         ('export', 'Export')
-    ], string='Type', tracking=True, default='export')
+    ], string='Type', tracking=True)
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     partner_id = fields.Many2one('res.partner', string='Customer Code', tracking=True)

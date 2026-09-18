@@ -59,14 +59,25 @@ class AirQuotation(models.Model):
         string="Tags",
     )
 
+    # FF-73 follow-up (generic Duplicate fix): copy=False -- lihat komentar
+    # setara di SeaQuotation.booking_ids/hbl_ids/sea_hbl_id. Tanpa ini,
+    # generic copy() menyalin air_booking_ids/air_hawb_id milik record
+    # SUMBER ke record BARU yang independen, lalu AirQuotation.create() di
+    # bawah menuliskannya balik ke Booking/HAWB.sale_order_ids -- constraint
+    # commercial-group mixin menolak karena duplicate itu bukan anggota
+    # commercial group manapun. Currency variant tetap tersinkron lewat
+    # "all_variants.write(...)" eksplisit di action convert (tidak bergantung
+    # pada copy() field inheritance untuk ini).
     air_booking_ids = fields.Many2many(
         "freight.air.booking",
         string="Air Bookings",
+        copy=False,
     )
     air_hawb_id = fields.Many2one(
         "freight.air.hawb",
         string="Air Jobsheet (HAWB)",
         index=True,
+        copy=False,
     )
     air_booking_count = fields.Integer(
         string="Air Booking Count", compute="_compute_air_booking_count"

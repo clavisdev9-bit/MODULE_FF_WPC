@@ -9,9 +9,24 @@ class SeaQuotation(models.Model):
     # =========================================================
 
     # Relasi booking & HBL
+    # FF-73 follow-up (generic Duplicate fix): copy=False di keempat field
+    # commercial-group mirror ini (booking_ids/hbl_ids/sea_hbl_id, dan yang
+    # setara di Air) sengaja ditambahkan. Tanpa ini, generic copy() (tombol
+    # Duplicate) ikut menyalin relasi Booking/Jobsheet milik record SUMBER ke
+    # record BARU yang independen (bukan currency variant) -- lalu
+    # SeaQuotation.create() di bawah menuliskannya balik ke
+    # Booking/HBL.sale_order_ids, dan constraint commercial-group mixin
+    # (freight.commercial.group.mixin) menolaknya karena duplicate itu bukan
+    # anggota commercial group manapun (original_quotation_id-nya False).
+    # Currency variant (action_create_currency_variant) TIDAK bergantung pada
+    # copy() untuk field-field ini -- ia disinkronkan eksplisit lewat
+    # _sync_sale_order_ids_mirror()/_mirror_commercial_group_local_relation()
+    # dan "all_variants.write(...)" di action convert, jadi copy=False di
+    # sini tidak memengaruhi currency variant sama sekali.
     booking_ids = fields.Many2many(
         "freight.sea.booking",
-        string="Sea Bookings"
+        string="Sea Bookings",
+        copy=False,
     )
     booking_count = fields.Integer(
         string="Booking Count", compute="_compute_booking_count"
@@ -23,6 +38,7 @@ class SeaQuotation(models.Model):
         "freight.sea.hbl",
         string="Sea Jobsheet",
         index=True,
+        copy=False,
     )
     # FF-73 UAT fix (Masalah 2): compatibility mirror -- BUKAN canonical
     # source of truth (itu tetap root_quotation_id / booking_id / resolver
@@ -34,6 +50,7 @@ class SeaQuotation(models.Model):
     hbl_ids = fields.Many2many(
         "freight.sea.hbl",
         string="Sea Jobsheets (compatibility mirror)",
+        copy=False,
     )
 
     # Container Type (sea-specific, juga di-sync ke sale_order)

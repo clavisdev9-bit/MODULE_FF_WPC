@@ -7,4 +7,6 @@ from . import (
     test_commercial_group,
     test_minimal_required_fields,
     test_currency_variant_view,
+    test_generic_duplicate_commercial_group,
+    test_ff73_migration_regression,
 )

@@ -21,10 +21,15 @@ class FreightAirBooking(models.Model):
         ('cancelled', 'Cancelled')
     ], string='Status', readonly=True, copy=False, index=True, tracking=True, default='draft')
     
+    # FF-73 hardening: TIDAK ada default -- business field yang tidak
+    # diberikan tidak boleh diam-diam diklasifikasikan ke arah tertentu.
+    # Direction Export/Import untuk create dari menu tetap datang lewat
+    # context default_freight_type (lihat views/air/booking/booking.xml),
+    # bukan dari default field ini.
     freight_type = fields.Selection([
         ('import', 'Import'),
         ('export', 'Export')
-    ], string='Type', tracking=True, default='export')
+    ], string='Type', tracking=True)
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     partner_id = fields.Many2one('res.partner', string='Customer', tracking=True)
