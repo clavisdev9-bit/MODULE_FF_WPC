@@ -1,76 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="view_freight_airline_list" model="ir.ui.view">
-        <field name="name">freight.airline.list</field>
-        <field name="model">freight.airline</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="code"/>
-                <field name="partner_name" string="Airline"/>
-                <field name="awb_prefix"/>
-                <field name="active" widget="boolean_toggle"/>
-            </list>
-        </field>
-    </record>
-
-    <record id="view_freight_airline_form" model="ir.ui.view">
-        <field name="name">freight.airline.form</field>
-        <field name="model">freight.airline</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <div class="oe_title">
-                        <h1>
-                            <field name="partner_name" readonly="1" placeholder="Business Party"/>
-                        </h1>
-                    </div>
-                    <group string="Business Party">
-                        <group>
-                            <field name="partner_id"/>
-                            <field name="street" readonly="1"/>
-                            <field name="city" readonly="1"/>
-                            <field name="country_id" readonly="1"/>
-                        </group>
-                        <group>
-                            <field name="phone" readonly="1"/>
-                            <field name="email" readonly="1"/>
-                            <field name="website" readonly="1"/>
-                        </group>
-                    </group>
-                    <group string="Airline Information">
-                        <group>
-                            <field name="code"/>
-                            <field name="airline_identifier"/>
-                            <field name="iata_code"/>
-                        </group>
-                        <group>
-                            <field name="awb_prefix"/>
-                            <field name="terminal"/>
-                            <field name="commission_percentage"/>
-                        </group>
-                    </group>
-                    <group string="AWB / System Configuration">
-                        <group>
-                            <field name="neutral_awb"/>
-                            <field name="ccn"/>
-                            <field name="analysis_code"/>
-                        </group>
-                        <group>
-                            <field name="column_offset"/>
-                            <field name="row_offset"/>
-                            <field name="left_margin"/>
-                            <field name="top_margin"/>
-                        </group>
-                    </group>
-                    <field name="active" invisible="1"/>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
+    <!-- Action: Airline master data → res.partner filtered by Airline tag -->
     <record id="action_freight_airline" model="ir.actions.act_window">
         <field name="name">Airlines</field>
-        <field name="res_model">freight.airline</field>
-        <field name="view_mode">list,form</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('category_id.freight_role_code', '=', 'airline')]</field>
+        <field name="context">{
+            'default_is_company': True,
+            'default_category_id': [('freight_role_code', '=', 'airline')]
+        }</field>
+    </record>
+
+    <!-- Airline tab on res.partner form (only visible when is_airline = True) -->
+    <record id="view_partner_airline_tab" model="ir.ui.view">
+        <field name="name">res.partner.form.airline.tab</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Airline" name="airline_info"
+                      invisible="not is_airline">
+                    <group string="Airline Information">
+                        <group>
+                            <field name="airline_code"/>
+                            <field name="airline_identifier"/>
+                            <field name="airline_iata_code"/>
+                            <field name="airline_terminal"/>
+                            <field name="airline_commission_percentage"/>
+                        </group>
+                        <group>
+                            <field name="airline_neutral_awb"/>
+                            <field name="airline_ccn"/>
+                            <field name="airline_analysis_code"/>
+                        </group>
+                    </group>
+                    <group string="AWB Print Layout">
+                        <group>
+                            <field name="airline_column_offset"/>
+                            <field name="airline_row_offset"/>
+                        </group>
+                        <group>
+                            <field name="airline_left_margin"/>
+                            <field name="airline_top_margin"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
     </record>
 </odoo>
