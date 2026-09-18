@@ -9,19 +9,18 @@ from .common import FreightTestBase
 class TestSeaBookingFields(FreightTestBase):
     """Verifikasi field constraints pada Sea Booking."""
 
-    def test_freight_type_required(self):
-        """freight_type wajib diisi — tanpanya create harus gagal."""
-        with self.assertRaises(Exception,
-                msg="Booking tanpa freight_type harus ditolak"):
-            self.env["freight.sea.booking"].create({
-                "container_type": "fcl",
-                "partner_id": self.partner.id,
-                "port_of_loading_id": self.port_loading.id,
-                "port_of_discharge_id": self.port_discharge.id,
-                "vessel_id": self.vessel.id,
-                "delivery_type_id": self.delivery_type.id,
-                # freight_type sengaja tidak diisi
-            })
+    def test_freight_type_not_required(self):
+        """Kebijakan sementara: freight_type (dan field bisnis Booking
+        lainnya) TIDAK BOLEH memblokir create selama struktur Booking/
+        Jobsheet belum final. Booking tanpa freight_type harus tetap
+        berhasil dibuat."""
+        booking = self.env["freight.sea.booking"].create({
+            "partner_id": self.partner.id,
+            # freight_type, container_type, vessel_id, delivery_type_id
+            # sengaja tidak diisi -- harus tetap berhasil.
+        })
+        self.assertTrue(booking.exists())
+        self.assertFalse(booking.freight_type)
 
     def test_freight_type_valid_values(self):
         """freight_type hanya menerima 'import' atau 'export' (lowercase)."""

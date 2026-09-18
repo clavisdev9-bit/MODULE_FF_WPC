@@ -20,21 +20,18 @@ class SeaBookingConvertWizard(models.TransientModel):
     salesman_id = fields.Many2one("hr.employee", string="Salesman")
     payment_term_id = fields.Many2one("account.payment.term", string="Terms Payment")
 
-    # Require user input
     freight_type = fields.Selection(
         selection=[
             ("import", "Import"),
             ("export", "Export"),
         ],
         string="Type",
-        required=True,
     )
     vessel_id = fields.Many2one(
         "freight.vessel",
         string="Vessel Name",
-        required=True,
     )
-    voyage_no = fields.Char(string="Voyage No.", required=True)
+    voyage_no = fields.Char(string="Voyage No.")
     etd = fields.Date(string="ETD (Departure)")
     eta = fields.Date(string="ETA (Arrival)")
 

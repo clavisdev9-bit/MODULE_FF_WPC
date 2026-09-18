@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.7",
+    "version": "18.0.1.8",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -118,10 +118,13 @@
         "views/sea/master_data/instruction.xml",
         # Menu
         "views/menu.xml",
-        "views/air/master_data/handling_information.xml",
         "views/menus/air.xml",
         "views/menus/sea.xml",
         "views/menus/master.xml",
+        # Harus dimuat SETELAH views/menus/master.xml -- menuitem di file ini
+        # mereferensikan parent="menu_sub_parent_air_master_data" yang
+        # didefinisikan di sana (bug urutan lama, baru kena pada fresh install).
+        "views/air/master_data/handling_information.xml",
     ],
     "installable": True,
     "application": True,
@@ -133,5 +136,10 @@
         "tests/test_sea_hbl.py",
         "tests/test_sea_quotation.py",
         "tests/test_analytic_sync.py",
+        "tests/test_commercial_group.py",
+        "tests/test_minimal_required_fields.py",
+        "tests/test_currency_variant_view.py",
+        "tests/test_generic_duplicate_commercial_group.py",
+        "tests/test_ff73_migration_regression.py",
     ],
 }

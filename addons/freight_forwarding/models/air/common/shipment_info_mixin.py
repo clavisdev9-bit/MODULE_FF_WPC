@@ -17,7 +17,7 @@ class FreightAirShipmentInfoMixin(models.AbstractModel):
         ('direct', 'Direct'),
         ('house', 'House'),
         ('master', 'Master')
-    ], string='Shipment Type', default='house', required=True, tracking=True)
+    ], string='Shipment Type', default='house', tracking=True)
 
     delivery_type = fields.Many2one('freight.delivery.type', string='Delivery Type')
     other_delivery = fields.Selection([('P', 'Prepaid'), ('C', 'Collect')], string='Other')

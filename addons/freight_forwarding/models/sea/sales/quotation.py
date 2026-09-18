@@ -1,5 +1,4 @@
 from odoo import api, fields, models
-from odoo.exceptions import UserError
 
 
 class SeaQuotation(models.Model):
@@ -10,9 +9,24 @@ class SeaQuotation(models.Model):
     # =========================================================
 
     # Relasi booking & HBL
+    # FF-73 follow-up (generic Duplicate fix): copy=False di keempat field
+    # commercial-group mirror ini (booking_ids/hbl_ids/sea_hbl_id, dan yang
+    # setara di Air) sengaja ditambahkan. Tanpa ini, generic copy() (tombol
+    # Duplicate) ikut menyalin relasi Booking/Jobsheet milik record SUMBER ke
+    # record BARU yang independen (bukan currency variant) -- lalu
+    # SeaQuotation.create() di bawah menuliskannya balik ke
+    # Booking/HBL.sale_order_ids, dan constraint commercial-group mixin
+    # (freight.commercial.group.mixin) menolaknya karena duplicate itu bukan
+    # anggota commercial group manapun (original_quotation_id-nya False).
+    # Currency variant (action_create_currency_variant) TIDAK bergantung pada
+    # copy() untuk field-field ini -- ia disinkronkan eksplisit lewat
+    # _sync_sale_order_ids_mirror()/_mirror_commercial_group_local_relation()
+    # dan "all_variants.write(...)" di action convert, jadi copy=False di
+    # sini tidak memengaruhi currency variant sama sekali.
     booking_ids = fields.Many2many(
         "freight.sea.booking",
-        string="Sea Bookings"
+        string="Sea Bookings",
+        copy=False,
     )
     booking_count = fields.Integer(
         string="Booking Count", compute="_compute_booking_count"
@@ -24,6 +38,19 @@ class SeaQuotation(models.Model):
         "freight.sea.hbl",
         string="Sea Jobsheet",
         index=True,
+        copy=False,
+    )
+    # FF-73 UAT fix (Masalah 2): compatibility mirror -- BUKAN canonical
+    # source of truth (itu tetap root_quotation_id / booking_id / resolver
+    # _get_commercial_group_jobsheets). sea_hbl_id (Many2one) sengaja tidak
+    # dipaksa jadi mirror karena cardinality-nya tidak menjamin selalu 1:1;
+    # hbl_ids (Many2many) di sini murni supaya currency variant langsung
+    # "mengenali" Jobsheet canonical lewat field lokal (parity dengan
+    # air_booking_ids milik Air), tanpa mengubah semantik sea_hbl_id.
+    hbl_ids = fields.Many2many(
+        "freight.sea.hbl",
+        string="Sea Jobsheets (compatibility mirror)",
+        copy=False,
     )
 
     # Container Type (sea-specific, juga di-sync ke sale_order)
@@ -53,38 +80,48 @@ class SeaQuotation(models.Model):
     # Sea-specific Compute Methods
     # =========================================================
 
-    @api.constrains("is_freight_quotation", "freight_business_type", "container_type")
-    def _check_sea_container_type_required(self):
-        for rec in self:
-            if (
-                rec.is_freight_quotation
-                and rec.freight_business_type == "sea"
-                and not rec.container_type
-            ):
-                raise UserError("Container Type is required for a Sea Freight Quotation.")
-
-    @api.depends("booking_ids")
+    @api.depends("original_quotation_id", "booking_ids")
     def _compute_booking_count(self):
-        for rec in self:
-            rec.booking_count = len(rec.booking_ids)
+        """FF-73 UAT fix (Bug 1): resolve lewat commercial group (root +
+        variant), bukan cuma booking_ids milik diri sendiri -- supaya child
+        variant tetap menunjukkan Booking yang benar meski root-nya yang
+        pertama kali dikonversi. Mirror _compute_hbl_count.
 
-    @api.depends("sea_hbl_id")
-    def _compute_hbl_count(self):
+        `booking_ids` tetap dicantumkan di depends (bukan sebagai source of
+        truth resolusi, resolvernya tetap _get_commercial_group_bookings) --
+        murni supaya compute field non-stored ini ter-invalidate saat Booking
+        baru dibuat. `sale_order_ids` pada freight.sea.booking dan
+        `booking_ids` pada sale.order berbagi tabel relasi m2m yang sama
+        (tidak ada explicit relation= di kedua field), jadi menulis salah
+        satu otomatis mencerminkan yang lain -- tanpa depends ini,
+        booking_count akan nyangkut di cache lama begitu compute pernah
+        diakses sebelum Booking-nya dibuat."""
         for rec in self:
-            count = 0
-            if hasattr(rec, "sea_hbl_id") and rec.sea_hbl_id:
-                count = 1
-            else:
-                count = self.env["freight.sea.hbl"].search_count([("sale_order_ids", "=", rec.id)])
-            rec.hbl_count = count
+            rec.booking_count = len(rec._get_commercial_group_bookings("freight.sea.booking"))
+
+    @api.depends("sea_hbl_id", "original_quotation_id", "hbl_ids")
+    def _compute_hbl_count(self):
+        """FF-73: resolve lewat commercial group (root + variant), bukan
+        cuma sea_hbl_id/sale_order_ids milik diri sendiri -- supaya smart
+        button tetap menunjukkan Jobsheet yang benar dari currency variant
+        mana pun dalam commercial group yang sama.
+
+        `hbl_ids` (compatibility mirror) sengaja dimasukkan ke depends --
+        sama seperti `booking_ids` di _compute_booking_count -- murni
+        sebagai trigger invalidasi cache compute non-stored ini, BUKAN
+        sebagai sumber hasil (hasil tetap dari resolver di atas)."""
+        for rec in self:
+            rec.hbl_count = len(rec._get_commercial_group_jobsheets("freight.sea.hbl"))
 
     # =========================================================
     # Sea-specific Actions
     # =========================================================
 
     def action_view_bookings(self):
+        """FF-73 UAT fix (Bug 1): resolve lewat commercial group -- lihat
+        _compute_booking_count."""
         self.ensure_one()
-        bookings = self.booking_ids
+        bookings = self._get_commercial_group_bookings("freight.sea.booking")
         ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
         ctx.update({"default_sale_order_ids": [self.id]})
         return {
@@ -99,7 +136,7 @@ class SeaQuotation(models.Model):
 
     def action_view_hbls(self):
         self.ensure_one()
-        hbls = self.sea_hbl_id or self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)])
+        hbls = self._get_commercial_group_jobsheets("freight.sea.hbl")
         ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
         ctx.update({"default_sale_order_ids": [self.id]})
         return {
@@ -143,6 +180,7 @@ class SeaQuotation(models.Model):
         booking_vals = {
             "name": booking_no,
             "sale_order_ids": [(6, 0, all_variants.ids)],
+            "root_quotation_id": original_id,
             "partner_id": self.partner_id.id,
             "delivery_type_id": self.delivery_type_id.id,
             "port_of_loading_id": self.port_of_loading_id.id,
@@ -164,6 +202,12 @@ class SeaQuotation(models.Model):
             "company_id": self.company_id.id,
         }
         booking = self.env["freight.sea.booking"].create(booking_vals)
+        # FF-73 UAT fix (Masalah 2): mirror eksplisit ke field lokal
+        # booking_ids -- parity dengan Air (_action_convert_to_booking_direct_air)
+        # -- supaya A/B langsung "mengenali" Booking lewat field sendiri,
+        # bukan cuma lewat resolver, dan supaya currency variant yang dibuat
+        # BELAKANGAN dari root ini otomatis mewarisi field ini lewat copy().
+        all_variants.write({"booking_ids": [(4, booking.id)]})
         return {
             "type": "ir.actions.act_window",
             "res_model": "freight.sea.booking",
@@ -182,6 +226,7 @@ class SeaQuotation(models.Model):
         hbl = self.env["freight.sea.hbl"].create(
             {
                 "sale_order_ids": [(6, 0, all_variants.ids)],
+                "root_quotation_id": original_id,
                 "freight_type": self.freight_type,
                 "container_type": self.container_type,
                 "customer_id": self.partner_id.id,
@@ -191,6 +236,10 @@ class SeaQuotation(models.Model):
             }
         )
         all_variants.write({"sea_hbl_id": hbl.id})
+        # FF-73 UAT fix (Masalah 2): mirror eksplisit ke field lokal
+        # hbl_ids (compatibility mirror, bukan pengganti sea_hbl_id) --
+        # parity dengan booking_ids di atas / air_booking_ids milik Air.
+        all_variants.write({"hbl_ids": [(4, hbl.id)]})
         return {
             "type": "ir.actions.act_window",
             "name": "Sea Jobsheet",

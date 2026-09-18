@@ -9,6 +9,7 @@ class SeaBooking(models.Model):
         "freight.sea.shipment.info.mixin",
         "freight.sea.vessel.details.mixin",
         "freight.sea.bl.info.mixin",
+        "freight.commercial.group.mixin",
     ]
     _description = "Sea Booking"
     _rec_name = "name"
@@ -110,7 +111,6 @@ class SeaBooking(models.Model):
             ("export", "Export"),
         ],
         string="Type",
-        required=True,
     )
     company_id = fields.Many2one(
         "res.company",
@@ -131,7 +131,6 @@ class SeaBooking(models.Model):
     container_type = fields.Selection(
         selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
         string="Container Type",
-        required=True,
     )
     job_date = fields.Date(string="Job Date")
     import_job_no = fields.Char(string="Import Job Number (Optional)")
@@ -142,7 +141,6 @@ class SeaBooking(models.Model):
     partner_id = fields.Many2one(
         "res.partner",
         string="Customer Name",
-        required=True,
     )
     customer_reference = fields.Char(string="Customer Reference")
     phone = fields.Char(related="partner_id.phone", string="Phone Number")
@@ -173,12 +171,12 @@ class SeaBooking(models.Model):
     from_city = fields.Many2one("res.city", string="From")
     to_city = fields.Many2one("res.city", string="To")
     delivery_type_id = fields.Many2one(
-        "freight.delivery.type", string="Delivery Type", required=True
+        "freight.delivery.type", string="Delivery Type"
     )
 
     # Vessel Information
     pod_port_id = fields.Many2one("freight.port", string="Port of Delivery")
-    vessel_id = fields.Many2one("freight.vessel", string="Vessel Name", required=True)
+    vessel_id = fields.Many2one("freight.vessel", string="Vessel Name")
     voyage_no = fields.Char(string="Voyage No.")
 
     # Notebook
@@ -298,8 +296,20 @@ class SeaBooking(models.Model):
         if hbl_update:
             hbl.write(hbl_update)
 
-        if not hbl.sale_order_ids and booking.sale_order_ids:
-            hbl.write({"sale_order_ids": [(6, 0, booking.sale_order_ids.ids)]})
+        # FF-73 UAT fix (Bug 3): compatibility mirror TIDAK boleh lagi
+        # bergantung pada "if not hbl.sale_order_ids" -- setelah FF-73, HBL
+        # bisa saja sudah punya mirror sebagian (root A) sebelum Booking
+        # -> Jobsheet ini dijalankan, sehingga guard kosong itu membuat
+        # variant lain (B, dan C yang dibuat belakangan) tidak pernah
+        # tersinkronkan. Root/anchor commercial group-nya adalah Booking
+        # (root_quotation_id + variant_ids), bukan snapshot hbl.sale_order_ids
+        # -- sinkronkan lewat shared FF-73 mirror sync (sale.order
+        # _sync_sale_order_ids_mirror), dipanggil untuk setiap anggota
+        # commercial group supaya Booking & Jobsheet canonical konsisten.
+        root = booking._get_root_quotation()
+        if root:
+            for order in root | root.variant_ids:
+                order._sync_sale_order_ids_mirror()
 
         if not hbl.cargo_info_ids and booking.cargo_info_ids:
             self._copy_cargo_info_lines_to_hbl(booking.cargo_info_ids, hbl)
