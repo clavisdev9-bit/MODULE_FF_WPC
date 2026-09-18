@@ -64,7 +64,6 @@
         # Sea Quotation
         "views/sea/sales/quotation.xml",
         "views/sea/sales/migration_wizard.xml",
-
         "views/sea/sales/rate_enquiry_actions.xml",
         # Air Quotation
         "views/air/sales/quotation.xml",
@@ -98,6 +97,8 @@
         "views/master_data/commodity.xml",
         "views/master_data/permit.xml",
         "views/master_data/shipment_type.xml",
+        "views/product.xml",
+        "views/charge_code_actions.xml",
         # Master Data - Account
         "views/master_data/acct/area.xml",
         "views/master_data/acct/charge_code.xml",

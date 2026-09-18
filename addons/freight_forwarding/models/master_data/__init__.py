@@ -11,3 +11,4 @@ from . import quotation_type
 from . import acct
 from . import sea
 from . import air
+from . import product
