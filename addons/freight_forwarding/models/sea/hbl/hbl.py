@@ -9,6 +9,7 @@ class SeaHBL(models.Model):
         "freight.sea.shipment.info.mixin",
         "freight.sea.vessel.details.mixin",
         "freight.sea.bl.info.mixin",
+        "freight.commercial.group.mixin",
     ]
     _description = "Sea Jobsheet"
     _rec_name = "job_no"
@@ -81,12 +82,10 @@ class SeaHBL(models.Model):
             ("export", "Export"),
         ],
         string="Type",
-        required=True,
     )
     container_type = fields.Selection(
         selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
         string="Container Type",
-        required=True,
     )
     booking_id = fields.Many2one(
         "freight.sea.booking",
@@ -189,6 +188,15 @@ class SeaHBL(models.Model):
         for rec in self:
             rec.booking_count = 1 if rec.booking_id else 0
 
+    def _get_root_quotation(self):
+        """FF-73: Export HBL (dibuat lewat Booking) tidak punya root_quotation_id
+        sendiri — root-nya diambil dari Booking. Import direct sudah mengisi
+        root_quotation_id langsung (lihat action_convert_to_jobsheet_direct_sea)."""
+        self.ensure_one()
+        return self.root_quotation_id or (
+            self.booking_id._get_root_quotation() if self.booking_id else False
+        )
+
     @api.onchange("from_city")
     def _onchange_from_city(self):
         for rec in self:
@@ -286,7 +294,16 @@ class SeaHBL(models.Model):
                     booking = self.env["freight.sea.booking"].browse(vals.get("booking_id"))
                     freight_type = booking.freight_type
 
-                seq_code = "freight.sea.hbl.job_no.exp" if freight_type == "export" else "freight.sea.hbl.job_no.imp"
+                # Direction eksplisit menentukan sequence Import/Export.
+                # Kalau freight_type kosong (Quotation Type belum diisi),
+                # JANGAN diam-diam dianggap Export -- pakai sequence netral
+                # supaya job_no tetap tergenerate tanpa salah klasifikasi.
+                if freight_type == "export":
+                    seq_code = "freight.sea.hbl.job_no.exp"
+                elif freight_type == "import":
+                    seq_code = "freight.sea.hbl.job_no.imp"
+                else:
+                    seq_code = "freight.sea.hbl.job_no"
                 vals["job_no"] = self.env["ir.sequence"].next_by_code(
                     seq_code, sequence_date=sequence_date
                 ) or "New"

@@ -80,15 +80,11 @@ class AirQuotation(models.Model):
         for rec in self:
             rec.air_booking_count = len(rec.air_booking_ids)
 
-    @api.depends("air_hawb_id")
+    @api.depends("air_hawb_id", "original_quotation_id")
     def _compute_air_hawb_count(self):
+        """FF-73: resolve lewat commercial group -- lihat SeaQuotation._compute_hbl_count."""
         for rec in self:
-            count = 0
-            if hasattr(rec, "air_hawb_id") and rec.air_hawb_id:
-                count = 1
-            else:
-                count = self.env["freight.air.hawb"].search_count([("sale_order_ids", "=", rec.id)])
-            rec.hawb_count = count
+            rec.hawb_count = len(rec._get_commercial_group_jobsheets("freight.air.hawb"))
 
     def action_view_air_bookings(self):
         self.ensure_one()
@@ -107,7 +103,7 @@ class AirQuotation(models.Model):
 
     def action_view_hawbs(self):
         self.ensure_one()
-        hawbs = self.air_hawb_id or self.env["freight.air.hawb"].search([("sale_order_ids", "=", self.id)])
+        hawbs = self._get_commercial_group_jobsheets("freight.air.hawb")
         ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
         ctx.update({"default_sale_order_ids": [self.id]})
         return {
@@ -166,6 +162,7 @@ class AirQuotation(models.Model):
             "commodity_id": self.commodity_id.id if self.commodity_id else False,
             "delivery_type": self.delivery_type_id.id if self.delivery_type_id else False,
             "sale_order_ids": [(6, 0, all_variants.ids)],
+            "root_quotation_id": original_id,
         }
 
         booking = self.env["freight.air.booking"].create(booking_vals)
@@ -198,6 +195,7 @@ class AirQuotation(models.Model):
             ),
             "company_id": self.company_id.id,
             "sale_order_ids": [(6, 0, all_variants.ids)],
+            "root_quotation_id": original_id,
         }
 
         hawb = self.env["freight.air.hawb"].create(hawb_vals)

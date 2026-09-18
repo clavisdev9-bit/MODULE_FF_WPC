@@ -30,7 +30,7 @@
                     type="object"
                     class="oe_stat_button"
                     icon="fa-file-text-o"
-                    invisible="not is_freight_quotation or freight_type != 'import' or hawb_count == 0">
+                    invisible="not is_freight_quotation or hawb_count == 0">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Jobsheet</span>
                     </div>
@@ -45,7 +45,7 @@
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="freight_type" invisible="not is_freight_quotation" required="is_freight_quotation" readonly="state == 'sale'" />
+                <field name="freight_type" invisible="not is_freight_quotation" readonly="state == 'sale'" />
                 <field name="quotation_title" invisible="not is_freight_quotation" />
             </xpath>
 
@@ -65,11 +65,11 @@
                     <field name="service_level" />
                     <field name="pricelist_id" readonly="state in ['cancel', 'sale']"
                         groups="!product.group_product_pricelist" />
-                    <field name="delivery_type_id" required="is_freight_quotation" />
+                    <field name="delivery_type_id" />
                     <field name="valid_from" />
                     <field name="validity_date" string="Valid To" />
                     <field name="reference_number" />
-                    <field name="commodity_id" required="is_freight_quotation" />
+                    <field name="commodity_id" />
                 </group>
             </xpath>
 

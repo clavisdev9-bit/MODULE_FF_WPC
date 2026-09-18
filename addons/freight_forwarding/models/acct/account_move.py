@@ -176,8 +176,10 @@ class AccountMoveLine(models.Model):
                 return acc
         if self.sale_line_ids:
             for s_line in self.sale_line_ids:
-                if s_line.order_id and hasattr(s_line.order_id, "air_hawb_id") and s_line.order_id.air_hawb_id:
-                    return s_line.order_id.air_hawb_id.analytic_account_id
+                if hasattr(s_line, "_get_air_hawb_analytic_account"):
+                    acc = s_line._get_air_hawb_analytic_account()
+                    if acc:
+                        return acc
         if self.env.context.get("default_air_hawb_id"):
             hawb = self.env["freight.air.hawb"].browse(self.env.context.get("default_air_hawb_id"))
             if hawb and hawb.analytic_account_id:

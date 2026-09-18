@@ -4,16 +4,17 @@ class FreightAirBooking(models.Model):
     _name = 'freight.air.booking'
     _description = 'Air Freight Booking'
     _inherit = [
-        'mail.thread', 
+        'mail.thread',
         'mail.activity.mixin',
         'freight.air.awb.info.mixin',
         'freight.air.shipment.info.mixin',
-        'freight.air.cargo.info.mixin'
+        'freight.air.cargo.info.mixin',
+        'freight.commercial.group.mixin',
     ]
     _order = 'id desc'
 
     name = fields.Char(string='Booking No.', required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
-    booking_date = fields.Datetime(string='Booking Date', default=fields.Datetime.now, required=True)
+    booking_date = fields.Datetime(string='Booking Date', default=fields.Datetime.now)
     state = fields.Selection([
         ('draft', 'Draft'),
         ('confirmed', 'Confirmed'),
@@ -23,10 +24,10 @@ class FreightAirBooking(models.Model):
     freight_type = fields.Selection([
         ('import', 'Import'),
         ('export', 'Export')
-    ], string='Type', required=True, tracking=True, default='export')
+    ], string='Type', tracking=True, default='export')
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
-    partner_id = fields.Many2one('res.partner', string='Customer', required=True, tracking=True)
+    partner_id = fields.Many2one('res.partner', string='Customer', tracking=True)
     customer_reference = fields.Char(string='Customer Reference', tracking=True)
     
     telephone = fields.Char(string='Telephone', related='partner_id.phone', readonly=False, store=True)

@@ -8,13 +8,14 @@ class FreightAirHawb(models.Model):
         'mail.activity.mixin',
         'freight.air.awb.info.mixin',
         'freight.air.shipment.info.mixin',
-        'freight.air.cargo.info.mixin'
+        'freight.air.cargo.info.mixin',
+        'freight.commercial.group.mixin',
     ]
     _order = 'id desc'
     _rec_name = 'job_no'
 
     job_no = fields.Char(string='Job No.', required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
-    job_date = fields.Date(string='Job Date', default=fields.Date.context_today, required=True, tracking=True)
+    job_date = fields.Date(string='Job Date', default=fields.Date.context_today, tracking=True)
     hawb_no = fields.Char(string='House AWB No.', tracking=True)
     smawb_no = fields.Char(string='SMawb No.', tracking=True)
     mawb_no = fields.Char(string='Mawb No.', tracking=True)
@@ -32,10 +33,10 @@ class FreightAirHawb(models.Model):
     freight_type = fields.Selection([
         ('import', 'Import'),
         ('export', 'Export')
-    ], string='Type', required=True, tracking=True, default='export')
+    ], string='Type', tracking=True, default='export')
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
-    partner_id = fields.Many2one('res.partner', string='Customer Code', required=True, tracking=True)
+    partner_id = fields.Many2one('res.partner', string='Customer Code', tracking=True)
     customer_ref = fields.Char(string='Cust Ref')
     is_nomination = fields.Boolean(string='Nomination Cargo')
     nomination_remark = fields.Char(string='Nomination Remark')
@@ -160,6 +161,15 @@ class FreightAirHawb(models.Model):
         for rec in self:
             rec.sales_order_count = len(rec.sale_order_ids)
 
+    def _get_root_quotation(self):
+        """FF-73: Export HAWB (dibuat lewat Booking) tidak punya root_quotation_id
+        sendiri — root-nya diambil dari Booking. Import direct sudah mengisi
+        root_quotation_id langsung (lihat action_convert_to_jobsheet_direct_air)."""
+        self.ensure_one()
+        return self.root_quotation_id or (
+            self.booking_id._get_root_quotation() if self.booking_id else False
+        )
+
     @api.depends('purchase_order_ids')
     def _compute_purchase_order_count(self):
         for rec in self:
@@ -250,11 +260,17 @@ class FreightAirHawb(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('job_no', _('New')) == _('New'):
-                freight_type = vals.get('freight_type', 'export')
+                # Direction eksplisit menentukan sequence Import/Export.
+                # Kalau freight_type kosong (Quotation Type belum diisi),
+                # JANGAN diam-diam dianggap Export -- pakai sequence netral
+                # supaya job_no tetap tergenerate tanpa salah klasifikasi.
+                freight_type = vals.get('freight_type')
                 if freight_type == 'export':
                     vals['job_no'] = self.env['ir.sequence'].next_by_code('freight.air.hawb.job_no.exp') or _('New')
-                else:
+                elif freight_type == 'import':
                     vals['job_no'] = self.env['ir.sequence'].next_by_code('freight.air.hawb.job_no.imp') or _('New')
+                else:
+                    vals['job_no'] = self.env['ir.sequence'].next_by_code('freight.air.hawb.job_no') or _('New')
         
         plan = self.env["account.analytic.plan"].search([], limit=1)
         if not plan:
