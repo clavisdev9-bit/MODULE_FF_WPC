@@ -5,3 +5,4 @@ from . import res_city
 from . import purchase_order
 from . import partner_address
 from . import partner_category
+from . import airline_partner

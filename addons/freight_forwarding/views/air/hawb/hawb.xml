@@ -99,7 +99,6 @@
 
                                 <group string="Agents &amp; Terms">
                                     <field name="term_payment"/>
-                                    <field name="awb_prefix"/>
                                     <field name="overseas_agent_id"/>
                                     <field name="agent_id" string="Agent"/>
                                     <field name="iata_code"/>

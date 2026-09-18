@@ -48,7 +48,6 @@ class FreightAirHawb(models.Model):
     is_nomination = fields.Boolean(string='Nomination Cargo')
     nomination_remark = fields.Char(string='Nomination Remark')
     term_payment = fields.Many2one('account.payment.term', string='Credit Term')
-    awb_prefix = fields.Char(string='Awb Prefix')
     
     salesman_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', copy=False)
