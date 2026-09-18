@@ -39,6 +39,7 @@ class FreightTestBase(TransactionCase):
 
         # Master data: Vessel
         cls.vessel = cls.env["freight.vessel"].create({
+            "code": "MV001",
             "name": "Test Vessel MV-001",
         })
 
@@ -72,6 +73,7 @@ class FreightTestBase(TransactionCase):
     def _create_quotation(self, **kwargs):
         """Buat Sea Quotation dengan default nilai yang valid."""
         vals = {
+            "is_freight_quotation": True,
             "freight_business_type": "sea",
             "freight_type": "export",
             "partner_id": self.partner.id,
@@ -84,12 +86,24 @@ class FreightTestBase(TransactionCase):
         vals.update(kwargs)
         return self.env["sale.order"].create(vals)
 
+    def _resolve_root_quotation_id(self, quotation_id):
+        """FF-73: resolve root quotation (commercial group anchor) dari id
+        quotation/variant apa pun -- dipakai fixture helper supaya
+        root_quotation_id (canonical) terisi selaras dengan arsitektur
+        commercial group, bukan cuma sale_order_ids (compatibility mirror)."""
+        quotation = self.env["sale.order"].browse(quotation_id)
+        root = quotation.original_quotation_id or quotation
+        return root.id
+
     def _create_booking(self, **kwargs):
         """Buat Sea Booking dengan default nilai yang valid.
 
-        `quotation_id=<sale.order record atau id>` diterima sebagai shortcut
-        dan diterjemahkan ke `sale_order_ids` (field asli sejak booking
-        mendukung multi-currency quotation variant).
+        `quotation_id=<sale.order record atau id>` diterima sebagai shortcut.
+        FF-73: selain `sale_order_ids` (compatibility mirror), ini juga
+        mengisi `root_quotation_id` (canonical commercial-group anchor) --
+        supaya fixture merepresentasikan arsitektur yang sama dengan
+        `_action_convert_to_booking_direct_sea` produksi, bukan cuma jalur
+        legacy sale_order_ids yang sudah tidak jadi source of truth resolver.
         """
         FreightTestBase._booking_counter += 1
         quotation_id = kwargs.pop("quotation_id", None)
@@ -106,14 +120,26 @@ class FreightTestBase(TransactionCase):
         vals.update(kwargs)
         if quotation_id and "sale_order_ids" not in kwargs:
             vals["sale_order_ids"] = [(6, 0, [quotation_id])]
+        if quotation_id and "root_quotation_id" not in kwargs:
+            vals["root_quotation_id"] = self._resolve_root_quotation_id(quotation_id)
         return self.env["freight.sea.booking"].create(vals)
 
     def _create_hbl(self, booking=None, **kwargs):
         """Buat Sea HBL dengan default nilai yang valid.
 
         `quotation_id=<sale.order record atau id>` diterima sebagai shortcut
-        dan diterjemahkan ke `sale_order_ids` (field asli, dipakai untuk flow
-        import langsung dari quotation tanpa booking).
+        untuk flow direct-import (Jobsheet langsung dari quotation, tanpa
+        booking). FF-73: selain `sale_order_ids` (compatibility mirror), ini
+        juga mengisi `root_quotation_id` (canonical direct-flow reference --
+        lihat `action_convert_to_jobsheet_direct_sea` produksi).
+
+        `booking=<freight.sea.booking record>` (flow via Booking) HANYA
+        mengisi `booking_id` -- root_quotation_id/sale_order_ids pada HBL
+        SENGAJA dibiarkan kosong, karena resolver production
+        (`_get_root_quotation` / `_get_commercial_group_jobsheets`) untuk
+        flow ini menemukan root lewat `booking_id.root_quotation_id`, bukan
+        lewat field HBL sendiri. Mengisinya manual di sini hanya akan
+        menutupi kalau resolver production berhenti membaca lewat booking.
         """
         FreightTestBase._hbl_counter += 1
         quotation_id = kwargs.pop("quotation_id", None)
@@ -130,6 +156,8 @@ class FreightTestBase(TransactionCase):
         vals.update(kwargs)
         if quotation_id and "sale_order_ids" not in kwargs:
             vals["sale_order_ids"] = [(6, 0, [quotation_id])]
+        if quotation_id and "root_quotation_id" not in kwargs:
+            vals["root_quotation_id"] = self._resolve_root_quotation_id(quotation_id)
         return self.env["freight.sea.hbl"].create(vals)
 
     def _create_booking_cargo_info(self, booking, **kwargs):

@@ -20,12 +20,6 @@ class FreightQuotation(models.AbstractModel):
     _description = "Freight Quotation Mixin"
 
     is_freight_quotation = fields.Boolean(string="Is Freight Quotation", default=False)
-    sea_hbl_id = fields.Many2one(
-        "freight.sea.hbl",
-        string="Sea Jobsheet",
-        index=True,
-    )
-
 
     # =========================================================
     # Header Information
@@ -181,25 +175,6 @@ class FreightQuotation(models.AbstractModel):
             if record.est_transit_time_days < 0:
                 raise ValidationError("Est. Transit Time (Days) cannot be negative.")
 
-    @api.constrains("is_freight_quotation", "freight_type", "delivery_type_id", "commodity_id")
-    def _check_freight_quotation_required_fields(self):
-        """freight_type/delivery_type_id/commodity_id hanya wajib untuk Freight Quotation,
-        agar tidak memblokir pembuatan Sales Order normal (bukan Freight) di sale.order."""
-        for record in self:
-            if not record.is_freight_quotation:
-                continue
-            missing = []
-            if not record.freight_type:
-                missing.append("Quotation Type")
-            if not record.delivery_type_id:
-                missing.append("Delivery Type")
-            if not record.commodity_id:
-                missing.append("Commodity")
-            if missing:
-                raise ValidationError(
-                    "%s is required for a Freight Quotation." % ", ".join(missing)
-                )
-
     def _has_downstream_quotation_records(self):
         """True jika quotation ini sudah punya Booking/Jobsheet turunan
         (Sea maupun Air) — dipakai untuk mengunci perubahan direction."""
@@ -214,11 +189,20 @@ class FreightQuotation(models.AbstractModel):
     def action_convert_quotation(self):
         """Satu entry point publik untuk convert quotation ke downstream
         record; branching Import/Export ditangani di sini, bukan lewat
-        dua button/action terpisah (lihat FF-71)."""
+        dua button/action terpisah (lihat FF-71).
+
+        FF-73 hardening: freight_type sekarang boleh kosong saat quotation
+        cuma disimpan sebagai draft (cukup Customer) -- tapi Convert BUTUH
+        tahu arah Import/Export secara eksplisit untuk menentukan cabang
+        yang benar. Kosong TIDAK boleh diam-diam dianggap Export."""
         self.ensure_one()
         if not self.is_freight_quotation:
             raise UserError(
                 "This action is only available for a Freight Quotation."
+            )
+        if not self.freight_type:
+            raise UserError(
+                "Quotation Type (Import/Export) must be set before converting this quotation."
             )
         if self.freight_type == "import":
             return self.action_convert_to_jobsheet_direct()
@@ -227,9 +211,36 @@ class FreightQuotation(models.AbstractModel):
     def action_convert_to_booking_direct(self):
         """Dispatch eksplisit berdasarkan freight_business_type, bukan
         lewat urutan _inherit/super() antar modul air & sea — supaya tidak
-        diam-diam salah pilih implementasi kalau urutan import berubah."""
+        diam-diam salah pilih implementasi kalau urutan import berubah.
+
+        FF-73 hardening: freight_business_type boleh kosong saat draft,
+        tapi convert butuh tahu Air/Sea secara eksplisit -- kosong/nilai
+        lain TIDAK boleh diam-diam jatuh ke Sea.
+
+        FF-73 UAT fix (Bug 1): guard di backend, bukan cuma visibility
+        tombol -- kalau commercial group (root + currency variant-nya) SUDAH
+        punya Booking, panggil action ini dari variant mana pun (bukan cuma
+        root) harus membuka Booking yang sudah ada, bukan diam-diam membuat
+        Booking kedua untuk commercial group yang sama."""
         self.ensure_one()
         if self.freight_business_type == "air":
+            booking_model = "freight.air.booking"
+        elif self.freight_business_type == "sea":
+            booking_model = "freight.sea.booking"
+        else:
+            raise UserError(
+                "Freight Business Type (Air/Sea) must be set before converting this quotation to a Booking."
+            )
+        existing = self._get_commercial_group_bookings(booking_model)
+        if existing:
+            return {
+                "type": "ir.actions.act_window",
+                "res_model": booking_model,
+                "res_id": existing[0].id,
+                "view_mode": "form",
+                "target": "current",
+            }
+        if booking_model == "freight.air.booking":
             return self._action_convert_to_booking_direct_air()
         return self._action_convert_to_booking_direct_sea()
 
@@ -239,7 +250,11 @@ class FreightQuotation(models.AbstractModel):
         self.ensure_one()
         if self.freight_business_type == "air":
             return self._action_convert_to_jobsheet_direct_air()
-        return self._action_convert_to_jobsheet_direct_sea()
+        if self.freight_business_type == "sea":
+            return self._action_convert_to_jobsheet_direct_sea()
+        raise UserError(
+            "Freight Business Type (Air/Sea) must be set before converting this quotation to a Jobsheet."
+        )
 
     def _sync_sale_order_rows(self):
         """
@@ -392,16 +407,39 @@ class FreightQuotation(models.AbstractModel):
         return result
 
     def _get_sea_hbl_analytic_account(self):
+        """FF-73: fallback resolve lewat commercial group (root + variant),
+        bukan cuma sale_order_ids milik diri sendiri -- supaya currency
+        variant yang dibuat SETELAH Jobsheet ada tetap kebagian analytic
+        account tanpa perlu ditambahkan manual ke tab Sales Orders Jobsheet.
+
+        Kalau commercial group resolve ke LEBIH DARI SATU Jobsheet (data
+        ambigu), sengaja tidak auto-pilih salah satu -- lebih baik tidak
+        mengisi analytic_distribution sama sekali daripada menebak."""
         self.ensure_one()
         if hasattr(self, "sea_hbl_id") and self.sea_hbl_id and self.sea_hbl_id.analytic_account_id:
             return self.sea_hbl_id.analytic_account_id
-        hbl = self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)], limit=1)
-        if hbl and hbl.analytic_account_id:
-            return hbl.analytic_account_id
+        hbls = self._get_commercial_group_jobsheets("freight.sea.hbl")
+        if len(hbls) == 1 and hbls.analytic_account_id:
+            return hbls.analytic_account_id
         if self.env.context.get("default_sea_hbl_id"):
             hbl = self.env["freight.sea.hbl"].browse(self.env.context.get("default_sea_hbl_id"))
             if hbl and hbl.analytic_account_id:
                 return hbl.analytic_account_id
+        return False
+
+    def _get_air_hawb_analytic_account(self):
+        """Mirror _get_sea_hbl_analytic_account untuk Air -- FF-73, menutup
+        gap yang sebelumnya cuma ada di sisi Sea (Follow-up B)."""
+        self.ensure_one()
+        if hasattr(self, "air_hawb_id") and self.air_hawb_id and self.air_hawb_id.analytic_account_id:
+            return self.air_hawb_id.analytic_account_id
+        hawbs = self._get_commercial_group_jobsheets("freight.air.hawb")
+        if len(hawbs) == 1 and hawbs.analytic_account_id:
+            return hawbs.analytic_account_id
+        if self.env.context.get("default_air_hawb_id"):
+            hawb = self.env["freight.air.hawb"].browse(self.env.context.get("default_air_hawb_id"))
+            if hawb and hawb.analytic_account_id:
+                return hawb.analytic_account_id
         return False
 
     def _prepare_invoice(self):
@@ -425,6 +463,281 @@ class FreightQuotation(models.AbstractModel):
         return ""
 
 
+class SaleOrderQuotation(models.Model):
+    """Satu-satunya tempat yang menempelkan mixin freight.quotation ke
+    sale.order. SeaQuotation dan AirQuotation (models/sea|air/sales/quotation.py)
+    sengaja hanya _inherit = "sale.order" (plain) — tidak ada satupun dari
+    keduanya yang perlu tahu soal mixin ini (lihat FF-71 structural cleanup).
+
+    Class ini juga menampung fitur currency-variant: generik, tidak menyentuh
+    field sea-specific maupun air-specific apa pun, dan sudah dipakai oleh
+    view Air maupun Sea.
+    """
+
+    _name = "sale.order"
+    _inherit = ["sale.order", "freight.quotation"]
+
+    # FF-73: model Booking/Jobsheet yang jadi anggota commercial group --
+    # dipakai bersama oleh resolver analytic (Masalah 1), smart button
+    # (Masalah 2), dan sync sale_order_ids mirror (Masalah 3).
+    _COMMERCIAL_GROUP_BOOKING_MODELS = ("freight.sea.booking", "freight.air.booking")
+    _COMMERCIAL_GROUP_JOBSHEET_MODELS = ("freight.sea.hbl", "freight.air.hawb")
+
+    # FF-73 UAT fix (Masalah 2): field lokal di sale.order (kalau ada) yang
+    # jadi compatibility mirror dari Booking/Jobsheet canonical -- parity
+    # dengan air_booking_ids milik Air, yang sudah terbukti langsung fresh
+    # di form browser (lewat copy() field inheritance + write eksplisit),
+    # tanpa perlu reload. Air Jobsheet (air_hawb_id, Many2one) sengaja TIDAK
+    # dimasukkan di sini -- cardinality-nya singular by design dan sudah
+    # ditangani lifecycle Air sendiri (lihat AirQuotation), jangan disentuh.
+    _COMMERCIAL_GROUP_LOCAL_MIRROR_FIELDS = {
+        "freight.sea.booking": "booking_ids",
+        "freight.sea.hbl": "hbl_ids",
+    }
+
+    original_quotation_id = fields.Many2one(
+        "sale.order",
+        string="Original Quotation",
+        copy=False,
+        index=True,
+    )
+    variant_ids = fields.One2many(
+        "sale.order",
+        "original_quotation_id",
+        string="Currency Variants",
+    )
+    variant_count = fields.Integer(
+        string="Variant Count",
+        compute="_compute_variant_count",
+    )
+
+    @api.depends("variant_ids", "original_quotation_id.variant_ids")
+    def _compute_variant_count(self):
+        for rec in self:
+            root = rec.original_quotation_id if rec.original_quotation_id else rec
+            rec.variant_count = len(root.variant_ids)
+
+    def _get_commercial_group_jobsheets(self, jobsheet_model):
+        """FF-73: resolve Jobsheet (freight.sea.hbl / freight.air.hawb).
+
+        Canonical-first, legacy-fallback -- BUKAN union setara. root_quotation_id
+        adalah source of truth commercial group; sale_order_ids cuma dipakai
+        kalau canonical benar-benar kosong (data lama sebelum FF-73 yang belum
+        pernah punya root_quotation_id sama sekali), supaya data legacy yang
+        stale tidak ikut mencemari hasil canonical begitu root_quotation_id
+        sudah terisi.
+
+        1. Canonical: root_quotation_id langsung di Jobsheet (direct convert)
+           ATAU booking_id.root_quotation_id (export lewat Booking).
+        2. Fallback (hanya jika canonical kosong): sale_order_ids berisi
+           salah satu anggota commercial group (root ATAU variant-nya --
+           bukan cuma diri sendiri), untuk data lama yang belum di-backfill.
+        """
+        self.ensure_one()
+        root = self.original_quotation_id or self
+        canonical_domain = [
+            "|",
+            ("root_quotation_id", "=", root.id),
+            ("booking_id.root_quotation_id", "=", root.id),
+        ]
+        canonical = self.env[jobsheet_model].search(canonical_domain)
+        if canonical:
+            return canonical
+        group_ids = (root | root.variant_ids).ids
+        return self.env[jobsheet_model].search([("sale_order_ids", "in", group_ids)])
+
+    def _get_commercial_group_bookings(self, booking_model):
+        """Sama seperti _get_commercial_group_jobsheets, untuk Booking
+        (freight.sea.booking / freight.air.booking) -- Booking tidak punya
+        booking_id sendiri, jadi canonical cukup root_quotation_id langsung.
+
+        FF-73 UAT fix (Bug 1): canonical-first, legacy-fallback (sale_order_ids)
+        sama seperti _get_commercial_group_jobsheets -- supaya Booking lama
+        yang belum sempat di-backfill root_quotation_id-nya tetap resolve,
+        dan supaya resolver ini (dipakai booking_count/action_view_bookings/
+        guard duplicate conversion) tidak balik bergantung pada booking_ids/
+        air_booking_ids milik record quotation yang sedang dibuka."""
+        self.ensure_one()
+        root = self.original_quotation_id or self
+        canonical = self.env[booking_model].search([("root_quotation_id", "=", root.id)])
+        if canonical:
+            return canonical
+        group_ids = (root | root.variant_ids).ids
+        return self.env[booking_model].search([("sale_order_ids", "in", group_ids)])
+
+    def _sync_sale_order_ids_mirror(self):
+        """FF-73 Masalah 3: sale_order_ids pada Booking/Jobsheet tetap
+        dipertahankan sebagai compatibility mirror untuk finance/analytic/
+        invoice -- root_quotation_id + variant_ids tetap source of truth
+        commercial group. Dipanggil setiap kali currency variant baru
+        dibuat, supaya variant tersebut otomatis ikut tercermin di
+        sale_order_ids Booking/Jobsheet yang sudah ada -- tidak lagi
+        mengandalkan penambahan manual lewat tab Sales Orders."""
+        self.ensure_one()
+        for model in self._COMMERCIAL_GROUP_BOOKING_MODELS:
+            found = self._get_commercial_group_bookings(model)
+            for rec in found:
+                if self.id not in rec.sale_order_ids.ids:
+                    rec.sale_order_ids = [(4, self.id)]
+            self._mirror_commercial_group_local_relation(model, found)
+        for model in self._COMMERCIAL_GROUP_JOBSHEET_MODELS:
+            found = self._get_commercial_group_jobsheets(model)
+            for rec in found:
+                if self.id not in rec.sale_order_ids.ids:
+                    rec.sale_order_ids = [(4, self.id)]
+            self._mirror_commercial_group_local_relation(model, found)
+        self._invalidate_commercial_group_downstream_counts()
+
+    def _mirror_commercial_group_local_relation(self, model, records):
+        """FF-73 UAT fix (Masalah 2): selain menulis `self` ke sale_order_ids
+        milik Booking/Jobsheet canonical (mirror arah Booking->SO di atas),
+        tulis juga arah sebaliknya (SO->Booking) ke field lokal `self` kalau
+        model tersebut punya compatibility mirror field (lihat
+        _COMMERCIAL_GROUP_LOCAL_MIRROR_FIELDS) -- supaya `self.booking_ids` /
+        `self.hbl_ids` langsung merepresentasikan Booking/Jobsheet canonical
+        yang sama, persis seperti `air_booking_ids` milik Air. Ini murni
+        compatibility mirror; canonical resolver (root_quotation_id/
+        booking_id) tetap tidak berubah dan tidak digantikan."""
+        self.ensure_one()
+        if not records:
+            return
+        mirror_field = self._COMMERCIAL_GROUP_LOCAL_MIRROR_FIELDS.get(model)
+        if not mirror_field or not hasattr(self, mirror_field):
+            return
+        current = getattr(self, mirror_field)
+        missing = records - current
+        if missing:
+            setattr(self, mirror_field, [(4, rec_id) for rec_id in missing.ids])
+
+    _COMMERCIAL_GROUP_DOWNSTREAM_COUNT_FIELDS = (
+        "booking_count", "hbl_count", "air_booking_count", "hawb_count",
+    )
+
+    def _invalidate_commercial_group_downstream_counts(self):
+        """FF-73 UAT fix (stale count): booking_count/hbl_count/air_booking_count/
+        hawb_count di sale.order dihitung lewat live search/relation lintas
+        record (commercial group), tapi @api.depends-nya hanya mengacu ke
+        field lokal record itu sendiri (mis. booking_ids, sea_hbl_id).
+        Akibatnya, saat variant baru dibuat lalu _sync_sale_order_ids_mirror
+        menulis sale_order_ids di Booking/Jobsheet milik member group LAIN,
+        ORM tidak tahu compute value yang sudah ke-cache di record C
+        (member yang baru) menjadi stale, karena tidak ada field ber-depends
+        di C sendiri yang berubah.
+
+        Fix-nya bukan mengubah resolver atau depends (itu tetap benar dan
+        tidak disentuh) melainkan meng-invalidate cache compute field ini
+        untuk seluruh anggota commercial group begitu sync selesai, supaya
+        akses berikutnya (termasuk di request/form yang sama, tanpa reload)
+        memicu recompute yang membaca ulang state ter-update lewat resolver
+        yang sama."""
+        self.ensure_one()
+        root = self.original_quotation_id or self
+        group = root | root.variant_ids
+        group.invalidate_recordset(list(self._COMMERCIAL_GROUP_DOWNSTREAM_COUNT_FIELDS))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """FF-73 Masalah 3: integrity compatibility mirror TIDAK boleh
+        bergantung pada action_create_currency_variant() -- record dengan
+        original_quotation_id yang dibuat lewat jalur apa pun (ORM, API,
+        test, migration, bukan cuma tombol Currency Variant) harus tetap
+        otomatis mensinkronkan sale_order_ids Booking/Jobsheet terkait.
+        original_quotation_id sengaja copy=False dan tidak pernah diisi
+        lewat write() setelah creation (lihat action_create_currency_variant),
+        jadi cukup ditangani di create() saja, tidak perlu di write()."""
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.original_quotation_id:
+                rec._sync_sale_order_ids_mirror()
+        return records
+
+    def action_create_currency_variant(self):
+        """
+        Buat salinan header-only yang tertaut ke quotation asal sebagai currency variant.
+        Berbeda dari Duplicate standar: tidak menyalin order lines,
+        dan otomatis tertaut lewat original_quotation_id.
+        """
+        self.ensure_one()
+        if not self.is_freight_quotation:
+            raise UserError("This action is only available for Freight Quotations.")
+        if self.original_quotation_id:
+            raise UserError("You cannot create a currency variant from a child quotation. Please create it from the parent quotation instead.")
+
+        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
+        # Sync sale_order_ids mirror (Masalah 3) ditangani di create() --
+        # bukan di sini -- supaya integrity commercial group tidak bergantung
+        # pada action ini (berlaku juga untuk pembuatan variant lewat ORM/API/test).
+        new_variant = self.copy(default={
+            'original_quotation_id': original_id,
+            'order_line': [],
+        })
+        root = self.env["sale.order"].browse(original_id)
+        form_view_id = self._get_currency_variant_form_view_id(root.freight_business_type)
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'sale.order',
+            'res_id': new_variant.id,
+            'view_mode': 'form',
+            'views': [(form_view_id, "form")],
+            'target': 'current',
+        }
+
+    _CURRENCY_VARIANT_FORM_VIEW_XMLID = {
+        "air": "freight_forwarding.view_air_quotation_form",
+        "sea": "freight_forwarding.view_sea_quotation_form",
+    }
+
+    def _get_currency_variant_form_view_id(self, freight_business_type):
+        """FF-73 UAT fix (Bug 2): satu mekanisme pemilihan form view untuk
+        currency variant, dipakai bersama oleh action_create_currency_variant()
+        dan action_view_currency_variants(), berdasarkan freight_business_type
+        root -- supaya keduanya selalu konsisten (Sea/Air pakai form khusus,
+        selain itu fallback ke default form)."""
+        form_view_xmlid = self._CURRENCY_VARIANT_FORM_VIEW_XMLID.get(freight_business_type)
+        return self.env.ref(form_view_xmlid).id if form_view_xmlid else False
+
+    def action_view_currency_variants(self):
+        """FF-73 UAT fix (Bug 1): action ini dulu tidak menentukan form view
+        sama sekali, sehingga Odoo jatuh ke default form sale.order (tanpa
+        smart button Booking/Jobsheet Sea/Air) -- beda dengan dibuka lewat
+        Quotation list yang sudah pakai view_sea_quotation_form/
+        view_air_quotation_form (lihat action_freight_sea_quotation_view_form
+        / action_freight_air_quotation_view_form). Sekarang eksplisit pilih
+        form view yang sama berdasarkan freight_business_type root -- satu
+        method common, tidak ada override terpisah di Sea/Air."""
+        self.ensure_one()
+        root = self.original_quotation_id if self.original_quotation_id else self
+        domain = ['|', ('id', '=', root.id), ('original_quotation_id', '=', root.id)]
+
+        form_view = (self._get_currency_variant_form_view_id(root.freight_business_type), "form")
+
+        return {
+            "name": "Currency Variants",
+            "type": "ir.actions.act_window",
+            "res_model": "sale.order",
+            "view_mode": "list,form",
+            "views": [(False, "list"), form_view],
+            "domain": domain,
+            "context": dict(self.env.context, create=False),
+        }
+
+    def action_confirm(self):
+        res = super().action_confirm()
+        for rec in self:
+            if rec.is_freight_quotation:
+                original_id = rec.original_quotation_id.id if rec.original_quotation_id else rec.id
+                domain = [
+                    '|', ('id', '=', original_id), ('original_quotation_id', '=', original_id),
+                    ('id', '!=', rec.id),
+                    ('state', 'in', ['draft', 'sent'])
+                ]
+                variants = self.env["sale.order"].search(domain)
+                if variants:
+                    # Prevent infinite recursion by passing context or just rely on state filter
+                    variants.action_confirm()
+        return res
+
+
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
@@ -440,19 +753,35 @@ class SaleOrderLine(models.Model):
                 return hbl.analytic_account_id
         return False
 
-    @api.depends("product_id", "order_id.sea_hbl_id")
+    def _get_air_hawb_analytic_account(self):
+        """Mirror _get_sea_hbl_analytic_account untuk Air -- FF-73."""
+        self.ensure_one()
+        if self.order_id and hasattr(self.order_id, "_get_air_hawb_analytic_account"):
+            acc = self.order_id._get_air_hawb_analytic_account()
+            if acc:
+                return acc
+        if self.env.context.get("default_air_hawb_id"):
+            hawb = self.env["freight.air.hawb"].browse(self.env.context.get("default_air_hawb_id"))
+            if hawb and hawb.analytic_account_id:
+                return hawb.analytic_account_id
+        return False
+
+    def _get_freight_analytic_account(self):
+        return self._get_sea_hbl_analytic_account() or self._get_air_hawb_analytic_account()
+
+    @api.depends("product_id", "order_id.sea_hbl_id", "order_id.air_hawb_id")
     def _compute_analytic_distribution(self):
         super()._compute_analytic_distribution()
         for line in self:
             if not line.analytic_distribution and line.display_type not in ("line_section", "line_note"):
-                analytic_account = line._get_sea_hbl_analytic_account()
+                analytic_account = line._get_freight_analytic_account()
                 if analytic_account:
                     line.analytic_distribution = {str(analytic_account.id): 100.0}
 
     def _prepare_invoice_line(self, **optional_values):
         res = super()._prepare_invoice_line(**optional_values)
         if not res.get("analytic_distribution"):
-            analytic_account = self._get_sea_hbl_analytic_account()
+            analytic_account = self._get_freight_analytic_account()
             if analytic_account:
                 res["analytic_distribution"] = {str(analytic_account.id): 100.0}
         return res
