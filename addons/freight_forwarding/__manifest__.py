@@ -61,6 +61,8 @@
         "report/sea/hbl/report_noa_sysfreight.xml",
         "report/sea/hbl/cargo_manifest_report_template.xml",
         "report/sea/hbl/cargo_manifest_report.xml",
+        "report/air/notice_of_arrival_template.xml",
+        "report/air/notice_of_arrival_report.xml",
         # Sea Quotation
         "views/sea/sales/quotation.xml",
         "views/sea/sales/migration_wizard.xml",

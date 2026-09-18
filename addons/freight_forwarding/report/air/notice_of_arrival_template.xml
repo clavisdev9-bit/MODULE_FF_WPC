@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="notice_of_arrival_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <t t-set="company" t-value="o.company_id"/>
+                    <t t-set="routing" t-value="o.flight_routing_ids[:1]"/>
+                    <t t-set="freight_type_label" t-value="dict(o._fields['freight_type'].selection).get(o.freight_type, '')"/>
+                    <div class="page air-noa-page">
+                        <style>
+                            * { box-sizing: border-box; }
+                            .air-noa-page {
+                                color: #000;
+                                font-family: Arial, Helvetica, "DejaVu Sans", sans-serif;
+                                font-size: 10pt;
+                                line-height: 1.4;
+                            }
+                            .air-noa-company-name { text-align: center; font-size: 14pt; font-weight: bold; margin-bottom: 2px; }
+                            .air-noa-company-address { text-align: center; font-size: 10pt; line-height: 1.3; margin-bottom: 18px; }
+                            .air-noa-title { text-align: center; font-size: 16pt; font-weight: bold; margin: 40px 0 10px; }
+                            .air-noa-fields { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+                            .air-noa-fields td { border: none; padding: 1px 0; vertical-align: top; }
+                            .air-noa-fields td.f-label { width: 150px; white-space: nowrap; }
+                            .air-noa-fields td.f-colon { width: 14px; }
+                            .air-noa-fields td.f-value { width: auto; }
+                            .air-noa-fields tr.spacer td { padding: 8px 0 0; }
+                            .air-noa-intro { margin: 0 0 16px; }
+                            .air-noa-notes p { margin: 0 0 12px; }
+                        </style>
+
+                        <div class="air-noa-company-name"><t t-esc="company.name or ''"/></div>
+                        <div class="air-noa-company-address">
+                            <t t-if="company.street"><t t-esc="company.street"/></t>
+                            <t t-if="company.street2"><t t-esc="company.street2"/></t>
+                            <br/>
+                            <t t-if="company.city"><t t-esc="company.city"/></t><t t-if="company.zip"> <t t-esc="company.zip"/></t><t t-if="company.country_id"> &#8211; <t t-esc="company.country_id.name"/></t>
+                        </div>
+
+                        <div class="air-noa-title">NOTICE OF ARRIVAL</div>
+
+                        <table class="air-noa-fields">
+                            <tr>
+                                <td class="f-label">TO</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.notify_party_id.name if o.notify_party_id else (o.partner_id.name if o.partner_id else '')"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">ATTN</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="(o.notify_party_id.child_ids[0].name if o.notify_party_id and o.notify_party_id.child_ids else (o.notify_party_id.name if o.notify_party_id else ''))"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">DATE</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><span t-field="o.job_date" t-options="{'format': 'dd/MMM/yyyy'}"/></td>
+                            </tr>
+                        </table>
+
+                        <p class="air-noa-intro">
+                            Herewith we inform you regarding the arrival of your
+                            <t t-esc="(freight_type_label or 'import').lower()"/> shipment with details as follows:
+                        </p>
+
+                        <table class="air-noa-fields">
+                            <tr>
+                                <td class="f-label">MAWB NO.</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.mawb_no or o.smawb_no or o.direct_awb_no or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">HAWB NO.</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.hawb_no or o.job_no or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">Flight / Arrival Date</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value">
+                                    <strong>
+                                        <t t-esc="routing and routing[0].flight_no or ''"/> / <span t-if="routing" t-field="routing[0].eta_date" t-options="{'format': 'MMMM dd, yyyy'}"/>
+                                    </strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">Description of Goods</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.commodity_id.name if o.commodity_id else ''"/></td>
+                            </tr>
+                            <tr class="spacer">
+                                <td class="f-label">QTY / GW / CW</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.pcs or o.total_pcs or 0"/><t t-if="o.uom_id"> <t t-esc="o.uom_id.name"/></t> / <t t-esc="o.gross_weight or 0.0"/> / <t t-esc="o.charge_weight or o.total_vol_weight or 0.0"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">Origin</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.departure_id.name if o.departure_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">Dest</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.destination_id.name if o.destination_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">Shipper</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.shipper_id.name if o.shipper_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">Notify Party</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="o.notify_party_id.name if o.notify_party_id else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td class="f-label">Freight</td>
+                                <td class="f-colon">:</td>
+                                <td class="f-value"><t t-esc="dict(o._fields['wt_val'].selection).get(o.wt_val, '') if o.wt_val else (dict(o._fields['other'].selection).get(o.other, '') if o.other else '')"/></td>
+                            </tr>
+                        </table>
+
+                        <div class="air-noa-notes">
+                            <p>Please note that the above flight details are only scheduled timetable and subject to final confirmation from the airline concerned.</p>
+                            <p>All documentation will be released by us at our town office (Grand Slipi Tower), open from Monday to Friday at 11.00 am until 04.00 pm.</p>
+                            <p>All related documents can be collected at the below address and needed letter of authorization (Surat Kuasa) for our reference.</p>
+                            <p t-if="o.note"><t t-esc="o.note"/></p>
+                            <p t-elif="o.handling_information"><t t-esc="o.handling_information"/></p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

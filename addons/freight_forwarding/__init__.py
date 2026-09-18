@@ -3,7 +3,6 @@ from psycopg2 import sql
 
 
 def post_init_hook(env):
-    """FF-29: Drop legacy tables yang sudah tidak dipakai setelah refactor ke mixin."""
     legacy_tables = [
         "freight_sea_booking_bl_info",
         "freight_sea_booking_notify_party",
