@@ -19,7 +19,7 @@ class FreightAirShipmentInfoMixin(models.AbstractModel):
         ('master', 'Master')
     ], string='Shipment Type', default='house', tracking=True)
 
-    delivery_type = fields.Many2one('freight.delivery.type', string='Delivery Type')
+    delivery_type = fields.Many2one('account.incoterms', string='Delivery Type')
     other_delivery = fields.Selection([('P', 'Prepaid'), ('C', 'Collect')], string='Other')
     service_level = fields.Selection([
         ('p1', 'P1'),

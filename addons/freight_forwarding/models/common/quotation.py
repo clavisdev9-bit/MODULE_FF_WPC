@@ -60,7 +60,7 @@ class FreightQuotation(models.AbstractModel):
     # Right side header
     pricelist_id = fields.Many2one("product.pricelist", string="Pricelist")
     delivery_type_id = fields.Many2one(
-        "freight.delivery.type", string="Delivery Type"
+        "account.incoterms", string="Delivery Type"
     )
     valid_from = fields.Date(string="Valid From")
     # validity_date = fields.Date(string="Valid To")

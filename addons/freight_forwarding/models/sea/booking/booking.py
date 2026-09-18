@@ -171,7 +171,7 @@ class SeaBooking(models.Model):
     from_city = fields.Many2one("res.city", string="From")
     to_city = fields.Many2one("res.city", string="To")
     delivery_type_id = fields.Many2one(
-        "freight.delivery.type", string="Delivery Type"
+        "account.incoterms", string="Delivery Type", required=True
     )
 
     # Vessel Information
