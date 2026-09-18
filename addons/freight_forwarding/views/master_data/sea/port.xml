@@ -38,6 +38,7 @@
                             <field name="destination_ids">
                                 <list editable="bottom">
                                     <field name="destination_city_id"/>
+                                    <field name="destination_country_id" readonly="1"/>
                                     <field name="no_of_day"/>
                                 </list>
                             </field>

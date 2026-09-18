@@ -1,0 +1,124 @@
+2026-09-18 04:03:26,758 173 INFO ? odoo: Odoo version 18.0-20260723 
+2026-09-18 04:03:26,761 173 INFO ? odoo: Using configuration file at /etc/odoo/odoo.conf 
+2026-09-18 04:03:26,761 173 INFO ? odoo: addons paths: ['/usr/lib/python3/dist-packages/odoo/addons', '/var/lib/odoo/addons/18.0', '/mnt/extra-addons/base', '/mnt/extra-addons/enterprise'] 
+2026-09-18 04:03:26,762 173 INFO ? odoo: database: odoo@db:5432 
+Warn: Can't find .pfb for face 'Courier'
+2026-09-18 04:03:27,201 173 INFO ? odoo.addons.base.models.ir_actions_report: Will use the Wkhtmltopdf binary at /usr/local/bin/wkhtmltopdf 
+2026-09-18 04:03:27,230 173 INFO ? odoo.addons.base.models.ir_actions_report: Will use the Wkhtmltoimage binary at /usr/local/bin/wkhtmltoimage 
+2026-09-18 04:03:27,829 173 INFO odoo odoo.modules.loading: loading 1 modules... 
+2026-09-18 04:03:27,852 173 INFO odoo odoo.modules.loading: 1 modules loaded in 0.02s, 0 queries (+0 extra) 
+2026-09-18 04:03:27,930 173 INFO odoo odoo.modules.loading: updating modules list 
+2026-09-18 04:03:27,937 173 INFO odoo odoo.addons.base.models.ir_module: ALLOW access to module.update_list on [] to user __system__ #1 via n/a 
+2026-09-18 04:04:10,094 173 INFO odoo odoo.addons.base.models.ir_module: ALLOW access to module.button_upgrade on ['Freight Forwarding'] to user __system__ #1 via n/a 
+2026-09-18 04:04:10,095 173 INFO odoo odoo.addons.base.models.ir_module: ALLOW access to module.update_list on ['Freight Forwarding'] to user __system__ #1 via n/a 
+2026-09-18 04:04:21,890 173 INFO odoo odoo.addons.base.models.ir_module: ALLOW access to module.button_install on [] to user __system__ #1 via n/a 
+2026-09-18 04:04:22,341 173 INFO odoo odoo.modules.loading: loading 144 modules... 
+2026-09-18 04:04:32,970 173 INFO odoo odoo.modules.loading: Loading module freight_forwarding (123/144) 
+2026-09-18 04:04:38,454 173 INFO odoo odoo.modules.registry: module freight_forwarding: creating or updating database tables 
+2026-09-18 04:04:39,337 173 WARNING odoo odoo.addons.base.models.ir_model: Two fields (other_delivery, other) of freight.air.booking() have the same label: Other. [Modules: freight_forwarding and freight_forwarding] 
+2026-09-18 04:04:39,338 173 WARNING odoo odoo.addons.base.models.ir_model: Two fields (other_delivery, other) of freight.air.hawb() have the same label: Other. [Modules: freight_forwarding and freight_forwarding] 
+2026-09-18 04:04:39,339 173 WARNING odoo odoo.addons.base.models.ir_model: Two fields (agent_contact_id, contact_person_id) of freight.air.hawb() have the same label: Contact Person. [Modules: freight_forwarding and freight_forwarding] 
+2026-09-18 04:04:39,339 173 WARNING odoo odoo.addons.base.models.ir_model: Two fields (agent_contact_phone, consignee_contact_phone) of freight.air.hawb() have the same label: Telephone. [Modules: freight_forwarding and freight_forwarding] 
+2026-09-18 04:04:40,463 173 INFO odoo odoo.schema: Table 'freight_port': unable to set NOT NULL on column 'code' 
+2026-09-18 04:04:40,466 173 INFO odoo odoo.schema: Table 'freight_vessel': unable to set NOT NULL on column 'code' 
+2026-09-18 04:04:40,673 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/ir.model.access.csv 
+2026-09-18 04:04:40,695 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/air/ir.model.access.csv 
+2026-09-18 04:04:40,825 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/master_data/ir.model.access.csv 
+2026-09-18 04:04:40,940 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/master_data/acct/ir.model.access.csv 
+2026-09-18 04:04:41,015 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/master_data/sea/ir.model.access.csv 
+2026-09-18 04:04:41,100 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/master_data/air/ir.model.access.csv 
+2026-09-18 04:04:41,147 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/sea/ir.model.access.csv 
+2026-09-18 04:04:41,194 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/sea/sales/ir.model.access.csv 
+2026-09-18 04:04:41,363 173 INFO odoo odoo.modules.loading: loading freight_forwarding/security/sea/master_data/ir.model.access.csv 
+2026-09-18 04:04:41,424 173 INFO odoo odoo.modules.loading: loading freight_forwarding/data/air/air_booking_sequence.xml 
+2026-09-18 04:04:41,465 173 INFO odoo odoo.modules.loading: loading freight_forwarding/data/air/air_mawb_sequence.xml 
+2026-09-18 04:04:41,503 173 INFO odoo odoo.modules.loading: loading freight_forwarding/data/air/air_hawb_sequence.xml 
+2026-09-18 04:04:41,542 173 INFO odoo odoo.modules.loading: loading freight_forwarding/data/sea/sea_booking_sequence.xml 
+2026-09-18 04:04:41,579 173 INFO odoo odoo.modules.loading: loading freight_forwarding/data/sea/sea_hbl_sequence.xml 
+2026-09-18 04:04:41,641 173 INFO odoo odoo.modules.loading: loading freight_forwarding/data/master_data/uom_data.xml 
+2026-09-18 04:04:42,371 173 INFO odoo odoo.modules.loading: loading freight_forwarding/data/quotation/sale_order_sequence.xml 
+2026-09-18 04:04:42,401 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/master_data/partner.xml 
+2026-09-18 04:04:42,452 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/partner.xml 
+2026-09-18 04:04:42,498 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/transport/partner.xml 
+2026-09-18 04:04:42,539 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/common/purchase_order.xml 
+2026-09-18 04:04:42,658 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/common/partner_address.xml 
+2026-09-18 04:04:42,795 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/common/partner_category.xml 
+2026-09-18 04:04:42,860 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/common/sale_order_list.xml 
+2026-09-18 04:04:42,927 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/quotation/quotation_report_template.xml 
+2026-09-18 04:04:43,012 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/quotation/quotation_report.xml 
+2026-09-18 04:04:43,059 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/hbl_terms_template.xml 
+2026-09-18 04:04:43,130 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/hbl_report_template.xml 
+2026-09-18 04:04:43,222 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/hbl_report.xml 
+2026-09-18 04:04:43,268 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/cover_jobsheet_report_template.xml 
+2026-09-18 04:04:43,340 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/cover_jobsheet_report.xml 
+2026-09-18 04:04:43,383 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/shipping_instruction_report_template.xml 
+2026-09-18 04:04:43,453 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/shipping_instruction_report.xml 
+2026-09-18 04:04:43,496 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/report_noa_sysfreight_template.xml 
+2026-09-18 04:04:43,577 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/report_noa_sysfreight.xml 
+2026-09-18 04:04:43,623 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/cargo_manifest_report_template.xml 
+2026-09-18 04:04:43,691 173 INFO odoo odoo.modules.loading: loading freight_forwarding/report/sea/hbl/cargo_manifest_report.xml 
+2026-09-18 04:04:43,747 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/sales/quotation.xml 
+2026-09-18 04:04:43,992 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/sales/migration_wizard.xml 
+2026-09-18 04:04:44,044 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/sales/rate_enquiry_actions.xml 
+2026-09-18 04:04:44,124 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/sales/quotation.xml 
+2026-09-18 04:04:44,320 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/booking/booking.xml 
+2026-09-18 04:04:44,441 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/booking/extra_info_views.xml 
+2026-09-18 04:04:44,500 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/booking/cargo_info.xml 
+2026-09-18 04:04:44,572 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/booking/booking_convert_wizard.xml 
+2026-09-18 04:04:44,630 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/hbl/cargo_info.xml 
+2026-09-18 04:04:44,708 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/hbl/custom_permit.xml 
+2026-09-18 04:04:44,772 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/hbl/tax_refund_doc_views.xml 
+2026-09-18 04:04:44,837 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/hbl/document_list_views.xml 
+2026-09-18 04:04:45,105 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/hbl/hbl.xml 
+2026-09-18 04:04:45,257 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/import/purchasing.xml 
+2026-09-18 04:04:45,348 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/booking/booking.xml 
+2026-09-18 04:04:45,489 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/hawb/document_list_views.xml 
+2026-09-18 04:04:45,742 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/hawb/hawb.xml 
+2026-09-18 04:04:45,949 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/master_data/insurance.xml 
+2026-09-18 04:04:46,033 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/master_data/pickup.xml 
+2026-09-18 04:04:46,099 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/master_data/cargo_type.xml 
+2026-09-18 04:04:46,169 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/master_data/contact.xml 
+2026-09-18 04:04:46,203 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/master_data/tag.xml 
+2026-09-18 04:04:46,239 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/master_data/incoterms.xml 
+2026-09-18 04:04:46,275 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/job_type.xml 
+2026-09-18 04:04:46,342 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/declaration.xml 
+2026-09-18 04:04:46,416 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/cargo_class.xml 
+2026-09-18 04:04:46,476 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/dg_class_code.xml 
+2026-09-18 04:04:46,533 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/quotation_type.xml 
+2026-09-18 04:04:46,592 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/delivery_type.xml 
+2026-09-18 04:04:46,650 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/commodity.xml 
+2026-09-18 04:04:46,711 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/permit.xml 
+2026-09-18 04:04:46,787 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/shipment_type.xml 
+2026-09-18 04:04:46,856 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/acct/area.xml 
+2026-09-18 04:04:46,929 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/acct/charge_code.xml 
+2026-09-18 04:04:47,022 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/acct/division.xml 
+2026-09-18 04:04:47,066 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/acct/payment_term.xml 
+2026-09-18 04:04:47,101 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/acct/vat_code.xml 
+2026-09-18 04:04:47,143 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/sea/port.xml 
+2026-09-18 04:04:47,217 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/sea/vessel.xml 
+2026-09-18 04:04:47,308 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/sea/shipping_line.xml 
+2026-09-18 04:04:47,374 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/sea/container_type.xml 
+2026-09-18 04:04:47,436 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/air/airport.xml 
+2026-09-18 04:04:47,503 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/master_data/air/airline.xml 
+2026-09-18 04:04:47,623 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/master_data/carrier.xml 
+2026-09-18 04:04:47,689 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/master_data/location.xml 
+2026-09-18 04:04:47,759 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/master_data/footer_remark.xml 
+2026-09-18 04:04:47,818 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/sea/master_data/instruction.xml 
+2026-09-18 04:04:47,895 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/menu.xml 
+2026-09-18 04:04:47,988 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/air/master_data/handling_information.xml 
+2026-09-18 04:04:48,073 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/menus/air.xml 
+2026-09-18 04:04:48,196 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/menus/sea.xml 
+2026-09-18 04:04:48,361 173 INFO odoo odoo.modules.loading: loading freight_forwarding/views/menus/master.xml 
+2026-09-18 04:04:48,714 173 INFO odoo odoo.modules.migration: module freight_forwarding: Running upgrade [18.0.1.10>] post-migrate 
+2026-09-18 04:04:48,716 173 INFO odoo odoo.upgrade.freight_forwarding.18.0.1.10.post-migrate: freight.port.destination: 0 records updated with destination_country_id 
+2026-09-18 04:04:48,856 173 INFO odoo odoo.modules.loading: Module freight_forwarding loaded in 15.89s, 3230 queries (+3230 other) 
+2026-09-18 04:04:50,161 173 INFO odoo odoo.modules.loading: 144 modules loaded in 27.82s, 3230 queries (+3230 extra) 
+2026-09-18 04:04:51,322 173 WARNING odoo odoo.schema: Table 'freight_port': unable to set NOT NULL on column 'code' 
+2026-09-18 04:04:51,325 173 WARNING odoo odoo.schema: Table 'freight_vessel': unable to set NOT NULL on column 'code' 
+2026-09-18 04:04:52,046 173 INFO odoo odoo.modules.registry: verifying fields for every extended model 
+2026-09-18 04:04:55,133 173 INFO odoo odoo.modules.loading: Modules loaded. 
+2026-09-18 04:04:55,164 173 INFO odoo odoo.modules.registry: Registry changed, signaling through the database 
+2026-09-18 04:04:55,167 173 INFO odoo odoo.modules.registry: Registry loaded in 87.419s 
+2026-09-18 04:04:55,167 173 INFO odoo odoo.service.server: Initiating shutdown 
+2026-09-18 04:04:55,167 173 INFO odoo odoo.service.server: Hit CTRL-C again or send a second signal to force the shutdown. 
+2026-09-18 04:04:55,167 173 INFO odoo odoo.sql_db: ConnectionPool(read/write;used=0/count=0/max=64): Closed 1 connections  
