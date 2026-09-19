@@ -100,7 +100,7 @@ class SeaBookingConvertWizard(models.TransientModel):
                 "to_city": quotation.delivery_city.id,
                 "salesman_id": self.salesman_id.id,
                 "payment_term_id": self.payment_term_id.id,
-                "container_type": quotation.container_type,
+                "ship_mode": quotation.sea_ship_mode,
                 "commodity_id": quotation.commodity_id.id,
                 "service_level": quotation.service_level,
                 "freight_type": self.freight_type,

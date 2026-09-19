@@ -28,20 +28,20 @@ class SeaBooking(models.Model):
     )
 
     # Field relasi narik data Jobsheet (HBL) yang terkait sama Booking ini
-    hbl_ids = fields.One2many("freight.sea.hbl", "booking_id", string="Sea Jobsheets")
+    sea_job_ids = fields.One2many("freight.sea.job", "booking_id", string="Sea Jobsheets")
 
     # Field count buat trigger sembunyi/tampil tombol
-    hbl_count = fields.Integer(string="Jobsheet Count", compute="_compute_hbl_count")
+    sea_job_count = fields.Integer(string="Jobsheet Count", compute="_compute_hbl_count")
 
     # Field buat show quotation (one-to-many relationship)
     sales_order_count = fields.Integer(
         string="Sales Order Count", compute="_compute_sales_order_count"
     )
 
-    @api.depends("hbl_ids")
+    @api.depends("sea_job_ids")
     def _compute_hbl_count(self):
         for rec in self:
-            rec.hbl_count = len(rec.hbl_ids)
+            rec.sea_job_count = len(rec.sea_job_ids)
 
     @api.depends("sale_order_ids")
     def _compute_sales_order_count(self):
@@ -74,14 +74,14 @@ class SeaBooking(models.Model):
             rec.state = "draft"
 
     # Fungsi pas tombol Jobsheet di klik
-    def action_view_hbl(self):
+    def action_view_jobs(self):
         self.ensure_one()
-        hbls = self.hbl_ids
+        hbls = self.sea_job_ids
 
         return {
             "name": "Sea Jobsheet",
             "type": "ir.actions.act_window",
-            "res_model": "freight.sea.hbl",
+            "res_model": "freight.sea.job",
             "view_mode": "form" if len(hbls) == 1 else "list,form",
             "domain": [("id", "in", hbls.ids)],
             "res_id": hbls.id if len(hbls) == 1 else False,
@@ -128,10 +128,9 @@ class SeaBooking(models.Model):
     hbl_no = fields.Char(string="B/L No.")
     job_no = fields.Char(string="Job No.")
     nomination_cargo = fields.Boolean(string="Nomination Cargo")
-    container_type = fields.Selection(
-        selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
-        string="Container Type",
-    )
+    # FF-75 follow-up: `container_type` (FCL/LCL) dihapus -- duplicate
+    # semantic dengan `ship_mode` yang sudah ada lewat
+    # freight.sea.shipment.info.mixin (_inherit di atas).
     job_date = fields.Date(string="Job Date")
     import_job_no = fields.Char(string="Import Job Number (Optional)")
     railing = fields.Boolean(string="Railing")
@@ -171,7 +170,7 @@ class SeaBooking(models.Model):
     from_city = fields.Many2one("res.city", string="From")
     to_city = fields.Many2one("res.city", string="To")
     delivery_type_id = fields.Many2one(
-        "account.incoterms", string="Delivery Type", required=True
+        "account.incoterms", string="Delivery Type"
     )
 
     # Vessel Information
@@ -223,22 +222,22 @@ class SeaBooking(models.Model):
             target_model.create(values)
 
     def _copy_cargo_info_lines_to_hbl(self, booking_cargo_info_records, hbl):
-        hbl_cargo_model = self.env["freight.sea.hbl.cargo.info"]
+        hbl_cargo_model = self.env["freight.sea.job.cargo.info"]
 
         for booking_cargo_info in booking_cargo_info_records:
-            cargo_values = booking_cargo_info.copy_data(default={"hbl_id": hbl.id})[0]
+            cargo_values = booking_cargo_info.copy_data(default={"job_id": hbl.id})[0]
             for field_name in ["booking_id", "sale_order_ids"]:
                 cargo_values.pop(field_name, None)
             for field_name in list(cargo_values.keys()):
                 if field_name not in hbl_cargo_model._fields:
                     cargo_values.pop(field_name, None)
-            cargo_values["hbl_id"] = hbl.id
+            cargo_values["job_id"] = hbl.id
             hbl_cargo_model.create(cargo_values)
 
     def _copy_booking_data_to_hbl(self, booking, hbl):
         # NOTE (FF-22): pemanggilan copy shipment_info_ids DIHAPUS di sini
         # karena model freight.sea.booking.shipment.info /
-        # freight.sea.hbl.shipment.info sudah tidak ada. Field-field
+        # freight.sea.job.shipment.info sudah tidak ada. Field-field
         # shipment info sekarang langsung ada di Booking & HBL (lewat mixin),
         # jadi tidak perlu proses copy antar model perantara lagi.
 
@@ -302,11 +301,11 @@ class SeaBooking(models.Model):
         # -> Jobsheet ini dijalankan, sehingga guard kosong itu membuat
         # variant lain (B, dan C yang dibuat belakangan) tidak pernah
         # tersinkronkan. Root/anchor commercial group-nya adalah Booking
-        # (root_quotation_id + variant_ids), bukan snapshot hbl.sale_order_ids
+        # (source_quotation_id + variant_ids), bukan snapshot hbl.sale_order_ids
         # -- sinkronkan lewat shared FF-73 mirror sync (sale.order
         # _sync_sale_order_ids_mirror), dipanggil untuk setiap anggota
         # commercial group supaya Booking & Jobsheet canonical konsisten.
-        root = booking._get_root_quotation()
+        root = booking._get_source_quotation()
         if root:
             for order in root | root.variant_ids:
                 order._sync_sale_order_ids_mirror()
@@ -317,26 +316,33 @@ class SeaBooking(models.Model):
         if not hbl.purchase_order_ids and booking.purchase_order_ids:
             hbl.write({"purchase_order_ids": [(6, 0, booking.purchase_order_ids.ids)]})
 
-    def action_convert_to_hbl(self):
+    def action_create_job(self):
+        """FF-75: Booking Export -> Create Job. Membuat 1 Master Job (kalau
+        belum ada) dan House Job PERTAMA otomatis dari
+        Booking.source_quotation_id, langsung ter-gabung ke Master tersebut.
+        Idempotent: dipanggil ulang tidak membuat Master/House kedua."""
         self.ensure_one()
 
-        existing_hbl = self.env["freight.sea.hbl"].search(
-            [("booking_id", "=", self.id)],
+        master = self.env["freight.sea.job"].search(
+            [("booking_id", "=", self.id), ("record_level", "=", "master")],
             limit=1,
             order="id desc",
         )
-        if existing_hbl:
-            hbl = existing_hbl
-        else:
-            hbl = self.env["freight.sea.hbl"].create(
+        if not master:
+            master = self.env["freight.sea.job"].create(
                 {
                     "booking_id": self.id,
+                    "record_level": "master",
                     "freight_type": self.freight_type,
-                    "container_type": self.container_type,
+                    "ship_mode": self.ship_mode,
                     "shipment_type_id": self.shipment_type_id.id if self.shipment_type_id else False,
                     "commodity_id": self.commodity_id.id if self.commodity_id else False,
                     "delivery_type_id": self.delivery_type_id.id if self.delivery_type_id else False,
-                    "customer_id": self.partner_id.id,
+                    # FF-75 follow-up (Section E): Master TIDAK boleh
+                    # mengambil Customer dari Booking secara otomatis --
+                    # semantic Customer Master consolidation belum
+                    # dipastikan. customer_id Master tetap optional/False
+                    # kecuali diisi eksplisit oleh user lewat flow lain.
                     "customer_ref": self.customer_reference,
                     "shipper_id": self.shipper_id.id if self.shipper_id else False,
                     "consignee_id": self.consignee_id.id if self.consignee_id else False,
@@ -357,13 +363,22 @@ class SeaBooking(models.Model):
                 }
             )
 
-        self._copy_booking_data_to_hbl(self, hbl)
+        self._copy_booking_data_to_hbl(self, master)
+
+        # House pertama otomatis dari source_quotation_id Booking (FF-75) --
+        # hanya kalau Master belum punya House sama sekali (idempotent) dan
+        # Booking punya source_quotation_id untuk diprefill.
+        if not master.house_job_ids and self.source_quotation_id:
+            house_vals = self.env["freight.sea.job"]._prepare_house_vals_from_quotation(
+                self.source_quotation_id, master=master
+            )
+            self.env["freight.sea.job"].create(house_vals)
 
         return {
             "type": "ir.actions.act_window",
-            "name": "Sea Jobsheet",
-            "res_model": "freight.sea.hbl",
-            "res_id": hbl.id,
+            "name": "Sea Job",
+            "res_model": "freight.sea.job",
+            "res_id": master.id,
             "view_mode": "form",
             "target": "current",
         }

@@ -18,13 +18,13 @@
 
     <record id="cargo_manifest_report" model="ir.actions.report">
         <field name="name">Cargo Manifest</field>
-        <field name="model">freight.sea.hbl</field>
+        <field name="model">freight.sea.job</field>
         <field name="report_type">qweb-html</field>
         <field name="report_name">freight_forwarding.cargo_manifest_report_template</field>
         <field name="report_file">freight_forwarding.cargo_manifest_report_template</field>
         <field name="print_report_name">'Cargo Manifest'</field>
         <field name="paperformat_id" ref="cargo_manifest_paperformat"/>
-        <field name="binding_model_id" ref="freight_forwarding.model_freight_sea_hbl"/>
+        <field name="binding_model_id" ref="freight_forwarding.model_freight_sea_job"/>
         <field name="binding_type">report</field>
         <field name="binding_view_types">list,form</field>
     </record>

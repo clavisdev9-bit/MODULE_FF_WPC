@@ -1,8 +1,8 @@
 """FF-73 follow-up: regression test untuk generic Duplicate (copy() tanpa
 default apa pun -- BUKAN action_create_currency_variant()).
 
-Sebelum fix ini, booking_ids/hbl_ids/sea_hbl_id (Sea) dan
-air_booking_ids/air_hawb_id (Air) di sale.order punya copy=True (default
+Sebelum fix ini, booking_ids/sea_job_ids/sea_job_id (Sea) dan
+air_booking_ids/air_job_id (Air) di sale.order punya copy=True (default
 Odoo untuk Many2one/Many2many). Generic Duplicate atas quotation yang sudah
 punya Booking/Jobsheet ikut menyalin field-field itu ke record BARU yang
 independen (original_quotation_id-nya tetap False, BUKAN currency variant),
@@ -26,8 +26,12 @@ class TestSeaGenericDuplicateCommercialGroup(FreightTestBase):
         quotation = self._create_quotation()  # A
         booking_result = quotation.action_convert_to_booking_direct()
         booking = self.env["freight.sea.booking"].browse(booking_result["res_id"])
-        hbl_result = booking.action_convert_to_hbl()
-        hbl = self.env["freight.sea.hbl"].browse(hbl_result["res_id"])
+        hbl_result = booking.action_create_job()
+        # FF-75: action_create_job membuka Master; House pertama (yang
+        # menyimpan sale_order_ids/source_quotation_id sendiri) otomatis
+        # dibuat sebagai child-nya -- Master shell tidak menyimpan sale_order_ids.
+        master = self.env["freight.sea.job"].browse(hbl_result["res_id"])
+        hbl = master.house_job_ids
 
         self.assertIn(quotation, booking.sale_order_ids)
         self.assertIn(quotation, hbl.sale_order_ids)
@@ -53,8 +57,8 @@ class TestSeaGenericDuplicateCommercialGroup(FreightTestBase):
             msg="Duplicate generic TIDAK boleh mewarisi booking_ids mirror milik A",
         )
         self.assertNotIn(
-            hbl, duplicate.hbl_ids,
-            msg="Duplicate generic TIDAK boleh mewarisi hbl_ids mirror milik A",
+            hbl, duplicate.sea_job_ids,
+            msg="Duplicate generic TIDAK boleh mewarisi sea_job_ids mirror milik A",
         )
         self.assertNotIn(
             duplicate, booking._get_commercial_group(),
@@ -62,20 +66,23 @@ class TestSeaGenericDuplicateCommercialGroup(FreightTestBase):
         )
 
     def test_duplicate_of_direct_import_jobsheet_quotation_is_independent(self):
-        """Jalur direct-import (sea_hbl_id, bukan lewat Booking)."""
+        """Jalur direct-import (sea_job_id, bukan lewat Booking)."""
         quotation = self._create_quotation(freight_type="import")  # A
         result = quotation.action_convert_to_jobsheet_direct()
-        hbl = self.env["freight.sea.hbl"].browse(result["res_id"])
+        # FF-75: action membuka Master; House pertamanya yang menyimpan
+        # sea_job_id/sale_order_ids terkait quotation.
+        master = self.env["freight.sea.job"].browse(result["res_id"])
+        hbl = master.house_job_ids
 
-        self.assertEqual(quotation.sea_hbl_id, hbl)
+        self.assertEqual(quotation.sea_job_id, hbl)
         self.assertIn(quotation, hbl.sale_order_ids)
 
         duplicate = quotation.copy()
 
         self.assertFalse(duplicate.original_quotation_id)
         self.assertFalse(
-            duplicate.sea_hbl_id,
-            msg="Duplicate generic TIDAK boleh mewarisi sea_hbl_id milik A",
+            duplicate.sea_job_id,
+            msg="Duplicate generic TIDAK boleh mewarisi sea_job_id milik A",
         )
         self.assertNotIn(
             duplicate, hbl.sale_order_ids,
@@ -89,8 +96,10 @@ class TestSeaGenericDuplicateCommercialGroup(FreightTestBase):
         quotation = self._create_quotation()  # A
         booking_result = quotation.action_convert_to_booking_direct()
         booking = self.env["freight.sea.booking"].browse(booking_result["res_id"])
-        hbl_result = booking.action_convert_to_hbl()
-        hbl = self.env["freight.sea.hbl"].browse(hbl_result["res_id"])
+        hbl_result = booking.action_create_job()
+        # FF-75: lihat komentar setara di test_duplicate_of_root_with_booking_and_jobsheet_is_independent.
+        master = self.env["freight.sea.job"].browse(hbl_result["res_id"])
+        hbl = master.house_job_ids
 
         variant_result = quotation.action_create_currency_variant()
         variant = self.env["sale.order"].browse(variant_result["res_id"])
@@ -101,7 +110,7 @@ class TestSeaGenericDuplicateCommercialGroup(FreightTestBase):
         self.assertIn(variant, hbl.sale_order_ids,
             msg="Currency variant HARUS otomatis masuk Jobsheet.sale_order_ids (beda dengan Duplicate generic)")
         self.assertIn(booking, variant.booking_ids)
-        self.assertIn(hbl, variant.hbl_ids)
+        self.assertIn(hbl, variant.sea_job_ids)
 
 
 class TestAirGenericDuplicateCommercialGroup(FreightTestBase):
@@ -120,8 +129,8 @@ class TestAirGenericDuplicateCommercialGroup(FreightTestBase):
         quotation = self._create_air_quotation()  # A
         booking_result = quotation.action_convert_to_booking_direct()
         booking = self.env["freight.air.booking"].browse(booking_result["res_id"])
-        hawb_result = booking.action_create_hawb()
-        hawb = self.env["freight.air.hawb"].browse(hawb_result["res_id"])
+        hawb_result = booking.action_create_job()
+        hawb = self.env["freight.air.job"].browse(hawb_result["res_id"])
 
         self.assertIn(quotation, booking.sale_order_ids)
 
@@ -135,8 +144,8 @@ class TestAirGenericDuplicateCommercialGroup(FreightTestBase):
             msg="Duplicate generic TIDAK boleh otomatis masuk Air Booking.sale_order_ids milik A",
         )
         self.assertFalse(
-            duplicate.air_hawb_id,
-            msg="Duplicate generic TIDAK boleh mewarisi air_hawb_id milik A",
+            duplicate.air_job_id,
+            msg="Duplicate generic TIDAK boleh mewarisi air_job_id milik A",
         )
         self.assertNotIn(
             booking, duplicate.air_booking_ids,

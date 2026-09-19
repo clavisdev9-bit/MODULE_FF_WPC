@@ -7,21 +7,21 @@
         <field name="arch" type="xml">
             <div name="button_box" position="inside">
                 <button
-                    name="action_view_sea_hbls"
+                    name="action_view_sea_jobs"
                     type="object"
                     class="oe_stat_button"
                     icon="fa-ship"
-                    invisible="sea_hbl_count == 0"
+                    invisible="sea_job_count == 0"
                 >
                     <field
-                        name="sea_hbl_count"
+                        name="sea_job_count"
                         widget="statinfo"
                         string="Jobsheet"
                     />
                 </button>
             </div>
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="sea_hbl_id" invisible="not sea_hbl_id" readonly="1"/>
+                <field name="sea_job_id" invisible="not sea_job_id" readonly="1"/>
             </xpath>
         </field>
     </record>

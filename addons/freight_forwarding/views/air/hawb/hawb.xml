@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- FORM VIEW -->
-    <record id="view_freight_air_hawb_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.form</field>
-        <field name="model">freight.air.hawb</field>
+    <record id="view_freight_air_job_form" model="ir.ui.view">
+        <field name="name">freight.air.job.form</field>
+        <field name="model">freight.air.job</field>
         <field name="arch" type="xml">
             <form string="Air Jobsheet (HAWB)">
                 <header>
@@ -51,12 +51,13 @@
                     <group name="top_identity_group">
                         <group>
                             <field name="shipment_type" />
+                            <field name="master_job_id" invisible="shipment_type != 'house'"/>
                             <field name="hawb_no" invisible="shipment_type != 'house'"/>
                             <field name="smawb_no" invisible="shipment_type != 'house'"/>
-                            <field name="mawb_no" string="Mawb No." invisible="shipment_type != 'house'"/>
+                            <field name="effective_mawb_no" string="Mawb No." invisible="shipment_type != 'house'"/>
                             <field name="direct_awb_no" invisible="shipment_type != 'direct'"/>
                             <field name="mawb_no" string="Master AWB No." invisible="shipment_type != 'master'"/>
-                            <field name="booking_id"/>
+                            <field name="booking_id" invisible="shipment_type == 'house'"/>
                         </group>
                         <group>
                             <field name="job_date"/>
@@ -216,7 +217,7 @@
 
                         <!-- TAB 4: JOB COSTING - PURCHASE ORDER -->
                         <page string="Purchase Order" name="purchase_orders">
-                            <field name="purchase_order_ids" nolabel="1" context="{'default_air_hawb_id': id}">
+                            <field name="purchase_order_ids" nolabel="1" context="{'default_air_job_id': id}">
                                 <list editable="bottom" open_form_view="1">
                                     <field name="name"/>
                                     <field name="partner_id"/>
@@ -230,14 +231,27 @@
                         <!-- TAB 5: JOB COSTING - SALES ORDERS -->
                         <page string="Sales Orders" name="sales_orders">
                             <!-- FF-73: sale_order_ids sekarang cuma compatibility mirror dari
-                                 commercial group (root_quotation_id + variant_ids); currency
+                                 commercial group (source_quotation_id + variant_ids); currency
                                  variant baru otomatis ikut tersinkron (lihat action_create_currency_variant),
                                  jadi tab ini display-only, bukan lagi jalur manual-add. -->
-                            <field name="sale_order_ids" nolabel="1" readonly="1" context="{'form_view_ref': 'freight_forwarding.view_air_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'air', 'default_freight_type': freight_type, 'default_air_hawb_id': id}">
+                            <field name="sale_order_ids" nolabel="1" readonly="1" context="{'form_view_ref': 'freight_forwarding.view_air_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'air', 'default_freight_type': freight_type, 'default_air_job_id': id}">
                                 <list editable="bottom" open_form_view="1">
                                     <field name="name"/>
                                     <field name="currency_id"/>
                                     <field name="amount_total"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- TAB: HOUSE JOBS (Master only) -->
+                        <page string="House Jobs" name="house_jobs" invisible="shipment_type != 'master'">
+                            <field name="house_job_ids" nolabel="1">
+                                <list>
+                                    <field name="job_no"/>
+                                    <field name="hawb_no"/>
+                                    <field name="partner_id"/>
+                                    <field name="source_quotation_id"/>
                                     <field name="state"/>
                                 </list>
                             </field>
@@ -280,10 +294,10 @@
     </record>
 
     <!-- IMPORT FORM VIEW (inherits base/export form) -->
-    <record id="view_freight_air_hawb_form_import" model="ir.ui.view">
-        <field name="name">freight.air.hawb.form.import</field>
-        <field name="model">freight.air.hawb</field>
-        <field name="inherit_id" ref="view_freight_air_hawb_form"/>
+    <record id="view_freight_air_job_form_import" model="ir.ui.view">
+        <field name="name">freight.air.job.form.import</field>
+        <field name="model">freight.air.job</field>
+        <field name="inherit_id" ref="view_freight_air_job_form"/>
         <field name="arch" type="xml">
             <!-- Header block: Job/AWB identity + Clearance/Transshipment,
                  Credit Term/Ship Mode/Service Level moved up per reviewed layout -->
@@ -291,15 +305,16 @@
                 <group name="top_identity_group">
                     <group>
                         <field name="shipment_type" />
+                        <field name="master_job_id" invisible="shipment_type != 'house'"/>
                         <field name="hawb_no" invisible="shipment_type != 'house'"/>
                         <field name="smawb_no" invisible="shipment_type != 'house'"/>
-                        <field name="mawb_no" string="Mawb No." invisible="shipment_type != 'house'"/>
+                        <field name="effective_mawb_no" string="Mawb No." invisible="shipment_type != 'house'"/>
                         <field name="direct_awb_no" invisible="shipment_type != 'direct'"/>
                         <field name="mawb_no" string="Master AWB No." invisible="shipment_type != 'master'"/>
                         <field name="clearance"/>
                         <field name="is_transhipment"/>
                         <field name="origin_mawb_no" invisible="not is_transhipment"/>
-                        <field name="booking_id"/>
+                        <field name="booking_id" invisible="shipment_type == 'house'"/>
                     </group>
                     <group>
                         <field name="job_date"/>
@@ -400,13 +415,14 @@
     </record>
 
     <!-- LIST VIEW -->
-    <record id="view_freight_air_hawb_tree" model="ir.ui.view">
-        <field name="name">freight.air.hawb.list</field>
-        <field name="model">freight.air.hawb</field>
+    <record id="view_freight_air_job_tree" model="ir.ui.view">
+        <field name="name">freight.air.job.list</field>
+        <field name="model">freight.air.job</field>
         <field name="arch" type="xml">
             <list string="Air Jobsheets">
                 <field name="job_no"/>
                 <field name="shipment_type" widget="badge" decoration-info="shipment_type == 'direct'" decoration-warning="shipment_type == 'house'" decoration-success="shipment_type == 'master'"/>
+                <field name="master_job_id" optional="show"/>
                 <field name="hawb_no" string="House AWB No." optional="show"/>
                 <field name="direct_awb_no" string="Direct AWB No." optional="hide"/>
                 <field name="mawb_no" string="Master AWB No." optional="show"/>
@@ -418,9 +434,9 @@
     </record>
 
     <!-- SEARCH VIEW -->
-    <record id="view_freight_air_hawb_search" model="ir.ui.view">
-        <field name="name">freight.air.hawb.search</field>
-        <field name="model">freight.air.hawb</field>
+    <record id="view_freight_air_job_search" model="ir.ui.view">
+        <field name="name">freight.air.job.search</field>
+        <field name="model">freight.air.job</field>
         <field name="arch" type="xml">
             <search string="Search Air Jobsheets">
                 <field name="job_no" string="Job No." />
@@ -456,11 +472,11 @@
     </record>
 
     <!-- ACTION ALL -->
-    <record id="action_freight_air_hawb" model="ir.actions.act_window">
+    <record id="action_freight_air_job" model="ir.actions.act_window">
         <field name="name">Air Jobsheets (AWB)</field>
-        <field name="res_model">freight.air.hawb</field>
+        <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="context">{'default_freight_type': 'export', 'default_shipment_type': 'house'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -470,11 +486,11 @@
     </record>
 
     <!-- ACTION EXPORT HOUSE AWB -->
-    <record id="action_freight_air_hawb_export" model="ir.actions.act_window">
+    <record id="action_freight_air_job_export" model="ir.actions.act_window">
         <field name="name">Air Export House AWB</field>
-        <field name="res_model">freight.air.hawb</field>
+        <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('shipment_type', '=', 'house')]</field>
         <field name="context">{'default_freight_type': 'export', 'default_shipment_type': 'house'}</field>
         <field name="help" type="html">
@@ -487,9 +503,9 @@
     <!-- ACTION EXPORT DIRECT AWB -->
     <record id="action_freight_air_dawb_export" model="ir.actions.act_window">
         <field name="name">Air Export Direct AWB</field>
-        <field name="res_model">freight.air.hawb</field>
+        <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('shipment_type', '=', 'direct')]</field>
         <field name="context">{'default_freight_type': 'export', 'default_shipment_type': 'direct'}</field>
         <field name="help" type="html">
@@ -502,9 +518,9 @@
     <!-- ACTION EXPORT MASTER AWB -->
     <record id="action_freight_air_mawb_export" model="ir.actions.act_window">
         <field name="name">Air Export Master AWB</field>
-        <field name="res_model">freight.air.hawb</field>
+        <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('shipment_type', '=', 'master')]</field>
         <field name="context">{'default_freight_type': 'export', 'default_shipment_type': 'master'}</field>
         <field name="help" type="html">
@@ -515,12 +531,12 @@
     </record>
 
     <!-- ACTION IMPORT AWB ENTRY / JOBSHEET (single Import entry point) -->
-    <record id="action_freight_air_hawb_import" model="ir.actions.act_window">
+    <record id="action_freight_air_job_import" model="ir.actions.act_window">
         <field name="name">Air Import AWB Entry</field>
-        <field name="res_model">freight.air.hawb</field>
+        <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
-        <field name="views" eval="[(ref('view_freight_air_hawb_tree'), 'list'), (ref('view_freight_air_hawb_form_import'), 'form')]"/>
-        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="views" eval="[(ref('view_freight_air_job_tree'), 'list'), (ref('view_freight_air_job_form_import'), 'form')]"/>
+        <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'import')]</field>
         <field name="context">{'default_freight_type': 'import', 'default_shipment_type': 'house'}</field>
         <field name="help" type="html">
@@ -533,9 +549,9 @@
     <!-- ACTION IMPORT DIRECT AWB -->
     <record id="action_freight_air_dawb_import" model="ir.actions.act_window">
         <field name="name">Air Import Direct AWB</field>
-        <field name="res_model">freight.air.hawb</field>
+        <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'import'), ('shipment_type', '=', 'direct')]</field>
         <field name="context">{'default_freight_type': 'import', 'default_shipment_type': 'direct'}</field>
         <field name="help" type="html">
@@ -548,9 +564,9 @@
     <!-- ACTION IMPORT MASTER AWB -->
     <record id="action_freight_air_mawb_import" model="ir.actions.act_window">
         <field name="name">Air Import Master AWB</field>
-        <field name="res_model">freight.air.hawb</field>
+        <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_freight_air_hawb_search" />
+        <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'import'), ('shipment_type', '=', 'master')]</field>
         <field name="context">{'default_freight_type': 'import', 'default_shipment_type': 'master'}</field>
         <field name="help" type="html">

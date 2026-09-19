@@ -3,26 +3,26 @@ access_freight_sea_booking_user,Freight Sea Booking User,model_freight_sea_booki
 access_freight_sea_booking_admin,Freight Sea Booking Admin,model_freight_sea_booking,base.group_system,1,1,1,1
 access_freight_sea_booking_cargo_info_user,Freight Sea Booking Cargo Info User,model_freight_sea_booking_cargo_info,base.group_user,1,1,1,0
 access_freight_sea_booking_cargo_info_admin,Freight Sea Booking Cargo Info Admin,model_freight_sea_booking_cargo_info,base.group_system,1,1,1,1
-access_freight_sea_hbl_custom_permit_user,Freight Sea HBL Custom Permit User,model_freight_sea_hbl_custom_permit,base.group_user,1,1,1,0
-access_freight_sea_hbl_custom_permit_admin,Freight Sea HBL Custom Permit Admin,model_freight_sea_hbl_custom_permit,base.group_system,1,1,1,1
-access_freight_sea_hbl_tax_refund_doc_user,Freight Sea HBL Tax Refund Doc User,model_freight_sea_hbl_tax_refund_doc,base.group_user,1,1,1,0
-access_freight_sea_hbl_tax_refund_doc_admin,Freight Sea HBL Tax Refund Doc Admin,model_freight_sea_hbl_tax_refund_doc,base.group_system,1,1,1,1
-access_freight_sea_hbl_invoice_user,Freight Sea HBL Invoice User,model_freight_sea_hbl_invoice,base.group_user,1,1,1,0
-access_freight_sea_hbl_invoice_admin,Freight Sea HBL Invoice Admin,model_freight_sea_hbl_invoice,base.group_system,1,1,1,1
-access_freight_sea_hbl_debit_note_user,Freight Sea HBL Debit Note User,model_freight_sea_hbl_debit_note,base.group_user,1,1,1,0
-access_freight_sea_hbl_debit_note_admin,Freight Sea HBL Debit Note Admin,model_freight_sea_hbl_debit_note,base.group_system,1,1,1,1
-access_freight_sea_hbl_credit_note_user,Freight Sea HBL Credit Note User,model_freight_sea_hbl_credit_note,base.group_user,1,1,1,0
-access_freight_sea_hbl_credit_note_admin,Freight Sea HBL Credit Note Admin,model_freight_sea_hbl_credit_note,base.group_system,1,1,1,1
-access_freight_sea_hbl_provision_cost_user,Freight Sea HBL Provision Cost User,model_freight_sea_hbl_provision_cost,base.group_user,1,1,1,0
-access_freight_sea_hbl_provision_cost_admin,Freight Sea HBL Provision Cost Admin,model_freight_sea_hbl_provision_cost,base.group_system,1,1,1,1
-access_freight_sea_hbl_vendor_invoice_user,Freight Sea HBL Vendor Invoice User,model_freight_sea_hbl_vendor_invoice,base.group_user,1,1,1,0
-access_freight_sea_hbl_vendor_invoice_admin,Freight Sea HBL Vendor Invoice Admin,model_freight_sea_hbl_vendor_invoice,base.group_system,1,1,1,1
-access_freight_sea_hbl_vendor_debit_note_user,Freight Sea HBL Vendor Debit Note User,model_freight_sea_hbl_vendor_debit_note,base.group_user,1,1,1,0
-access_freight_sea_hbl_vendor_debit_note_admin,Freight Sea HBL Vendor Debit Note Admin,model_freight_sea_hbl_vendor_debit_note,base.group_system,1,1,1,1
-access_freight_sea_hbl_vendor_credit_note_user,Freight Sea HBL Vendor Credit Note User,model_freight_sea_hbl_vendor_credit_note,base.group_user,1,1,1,0
-access_freight_sea_hbl_vendor_credit_note_admin,Freight Sea HBL Vendor Credit Note Admin,model_freight_sea_hbl_vendor_credit_note,base.group_system,1,1,1,1
-access_freight_sea_hbl_cash_purchase_user,Freight Sea HBL Cash Purchase User,model_freight_sea_hbl_cash_purchase,base.group_user,1,1,1,0
-access_freight_sea_hbl_cash_purchase_admin,Freight Sea HBL Cash Purchase Admin,model_freight_sea_hbl_cash_purchase,base.group_system,1,1,1,1
+access_freight_sea_job_custom_permit_user,Freight Sea HBL Custom Permit User,model_freight_sea_job_custom_permit,base.group_user,1,1,1,0
+access_freight_sea_job_custom_permit_admin,Freight Sea HBL Custom Permit Admin,model_freight_sea_job_custom_permit,base.group_system,1,1,1,1
+access_freight_sea_job_tax_refund_doc_user,Freight Sea HBL Tax Refund Doc User,model_freight_sea_job_tax_refund_doc,base.group_user,1,1,1,0
+access_freight_sea_job_tax_refund_doc_admin,Freight Sea HBL Tax Refund Doc Admin,model_freight_sea_job_tax_refund_doc,base.group_system,1,1,1,1
+access_freight_sea_job_invoice_user,Freight Sea HBL Invoice User,model_freight_sea_job_invoice,base.group_user,1,1,1,0
+access_freight_sea_job_invoice_admin,Freight Sea HBL Invoice Admin,model_freight_sea_job_invoice,base.group_system,1,1,1,1
+access_freight_sea_job_debit_note_user,Freight Sea HBL Debit Note User,model_freight_sea_job_debit_note,base.group_user,1,1,1,0
+access_freight_sea_job_debit_note_admin,Freight Sea HBL Debit Note Admin,model_freight_sea_job_debit_note,base.group_system,1,1,1,1
+access_freight_sea_job_credit_note_user,Freight Sea HBL Credit Note User,model_freight_sea_job_credit_note,base.group_user,1,1,1,0
+access_freight_sea_job_credit_note_admin,Freight Sea HBL Credit Note Admin,model_freight_sea_job_credit_note,base.group_system,1,1,1,1
+access_freight_sea_job_provision_cost_user,Freight Sea HBL Provision Cost User,model_freight_sea_job_provision_cost,base.group_user,1,1,1,0
+access_freight_sea_job_provision_cost_admin,Freight Sea HBL Provision Cost Admin,model_freight_sea_job_provision_cost,base.group_system,1,1,1,1
+access_freight_sea_job_vendor_invoice_user,Freight Sea HBL Vendor Invoice User,model_freight_sea_job_vendor_invoice,base.group_user,1,1,1,0
+access_freight_sea_job_vendor_invoice_admin,Freight Sea HBL Vendor Invoice Admin,model_freight_sea_job_vendor_invoice,base.group_system,1,1,1,1
+access_freight_sea_job_vendor_debit_note_user,Freight Sea HBL Vendor Debit Note User,model_freight_sea_job_vendor_debit_note,base.group_user,1,1,1,0
+access_freight_sea_job_vendor_debit_note_admin,Freight Sea HBL Vendor Debit Note Admin,model_freight_sea_job_vendor_debit_note,base.group_system,1,1,1,1
+access_freight_sea_job_vendor_credit_note_user,Freight Sea HBL Vendor Credit Note User,model_freight_sea_job_vendor_credit_note,base.group_user,1,1,1,0
+access_freight_sea_job_vendor_credit_note_admin,Freight Sea HBL Vendor Credit Note Admin,model_freight_sea_job_vendor_credit_note,base.group_system,1,1,1,1
+access_freight_sea_job_cash_purchase_user,Freight Sea HBL Cash Purchase User,model_freight_sea_job_cash_purchase,base.group_user,1,1,1,0
+access_freight_sea_job_cash_purchase_admin,Freight Sea HBL Cash Purchase Admin,model_freight_sea_job_cash_purchase,base.group_system,1,1,1,1
 access_freight_sea_booking_extra_info_user,Freight Sea Booking Extra Info User,model_freight_sea_booking_extra_info,base.group_user,1,1,1,0
 access_freight_sea_booking_extra_info_admin,Freight Sea Booking Extra Info Admin,model_freight_sea_booking_extra_info,base.group_system,1,1,1,1
 access_freight_sea_booking_vessel_schedule_user,Freight Sea Booking Vessel Schedule User,model_freight_sea_booking_vessel_schedule,base.group_user,1,1,1,0
@@ -32,4 +32,5 @@ access_freight_sea_booking_convert_wizard_admin,Freight Sea Booking Convert Wiza
 access_freight_sea_quotation_migration_wizard_admin,Freight Sea Quotation Migration Wizard Admin,model_freight_sea_quotation_migration_wizard,base.group_system,1,1,1,1
 access_freight_sea_booking_shipment_info_user,Freight Sea Booking Shipment Info User,model_freight_sea_booking_shipment_info,base.group_user,1,1,1,0
 access_freight_sea_booking_shipment_info_admin,Freight Sea Booking Shipment Info Admin,model_freight_sea_booking_shipment_info,base.group_system,1,1,1,1
+access_freight_sea_add_to_master_wizard_user,Freight Sea Add to Master Wizard User,model_freight_sea_add_to_master_wizard,base.group_user,1,1,1,1
 

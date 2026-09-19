@@ -2,8 +2,8 @@
 <odoo>
     <!-- Invoice Views -->
     <record id="view_air_hawb_invoice_list" model="ir.ui.view">
-        <field name="name">freight.air.hawb.invoice.list</field>
-        <field name="model">freight.air.hawb.invoice</field>
+        <field name="name">freight.air.job.invoice.list</field>
+        <field name="model">freight.air.job.invoice</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -14,13 +14,13 @@
     </record>
 
     <record id="view_air_hawb_invoice_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.invoice.form</field>
-        <field name="model">freight.air.hawb.invoice</field>
+        <field name="name">freight.air.job.invoice.form</field>
+        <field name="model">freight.air.job.invoice</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hawb_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -39,8 +39,8 @@
 
     <!-- Debit Note Views -->
     <record id="view_air_hawb_debit_note_list" model="ir.ui.view">
-        <field name="name">freight.air.hawb.debit.note.list</field>
-        <field name="model">freight.air.hawb.debit.note</field>
+        <field name="name">freight.air.job.debit.note.list</field>
+        <field name="model">freight.air.job.debit.note</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -51,13 +51,13 @@
     </record>
 
     <record id="view_air_hawb_debit_note_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.debit.note.form</field>
-        <field name="model">freight.air.hawb.debit.note</field>
+        <field name="name">freight.air.job.debit.note.form</field>
+        <field name="model">freight.air.job.debit.note</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hawb_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -76,8 +76,8 @@
 
     <!-- Credit Note Views -->
     <record id="view_air_hawb_credit_note_list" model="ir.ui.view">
-        <field name="name">freight.air.hawb.credit.note.list</field>
-        <field name="model">freight.air.hawb.credit.note</field>
+        <field name="name">freight.air.job.credit.note.list</field>
+        <field name="model">freight.air.job.credit.note</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -88,13 +88,13 @@
     </record>
 
     <record id="view_air_hawb_credit_note_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.credit.note.form</field>
-        <field name="model">freight.air.hawb.credit.note</field>
+        <field name="name">freight.air.job.credit.note.form</field>
+        <field name="model">freight.air.job.credit.note</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hawb_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -113,8 +113,8 @@
 
     <!-- Provision Cost Views -->
     <record id="view_air_hawb_provision_cost_list" model="ir.ui.view">
-        <field name="name">freight.air.hawb.provision.cost.list</field>
-        <field name="model">freight.air.hawb.provision.cost</field>
+        <field name="name">freight.air.job.provision.cost.list</field>
+        <field name="model">freight.air.job.provision.cost</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -125,13 +125,13 @@
     </record>
 
     <record id="view_air_hawb_provision_cost_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.provision.cost.form</field>
-        <field name="model">freight.air.hawb.provision.cost</field>
+        <field name="name">freight.air.job.provision.cost.form</field>
+        <field name="model">freight.air.job.provision.cost</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hawb_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -150,8 +150,8 @@
 
     <!-- Vendor Invoice Views -->
     <record id="view_air_hawb_vendor_invoice_list" model="ir.ui.view">
-        <field name="name">freight.air.hawb.vendor.invoice.list</field>
-        <field name="model">freight.air.hawb.vendor.invoice</field>
+        <field name="name">freight.air.job.vendor.invoice.list</field>
+        <field name="model">freight.air.job.vendor.invoice</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -162,13 +162,13 @@
     </record>
 
     <record id="view_air_hawb_vendor_invoice_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.vendor.invoice.form</field>
-        <field name="model">freight.air.hawb.vendor.invoice</field>
+        <field name="name">freight.air.job.vendor.invoice.form</field>
+        <field name="model">freight.air.job.vendor.invoice</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hawb_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -187,8 +187,8 @@
 
     <!-- Vendor Debit Note Views -->
     <record id="view_air_hawb_vendor_debit_note_list" model="ir.ui.view">
-        <field name="name">freight.air.hawb.vendor.debit.note.list</field>
-        <field name="model">freight.air.hawb.vendor.debit.note</field>
+        <field name="name">freight.air.job.vendor.debit.note.list</field>
+        <field name="model">freight.air.job.vendor.debit.note</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -199,13 +199,13 @@
     </record>
 
     <record id="view_air_hawb_vendor_debit_note_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.vendor.debit.note.form</field>
-        <field name="model">freight.air.hawb.vendor.debit.note</field>
+        <field name="name">freight.air.job.vendor.debit.note.form</field>
+        <field name="model">freight.air.job.vendor.debit.note</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hawb_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -224,8 +224,8 @@
 
     <!-- Vendor Credit Note Views -->
     <record id="view_air_hawb_vendor_credit_note_list" model="ir.ui.view">
-        <field name="name">freight.air.hawb.vendor.credit.note.list</field>
-        <field name="model">freight.air.hawb.vendor.credit.note</field>
+        <field name="name">freight.air.job.vendor.credit.note.list</field>
+        <field name="model">freight.air.job.vendor.credit.note</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -236,13 +236,13 @@
     </record>
 
     <record id="view_air_hawb_vendor_credit_note_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.vendor.credit.note.form</field>
-        <field name="model">freight.air.hawb.vendor.credit.note</field>
+        <field name="name">freight.air.job.vendor.credit.note.form</field>
+        <field name="model">freight.air.job.vendor.credit.note</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hawb_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -261,8 +261,8 @@
 
     <!-- Cash Purchase Views -->
     <record id="view_air_hawb_cash_purchase_list" model="ir.ui.view">
-        <field name="name">freight.air.hawb.cash.purchase.list</field>
-        <field name="model">freight.air.hawb.cash.purchase</field>
+        <field name="name">freight.air.job.cash.purchase.list</field>
+        <field name="model">freight.air.job.cash.purchase</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -273,13 +273,13 @@
     </record>
 
     <record id="view_air_hawb_cash_purchase_form" model="ir.ui.view">
-        <field name="name">freight.air.hawb.cash.purchase.form</field>
-        <field name="model">freight.air.hawb.cash.purchase</field>
+        <field name="name">freight.air.job.cash.purchase.form</field>
+        <field name="model">freight.air.job.cash.purchase</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hawb_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>

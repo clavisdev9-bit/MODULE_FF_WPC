@@ -16,7 +16,7 @@
         sequence="40" />
     <menuitem id="menu_air_import_awb_entry" name="AWB Entry"
         parent="menu_sub_parent_air_import"
-        action="action_freight_air_hawb_import"
+        action="action_freight_air_job_import"
         sequence="10" />
 
     <!-- EXPORT -->
@@ -40,7 +40,7 @@
 
     <menuitem id="menu_air_export_house_awb" name="House AWB"
         parent="menu_sub_parent_air_export_awb_preparation"
-        action="action_freight_air_hawb_export"
+        action="action_freight_air_job_export"
         sequence="20" />
 
     <menuitem id="menu_air_export_master_awb" name="Master AWB"

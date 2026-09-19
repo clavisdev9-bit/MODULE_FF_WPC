@@ -255,7 +255,7 @@
                                             <td class="align-top">
                                                 <div class="bl-label">TYPE OF SERVICE</div>
                                                 <div class="bl-field-sm">
-                                                    <span t-field="doc.container_type" />
+                                                    <span t-field="doc.ship_mode" />
                                                 </div>
                                             </td>
                                         </tr>

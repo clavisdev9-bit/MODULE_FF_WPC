@@ -63,8 +63,8 @@ class FreightAirBooking(models.Model):
     # Relational Tables
     flight_routing_ids = fields.One2many('freight.air.booking.flight.routing', 'booking_id', string='Flight Routings')
     dimension_ids = fields.One2many('freight.air.booking.dimension', 'booking_id', string='Dimensions')
-    hawb_ids = fields.One2many('freight.air.hawb', 'booking_id', string='Air Jobsheets (HAWBs)')
-    hawb_count = fields.Integer(string='Jobsheet Count', compute='_compute_hawb_count')
+    air_job_ids = fields.One2many('freight.air.job', 'booking_id', string='Air Jobsheets (HAWBs)')
+    air_job_count = fields.Integer(string='Jobsheet Count', compute='_compute_hawb_count')
 
     @api.depends('sale_order_ids')
     def _compute_sales_order_count(self):
@@ -96,7 +96,7 @@ class FreightAirBooking(models.Model):
 
     def _compute_hawb_count(self):
         for rec in self:
-            rec.hawb_count = len(rec.hawb_ids)
+            rec.air_job_count = len(rec.air_job_ids)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -127,8 +127,39 @@ class FreightAirBooking(models.Model):
             rec.total_vol_weight = total_vol / 6000.0 if total_vol else 0.0
             rec.volumetric_weight = total_vol / 6000.0 if total_vol else 0.0
 
-    def action_create_hawb(self):
+    def action_create_job(self):
+        """Manual UAT follow-up FF-75 (Section 2): Air Booking -> Create Job
+        SELALU berarti Booking -> Master -> House, tidak pernah Direct.
+        Direct AWB TIDAK dibuat lewat Booking -- Direct AWB dibuat langsung
+        sebagai freight.air.job berdiri sendiri lewat flow/menu Direct AWB
+        (lihat _action_convert_to_jobsheet_direct_air di AirQuotation),
+        tanpa lewat Booking sama sekali. Karena itu branching
+        `is_direct = self.shipment_type == 'direct'` yang sebelumnya ada di
+        sini DIHAPUS -- method ini sekarang murni membuat/mengambil Master
+        Job (idempotent) dan House Job PERTAMA otomatis dari
+        Booking.source_quotation_id."""
         self.ensure_one()
+
+        master = self.env['freight.air.job'].search(
+            [('booking_id', '=', self.id), ('shipment_type', '=', 'master')],
+            limit=1,
+            order='id desc',
+        )
+        if master:
+            if not master.house_job_ids and self.source_quotation_id:
+                house_vals = self.env['freight.air.job']._prepare_house_vals_from_quotation(
+                    self.source_quotation_id, master=master
+                )
+                self.env['freight.air.job'].create(house_vals)
+            return {
+                'name': _('Air Job'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'freight.air.job',
+                'res_id': master.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+
         flight_lines = [
             (0, 0, {
                 'airport_dest_id': r.airport_dest_id.id if r.airport_dest_id else False,
@@ -152,7 +183,10 @@ class FreightAirBooking(models.Model):
             'booking_id': self.id,
             'freight_type': self.freight_type,
             'company_id': self.company_id.id,
-            'partner_id': self.partner_id.id,
+            # FF-75 follow-up (Section E): Master TIDAK boleh mengambil
+            # Customer dari Booking secara otomatis -- semantic Customer
+            # Master consolidation belum dipastikan.
+            'partner_id': False,
             'customer_ref': self.customer_reference,
             'is_nomination': self.is_nomination,
             'nomination_remark': self.nomination_remark,
@@ -172,7 +206,7 @@ class FreightAirBooking(models.Model):
             'destination_id': self.destination_id.id if self.destination_id else False,
             'origin_country_id': self.origin_country_id.id if self.origin_country_id else False,
             'ship_mode': self.ship_mode,
-            'shipment_type': self.shipment_type,
+            'shipment_type': 'master',
             'delivery_type': self.delivery_type.id if self.delivery_type else False,
             'other_delivery': self.other_delivery,
             'service_level': self.service_level,
@@ -188,34 +222,43 @@ class FreightAirBooking(models.Model):
             'flight_routing_ids': flight_lines,
             'dimension_ids': dimension_lines,
         }
-        if self.sale_order_ids:
-            hawb_vals['sale_order_ids'] = [(6, 0, self.sale_order_ids.ids)]
-        hawb = self.env['freight.air.hawb'].create(hawb_vals)
+        # FF-75 follow-up (Section D): Master TIDAK boleh menerima
+        # sale_order_ids Booking untuk commercial ownership -- House
+        # (bukan Master) yang menjadi Job commercial untuk Q1 (dari
+        # source_quotation_id-nya sendiri, lihat _prepare_house_vals_from_quotation).
+        job = self.env['freight.air.job'].create(hawb_vals)
+
+        if not job.house_job_ids and self.source_quotation_id:
+            house_vals = self.env['freight.air.job']._prepare_house_vals_from_quotation(
+                self.source_quotation_id, master=job
+            )
+            self.env['freight.air.job'].create(house_vals)
+
         return {
-            'name': _('Air Jobsheet (HAWB)'),
+            'name': _('Air Job'),
             'type': 'ir.actions.act_window',
-            'res_model': 'freight.air.hawb',
-            'res_id': hawb.id,
+            'res_model': 'freight.air.job',
+            'res_id': job.id,
             'view_mode': 'form',
             'target': 'current',
         }
 
-    def action_view_hawbs(self):
+    def action_view_jobs(self):
         self.ensure_one()
-        hawbs = self.hawb_ids
+        hawbs = self.air_job_ids
         ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
         ctx.update({"default_booking_id": self.id})
         return {
             'name': _('Air Jobsheets (HAWBs)'),
             'type': 'ir.actions.act_window',
-            'res_model': 'freight.air.hawb',
+            'res_model': 'freight.air.job',
             'view_mode': 'form' if len(hawbs) == 1 else 'list,form',
             'domain': [('id', 'in', hawbs.ids)],
             'res_id': hawbs.id if len(hawbs) == 1 else False,
             'context': ctx,
         }
 
-    action_create_jobsheet = action_create_hawb
-    action_view_jobsheets = action_view_hawbs
+    action_create_jobsheet = action_create_job
+    action_view_jobsheets = action_view_jobs
 
 

@@ -181,9 +181,9 @@ class FreightQuotation(models.AbstractModel):
         self.ensure_one()
         return bool(
             self.booking_count
-            or self.hbl_count
+            or self.sea_job_count
             or getattr(self, "air_booking_count", 0)
-            or getattr(self, "hawb_count", 0)
+            or getattr(self, "air_job_count", 0)
         )
 
     def action_convert_quotation(self):
@@ -406,7 +406,7 @@ class FreightQuotation(models.AbstractModel):
             self.env["sale.order"].invalidate_model()
         return result
 
-    def _get_sea_hbl_analytic_account(self):
+    def _get_sea_job_analytic_account(self):
         """FF-73: fallback resolve lewat commercial group (root + variant),
         bukan cuma sale_order_ids milik diri sendiri -- supaya currency
         variant yang dibuat SETELAH Jobsheet ada tetap kebagian analytic
@@ -416,40 +416,40 @@ class FreightQuotation(models.AbstractModel):
         ambigu), sengaja tidak auto-pilih salah satu -- lebih baik tidak
         mengisi analytic_distribution sama sekali daripada menebak."""
         self.ensure_one()
-        if hasattr(self, "sea_hbl_id") and self.sea_hbl_id and self.sea_hbl_id.analytic_account_id:
-            return self.sea_hbl_id.analytic_account_id
-        hbls = self._get_commercial_group_jobsheets("freight.sea.hbl")
+        if hasattr(self, "sea_job_id") and self.sea_job_id and self.sea_job_id.analytic_account_id:
+            return self.sea_job_id.analytic_account_id
+        hbls = self._get_commercial_group_jobsheets("freight.sea.job")
         if len(hbls) == 1 and hbls.analytic_account_id:
             return hbls.analytic_account_id
-        if self.env.context.get("default_sea_hbl_id"):
-            hbl = self.env["freight.sea.hbl"].browse(self.env.context.get("default_sea_hbl_id"))
+        if self.env.context.get("default_sea_job_id"):
+            hbl = self.env["freight.sea.job"].browse(self.env.context.get("default_sea_job_id"))
             if hbl and hbl.analytic_account_id:
                 return hbl.analytic_account_id
         return False
 
-    def _get_air_hawb_analytic_account(self):
-        """Mirror _get_sea_hbl_analytic_account untuk Air -- FF-73, menutup
+    def _get_air_job_analytic_account(self):
+        """Mirror _get_sea_job_analytic_account untuk Air -- FF-73, menutup
         gap yang sebelumnya cuma ada di sisi Sea (Follow-up B)."""
         self.ensure_one()
-        if hasattr(self, "air_hawb_id") and self.air_hawb_id and self.air_hawb_id.analytic_account_id:
-            return self.air_hawb_id.analytic_account_id
-        hawbs = self._get_commercial_group_jobsheets("freight.air.hawb")
+        if hasattr(self, "air_job_id") and self.air_job_id and self.air_job_id.analytic_account_id:
+            return self.air_job_id.analytic_account_id
+        hawbs = self._get_commercial_group_jobsheets("freight.air.job")
         if len(hawbs) == 1 and hawbs.analytic_account_id:
             return hawbs.analytic_account_id
-        if self.env.context.get("default_air_hawb_id"):
-            hawb = self.env["freight.air.hawb"].browse(self.env.context.get("default_air_hawb_id"))
+        if self.env.context.get("default_air_job_id"):
+            hawb = self.env["freight.air.job"].browse(self.env.context.get("default_air_job_id"))
             if hawb and hawb.analytic_account_id:
                 return hawb.analytic_account_id
         return False
 
     def _prepare_invoice(self):
         invoice_vals = super()._prepare_invoice()
-        if hasattr(self, "sea_hbl_id") and self.sea_hbl_id:
-            invoice_vals["sea_hbl_id"] = self.sea_hbl_id.id
+        if hasattr(self, "sea_job_id") and self.sea_job_id:
+            invoice_vals["sea_job_id"] = self.sea_job_id.id
         else:
-            hbl = self.env["freight.sea.hbl"].search([("sale_order_ids", "=", self.id)], limit=1)
+            hbl = self.env["freight.sea.job"].search([("sale_order_ids", "=", self.id)], limit=1)
             if hbl:
-                invoice_vals["sea_hbl_id"] = hbl.id
+                invoice_vals["sea_job_id"] = hbl.id
         return invoice_vals
 
     def get_report_logo_src(self):
@@ -481,18 +481,18 @@ class SaleOrderQuotation(models.Model):
     # dipakai bersama oleh resolver analytic (Masalah 1), smart button
     # (Masalah 2), dan sync sale_order_ids mirror (Masalah 3).
     _COMMERCIAL_GROUP_BOOKING_MODELS = ("freight.sea.booking", "freight.air.booking")
-    _COMMERCIAL_GROUP_JOBSHEET_MODELS = ("freight.sea.hbl", "freight.air.hawb")
+    _COMMERCIAL_GROUP_JOBSHEET_MODELS = ("freight.sea.job", "freight.air.job")
 
     # FF-73 UAT fix (Masalah 2): field lokal di sale.order (kalau ada) yang
     # jadi compatibility mirror dari Booking/Jobsheet canonical -- parity
     # dengan air_booking_ids milik Air, yang sudah terbukti langsung fresh
     # di form browser (lewat copy() field inheritance + write eksplisit),
-    # tanpa perlu reload. Air Jobsheet (air_hawb_id, Many2one) sengaja TIDAK
+    # tanpa perlu reload. Air Jobsheet (air_job_id, Many2one) sengaja TIDAK
     # dimasukkan di sini -- cardinality-nya singular by design dan sudah
     # ditangani lifecycle Air sendiri (lihat AirQuotation), jangan disentuh.
     _COMMERCIAL_GROUP_LOCAL_MIRROR_FIELDS = {
         "freight.sea.booking": "booking_ids",
-        "freight.sea.hbl": "hbl_ids",
+        "freight.sea.job": "sea_job_ids",
     }
 
     original_quotation_id = fields.Many2one(
@@ -518,29 +518,27 @@ class SaleOrderQuotation(models.Model):
             rec.variant_count = len(root.variant_ids)
 
     def _get_commercial_group_jobsheets(self, jobsheet_model):
-        """FF-73: resolve Jobsheet (freight.sea.hbl / freight.air.hawb).
+        """FF-75: resolve Job (freight.sea.job / freight.air.job) milik
+        commercial group quotation ini.
 
-        Canonical-first, legacy-fallback -- BUKAN union setara. root_quotation_id
-        adalah source of truth commercial group; sale_order_ids cuma dipakai
-        kalau canonical benar-benar kosong (data lama sebelum FF-73 yang belum
-        pernah punya root_quotation_id sama sekali), supaya data legacy yang
-        stale tidak ikut mencemari hasil canonical begitu root_quotation_id
-        sudah terisi.
+        Canonical-first, legacy-fallback -- BUKAN union setara.
+        source_quotation_id adalah source of truth: setiap Job (Master
+        maupun House) menyimpan source-nya SENDIRI secara langsung saat
+        dibuat (dari Booking.source_quotation_id untuk House pertama, dari
+        Quotation aktif untuk Add-to-Master/Import) -- resolver ini SENGAJA
+        tidak lagi ikut mengecek booking_id.source_quotation_id supaya tidak
+        memaksa seluruh House di bawah satu Master/Booking mengikuti
+        source_quotation_id yang sama (FF-75, House boleh punya commercial
+        root sendiri-sendiri).
 
-        1. Canonical: root_quotation_id langsung di Jobsheet (direct convert)
-           ATAU booking_id.root_quotation_id (export lewat Booking).
+        1. Canonical: source_quotation_id langsung di Job.
         2. Fallback (hanya jika canonical kosong): sale_order_ids berisi
            salah satu anggota commercial group (root ATAU variant-nya --
            bukan cuma diri sendiri), untuk data lama yang belum di-backfill.
         """
         self.ensure_one()
         root = self.original_quotation_id or self
-        canonical_domain = [
-            "|",
-            ("root_quotation_id", "=", root.id),
-            ("booking_id.root_quotation_id", "=", root.id),
-        ]
-        canonical = self.env[jobsheet_model].search(canonical_domain)
+        canonical = self.env[jobsheet_model].search([("source_quotation_id", "=", root.id)])
         if canonical:
             return canonical
         group_ids = (root | root.variant_ids).ids
@@ -549,17 +547,17 @@ class SaleOrderQuotation(models.Model):
     def _get_commercial_group_bookings(self, booking_model):
         """Sama seperti _get_commercial_group_jobsheets, untuk Booking
         (freight.sea.booking / freight.air.booking) -- Booking tidak punya
-        booking_id sendiri, jadi canonical cukup root_quotation_id langsung.
+        booking_id sendiri, jadi canonical cukup source_quotation_id langsung.
 
         FF-73 UAT fix (Bug 1): canonical-first, legacy-fallback (sale_order_ids)
         sama seperti _get_commercial_group_jobsheets -- supaya Booking lama
-        yang belum sempat di-backfill root_quotation_id-nya tetap resolve,
+        yang belum sempat di-backfill source_quotation_id-nya tetap resolve,
         dan supaya resolver ini (dipakai booking_count/action_view_bookings/
         guard duplicate conversion) tidak balik bergantung pada booking_ids/
         air_booking_ids milik record quotation yang sedang dibuka."""
         self.ensure_one()
         root = self.original_quotation_id or self
-        canonical = self.env[booking_model].search([("root_quotation_id", "=", root.id)])
+        canonical = self.env[booking_model].search([("source_quotation_id", "=", root.id)])
         if canonical:
             return canonical
         group_ids = (root | root.variant_ids).ids
@@ -568,7 +566,7 @@ class SaleOrderQuotation(models.Model):
     def _sync_sale_order_ids_mirror(self):
         """FF-73 Masalah 3: sale_order_ids pada Booking/Jobsheet tetap
         dipertahankan sebagai compatibility mirror untuk finance/analytic/
-        invoice -- root_quotation_id + variant_ids tetap source of truth
+        invoice -- source_quotation_id + variant_ids tetap source of truth
         commercial group. Dipanggil setiap kali currency variant baru
         dibuat, supaya variant tersebut otomatis ikut tercermin di
         sale_order_ids Booking/Jobsheet yang sudah ada -- tidak lagi
@@ -594,9 +592,9 @@ class SaleOrderQuotation(models.Model):
         tulis juga arah sebaliknya (SO->Booking) ke field lokal `self` kalau
         model tersebut punya compatibility mirror field (lihat
         _COMMERCIAL_GROUP_LOCAL_MIRROR_FIELDS) -- supaya `self.booking_ids` /
-        `self.hbl_ids` langsung merepresentasikan Booking/Jobsheet canonical
+        `self.sea_job_ids` langsung merepresentasikan Booking/Jobsheet canonical
         yang sama, persis seperti `air_booking_ids` milik Air. Ini murni
-        compatibility mirror; canonical resolver (root_quotation_id/
+        compatibility mirror; canonical resolver (source_quotation_id/
         booking_id) tetap tidak berubah dan tidak digantikan."""
         self.ensure_one()
         if not records:
@@ -610,14 +608,14 @@ class SaleOrderQuotation(models.Model):
             setattr(self, mirror_field, [(4, rec_id) for rec_id in missing.ids])
 
     _COMMERCIAL_GROUP_DOWNSTREAM_COUNT_FIELDS = (
-        "booking_count", "hbl_count", "air_booking_count", "hawb_count",
+        "booking_count", "sea_job_count", "air_booking_count", "air_job_count",
     )
 
     def _invalidate_commercial_group_downstream_counts(self):
-        """FF-73 UAT fix (stale count): booking_count/hbl_count/air_booking_count/
-        hawb_count di sale.order dihitung lewat live search/relation lintas
+        """FF-73 UAT fix (stale count): booking_count/sea_job_count/air_booking_count/
+        air_job_count di sale.order dihitung lewat live search/relation lintas
         record (commercial group), tapi @api.depends-nya hanya mengacu ke
-        field lokal record itu sendiri (mis. booking_ids, sea_hbl_id).
+        field lokal record itu sendiri (mis. booking_ids, sea_job_id).
         Akibatnya, saat variant baru dibuat lalu _sync_sale_order_ids_mirror
         menulis sale_order_ids di Booking/Jobsheet milik member group LAIN,
         ORM tidak tahu compute value yang sudah ke-cache di record C
@@ -741,35 +739,35 @@ class SaleOrderQuotation(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    def _get_sea_hbl_analytic_account(self):
+    def _get_sea_job_analytic_account(self):
         self.ensure_one()
-        if self.order_id and hasattr(self.order_id, "_get_sea_hbl_analytic_account"):
-            acc = self.order_id._get_sea_hbl_analytic_account()
+        if self.order_id and hasattr(self.order_id, "_get_sea_job_analytic_account"):
+            acc = self.order_id._get_sea_job_analytic_account()
             if acc:
                 return acc
-        if self.env.context.get("default_sea_hbl_id"):
-            hbl = self.env["freight.sea.hbl"].browse(self.env.context.get("default_sea_hbl_id"))
+        if self.env.context.get("default_sea_job_id"):
+            hbl = self.env["freight.sea.job"].browse(self.env.context.get("default_sea_job_id"))
             if hbl and hbl.analytic_account_id:
                 return hbl.analytic_account_id
         return False
 
-    def _get_air_hawb_analytic_account(self):
-        """Mirror _get_sea_hbl_analytic_account untuk Air -- FF-73."""
+    def _get_air_job_analytic_account(self):
+        """Mirror _get_sea_job_analytic_account untuk Air -- FF-73."""
         self.ensure_one()
-        if self.order_id and hasattr(self.order_id, "_get_air_hawb_analytic_account"):
-            acc = self.order_id._get_air_hawb_analytic_account()
+        if self.order_id and hasattr(self.order_id, "_get_air_job_analytic_account"):
+            acc = self.order_id._get_air_job_analytic_account()
             if acc:
                 return acc
-        if self.env.context.get("default_air_hawb_id"):
-            hawb = self.env["freight.air.hawb"].browse(self.env.context.get("default_air_hawb_id"))
+        if self.env.context.get("default_air_job_id"):
+            hawb = self.env["freight.air.job"].browse(self.env.context.get("default_air_job_id"))
             if hawb and hawb.analytic_account_id:
                 return hawb.analytic_account_id
         return False
 
     def _get_freight_analytic_account(self):
-        return self._get_sea_hbl_analytic_account() or self._get_air_hawb_analytic_account()
+        return self._get_sea_job_analytic_account() or self._get_air_job_analytic_account()
 
-    @api.depends("product_id", "order_id.sea_hbl_id", "order_id.air_hawb_id")
+    @api.depends("product_id", "order_id.sea_job_id", "order_id.air_job_id")
     def _compute_analytic_distribution(self):
         super()._compute_analytic_distribution()
         for line in self:

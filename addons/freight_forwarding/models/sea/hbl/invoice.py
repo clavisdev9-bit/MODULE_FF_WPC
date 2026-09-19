@@ -2,12 +2,12 @@ from odoo import fields, models
 
 
 class SeaHBLInvoice(models.Model):
-    _name = "freight.sea.hbl.invoice"
+    _name = "freight.sea.job.invoice"
     _description = "Sea Jobsheet Invoice"
-    _rec_name = "hbl_id"
+    _rec_name = "job_id"
 
-    hbl_id = fields.Many2one(
-        "freight.sea.hbl",
+    job_id = fields.Many2one(
+        "freight.sea.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",

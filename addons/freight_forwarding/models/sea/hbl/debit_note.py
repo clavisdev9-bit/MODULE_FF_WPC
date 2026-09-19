@@ -2,12 +2,12 @@ from odoo import fields, models
 
 
 class SeaHBLDebitNote(models.Model):
-    _name = "freight.sea.hbl.debit.note"
+    _name = "freight.sea.job.debit.note"
     _description = "Sea Jobsheet Debit Note"
-    _rec_name = "hbl_id"
+    _rec_name = "job_id"
 
-    hbl_id = fields.Many2one(
-        "freight.sea.hbl",
+    job_id = fields.Many2one(
+        "freight.sea.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",

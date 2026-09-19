@@ -9,4 +9,5 @@ from . import (
     test_currency_variant_view,
     test_generic_duplicate_commercial_group,
     test_ff73_migration_regression,
+    test_ff75_hierarchy_followup,
 )
