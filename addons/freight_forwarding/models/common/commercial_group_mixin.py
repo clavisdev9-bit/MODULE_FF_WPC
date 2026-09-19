@@ -6,10 +6,18 @@ class FreightCommercialGroupMixin(models.AbstractModel):
     """Mixin bersama untuk Booking dan Job (Sea & Air) — FF-73 / FF-75.
 
     `source_quotation_id` menyimpan Quotation yang menjadi SOURCE ketika
-    record ini pertama dibuat — bukan commercial
-    root untuk seluruh keluarga Master/House. Setiap record (Booking, atau
-    Job Master/House) menyimpan source-nya sendiri; House tidak dipaksa
-    mengikuti source_quotation_id milik Booking/Master-nya (FF-75).
+    record ini pertama dibuat — bukan commercial root untuk seluruh
+    keluarga Master/House.
+
+    Booking dan House bisa punya `source_quotation_id` sendiri (House
+    tidak dipaksa mengikuti source_quotation_id milik Booking/Master-nya,
+    FF-75). Master TIDAK memiliki canonical commercial source apa pun --
+    `source_quotation_id` Master selalu kosong dan TIDAK boleh di-resolve
+    lewat Booking (Master bukan commercial owner Quotation). Satu
+    pengecualian: Air Direct (di luar scope hierarchy Master/House FF-75)
+    punya fallback khusus lewat `booking_id._get_source_quotation()` kalau
+    `source_quotation_id`-nya sendiri kosong -- lihat
+    `freight.air.job._get_source_quotation()`.
 
     Field ini tetap dipakai sebagai anchor untuk mendapatkan commercial group
     (root + `root.variant_ids`) secara live milik record itu SENDIRI.

@@ -55,6 +55,14 @@ class SeaAddToMasterWizard(models.TransientModel):
         UX, RPC/API lain yang menulis master_job_id langsung harus tetap
         ditolak kalau kandidat tidak valid."""
         self.ensure_one()
+        quotation = self.quotation_id
+        if not quotation.is_freight_quotation:
+            raise UserError("Quotation yang dipilih bukan Freight Quotation.")
+        if quotation.freight_business_type != "sea":
+            raise UserError("Add to Master Sea hanya berlaku untuk Quotation Sea.")
+        if quotation.freight_type != "export":
+            raise UserError("Add to Master hanya berlaku untuk Quotation Export.")
+
         master = self.master_job_id
         if master.record_level != "master":
             raise UserError("Job yang dipilih harus berupa Master Job.")

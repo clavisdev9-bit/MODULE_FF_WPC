@@ -53,6 +53,14 @@ class AirAddToMasterWizard(models.TransientModel):
         UX, RPC/API lain yang menulis master_job_id langsung harus tetap
         ditolak kalau kandidat tidak valid."""
         self.ensure_one()
+        quotation = self.quotation_id
+        if not quotation.is_freight_quotation:
+            raise UserError("Quotation yang dipilih bukan Freight Quotation.")
+        if quotation.freight_business_type != "air":
+            raise UserError("Add to Master Air hanya berlaku untuk Quotation Air.")
+        if quotation.freight_type != "export":
+            raise UserError("Add to Master hanya berlaku untuk Quotation Export.")
+
         master = self.master_job_id
         if master.shipment_type != "master":
             raise UserError("Job yang dipilih harus berupa Master Job.")

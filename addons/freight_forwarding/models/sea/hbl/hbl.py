@@ -26,8 +26,9 @@ class SeaHBL(models.Model):
         tracking=True,
         help="Master: Job penuh (BL/Booking, shipment info, costing, dst. "
              "sendiri) yang berperan sebagai consolidation point, bisa "
-             "menaungi banyak House. House: Job individual, bisa berdiri "
-             "sendiri atau menjadi child dari satu Master lewat master_job_id.",
+             "menaungi banyak House. House: Job individual yang WAJIB "
+             "berada di bawah satu Master lewat master_job_id -- House "
+             "tidak boleh berdiri sendiri.",
     )
     master_job_id = fields.Many2one(
         "freight.sea.job",

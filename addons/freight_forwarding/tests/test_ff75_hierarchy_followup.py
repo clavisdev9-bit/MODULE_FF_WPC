@@ -323,6 +323,79 @@ class TestFF75AddToMasterWizardHardening(FreightTestBase):
         with self.assertRaises(UserError):
             wizard.action_add_to_master()
 
+    def _create_air_quotation(self, **kwargs):
+        vals = {
+            "is_freight_quotation": True,
+            "freight_business_type": "air",
+            "freight_type": "export",
+            "partner_id": self.partner.id,
+        }
+        vals.update(kwargs)
+        return self.env["sale.order"].create(vals)
+
+    def test_wizard_rejects_import_quotation_direct_call(self):
+        """Section 1/2: proteksi bukan cuma UI/action_open -- direct-call ke
+        action_add_to_master() dengan Quotation Import harus tetap ditolak."""
+        quotation = self._create_quotation(freight_type="import")
+        master = self._create_master()
+        wizard = self._create_wizard(quotation, master)
+        with self.assertRaises(UserError):
+            wizard.action_add_to_master()
+
+    def test_wizard_rejects_air_quotation_on_sea_wizard(self):
+        quotation = self._create_air_quotation()
+        master = self._create_master()
+        wizard = self._create_wizard(quotation, master)
+        with self.assertRaises(UserError):
+            wizard.action_add_to_master()
+
+
+class TestFF75AirAddToMasterQuotationGuard(FreightTestBase):
+    """Section 2: freight.air.add.to.master.wizard harus menolak Quotation
+    yang bukan Freight/bukan Air/bukan Export, langsung lewat backend
+    action_add_to_master() -- bukan cuma UI/action_open/domain."""
+
+    def _create_air_quotation(self, **kwargs):
+        vals = {
+            "is_freight_quotation": True,
+            "freight_business_type": "air",
+            "freight_type": "export",
+            "partner_id": self.partner.id,
+        }
+        vals.update(kwargs)
+        return self.env["sale.order"].create(vals)
+
+    def _create_air_master(self, **kwargs):
+        vals = {
+            "shipment_type": "master",
+            "freight_type": "export",
+            "company_id": self.env.company.id,
+        }
+        vals.update(kwargs)
+        return self.env["freight.air.job"].create(vals)
+
+    def _create_wizard(self, quotation, master):
+        return self.env["freight.air.add.to.master.wizard"].create({
+            "quotation_id": quotation.id,
+            "freight_type": quotation.freight_type,
+            "company_id": quotation.company_id.id,
+            "master_job_id": master.id,
+        })
+
+    def test_wizard_rejects_import_quotation_direct_call(self):
+        quotation = self._create_air_quotation(freight_type="import")
+        master = self._create_air_master()
+        wizard = self._create_wizard(quotation, master)
+        with self.assertRaises(UserError):
+            wizard.action_add_to_master()
+
+    def test_wizard_rejects_sea_quotation_on_air_wizard(self):
+        quotation = self._create_quotation()
+        master = self._create_air_master()
+        wizard = self._create_wizard(quotation, master)
+        with self.assertRaises(UserError):
+            wizard.action_add_to_master()
+
 
 class TestFF75SourceQuotationResolverSemantic(FreightTestBase):
     """Audit semantic consistency _get_source_quotation(): Master (Sea &
