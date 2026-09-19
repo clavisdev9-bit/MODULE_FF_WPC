@@ -43,16 +43,16 @@ class TestSeaBookingFields(FreightTestBase):
 
 
 class TestSeaBookingConvertToHbl(FreightTestBase):
-    """Verifikasi action_convert_to_hbl — konversi booking ke HBL."""
+    """Verifikasi action_create_job — konversi booking ke HBL."""
 
     def test_convert_creates_hbl(self):
-        """action_convert_to_hbl membuat satu HBL baru."""
+        """action_create_job membuat satu HBL baru."""
         booking = self._create_booking(freight_type="export")
-        self.assertEqual(booking.hbl_count, 0)
+        self.assertEqual(booking.sea_job_count, 0)
 
-        booking.action_convert_to_hbl()
+        booking.action_create_job()
 
-        self.assertEqual(booking.hbl_count, 1,
+        self.assertEqual(booking.sea_job_count, 1,
             msg="Harus ada tepat 1 HBL setelah convert")
 
     def test_convert_hbl_inherits_freight_type(self):
@@ -60,11 +60,11 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
         booking_export = self._create_booking(freight_type="export")
         booking_import = self._create_booking(freight_type="import")
 
-        booking_export.action_convert_to_hbl()
-        booking_import.action_convert_to_hbl()
+        booking_export.action_create_job()
+        booking_import.action_create_job()
 
-        hbl_export = booking_export.hbl_ids[0]
-        hbl_import = booking_import.hbl_ids[0]
+        hbl_export = booking_export.sea_job_ids[0]
+        hbl_import = booking_import.sea_job_ids[0]
 
         # Kunci: HBL pakai casing yang sama persis (lowercase) dengan booking
         self.assertEqual(hbl_export.freight_type, "export",
@@ -73,13 +73,13 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
             msg="HBL harus inherit 'import' langsung dari booking")
 
     def test_convert_idempotent(self):
-        """Memanggil action_convert_to_hbl dua kali tidak membuat HBL baru."""
+        """Memanggil action_create_job dua kali tidak membuat HBL baru."""
         booking = self._create_booking()
 
-        booking.action_convert_to_hbl()
-        booking.action_convert_to_hbl()  # panggil lagi
+        booking.action_create_job()
+        booking.action_create_job()  # panggil lagi
 
-        self.assertEqual(booking.hbl_count, 1,
+        self.assertEqual(booking.sea_job_count, 1,
             msg="Harus tetap 1 HBL meski convert dipanggil dua kali")
 
     def test_convert_copies_cargo_info(self):
@@ -88,19 +88,19 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
         self._create_booking_cargo_info(booking, quantity=5)
         self._create_booking_cargo_info(booking, quantity=3)
 
-        booking.action_convert_to_hbl()
+        booking.action_create_job()
 
-        hbl = booking.hbl_ids[0]
+        hbl = booking.sea_job_ids[0]
         self.assertEqual(len(hbl.cargo_info_ids), 2,
             msg="Semua cargo info dari booking harus ter-copy ke HBL")
 
     def test_convert_returns_action_to_hbl(self):
-        """action_convert_to_hbl mengembalikan action window ke HBL."""
+        """action_create_job mengembalikan action window ke HBL."""
         booking = self._create_booking()
-        result = booking.action_convert_to_hbl()
+        result = booking.action_create_job()
 
-        self.assertEqual(result.get("res_model"), "freight.sea.hbl",
-            msg="Action harus mengarah ke model freight.sea.hbl")
+        self.assertEqual(result.get("res_model"), "freight.sea.job",
+            msg="Action harus mengarah ke model freight.sea.job")
         self.assertEqual(result.get("view_mode"), "form")
 
     def test_convert_copies_bl_info(self):
@@ -110,9 +110,9 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
             notify_party_id=self.partner.id,
             notify_same_as_consignee=True,
         )
-        booking.action_convert_to_hbl()
+        booking.action_create_job()
 
-        hbl = booking.hbl_ids[0]
+        hbl = booking.sea_job_ids[0]
         self.assertEqual(hbl.consignee_id, self.partner)
         self.assertEqual(hbl.notify_party_id, self.partner)
         self.assertTrue(hbl.notify_same_as_consignee)
@@ -123,9 +123,9 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
             "name": "FCL / FCL",
         })
         booking = self._create_booking(shipment_type_id=shipment_type.id)
-        booking.action_convert_to_hbl()
+        booking.action_create_job()
 
-        hbl = booking.hbl_ids[0]
+        hbl = booking.sea_job_ids[0]
         self.assertEqual(hbl.shipment_type_id, shipment_type,
             msg="shipment_type_id harus ter-copy dari Booking ke HBL")
 
@@ -137,9 +137,9 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
             depot_code="DPT01",
             depot_address="Jl. Depot Raya No. 1",
         )
-        booking.action_convert_to_hbl()
+        booking.action_create_job()
 
-        hbl = booking.hbl_ids[0]
+        hbl = booking.sea_job_ids[0]
         self.assertEqual(hbl.customer_ref, "CUST-REF-12345",
             msg="customer_reference Booking harus tersalin ke customer_ref HBL")
         self.assertEqual(hbl.depot_id, "DEPOT-A")
@@ -163,9 +163,9 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
             delivery_type_id=self.delivery_type.id,
             shipment_type_id=shipment_type.id,
         )
-        booking.action_convert_to_hbl()
+        booking.action_create_job()
 
-        hbl = booking.hbl_ids[0]
+        hbl = booking.sea_job_ids[0]
         self.assertEqual(hbl.shipper_id, shipper)
         self.assertEqual(hbl.consignee_id, consignee)
         self.assertEqual(hbl.notify_party_id, notify)

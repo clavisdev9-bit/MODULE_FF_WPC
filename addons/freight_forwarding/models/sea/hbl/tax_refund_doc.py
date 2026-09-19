@@ -2,12 +2,12 @@ from odoo import fields, models
 
 
 class SeaHBLTaxRefundDoc(models.Model):
-    _name = "freight.sea.hbl.tax.refund.doc"
+    _name = "freight.sea.job.tax.refund.doc"
     _description = "Sea Jobsheet Tax Refund Doc"
-    _rec_name = "hbl_id"
+    _rec_name = "job_id"
 
-    hbl_id = fields.Many2one(
-        "freight.sea.hbl",
+    job_id = fields.Many2one(
+        "freight.sea.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",

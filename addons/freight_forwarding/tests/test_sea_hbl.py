@@ -26,13 +26,13 @@ class TestSeaHblOndelete(FreightTestBase):
             freight_type="import",
             quotation_id=quotation.id,
         )
-        hbl_id = hbl.id
+        job_id = hbl.id
 
         # Act: hapus quotation
         quotation.unlink()
 
         # Assert: HBL masih ada
-        surviving_hbl = self.env["freight.sea.hbl"].browse(hbl_id)
+        surviving_hbl = self.env["freight.sea.job"].browse(job_id)
         self.assertTrue(surviving_hbl.exists(),
             msg="HBL harus tetap ada setelah quotation dihapus")
 
@@ -44,11 +44,11 @@ class TestSeaHblOndelete(FreightTestBase):
         """Menghapus booking HARUS menghapus HBL (cascade tetap berlaku di booking_id)."""
         booking = self._create_booking()
         hbl = self._create_hbl(booking=booking)
-        hbl_id = hbl.id
+        job_id = hbl.id
 
         booking.unlink()
 
-        surviving_hbl = self.env["freight.sea.hbl"].browse(hbl_id)
+        surviving_hbl = self.env["freight.sea.job"].browse(job_id)
         self.assertFalse(surviving_hbl.exists(),
             msg="HBL harus terhapus saat booking-nya dihapus (cascade)")
 

@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.10",
+    "version": "18.0.1.11",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -64,10 +64,12 @@
         # Sea Quotation
         "views/sea/sales/quotation.xml",
         "views/sea/sales/migration_wizard.xml",
+        "views/sea/sales/add_to_master_wizard.xml",
 
         "views/sea/sales/rate_enquiry_actions.xml",
         # Air Quotation
         "views/air/sales/quotation.xml",
+        "views/air/sales/add_to_master_wizard.xml",
         "views/sea/booking/booking.xml",
         "views/sea/booking/extra_info_views.xml",
         "views/sea/booking/cargo_info.xml",

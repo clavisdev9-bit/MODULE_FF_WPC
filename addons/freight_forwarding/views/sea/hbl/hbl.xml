@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="view_sea_hbl_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.list</field>
-        <field name="model">freight.sea.hbl</field>
+        <field name="name">freight.sea.job.list</field>
+        <field name="model">freight.sea.job</field>
         <field name="arch" type="xml">
             <list>
+                <field name="job_no" />
+                <field name="record_level" widget="badge" decoration-success="record_level == 'master'" decoration-info="record_level == 'house'" />
+                <field name="master_job_id" />
                 <field name="hbl_no" />
                 <field name="freight_type" />
                 <field name="container_type" />
                 <field name="sale_order_ids" widget="many2many_tags" />
                 <field name="booking_id" />
                 <field name="customer_id" />
-                <field name="job_no" />
                 <field name="job_date" />
             </list>
         </field>
     </record>
 
     <record id="view_sea_hbl_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.form</field>
-        <field name="model">freight.sea.hbl</field>
+        <field name="name">freight.sea.job.form</field>
+        <field name="model">freight.sea.job</field>
         <field name="arch" type="xml">
             <form string="Sea Jobsheet">
                 <header>
@@ -60,16 +62,19 @@
                     </h1>
                     <group string="Header Information">
                         <group>
+                            <field name="record_level" widget="radio" options="{'horizontal': true}" />
+                            <field name="master_job_id" invisible="record_level != 'house'" />
                             <field name="freight_type" />
                             <field name="container_type" />
-                            <field name="booking_id" />
-                            <field name="master_job_no" />
+                            <field name="booking_id" invisible="record_level == 'house'" />
+                            <field name="master_job_no" invisible="record_level == 'house'" />
                             <field name="job_date" />
                             <field name="job_city_id" />
                         </group>
                         <group>
                             <field name="no_of_original_bl" />
-                            <field name="mbl_no" />
+                            <field name="mbl_no" invisible="record_level == 'house'" />
+                            <field name="effective_mbl_no" invisible="record_level != 'house'" />
                             <field name="hbl_no" />
                             <field name="bl_surrendered" />
                             <field name="commodity_id" />
@@ -233,7 +238,7 @@
                         </page>
                         <page string="Purchase Order">
                             <field name="purchase_order_ids" nolabel="1"
-                                context="{'default_sea_hbl_id': id}">
+                                context="{'default_sea_job_id': id}">
                                 <list editable="bottom" open_form_view="1">
                                     <field name="name" />
                                     <field name="partner_id" />
@@ -245,11 +250,11 @@
                         </page>
                         <page string="Sales Orders">
                             <!-- FF-73: sale_order_ids sekarang cuma compatibility mirror dari
-                                 commercial group (root_quotation_id + variant_ids); currency
+                                 commercial group (source_quotation_id + variant_ids); currency
                                  variant baru otomatis ikut tersinkron (lihat action_create_currency_variant),
                                  jadi tab ini display-only, bukan lagi jalur manual-add. -->
                             <field name="sale_order_ids" nolabel="1" readonly="1"
-                                context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea', 'default_freight_type': 'import', 'default_sea_hbl_id': id}">
+                                context="{'form_view_ref': 'freight_forwarding.view_sea_quotation_form', 'default_is_freight_quotation': True, 'default_freight_business_type': 'sea', 'default_freight_type': 'import', 'default_sea_job_id': id}">
                                 <list editable="bottom" open_form_view="1">
                                     <field name="name" />
                                     <field name="currency_id" />
@@ -260,6 +265,17 @@
                         </page>
                         <page string="Tax Refund Doc">
                             <field name="tax_refund_doc_ids" nolabel="1" />
+                        </page>
+                        <page string="House Jobs" invisible="record_level != 'master'">
+                            <field name="house_job_ids" nolabel="1">
+                                <list>
+                                    <field name="job_no" />
+                                    <field name="hbl_no" />
+                                    <field name="customer_id" />
+                                    <field name="source_quotation_id" />
+                                    <field name="state" />
+                                </list>
+                            </field>
                         </page>
                         <page string="Document List">
                             <notebook>
@@ -297,8 +313,8 @@
     </record>
 
     <record id="view_sea_hbl_search" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.search</field>
-        <field name="model">freight.sea.hbl</field>
+        <field name="name">freight.sea.job.search</field>
+        <field name="model">freight.sea.job</field>
         <field name="arch" type="xml">
             <search>
                 <field name="hbl_no" string="Jobsheet No." />
@@ -313,22 +329,25 @@
                     domain="[('freight_type', '=', 'export')]" />
                 <filter name="filter_fcl" string="FCL" domain="[('container_type', '=', 'fcl')]" />
                 <filter name="filter_lcl" string="LCL" domain="[('container_type', '=', 'lcl')]" />
-                <filter name="filter_consol" string="Consol"
-                    domain="[('container_type', '=', 'consol')]" />
+                <separator />
+                <filter name="filter_master" string="Master"
+                    domain="[('record_level', '=', 'master')]" />
+                <filter name="filter_house" string="House"
+                    domain="[('record_level', '=', 'house')]" />
             </search>
         </field>
     </record>
 
     <record id="action_sea_hbl" model="ir.actions.act_window">
         <field name="name">Sea Jobsheet</field>
-        <field name="res_model">freight.sea.hbl</field>
+        <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
     </record>
 
     <record id="action_sea_hbl_import_fcl" model="ir.actions.act_window">
         <field name="name">Import Jobsheet FCL</field>
-        <field name="res_model">freight.sea.hbl</field>
+        <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'fcl')]</field>
@@ -336,23 +355,15 @@
 
     <record id="action_sea_hbl_import_lcl" model="ir.actions.act_window">
         <field name="name">Import Jobsheet LCL</field>
-        <field name="res_model">freight.sea.hbl</field>
+        <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'lcl')]</field>
     </record>
 
-    <record id="action_sea_hbl_import_consol" model="ir.actions.act_window">
-        <field name="name">Import Jobsheet Consol</field>
-        <field name="res_model">freight.sea.hbl</field>
-        <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search" />
-        <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'consol')]</field>
-    </record>
-
     <record id="action_sea_hbl_export_fcl" model="ir.actions.act_window">
         <field name="name">Export Jobsheet FCL</field>
-        <field name="res_model">freight.sea.hbl</field>
+        <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'fcl')]</field>
@@ -360,17 +371,10 @@
 
     <record id="action_sea_hbl_export_lcl" model="ir.actions.act_window">
         <field name="name">Export Jobsheet LCL</field>
-        <field name="res_model">freight.sea.hbl</field>
+        <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'lcl')]</field>
     </record>
 
-    <record id="action_sea_hbl_export_consol" model="ir.actions.act_window">
-        <field name="name">Export Jobsheet Consol</field>
-        <field name="res_model">freight.sea.hbl</field>
-        <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_sea_hbl_search" />
-        <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'consol')]</field>
-    </record>
 </odoo>

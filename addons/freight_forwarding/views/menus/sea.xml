@@ -23,10 +23,6 @@
         parent="menu_sub_parent_sea_import"
         action="action_sea_hbl_import_lcl"
         sequence="20" />
-    <menuitem id="menu_sea_import_job_consol" name="Import Job Consol"
-        parent="menu_sub_parent_sea_import"
-        action="action_sea_hbl_import_consol"
-        sequence="30" />
 
     <!-- EXPORT -->
     <menuitem id="menu_sub_parent_sea_export" name="Export"
@@ -56,8 +52,4 @@
         parent="menu_sub_parent_sea_export_job"
         action="action_sea_hbl_export_lcl"
         sequence="20" />
-    <menuitem id="menu_sea_export_job_consol" name="Export Job Consol"
-        parent="menu_sub_parent_sea_export_job"
-        action="action_sea_hbl_export_consol"
-        sequence="30" />
 </odoo>

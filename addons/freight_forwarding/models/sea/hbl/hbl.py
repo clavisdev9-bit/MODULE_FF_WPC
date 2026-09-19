@@ -1,17 +1,47 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class SeaHBL(models.Model):
-    _name = "freight.sea.hbl"
+    _name = "freight.sea.job"
     _inherit = [
         "mail.thread",
         "mail.activity.mixin",
         "freight.sea.shipment.info.mixin",
         "freight.sea.vessel.details.mixin",
         "freight.sea.bl.info.mixin",
+        "freight.commercial.group.mixin",
     ]
-    _description = "Sea Jobsheet"
+    _description = "Sea Job (Master/House)"
     _rec_name = "job_no"
+    _sql_constraints = [
+        ("job_no_uniq", "unique(job_no)", "Job No. harus unik."),
+    ]
+
+    record_level = fields.Selection(
+        [("master", "Master"), ("house", "House")],
+        string="Record Level",
+        default="house",
+        required=True,
+        tracking=True,
+        help="Master: Job penuh (BL/Booking, shipment info, costing, dst. "
+             "sendiri) yang berperan sebagai consolidation point, bisa "
+             "menaungi banyak House. House: Job individual, bisa berdiri "
+             "sendiri atau menjadi child dari satu Master lewat master_job_id.",
+    )
+    master_job_id = fields.Many2one(
+        "freight.sea.job",
+        string="Master Job",
+        domain="[('record_level', '=', 'master'), ('id', '!=', id)]",
+        tracking=True,
+        help="Master Job tempat House ini bergabung. Kosong untuk Master "
+             "itu sendiri dan untuk House yang belum digabungkan.",
+    )
+    house_job_ids = fields.One2many(
+        "freight.sea.job",
+        "master_job_id",
+        string="House Jobs",
+    )
 
     state = fields.Selection(
         [
@@ -63,8 +93,8 @@ class SeaHBL(models.Model):
     port_code = fields.Char(string="Port Code")
     container_seal_ids = fields.Char(string="Container / Seal No.", compute="_compute_container_seal_ids", store=False)
     cargo_line_ids = fields.One2many(
-        "freight.sea.hbl.cargo.info",
-        "hbl_id",
+        "freight.sea.job.cargo.info",
+        "job_id",
         string="Cargo Lines",
         related="cargo_info_ids",
         readonly=True,
@@ -84,7 +114,7 @@ class SeaHBL(models.Model):
         required=True,
     )
     container_type = fields.Selection(
-        selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
+        selection=[("fcl", "FCL"), ("lcl", "LCL")],
         string="Container Type",
         required=True,
     )
@@ -103,6 +133,12 @@ class SeaHBL(models.Model):
     master_job_no = fields.Char(string="Master Job No.")
     no_of_original_bl = fields.Char(string="No. of Original B/L")
     mbl_no = fields.Char(string="MBL No.")
+    effective_mbl_no = fields.Char(
+        string="MBL No. (Effective)",
+        compute="_compute_effective_mbl_no",
+        help="MBL No. Master jika record ini House yang sudah tergabung; "
+             "kalau tidak, MBL No. milik record ini sendiri.",
+    )
     bl_surrendered = fields.Boolean(string="BL Surrendered")
     shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
     delivery_type_id = fields.Many2one("account.incoterms", string="Delivery Type")
@@ -147,17 +183,17 @@ class SeaHBL(models.Model):
 
     sale_order_ids = fields.Many2many("sale.order", string="Sales Orders")
     purchase_order_ids = fields.Many2many("purchase.order", string="Purchase Orders")
-    custom_permit_ids = fields.One2many("freight.sea.hbl.custom.permit", "hbl_id", string="Custom Permit")
-    cargo_info_ids = fields.One2many("freight.sea.hbl.cargo.info", "hbl_id", string="Cargo Info")
-    tax_refund_doc_ids = fields.One2many("freight.sea.hbl.tax.refund.doc", "hbl_id", string="Tax Refund Doc")
-    invoice_ids = fields.One2many("freight.sea.hbl.invoice", "hbl_id", string="Invoice")
-    debit_note_ids = fields.One2many("freight.sea.hbl.debit.note", "hbl_id", string="Debit Note")
-    credit_note_ids = fields.One2many("freight.sea.hbl.credit.note", "hbl_id", string="Credit Note")
-    provision_cost_ids = fields.One2many("freight.sea.hbl.provision.cost", "hbl_id", string="Provision Cost")
-    vendor_invoice_ids = fields.One2many("freight.sea.hbl.vendor.invoice", "hbl_id", string="Vendor Invoice")
-    vendor_debit_note_ids = fields.One2many("freight.sea.hbl.vendor.debit.note", "hbl_id", string="Vendor Debit Note")
-    vendor_credit_note_ids = fields.One2many("freight.sea.hbl.vendor.credit.note", "hbl_id", string="Vendor Credit Note")
-    cash_purchase_ids = fields.One2many("freight.sea.hbl.cash.purchase", "hbl_id", string="Cash Purchase")
+    custom_permit_ids = fields.One2many("freight.sea.job.custom.permit", "job_id", string="Custom Permit")
+    cargo_info_ids = fields.One2many("freight.sea.job.cargo.info", "job_id", string="Cargo Info")
+    tax_refund_doc_ids = fields.One2many("freight.sea.job.tax.refund.doc", "job_id", string="Tax Refund Doc")
+    invoice_ids = fields.One2many("freight.sea.job.invoice", "job_id", string="Invoice")
+    debit_note_ids = fields.One2many("freight.sea.job.debit.note", "job_id", string="Debit Note")
+    credit_note_ids = fields.One2many("freight.sea.job.credit.note", "job_id", string="Credit Note")
+    provision_cost_ids = fields.One2many("freight.sea.job.provision.cost", "job_id", string="Provision Cost")
+    vendor_invoice_ids = fields.One2many("freight.sea.job.vendor.invoice", "job_id", string="Vendor Invoice")
+    vendor_debit_note_ids = fields.One2many("freight.sea.job.vendor.debit.note", "job_id", string="Vendor Debit Note")
+    vendor_credit_note_ids = fields.One2many("freight.sea.job.vendor.credit.note", "job_id", string="Vendor Credit Note")
+    cash_purchase_ids = fields.One2many("freight.sea.job.cash.purchase", "job_id", string="Cash Purchase")
 
     @api.depends("cargo_info_ids")
     def _compute_container_seal_ids(self):
@@ -184,10 +220,103 @@ class SeaHBL(models.Model):
         for rec in self:
             rec.purchase_order_count = len(rec.purchase_order_ids)
 
-    @api.depends("booking_id")
+    @api.depends("booking_id", "master_job_id.booking_id")
     def _compute_booking_count(self):
         for rec in self:
-            rec.booking_count = 1 if rec.booking_id else 0
+            rec.booking_count = 1 if rec._get_effective_booking() else 0
+
+    @api.depends("mbl_no", "master_job_id.mbl_no")
+    def _compute_effective_mbl_no(self):
+        for rec in self:
+            rec.effective_mbl_no = (
+                rec.master_job_id.mbl_no if rec.master_job_id else False
+            ) or rec.mbl_no
+
+    def _get_effective_booking(self):
+        self.ensure_one()
+        return self.booking_id or (
+            self.master_job_id.booking_id if self.master_job_id else self.env["freight.sea.booking"]
+        )
+
+    def _get_source_quotation(self):
+        self.ensure_one()
+        return self.source_quotation_id or (
+            self.booking_id._get_source_quotation() if self.booking_id else False
+        )
+
+    @api.constrains("record_level", "master_job_id")
+    def _check_master_house_hierarchy(self):
+        for rec in self:
+            if rec.record_level == "master" and rec.master_job_id:
+                raise ValidationError("Master Job tidak boleh memiliki Master Job lain (master_job_id harus kosong).")
+            if rec.master_job_id:
+                if rec.master_job_id.id == rec.id:
+                    raise ValidationError("Job tidak boleh menjadi Master Job untuk dirinya sendiri.")
+                if rec.master_job_id.record_level != "master":
+                    raise ValidationError("master_job_id harus menunjuk ke Job dengan Record Level 'Master'.")
+
+    @api.constrains("master_job_id")
+    def _check_fcl_single_house_on_attach(self):
+        for rec in self:
+            master = rec.master_job_id
+            if master and master.container_type == "fcl":
+                other_house_count = self.search_count([
+                    ("master_job_id", "=", master.id),
+                    ("id", "!=", rec.id),
+                ])
+                if other_house_count >= 1:
+                    raise ValidationError(
+                        "Sea FCL (%s) sudah memiliki 1 House Job. Tidak bisa menambahkan House lagi." % master.job_no
+                    )
+
+    @api.constrains("container_type", "house_job_ids")
+    def _check_fcl_single_house_on_master(self):
+        for rec in self:
+            if rec.record_level == "master" and rec.container_type == "fcl" and len(rec.house_job_ids) > 1:
+                raise ValidationError(
+                    "Sea FCL (%s) hanya boleh memiliki maksimal 1 House Job." % rec.job_no
+                )
+
+    @api.constrains("analytic_account_id", "master_job_id")
+    def _check_house_analytic_matches_master(self):
+        """FF-75: invariant keras -- House TIDAK BOLEH punya analytic account
+        yang beda dari Master-nya, lewat jalur apa pun (create/write/RPC).
+        create()/write() di bawah selalu menyamakannya otomatis; constraint
+        ini murni jaring pengaman supaya invariant ini tidak bisa dilanggar
+        diam-diam oleh kode lain di masa depan."""
+        for rec in self:
+            if rec.master_job_id and rec.analytic_account_id != rec.master_job_id.analytic_account_id:
+                raise ValidationError(
+                    "House (%s) tidak boleh memiliki Analytic Account independen -- "
+                    "harus sama dengan Master Job (%s)." % (rec.job_no, rec.master_job_id.job_no)
+                )
+
+    @api.model
+    def _prepare_house_vals_from_quotation(self, quotation, master=False):
+        """FF-75: vals House Job baru, diprefill dari Quotation aktif -- BUKAN
+        dari Booking/Master. Dipakai bersama oleh flow Export (House pertama
+        dari Booking.source_quotation_id), Import (House pertama dari
+        Quotation langsung), dan wizard Add to Master (House tambahan).
+
+        Mapping field mengikuti persis yang sudah ada di
+        _action_convert_to_jobsheet_direct_sea sebelum FF-75 -- tidak
+        menambah mapping baru yang belum punya source existing."""
+        original = quotation.original_quotation_id or quotation
+        all_variants = original | original.variant_ids
+        vals = {
+            "record_level": "house",
+            "sale_order_ids": [(6, 0, all_variants.ids)],
+            "source_quotation_id": original.id,
+            "freight_type": quotation.freight_type,
+            "container_type": quotation.container_type,
+            "customer_id": quotation.partner_id.id if quotation.partner_id else False,
+            "term_payment": quotation.payment_term_id.id if quotation.payment_term_id else False,
+            "job_date": fields.Date.context_today(self),
+            "company_id": quotation.company_id.id if quotation.company_id else self.env.company.id,
+        }
+        if master:
+            vals["master_job_id"] = master.id
+        return vals
 
     @api.onchange("from_city")
     def _onchange_from_city(self):
@@ -226,7 +355,7 @@ class SeaHBL(models.Model):
         view_id = self.env.ref("freight_forwarding.view_sea_quotation_form").id
         ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
         ctx.update({
-            "default_sea_hbl_id": self.id,
+            "default_sea_job_id": self.id,
             "default_is_freight_quotation": True,
             "default_freight_business_type": "sea",
         })
@@ -256,26 +385,28 @@ class SeaHBL(models.Model):
             "res_id": orders.id if len(orders) == 1 else False,
             "context": dict(
                 self.env.context,
-                default_sea_hbl_id=self.id,
+                default_sea_job_id=self.id,
             ),
         }
 
     def action_view_booking(self):
         self.ensure_one()
-        if not self.booking_id:
+        booking = self._get_effective_booking()
+        if not booking:
             return False
 
         return {
             "name": "Sea Booking",
             "type": "ir.actions.act_window",
             "res_model": "freight.sea.booking",
-            "res_id": self.booking_id.id,
+            "res_id": booking.id,
             "view_mode": "form",
             "context": dict(self.env.context),
         }
 
     @api.model_create_multi
     def create(self, vals_list):
+        plan = None
         for vals in vals_list:
             sequence_date = fields.Date.to_date(
                 vals.get("job_date") or fields.Date.context_today(self)
@@ -286,31 +417,63 @@ class SeaHBL(models.Model):
                     booking = self.env["freight.sea.booking"].browse(vals.get("booking_id"))
                     freight_type = booking.freight_type
 
-                seq_code = "freight.sea.hbl.job_no.exp" if freight_type == "export" else "freight.sea.hbl.job_no.imp"
+                seq_code = "freight.sea.job.job_no.exp" if freight_type == "export" else "freight.sea.job.job_no.imp"
                 vals["job_no"] = self.env["ir.sequence"].next_by_code(
                     seq_code, sequence_date=sequence_date
                 ) or "New"
-                
+
+            # FF-75: analytic HARUS sudah konsisten di vals SEBELUM super().create()
+            # -- Odoo memvalidasi @api.constrains (termasuk
+            # _check_house_analytic_matches_master) sesaat setelah INSERT, di
+            # dalam super().create() itu sendiri, jauh sebelum baris manapun
+            # SETELAH super().create() sempat jalan. Menyamakan analytic_account_id
+            # di sini (bukan lewat rec.analytic_account_id = ... pasca-create)
+            # supaya constraint tidak pernah melihat state sementara yang mismatch.
+            if not vals.get("analytic_account_id"):
+                master_job_id = vals.get("master_job_id")
+                if master_job_id:
+                    # House tidak pernah membuat analytic account independen --
+                    # analytic efektifnya selalu ikut Master.
+                    master = self.browse(master_job_id)
+                    vals["analytic_account_id"] = master.analytic_account_id.id
+                else:
+                    if plan is None:
+                        plan = self.env["account.analytic.plan"].search([], limit=1)
+                        if not plan:
+                            plan = self.env["account.analytic.plan"].create({"name": "Default"})
+                    analytic_acc = self.env["account.analytic.account"].create({
+                        "name": vals.get("job_no"),
+                        "plan_id": plan.id,
+                        "partner_id": vals.get("customer_id") or False,
+                        "company_id": vals.get("company_id") or self.env.company.id,
+                    })
+                    vals["analytic_account_id"] = analytic_acc.id
+
         records = super().create(vals_list)
-        
-        plan = self.env["account.analytic.plan"].search([], limit=1)
-        if not plan:
-            plan = self.env["account.analytic.plan"].create({"name": "Default"})
-        for rec in records:
-            if not rec.analytic_account_id:
-                analytic_acc = self.env["account.analytic.account"].create({
-                    "name": rec.job_no,
-                    "plan_id": plan.id,
-                    "partner_id": rec.customer_id.id if rec.customer_id else False,
-                    "company_id": rec.company_id.id if rec.company_id else self.env.company.id,
-                })
-                rec.analytic_account_id = analytic_acc.id
-                
         records._sync_analytic_to_related_docs()
         return records
 
     def write(self, vals):
+        if "master_job_id" in vals and "analytic_account_id" not in vals:
+            # FF-75: House mengikuti analytic Master -- disamakan di vals
+            # SEBELUM super().write() supaya @api.constrains tidak melihat
+            # state sementara yang mismatch (lihat komentar setara di create()).
+            master_job_id = vals.get("master_job_id")
+            if master_job_id:
+                master = self.browse(master_job_id)
+                vals["analytic_account_id"] = master.analytic_account_id.id
         res = super().write(vals)
+        if "analytic_account_id" in vals:
+            # FF-75: Master.analytic_account_id berubah -> cascade ke semua
+            # House-nya, supaya tidak ada House yang nyangkut di nilai lama
+            # (invariant ini juga dijaga keras oleh _check_house_analytic_matches_master).
+            for rec in self:
+                if rec.record_level == "master" and rec.house_job_ids:
+                    stale_houses = rec.house_job_ids.filtered(
+                        lambda h, rec=rec: h.analytic_account_id != rec.analytic_account_id
+                    )
+                    if stale_houses:
+                        stale_houses.write({"analytic_account_id": rec.analytic_account_id.id})
         self._sync_analytic_to_related_docs()
         return res
 
@@ -325,8 +488,8 @@ class SeaHBL(models.Model):
             # 1. Sync to Sales Orders & Lines
             if rec.sale_order_ids:
                 for so in rec.sale_order_ids:
-                    if hasattr(so, "sea_hbl_id") and not so.sea_hbl_id:
-                        so.sea_hbl_id = rec.id
+                    if hasattr(so, "sea_job_id") and not so.sea_job_id:
+                        so.sea_job_id = rec.id
                     if hasattr(so, "analytic_account_id") and not so.analytic_account_id:
                         so.analytic_account_id = rec.analytic_account_id.id
                     for line in so.order_line:
@@ -340,8 +503,8 @@ class SeaHBL(models.Model):
             # 2. Sync to Purchase Orders & Lines
             if rec.purchase_order_ids:
                 for po in rec.purchase_order_ids:
-                    if hasattr(po, "sea_hbl_id") and not po.sea_hbl_id:
-                        po.sea_hbl_id = rec.id
+                    if hasattr(po, "sea_job_id") and not po.sea_job_id:
+                        po.sea_job_id = rec.id
                     for line in po.order_line:
                         if not line.analytic_distribution:
                             self.env.cr.execute(
@@ -356,7 +519,7 @@ class SeaHBL(models.Model):
                 moves |= rec.purchase_order_ids.mapped("invoice_ids")
             if rec.sale_order_ids:
                 moves |= rec.sale_order_ids.mapped("invoice_ids")
-            moves |= self.env["account.move"].search([("sea_hbl_id", "=", rec.id)])
+            moves |= self.env["account.move"].search([("sea_job_id", "=", rec.id)])
             
             # Document list references
             doc_fields = [
@@ -377,8 +540,8 @@ class SeaHBL(models.Model):
                                     moves |= val
 
             for move in moves:
-                if hasattr(move, "sea_hbl_id") and not move.sea_hbl_id:
-                    move.sea_hbl_id = rec.id
+                if hasattr(move, "sea_job_id") and not move.sea_job_id:
+                    move.sea_job_id = rec.id
                 for line in move.invoice_line_ids:
                     if not line.analytic_distribution and line.display_type not in ("line_section", "line_note"):
                         self.env.cr.execute(

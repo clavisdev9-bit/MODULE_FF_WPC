@@ -12,7 +12,7 @@
             <xpath expr="//sheet" position="inside">
                 <field name="is_freight_quotation" invisible="1" />
                 <field name="booking_count" invisible="1" />
-                <field name="hbl_count" invisible="1" />
+                <field name="sea_job_count" invisible="1" />
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_bookings"
@@ -24,13 +24,13 @@
                         <span class="o_stat_text">Booking</span>
                     </div>
                 </button>
-                <button name="action_view_hbls"
+                <button name="action_view_sea_jobs"
                     type="object"
                     class="oe_stat_button"
                     icon="fa-file-text-o"
-                    invisible="not is_freight_quotation or hbl_count == 0">
+                    invisible="not is_freight_quotation or sea_job_count == 0">
                     <div class="o_stat_info">
-                        <span class="o_stat_text">Jobsheet</span>
+                        <span class="o_stat_text">Job</span>
                     </div>
                 </button>
                 <button name="action_view_currency_variants"
@@ -113,20 +113,35 @@
 
             <xpath expr="//header" position="inside">
                 <field name="original_quotation_id" invisible="1" />
-                <button
-                    name="action_convert_quotation"
-                    type="object"
-                    string="Create Booking"
-                    class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_type != 'export' or state != 'sale' or booking_count &gt; 0"
-                />
-                <button
-                    name="action_convert_quotation"
-                    type="object"
-                    string="Create Jobsheet"
-                    class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_type != 'import' or state != 'sale' or hbl_count &gt; 0"
-                />
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="before">
+                <group name="freight_actions" string="Freight Actions"
+                    invisible="not is_freight_quotation or state != 'sale'">
+                    <div class="o_row">
+                        <button
+                            name="action_convert_quotation"
+                            type="object"
+                            string="Create Booking"
+                            class="btn-primary"
+                            invisible="freight_type != 'export' or booking_count &gt; 0"
+                        />
+                        <button
+                            name="action_open_add_to_master_wizard"
+                            type="object"
+                            string="Add to Master"
+                            class="btn-secondary"
+                            invisible="freight_type != 'export'"
+                        />
+                        <button
+                            name="action_convert_quotation"
+                            type="object"
+                            string="Create Job"
+                            class="btn-primary"
+                            invisible="freight_type != 'import' or sea_job_count &gt; 0"
+                        />
+                    </div>
+                </group>
             </xpath>
 
             <xpath expr="//page[@name='other_information']" position="inside">

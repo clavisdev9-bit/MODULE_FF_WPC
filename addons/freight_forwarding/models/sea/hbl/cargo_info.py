@@ -2,30 +2,30 @@ from odoo import fields, models
 
 
 class SeaHBLCargoInfo(models.Model):
-    _name = "freight.sea.hbl.cargo.info"
+    _name = "freight.sea.job.cargo.info"
     _inherit = "freight.sea.cargo.info.mixin"
     _description = "Sea Jobsheet Cargo Info"
-    _rec_name = "hbl_id"
+    _rec_name = "job_id"
 
-    hbl_id = fields.Many2one(
-        "freight.sea.hbl",
+    job_id = fields.Many2one(
+        "freight.sea.job",
         string="Jobsheet",
         ondelete="cascade",
     )
     hbl_no = fields.Char(
         string="Jobsheet No.",
-        related="hbl_id.hbl_no",
+        related="job_id.hbl_no",
         store=True,
         readonly=True,
     )
     type = fields.Selection(
-        related="hbl_id.freight_type",
+        related="job_id.freight_type",
         string="Type",
         store=True,
         readonly=True,
     )
     freight_type = fields.Selection(
-        related="hbl_id.container_type",
+        related="job_id.container_type",
         string="Freight Type",
         store=True,
         readonly=True,
@@ -33,14 +33,14 @@ class SeaHBLCargoInfo(models.Model):
     booking_id = fields.Many2one(
         "freight.sea.booking",
         string="Booking",
-        related="hbl_id.booking_id",
+        related="job_id.booking_id",
         store=True,
         readonly=True,
     )
     customer_id = fields.Many2one(
         "res.partner",
         string="Customer",
-        related="hbl_id.customer_id",
+        related="job_id.customer_id",
         store=True,
         readonly=True,
     )

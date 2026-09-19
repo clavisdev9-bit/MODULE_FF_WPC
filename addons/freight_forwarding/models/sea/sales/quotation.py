@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class SeaQuotation(models.Model):
@@ -10,7 +11,7 @@ class SeaQuotation(models.Model):
 
     # Relasi booking & HBL
     # FF-73 follow-up (generic Duplicate fix): copy=False di keempat field
-    # commercial-group mirror ini (booking_ids/hbl_ids/sea_hbl_id, dan yang
+    # commercial-group mirror ini (booking_ids/sea_job_ids/sea_job_id, dan yang
     # setara di Air) sengaja ditambahkan. Tanpa ini, generic copy() (tombol
     # Duplicate) ikut menyalin relasi Booking/Jobsheet milik record SUMBER ke
     # record BARU yang independen (bukan currency variant) -- lalu
@@ -31,24 +32,24 @@ class SeaQuotation(models.Model):
     booking_count = fields.Integer(
         string="Booking Count", compute="_compute_booking_count"
     )
-    hbl_count = fields.Integer(
+    sea_job_count = fields.Integer(
         string="Jobsheet Count", compute="_compute_hbl_count"
     )
-    sea_hbl_id = fields.Many2one(
-        "freight.sea.hbl",
+    sea_job_id = fields.Many2one(
+        "freight.sea.job",
         string="Sea Jobsheet",
         index=True,
         copy=False,
     )
     # FF-73 UAT fix (Masalah 2): compatibility mirror -- BUKAN canonical
-    # source of truth (itu tetap root_quotation_id / booking_id / resolver
-    # _get_commercial_group_jobsheets). sea_hbl_id (Many2one) sengaja tidak
+    # source of truth (itu tetap source_quotation_id / booking_id / resolver
+    # _get_commercial_group_jobsheets). sea_job_id (Many2one) sengaja tidak
     # dipaksa jadi mirror karena cardinality-nya tidak menjamin selalu 1:1;
-    # hbl_ids (Many2many) di sini murni supaya currency variant langsung
+    # sea_job_ids (Many2many) di sini murni supaya currency variant langsung
     # "mengenali" Jobsheet canonical lewat field lokal (parity dengan
-    # air_booking_ids milik Air), tanpa mengubah semantik sea_hbl_id.
-    hbl_ids = fields.Many2many(
-        "freight.sea.hbl",
+    # air_booking_ids milik Air), tanpa mengubah semantik sea_job_id.
+    sea_job_ids = fields.Many2many(
+        "freight.sea.job",
         string="Sea Jobsheets (compatibility mirror)",
         copy=False,
     )
@@ -58,7 +59,6 @@ class SeaQuotation(models.Model):
         selection=[
             ("fcl", "FCL"),
             ("lcl", "LCL"),
-            ("consol", "Consol"),
         ],
         string="Container Type",
     )
@@ -99,19 +99,19 @@ class SeaQuotation(models.Model):
         for rec in self:
             rec.booking_count = len(rec._get_commercial_group_bookings("freight.sea.booking"))
 
-    @api.depends("sea_hbl_id", "original_quotation_id", "hbl_ids")
+    @api.depends("sea_job_id", "original_quotation_id", "sea_job_ids")
     def _compute_hbl_count(self):
         """FF-73: resolve lewat commercial group (root + variant), bukan
-        cuma sea_hbl_id/sale_order_ids milik diri sendiri -- supaya smart
+        cuma sea_job_id/sale_order_ids milik diri sendiri -- supaya smart
         button tetap menunjukkan Jobsheet yang benar dari currency variant
         mana pun dalam commercial group yang sama.
 
-        `hbl_ids` (compatibility mirror) sengaja dimasukkan ke depends --
+        `sea_job_ids` (compatibility mirror) sengaja dimasukkan ke depends --
         sama seperti `booking_ids` di _compute_booking_count -- murni
         sebagai trigger invalidasi cache compute non-stored ini, BUKAN
         sebagai sumber hasil (hasil tetap dari resolver di atas)."""
         for rec in self:
-            rec.hbl_count = len(rec._get_commercial_group_jobsheets("freight.sea.hbl"))
+            rec.sea_job_count = len(rec._get_commercial_group_jobsheets("freight.sea.job"))
 
     # =========================================================
     # Sea-specific Actions
@@ -134,15 +134,15 @@ class SeaQuotation(models.Model):
             "context": ctx,
         }
 
-    def action_view_hbls(self):
+    def action_view_sea_jobs(self):
         self.ensure_one()
-        hbls = self._get_commercial_group_jobsheets("freight.sea.hbl")
+        hbls = self._get_commercial_group_jobsheets("freight.sea.job")
         ctx = {k: v for k, v in self.env.context.items() if not k.endswith("_view_ref")}
         ctx.update({"default_sale_order_ids": [self.id]})
         return {
             "name": "Sea Jobsheet",
             "type": "ir.actions.act_window",
-            "res_model": "freight.sea.hbl",
+            "res_model": "freight.sea.job",
             "view_mode": "form" if len(hbls) == 1 else "list,form",
             "domain": [("id", "in", hbls.ids)],
             "res_id": hbls.id if len(hbls) == 1 else False,
@@ -153,17 +153,17 @@ class SeaQuotation(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         for rec in records:
-            if hasattr(rec, "sea_hbl_id") and rec.sea_hbl_id:
-                if rec.id not in rec.sea_hbl_id.sale_order_ids.ids:
-                    rec.sea_hbl_id.sale_order_ids = [(4, rec.id)]
+            if hasattr(rec, "sea_job_id") and rec.sea_job_id:
+                if rec.id not in rec.sea_job_id.sale_order_ids.ids:
+                    rec.sea_job_id.sale_order_ids = [(4, rec.id)]
         return records
 
     def write(self, vals):
         res = super().write(vals)
-        if "sea_hbl_id" in vals:
+        if "sea_job_id" in vals:
             for rec in self:
-                if hasattr(rec, "sea_hbl_id") and rec.sea_hbl_id and rec.id not in rec.sea_hbl_id.sale_order_ids.ids:
-                    rec.sea_hbl_id.sale_order_ids = [(4, rec.id)]
+                if hasattr(rec, "sea_job_id") and rec.sea_job_id and rec.id not in rec.sea_job_id.sale_order_ids.ids:
+                    rec.sea_job_id.sale_order_ids = [(4, rec.id)]
         return res
 
     def _action_convert_to_booking_direct_sea(self):
@@ -180,7 +180,7 @@ class SeaQuotation(models.Model):
         booking_vals = {
             "name": booking_no,
             "sale_order_ids": [(6, 0, all_variants.ids)],
-            "root_quotation_id": original_id,
+            "source_quotation_id": original_id,
             "partner_id": self.partner_id.id,
             "delivery_type_id": self.delivery_type_id.id,
             "port_of_loading_id": self.port_of_loading_id.id,
@@ -217,34 +217,66 @@ class SeaQuotation(models.Model):
         }
 
     def _action_convert_to_jobsheet_direct_sea(self):
-        """Convert import quotation directly to jobsheet (HBL) without booking"""
+        """FF-75: Import quotation -> Create Job TANPA Booking. Membuat 1
+        Master Job + 1 House Job pertama yang diprefill dari Quotation aktif,
+        langsung ter-gabung (master_job_id) ke Master tersebut.
+
+        Master DI SINI BUKAN container kosong -- ia adalah freight.sea.job
+        penuh (operational fields, shipment info, costing, document list,
+        parties, dst. sama seperti Master hasil flow Export) yang tetap bisa
+        diisi/diedit normal oleh user lewat form yang sama. Hanya saja tidak
+        ada Booking untuk menyalin data awal, jadi field operasionalnya
+        dimulai kosong (selain freight_type/container_type/company_id/
+        job_date) -- bukan berarti recordnya dibatasi jadi shell. Data
+        customer/commercial TIDAK dipaksakan ke Master (semantic Customer
+        Master consolidation belum dipastikan -- lihat customer_id optional
+        di hbl.py) -- itu tetap milik House, sesuai mapping existing yang
+        sudah punya source jelas."""
         self.ensure_one()
-        original_id = self.original_quotation_id.id if self.original_quotation_id else self.id
-        domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
-        all_variants = self.env["sale.order"].search(domain)
-        
-        hbl = self.env["freight.sea.hbl"].create(
-            {
-                "sale_order_ids": [(6, 0, all_variants.ids)],
-                "root_quotation_id": original_id,
-                "freight_type": self.freight_type,
-                "container_type": self.container_type,
-                "customer_id": self.partner_id.id,
-                "term_payment": self.payment_term_id.id,
-                "job_date": fields.Date.today(),
-                "company_id": self.company_id.id,
-            }
+
+        master = self.env["freight.sea.job"].create({
+            "record_level": "master",
+            "freight_type": self.freight_type,
+            "container_type": self.container_type,
+            "company_id": self.company_id.id,
+            "job_date": fields.Date.today(),
+        })
+        house_vals = self.env["freight.sea.job"]._prepare_house_vals_from_quotation(
+            self, master=master
         )
-        all_variants.write({"sea_hbl_id": hbl.id})
+        house = self.env["freight.sea.job"].create(house_vals)
+
+        all_variants = house.source_quotation_id | house.source_quotation_id.variant_ids
+        all_variants.write({"sea_job_id": house.id})
         # FF-73 UAT fix (Masalah 2): mirror eksplisit ke field lokal
-        # hbl_ids (compatibility mirror, bukan pengganti sea_hbl_id) --
+        # sea_job_ids (compatibility mirror, bukan pengganti sea_job_id) --
         # parity dengan booking_ids di atas / air_booking_ids milik Air.
-        all_variants.write({"hbl_ids": [(4, hbl.id)]})
+        all_variants.write({"sea_job_ids": [(4, house.id)]})
         return {
             "type": "ir.actions.act_window",
-            "name": "Sea Jobsheet",
-            "res_model": "freight.sea.hbl",
-            "res_id": hbl.id,
+            "name": "Sea Job",
+            "res_model": "freight.sea.job",
+            # Master dibuka (bukan House) -- konsisten dengan flow Export
+            # (Create Job dari Booking juga membuka Master), dan Master
+            # adalah operational Job penuh, bukan detail implementasi yang
+            # disembunyikan. House tetap bisa diakses lewat tab House Jobs.
+            "res_id": master.id,
             "view_mode": "form",
             "target": "current",
+        }
+
+    def action_open_add_to_master_wizard(self):
+        """FF-75: 'Add to Master' -- Freight Actions Export. Membuat House
+        Job baru dari Quotation aktif dan menggabungkannya ke Master Sea
+        existing (dipilih lewat wizard), TANPA membuat Booking baru."""
+        self.ensure_one()
+        if self.freight_type != "export":
+            raise UserError("Add to Master hanya berlaku untuk Quotation Export.")
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Add to Master",
+            "res_model": "freight.sea.add.to.master.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": dict(self.env.context, default_quotation_id=self.id),
         }
