@@ -269,9 +269,14 @@ class SeaQuotation(models.Model):
             "target": "current",
         }
 
-    def action_open_add_to_master_wizard(self):
-        """FF-75: 'Add to Master' -- Freight Actions Export. Membuat House
-        Job baru dari Quotation aktif dan menggabungkannya ke Master Sea
+    def action_open_sea_add_to_master_wizard(self):
+        """FF-75 follow-up (method collision fix): nama method di-prefix
+        `sea_` -- SeaQuotation dan AirQuotation sama-sama _inherit=
+        "sale.order", jadi nama method generik `action_open_add_to_master_wizard`
+        di kedua file saling override (yang belakangan dimuat MENANG untuk
+        SEMUA quotation, Sea maupun Air) -- tombol Sea bisa membuka wizard
+        Air. 'Add to Master' -- Freight Actions Export. Membuat House Job
+        baru dari Quotation aktif dan menggabungkannya ke Master Sea
         existing (dipilih lewat wizard), TANPA membuat Booking baru."""
         self.ensure_one()
         if self.freight_type != "export":

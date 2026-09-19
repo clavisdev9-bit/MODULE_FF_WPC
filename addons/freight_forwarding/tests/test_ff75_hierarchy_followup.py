@@ -397,6 +397,109 @@ class TestFF75AirAddToMasterQuotationGuard(FreightTestBase):
             wizard.action_add_to_master()
 
 
+class TestFF75AddToMasterActionCollisionFix(FreightTestBase):
+    """Manual UAT follow-up Section 1: SeaQuotation dan AirQuotation
+    sama-sama _inherit="sale.order" dan sebelumnya sama-sama memakai nama
+    method generik `action_open_add_to_master_wizard` -- yang belakangan
+    dimuat MENANG untuk SEMUA quotation (Sea maupun Air), jadi tombol Sea
+    bisa membuka wizard Air. Regression test ini memastikan masing-masing
+    action sekarang membuka wizard model-nya sendiri."""
+
+    def _create_air_quotation(self, **kwargs):
+        vals = {
+            "is_freight_quotation": True,
+            "freight_business_type": "air",
+            "freight_type": "export",
+            "partner_id": self.partner.id,
+        }
+        vals.update(kwargs)
+        return self.env["sale.order"].create(vals)
+
+    def test_sea_quotation_action_opens_sea_wizard(self):
+        quotation = self._create_quotation()
+        action = quotation.action_open_sea_add_to_master_wizard()
+        self.assertEqual(action["res_model"], "freight.sea.add.to.master.wizard")
+
+    def test_air_quotation_action_opens_air_wizard(self):
+        quotation = self._create_air_quotation()
+        action = quotation.action_open_air_add_to_master_wizard()
+        self.assertEqual(action["res_model"], "freight.air.add.to.master.wizard")
+
+
+class TestFF75AirBookingCreateJobAlwaysMasterHouse(FreightTestBase):
+    """Manual UAT follow-up Section 2: Direct AWB TIDAK dibuat lewat
+    Booking -- Direct AWB dibuat langsung sebagai freight.air.job berdiri
+    sendiri lewat flow/menu Direct AWB (AirQuotation._action_convert_to_jobsheet_direct_air),
+    di luar Booking sama sekali. Karena itu Air Booking -> Create Job
+    SELALU berarti Booking -> Master -> House, branching
+    `is_direct = shipment_type == 'direct'` yang sebelumnya ada di
+    action_create_job() dihapus total."""
+
+    def _create_air_quotation(self, **kwargs):
+        vals = {
+            "is_freight_quotation": True,
+            "freight_business_type": "air",
+            "freight_type": "export",
+            "partner_id": self.partner.id,
+        }
+        vals.update(kwargs)
+        return self.env["sale.order"].create(vals)
+
+    def test_first_call_creates_master_and_house(self):
+        quotation = self._create_air_quotation()
+        booking_result = quotation.action_convert_to_booking_direct()
+        booking = self.env["freight.air.booking"].browse(booking_result["res_id"])
+
+        job_result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(job_result["res_id"])
+
+        self.assertEqual(master.shipment_type, "master")
+        self.assertEqual(len(master.house_job_ids), 1)
+        self.assertEqual(master.house_job_ids.shipment_type, "house")
+        self.assertEqual(master.house_job_ids.master_job_id, master)
+
+    def test_second_call_is_idempotent_no_duplicate_master_or_house(self):
+        quotation = self._create_air_quotation()
+        booking_result = quotation.action_convert_to_booking_direct()
+        booking = self.env["freight.air.booking"].browse(booking_result["res_id"])
+
+        first_result = booking.action_create_job()
+        second_result = booking.action_create_job()
+
+        self.assertEqual(first_result["res_id"], second_result["res_id"],
+            msg="Panggilan kedua harus membuka Master yang sama, bukan membuat Master baru")
+        master = self.env["freight.air.job"].browse(second_result["res_id"])
+        self.assertEqual(len(master.house_job_ids), 1,
+            msg="Panggilan kedua tidak boleh menduplikasi House")
+
+    def test_create_job_ignores_booking_shipment_type_direct(self):
+        """Meskipun shipment_type Booking (field mixin, sekarang disembunyikan
+        dari form) diset 'direct' secara langsung lewat backend, Create Job
+        HARUS tetap menghasilkan Master + House, bukan Job standalone."""
+        quotation = self._create_air_quotation()
+        booking_result = quotation.action_convert_to_booking_direct()
+        booking = self.env["freight.air.booking"].browse(booking_result["res_id"])
+        booking.shipment_type = "direct"
+
+        job_result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(job_result["res_id"])
+
+        self.assertEqual(master.shipment_type, "master")
+        self.assertEqual(len(master.house_job_ids), 1)
+
+    def test_direct_awb_standalone_menu_flow_unaffected(self):
+        """Direct AWB (menu/flow standalone freight.air.job dengan
+        default_shipment_type='direct', lihat views/air/hawb/hawb.xml) TIDAK
+        pernah lewat Booking sama sekali dan TIDAK disentuh oleh perubahan
+        Section 2 -- tetap bisa dibuat berdiri sendiri tanpa Master."""
+        direct = self.env["freight.air.job"].create({
+            "shipment_type": "direct",
+            "freight_type": "export",
+        })
+        self.assertTrue(direct.exists())
+        self.assertFalse(direct.master_job_id)
+
+
 class TestFF75SourceQuotationResolverSemantic(FreightTestBase):
     """Audit semantic consistency _get_source_quotation(): Master (Sea &
     Air) bukan commercial owner Quotation manapun -- TIDAK boleh resolve
@@ -454,21 +557,31 @@ class TestFF75SourceQuotationResolverSemantic(FreightTestBase):
         self.assertEqual(house._get_source_quotation(), quotation)
 
     def test_air_direct_still_falls_back_to_booking(self):
-        """Direct out of scope -- behavior existing dipertahankan: kalau
-        Direct dibuat lewat Booking tanpa source_quotation_id sendiri,
-        resolusinya tetap lewat Booking._get_source_quotation()."""
+        """Manual UAT follow-up Section 2: Direct AWB TIDAK LAGI dibuat lewat
+        Booking (booking.action_create_job() sekarang SELALU menghasilkan
+        Master + House, terlepas dari booking.shipment_type). Fallback
+        `_get_source_quotation()` lewat booking_id untuk shipment_type ==
+        'direct' di freight.air.job dipertahankan di level kode (Direct
+        standalone yang dibuat lewat menu Direct AWB tetap bisa punya
+        booking_id manual), tapi jalur lama "Booking -> Direct" sudah tidak
+        ada lagi -- test ini diupdate untuk memverifikasi fallback tersebut
+        langsung lewat construction manual, bukan lewat
+        booking.action_create_job()."""
         quotation = self._create_air_quotation()
         booking_result = quotation.action_convert_to_booking_direct()
         booking = self.env["freight.air.booking"].browse(booking_result["res_id"])
-        booking.shipment_type = "direct"
-        job_result = booking.action_create_job()
-        direct = self.env["freight.air.job"].browse(job_result["res_id"])
 
-        self.assertEqual(direct.shipment_type, "direct")
+        direct = self.env["freight.air.job"].create({
+            "shipment_type": "direct",
+            "freight_type": "export",
+            "booking_id": booking.id,
+        })
+
         self.assertFalse(direct.source_quotation_id,
-            msg="Direct hasil Booking tidak menyimpan source_quotation_id sendiri")
+            msg="Direct tanpa source_quotation_id sendiri")
         self.assertEqual(direct._get_source_quotation(), quotation,
-            msg="Direct tetap boleh fallback ke Booking._get_source_quotation()")
+            msg="Direct tetap boleh fallback ke Booking._get_source_quotation() "
+                "kalau booking_id di-set manual (behavior existing dipertahankan)")
 
 
 class TestFF75ContainerTypeCleanup(FreightTestBase):
@@ -486,3 +599,28 @@ class TestFF75ContainerTypeCleanup(FreightTestBase):
             "container_type_id": self.container_type.id,
         })
         self.assertEqual(cargo.container_type_id, self.container_type)
+
+
+class TestFF75SeaJobCustomerNoTagDomain(FreightTestBase):
+    """Manual UAT follow-up Section 3: freight.sea.job.customer_id sebelumnya
+    punya domain="[('category_id.name', '=', 'Customer')]" yang memblokir
+    partner tanpa tag 'Customer' di UI. Domain dihapus total -- field
+    sekarang plain Many2one tanpa domain sama sekali. Scope tidak melebar
+    ke field partner-role lain (shipper/consignee/notify/delivery
+    agent/warehouse/agent) -- domain field-field tersebut diaudit
+    terpisah, belum bagian dari task ini."""
+
+    def test_customer_id_field_has_no_domain(self):
+        field = self.env["freight.sea.job"]._fields["customer_id"]
+        self.assertFalse(field.domain,
+            msg="customer_id tidak boleh lagi punya domain category_id.name == 'Customer'")
+
+    def test_customer_id_accepts_partner_without_customer_tag(self):
+        partner_no_tag = self.env["res.partner"].create({"name": "FF75 Partner No Tag"})
+        master = self.env["freight.sea.job"].create({
+            "record_level": "master",
+            "freight_type": "export",
+            "ship_mode": "lcl",
+            "customer_id": partner_no_tag.id,
+        })
+        self.assertEqual(master.customer_id, partner_no_tag)

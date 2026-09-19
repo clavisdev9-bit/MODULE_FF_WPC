@@ -128,38 +128,37 @@ class FreightAirBooking(models.Model):
             rec.volumetric_weight = total_vol / 6000.0 if total_vol else 0.0
 
     def action_create_job(self):
-        """FF-75: Booking Export -> Create Job.
-
-        Direct (shipment_type == 'direct') OUT OF SCOPE -- preserve behavior
-        existing SAMA PERSIS: satu Air Job dibuat langsung, tanpa hierarchy
-        Master/House.
-
-        Selain Direct (house/master): membuat 1 Master Job (idempotent) +
-        House Job PERTAMA otomatis dari Booking.source_quotation_id,
-        langsung ter-gabung ke Master tersebut (master_job_id)."""
+        """Manual UAT follow-up FF-75 (Section 2): Air Booking -> Create Job
+        SELALU berarti Booking -> Master -> House, tidak pernah Direct.
+        Direct AWB TIDAK dibuat lewat Booking -- Direct AWB dibuat langsung
+        sebagai freight.air.job berdiri sendiri lewat flow/menu Direct AWB
+        (lihat _action_convert_to_jobsheet_direct_air di AirQuotation),
+        tanpa lewat Booking sama sekali. Karena itu branching
+        `is_direct = self.shipment_type == 'direct'` yang sebelumnya ada di
+        sini DIHAPUS -- method ini sekarang murni membuat/mengambil Master
+        Job (idempotent) dan House Job PERTAMA otomatis dari
+        Booking.source_quotation_id."""
         self.ensure_one()
-        is_direct = self.shipment_type == 'direct'
 
-        if not is_direct:
-            master = self.env['freight.air.job'].search(
-                [('booking_id', '=', self.id), ('shipment_type', '=', 'master')],
-                limit=1,
-                order='id desc',
-            )
-            if master:
-                if not master.house_job_ids and self.source_quotation_id:
-                    house_vals = self.env['freight.air.job']._prepare_house_vals_from_quotation(
-                        self.source_quotation_id, master=master
-                    )
-                    self.env['freight.air.job'].create(house_vals)
-                return {
-                    'name': _('Air Job'),
-                    'type': 'ir.actions.act_window',
-                    'res_model': 'freight.air.job',
-                    'res_id': master.id,
-                    'view_mode': 'form',
-                    'target': 'current',
-                }
+        master = self.env['freight.air.job'].search(
+            [('booking_id', '=', self.id), ('shipment_type', '=', 'master')],
+            limit=1,
+            order='id desc',
+        )
+        if master:
+            if not master.house_job_ids and self.source_quotation_id:
+                house_vals = self.env['freight.air.job']._prepare_house_vals_from_quotation(
+                    self.source_quotation_id, master=master
+                )
+                self.env['freight.air.job'].create(house_vals)
+            return {
+                'name': _('Air Job'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'freight.air.job',
+                'res_id': master.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
 
         flight_lines = [
             (0, 0, {
@@ -186,9 +185,8 @@ class FreightAirBooking(models.Model):
             'company_id': self.company_id.id,
             # FF-75 follow-up (Section E): Master TIDAK boleh mengambil
             # Customer dari Booking secara otomatis -- semantic Customer
-            # Master consolidation belum dipastikan. Direct (out of scope)
-            # tetap pakai behavior existing (partner_id dari Booking).
-            'partner_id': self.partner_id.id if is_direct else False,
+            # Master consolidation belum dipastikan.
+            'partner_id': False,
             'customer_ref': self.customer_reference,
             'is_nomination': self.is_nomination,
             'nomination_remark': self.nomination_remark,
@@ -208,7 +206,7 @@ class FreightAirBooking(models.Model):
             'destination_id': self.destination_id.id if self.destination_id else False,
             'origin_country_id': self.origin_country_id.id if self.origin_country_id else False,
             'ship_mode': self.ship_mode,
-            'shipment_type': 'direct' if is_direct else 'master',
+            'shipment_type': 'master',
             'delivery_type': self.delivery_type.id if self.delivery_type else False,
             'other_delivery': self.other_delivery,
             'service_level': self.service_level,
@@ -224,16 +222,13 @@ class FreightAirBooking(models.Model):
             'flight_routing_ids': flight_lines,
             'dimension_ids': dimension_lines,
         }
-        if is_direct and self.sale_order_ids:
-            # FF-75 follow-up (Section D): Master TIDAK boleh menerima
-            # sale_order_ids Booking untuk commercial ownership -- House
-            # (bukan Master) yang menjadi Job commercial untuk Q1 (dari
-            # source_quotation_id-nya sendiri, lihat _prepare_house_vals_from_quotation).
-            # Direct (out of scope) tetap pakai behavior existing.
-            hawb_vals['sale_order_ids'] = [(6, 0, self.sale_order_ids.ids)]
+        # FF-75 follow-up (Section D): Master TIDAK boleh menerima
+        # sale_order_ids Booking untuk commercial ownership -- House
+        # (bukan Master) yang menjadi Job commercial untuk Q1 (dari
+        # source_quotation_id-nya sendiri, lihat _prepare_house_vals_from_quotation).
         job = self.env['freight.air.job'].create(hawb_vals)
 
-        if not is_direct and not job.house_job_ids and self.source_quotation_id:
+        if not job.house_job_ids and self.source_quotation_id:
             house_vals = self.env['freight.air.job']._prepare_house_vals_from_quotation(
                 self.source_quotation_id, master=job
             )

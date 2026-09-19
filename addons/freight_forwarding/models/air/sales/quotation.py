@@ -223,10 +223,13 @@ class AirQuotation(models.Model):
             "target": "current",
         }
 
-    def action_open_add_to_master_wizard(self):
-        """FF-75: 'Add to Master' -- Freight Actions Export. Membuat House
-        Job baru dari Quotation aktif dan menggabungkannya ke Master Air
-        existing (dipilih lewat wizard), TANPA membuat Booking baru."""
+    def action_open_air_add_to_master_wizard(self):
+        """FF-75 follow-up (method collision fix): nama method di-prefix
+        `air_` -- lihat komentar setara di
+        SeaQuotation.action_open_sea_add_to_master_wizard. 'Add to Master'
+        -- Freight Actions Export. Membuat House Job baru dari Quotation
+        aktif dan menggabungkannya ke Master Air existing (dipilih lewat
+        wizard), TANPA membuat Booking baru."""
         self.ensure_one()
         if self.freight_type != "export":
             raise UserError("Add to Master hanya berlaku untuk Quotation Export.")

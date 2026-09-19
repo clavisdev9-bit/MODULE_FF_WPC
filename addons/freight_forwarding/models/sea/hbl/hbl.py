@@ -156,11 +156,7 @@ class SeaHBL(models.Model):
         default=lambda self: self.env.company,
     )
 
-    customer_id = fields.Many2one(
-        "res.partner",
-        string="Customer",
-        domain="[('category_id.name', '=', 'Customer')]",
-    )
+    customer_id = fields.Many2one("res.partner", string="Customer")
     customer_ref = fields.Char(string="Customer Reference")
     actual_shipper = fields.Boolean(string="Actual Shipper")
     term_payment = fields.Many2one("account.payment.term", string="Terms of Payment")

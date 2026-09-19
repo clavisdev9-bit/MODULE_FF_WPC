@@ -127,7 +127,7 @@
                             invisible="freight_type != 'export' or booking_count &gt; 0"
                         />
                         <button
-                            name="action_open_add_to_master_wizard"
+                            name="action_open_sea_add_to_master_wizard"
                             type="object"
                             string="Add to Master"
                             class="btn-secondary"
