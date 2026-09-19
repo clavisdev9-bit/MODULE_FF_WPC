@@ -132,7 +132,7 @@
                             type="object"
                             string="Add to Master"
                             class="btn-secondary"
-                            invisible="freight_type != 'export'"
+                            invisible="freight_type != 'export' or air_job_count &gt; 0"
                         />
                         <button
                             name="action_convert_quotation"

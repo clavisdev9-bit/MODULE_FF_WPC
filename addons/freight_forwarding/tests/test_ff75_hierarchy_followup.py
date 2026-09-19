@@ -624,3 +624,231 @@ class TestFF75SeaJobCustomerNoTagDomain(FreightTestBase):
             "customer_id": partner_no_tag.id,
         })
         self.assertEqual(master.customer_id, partner_no_tag)
+
+
+class TestFF75SeaSingleHousePerCommercialGroup(FreightTestBase):
+    """Final FF-75 UAT follow-up: 1 commercial quotation group (root +
+    seluruh currency variant) maksimal punya 1 freight.sea.job dengan
+    record_level='house'. Berlaku murni untuk House -- Master tidak ikut
+    rule ini."""
+
+    def _create_master(self, **kwargs):
+        vals = {
+            "record_level": "master",
+            "freight_type": "export",
+            "ship_mode": "lcl",
+            "company_id": self.env.company.id,
+        }
+        vals.update(kwargs)
+        return self.env["freight.sea.job"].create(vals)
+
+    def _create_wizard(self, quotation, master):
+        return self.env["freight.sea.add.to.master.wizard"].create({
+            "quotation_id": quotation.id,
+            "freight_type": quotation.freight_type,
+            "company_id": quotation.company_id.id,
+            "master_job_id": master.id,
+        })
+
+    def test_a_wizard_rejects_second_house_from_same_quotation(self):
+        quotation = self._create_quotation()
+        master = self._create_master()
+        self._create_wizard(quotation, master).action_add_to_master()
+
+        wizard2 = self._create_wizard(quotation, self._create_master())
+        with self.assertRaises(UserError):
+            wizard2.action_add_to_master()
+
+        houses = self.env["freight.sea.job"].search([
+            ("record_level", "=", "house"),
+            ("source_quotation_id", "=", quotation.id),
+        ])
+        self.assertEqual(len(houses), 1,
+            msg="Tetap hanya boleh ada 1 House dari Q1 setelah Add to Master kedua ditolak")
+
+    def test_b_wizard_rejects_house_from_currency_variant_of_same_group(self):
+        quotation = self._create_quotation()
+        master = self._create_master()
+        self._create_wizard(quotation, master).action_add_to_master()
+
+        variant_result = quotation.action_create_currency_variant()
+        variant = self.env["sale.order"].browse(variant_result["res_id"])
+
+        wizard2 = self._create_wizard(variant, self._create_master())
+        with self.assertRaises(UserError):
+            wizard2.action_add_to_master()
+
+    def test_c_direct_orm_create_second_house_same_group_raises(self):
+        quotation = self._create_quotation()
+        master1 = self._create_master()
+        house_vals = self.env["freight.sea.job"]._prepare_house_vals_from_quotation(quotation, master=master1)
+        self.env["freight.sea.job"].create(house_vals)
+
+        master2 = self._create_master()
+        house2_vals = self.env["freight.sea.job"]._prepare_house_vals_from_quotation(quotation, master=master2)
+        with self.assertRaises(ValidationError):
+            self.env["freight.sea.job"].create(house2_vals)
+
+    def test_c_write_into_duplicate_source_quotation_raises(self):
+        """Constraint juga harus menangkap write(), bukan cuma create()."""
+        quotation = self._create_quotation()
+        master = self._create_master()
+        house_vals = self.env["freight.sea.job"]._prepare_house_vals_from_quotation(quotation, master=master)
+        self.env["freight.sea.job"].create(house_vals)
+
+        other_master = self._create_master()
+        other_house = self._create_hbl(
+            record_level="house", master_job_id=other_master.id,
+            freight_type="export", ship_mode="lcl",
+        )
+        with self.assertRaises(ValidationError):
+            other_house.write({"source_quotation_id": quotation.id})
+
+    def test_d_two_different_quotations_same_lcl_master_valid(self):
+        quotation1 = self._create_quotation()
+        quotation2 = self._create_quotation()
+        master = self._create_master(ship_mode="lcl")
+
+        self._create_wizard(quotation1, master).action_add_to_master()
+        self._create_wizard(quotation2, master).action_add_to_master()
+
+        self.assertEqual(len(master.house_job_ids), 2)
+
+    def test_fcl_max_one_house_rule_still_independent(self):
+        """Sea FCL max-1-House (jumlah total House di Master) tetap
+        berbeda dari rule baru (1 quotation/commercial group -> max 1
+        House) -- FCL master kedua Quotation BERBEDA tetap ditolak oleh
+        rule FCL, bukan oleh rule baru ini."""
+        quotation1 = self._create_quotation()
+        quotation2 = self._create_quotation()
+        master = self._create_master(ship_mode="fcl")
+
+        self._create_wizard(quotation1, master).action_add_to_master()
+        wizard2 = self._create_wizard(quotation2, master)
+        with self.assertRaises(UserError):
+            wizard2.action_add_to_master()
+
+    def test_button_hidden_after_house_exists(self):
+        quotation = self._create_quotation()
+        self.assertEqual(quotation.sea_job_count, 0)
+        master = self._create_master()
+        self._create_wizard(quotation, master).action_add_to_master()
+        quotation.invalidate_recordset(["sea_job_count"])
+        self.assertEqual(quotation.sea_job_count, 1)
+
+
+class TestFF75AirSingleHousePerCommercialGroup(FreightTestBase):
+    """Mirror TestFF75SeaSingleHousePerCommercialGroup untuk Air."""
+
+    def _create_air_quotation(self, **kwargs):
+        vals = {
+            "is_freight_quotation": True,
+            "freight_business_type": "air",
+            "freight_type": "export",
+            "partner_id": self.partner.id,
+        }
+        vals.update(kwargs)
+        return self.env["sale.order"].create(vals)
+
+    def _create_air_master(self, **kwargs):
+        vals = {
+            "shipment_type": "master",
+            "freight_type": "export",
+            "company_id": self.env.company.id,
+        }
+        vals.update(kwargs)
+        return self.env["freight.air.job"].create(vals)
+
+    def _create_wizard(self, quotation, master):
+        return self.env["freight.air.add.to.master.wizard"].create({
+            "quotation_id": quotation.id,
+            "freight_type": quotation.freight_type,
+            "company_id": quotation.company_id.id,
+            "master_job_id": master.id,
+        })
+
+    def test_a_wizard_rejects_second_house_from_same_quotation(self):
+        quotation = self._create_air_quotation()
+        master = self._create_air_master()
+        self._create_wizard(quotation, master).action_add_to_master()
+
+        wizard2 = self._create_wizard(quotation, self._create_air_master())
+        with self.assertRaises(UserError):
+            wizard2.action_add_to_master()
+
+        houses = self.env["freight.air.job"].search([
+            ("shipment_type", "=", "house"),
+            ("source_quotation_id", "=", quotation.id),
+        ])
+        self.assertEqual(len(houses), 1)
+
+    def test_b_wizard_rejects_house_from_currency_variant_of_same_group(self):
+        quotation = self._create_air_quotation()
+        master = self._create_air_master()
+        self._create_wizard(quotation, master).action_add_to_master()
+
+        variant_result = quotation.action_create_currency_variant()
+        variant = self.env["sale.order"].browse(variant_result["res_id"])
+
+        wizard2 = self._create_wizard(variant, self._create_air_master())
+        with self.assertRaises(UserError):
+            wizard2.action_add_to_master()
+
+    def test_c_direct_orm_create_second_house_same_group_raises(self):
+        quotation = self._create_air_quotation()
+        master1 = self._create_air_master()
+        house_vals = self.env["freight.air.job"]._prepare_house_vals_from_quotation(quotation, master=master1)
+        self.env["freight.air.job"].create(house_vals)
+
+        master2 = self._create_air_master()
+        house2_vals = self.env["freight.air.job"]._prepare_house_vals_from_quotation(quotation, master=master2)
+        with self.assertRaises(ValidationError):
+            self.env["freight.air.job"].create(house2_vals)
+
+    def test_c_write_into_duplicate_source_quotation_raises(self):
+        quotation = self._create_air_quotation()
+        master = self._create_air_master()
+        house_vals = self.env["freight.air.job"]._prepare_house_vals_from_quotation(quotation, master=master)
+        self.env["freight.air.job"].create(house_vals)
+
+        other_master = self._create_air_master()
+        other_house = self.env["freight.air.job"].create({
+            "shipment_type": "house",
+            "master_job_id": other_master.id,
+            "freight_type": "export",
+        })
+        with self.assertRaises(ValidationError):
+            other_house.write({"source_quotation_id": quotation.id})
+
+    def test_d_two_different_quotations_same_master_valid(self):
+        quotation1 = self._create_air_quotation()
+        quotation2 = self._create_air_quotation()
+        master = self._create_air_master()
+
+        self._create_wizard(quotation1, master).action_add_to_master()
+        self._create_wizard(quotation2, master).action_add_to_master()
+
+        self.assertEqual(len(master.house_job_ids), 2)
+
+    def test_direct_awb_not_subject_to_single_house_rule(self):
+        """Direct AWB (shipment_type='direct') tidak ikut rule ini sama
+        sekali, meski punya source_quotation_id yang sama dengan House lain
+        di commercial group yang sama."""
+        quotation = self._create_air_quotation()
+        master = self._create_air_master()
+        self._create_wizard(quotation, master).action_add_to_master()
+
+        direct = self.env["freight.air.job"].create({
+            "shipment_type": "direct",
+            "freight_type": "export",
+            "source_quotation_id": quotation.id,
+        })
+        self.assertTrue(direct.exists())
+
+    def test_button_hidden_after_house_exists(self):
+        quotation = self._create_air_quotation()
+        self.assertEqual(quotation.air_job_count, 0)
+        master = self._create_air_master()
+        self._create_wizard(quotation, master).action_add_to_master()
+        quotation.invalidate_recordset(["air_job_count"])
+        self.assertEqual(quotation.air_job_count, 1)

@@ -77,6 +77,19 @@ class SeaAddToMasterWizard(models.TransientModel):
                 "Sea FCL (%s) sudah memiliki 1 House Job." % master.job_no
             )
 
+        # Manual UAT follow-up FF-75: 1 commercial quotation group (root +
+        # currency variant) maksimal 1 House Sea -- guard dobel dengan
+        # model constraint _check_single_house_per_commercial_group, di sini
+        # murni supaya user mendapat pesan error yang jelas sebelum House
+        # sempat dibuat. Canonical check lewat House + source quotation/
+        # commercial group, BUKAN sale_order.sea_job_id singular.
+        existing_house = self.env["freight.sea.job"]._find_commercial_group_house(quotation)
+        if existing_house:
+            raise UserError(
+                "Quotation ini sudah memiliki House Job dan tidak dapat "
+                "ditambahkan ke Master lagi."
+            )
+
         house_vals = self.env["freight.sea.job"]._prepare_house_vals_from_quotation(
             self.quotation_id, master=self.master_job_id
         )

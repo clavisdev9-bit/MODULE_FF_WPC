@@ -293,6 +293,43 @@ class SeaHBL(models.Model):
                     "Sea FCL (%s) hanya boleh memiliki maksimal 1 House Job." % rec.job_no
                 )
 
+    @api.model
+    def _find_commercial_group_house(self, quotation):
+        """Manual UAT follow-up FF-75: House Sea lain (record_level='house')
+        yang source_quotation_id-nya berada di commercial group (root +
+        seluruh currency variant) yang sama dengan `quotation`. Dipakai
+        bersama oleh constraint model (_check_single_house_per_commercial_group)
+        dan wizard Add to Master -- canonical check HARUS berdasarkan House +
+        source quotation/commercial group, BUKAN sale_order.sea_job_id
+        (singular, tidak menjamin 1:1) atau sea_job_ids compatibility mirror."""
+        if not quotation:
+            return self.browse()
+        root = quotation.original_quotation_id or quotation
+        group_ids = (root | root.variant_ids).ids
+        return self.search([
+            ("record_level", "=", "house"),
+            ("source_quotation_id", "in", group_ids),
+        ])
+
+    @api.constrains("record_level", "source_quotation_id")
+    def _check_single_house_per_commercial_group(self):
+        """Manual UAT follow-up FF-75: 1 commercial quotation group (root +
+        seluruh currency variant) maksimal punya 1 House Sea. Berlaku murni
+        untuk House -- Master tidak ikut rule ini (source_quotation_id Master
+        selalu kosong, lihat commercial_group_mixin). Ditangkap lewat
+        create() MAUPUN write() (constrains, bukan hanya wizard)."""
+        for rec in self:
+            if rec.record_level != "house" or not rec.source_quotation_id:
+                continue
+            duplicates = rec._find_commercial_group_house(rec.source_quotation_id) - rec
+            if duplicates:
+                root = rec.source_quotation_id.original_quotation_id or rec.source_quotation_id
+                raise ValidationError(
+                    "Quotation %s (beserta seluruh currency variant-nya) sudah "
+                    "memiliki House Job (%s) -- satu Quotation hanya boleh "
+                    "menghasilkan maksimal 1 House Job." % (root.name, duplicates[0].job_no)
+                )
+
     @api.constrains("analytic_account_id", "master_job_id")
     def _check_house_analytic_matches_master(self):
         """FF-75: invariant keras -- House TIDAK BOLEH punya analytic account
