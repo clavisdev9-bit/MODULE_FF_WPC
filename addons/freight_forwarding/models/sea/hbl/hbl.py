@@ -34,8 +34,10 @@ class SeaHBL(models.Model):
         string="Master Job",
         domain="[('record_level', '=', 'master'), ('id', '!=', id)]",
         tracking=True,
-        help="Master Job tempat House ini bergabung. Kosong untuk Master "
-             "itu sendiri dan untuk House yang belum digabungkan.",
+        ondelete="restrict",
+        help="Master Job tempat House ini bergabung. WAJIB terisi untuk "
+             "House (House tidak boleh berdiri sendiri); kosong untuk "
+             "Master itu sendiri.",
     )
     house_job_ids = fields.One2many(
         "freight.sea.job",
@@ -113,11 +115,13 @@ class SeaHBL(models.Model):
         string="Type",
         required=True,
     )
-    container_type = fields.Selection(
-        selection=[("fcl", "FCL"), ("lcl", "LCL")],
-        string="Container Type",
-        required=True,
-    )
+    # FF-75 follow-up: `container_type` (FCL/LCL) dihapus -- duplicate
+    # semantic dengan `ship_mode` (fields.Selection fcl/lcl) yang sudah ada
+    # di freight.sea.shipment.info.mixin (di-inherit lewat _inherit di atas).
+    # Override di sini murni untuk mempertahankan required=True yang dulu
+    # ada di container_type -- ship_mode di mixin sendiri sengaja tidak
+    # required (dipakai juga oleh Booking yang tidak mewajibkannya).
+    ship_mode = fields.Selection(required=True)
     booking_id = fields.Many2one(
         "freight.sea.booking",
         string="Booking",
@@ -238,28 +242,43 @@ class SeaHBL(models.Model):
             self.master_job_id.booking_id if self.master_job_id else self.env["freight.sea.booking"]
         )
 
-    def _get_source_quotation(self):
-        self.ensure_one()
-        return self.source_quotation_id or (
-            self.booking_id._get_source_quotation() if self.booking_id else False
-        )
+    # FF-75 semantic consistency: TIDAK override _get_source_quotation() --
+    # Sea tidak punya Direct, jadi implementation base
+    # freight.commercial.group.mixin (return self.source_quotation_id, tanpa
+    # fallback lewat booking_id) sudah tepat apa adanya untuk Master maupun
+    # House. Master bukan commercial owner Quotation manapun (source_quotation_id
+    # sendiri memang selalu kosong untuk Master). House selalu punya
+    # source_quotation_id sendiri (diisi langsung saat dibuat).
 
     @api.constrains("record_level", "master_job_id")
     def _check_master_house_hierarchy(self):
         for rec in self:
             if rec.record_level == "master" and rec.master_job_id:
                 raise ValidationError("Master Job tidak boleh memiliki Master Job lain (master_job_id harus kosong).")
+            if rec.record_level == "house" and not rec.master_job_id:
+                raise ValidationError("House Job wajib menunjuk ke Master Job (master_job_id tidak boleh kosong).")
             if rec.master_job_id:
                 if rec.master_job_id.id == rec.id:
                     raise ValidationError("Job tidak boleh menjadi Master Job untuk dirinya sendiri.")
                 if rec.master_job_id.record_level != "master":
                     raise ValidationError("master_job_id harus menunjuk ke Job dengan Record Level 'Master'.")
 
+    @api.constrains("record_level")
+    def _check_master_cannot_become_house(self):
+        """FF-75 follow-up: proteksi dari sisi parent -- Master yang sudah
+        punya House tidak boleh diubah jadi House lewat write/RPC."""
+        for rec in self:
+            if rec.record_level == "house" and rec.house_job_ids:
+                raise ValidationError(
+                    "Job (%s) tidak bisa diubah dari Master menjadi House karena masih "
+                    "memiliki House Job (%s)." % (rec.job_no, ", ".join(rec.house_job_ids.mapped("job_no")))
+                )
+
     @api.constrains("master_job_id")
     def _check_fcl_single_house_on_attach(self):
         for rec in self:
             master = rec.master_job_id
-            if master and master.container_type == "fcl":
+            if master and master.ship_mode == "fcl":
                 other_house_count = self.search_count([
                     ("master_job_id", "=", master.id),
                     ("id", "!=", rec.id),
@@ -269,10 +288,10 @@ class SeaHBL(models.Model):
                         "Sea FCL (%s) sudah memiliki 1 House Job. Tidak bisa menambahkan House lagi." % master.job_no
                     )
 
-    @api.constrains("container_type", "house_job_ids")
+    @api.constrains("ship_mode", "house_job_ids")
     def _check_fcl_single_house_on_master(self):
         for rec in self:
-            if rec.record_level == "master" and rec.container_type == "fcl" and len(rec.house_job_ids) > 1:
+            if rec.record_level == "master" and rec.ship_mode == "fcl" and len(rec.house_job_ids) > 1:
                 raise ValidationError(
                     "Sea FCL (%s) hanya boleh memiliki maksimal 1 House Job." % rec.job_no
                 )
@@ -308,7 +327,7 @@ class SeaHBL(models.Model):
             "sale_order_ids": [(6, 0, all_variants.ids)],
             "source_quotation_id": original.id,
             "freight_type": quotation.freight_type,
-            "container_type": quotation.container_type,
+            "ship_mode": quotation.sea_ship_mode,
             "customer_id": quotation.partner_id.id if quotation.partner_id else False,
             "term_payment": quotation.payment_term_id.id if quotation.payment_term_id else False,
             "job_date": fields.Date.context_today(self),

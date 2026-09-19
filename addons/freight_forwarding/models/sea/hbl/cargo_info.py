@@ -24,12 +24,13 @@ class SeaHBLCargoInfo(models.Model):
         store=True,
         readonly=True,
     )
-    freight_type = fields.Selection(
-        related="job_id.container_type",
-        string="Freight Type",
-        store=True,
-        readonly=True,
-    )
+    # FF-75 follow-up: field `freight_type` (related=job_id.container_type)
+    # dihapus -- misleading (parent.freight_type sebenarnya berarti
+    # Import/Export, lihat field `type` di atas), dan container_type sendiri
+    # sudah dihapus dari Job (diganti ship_mode). Tidak ada runtime consumer
+    # lain selain definisinya sendiri (dikonfirmasi lewat audit), jadi tidak
+    # diganti dengan stored duplicate baru -- consumer yang butuh FCL/LCL
+    # harus baca job_id.ship_mode langsung.
     booking_id = fields.Many2one(
         "freight.sea.booking",
         string="Booking",

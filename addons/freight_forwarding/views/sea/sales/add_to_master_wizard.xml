@@ -9,6 +9,7 @@
                     <group>
                         <field name="quotation_id" readonly="1" />
                         <field name="freight_type" invisible="1" />
+                        <field name="company_id" invisible="1" />
                         <field name="master_job_id" required="1" />
                     </group>
                     <footer>

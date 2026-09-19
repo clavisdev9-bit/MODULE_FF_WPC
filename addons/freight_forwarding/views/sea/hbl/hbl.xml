@@ -10,7 +10,7 @@
                 <field name="master_job_id" />
                 <field name="hbl_no" />
                 <field name="freight_type" />
-                <field name="container_type" />
+                <field name="ship_mode" />
                 <field name="sale_order_ids" widget="many2many_tags" />
                 <field name="booking_id" />
                 <field name="customer_id" />
@@ -65,7 +65,7 @@
                             <field name="record_level" widget="radio" options="{'horizontal': true}" />
                             <field name="master_job_id" invisible="record_level != 'house'" />
                             <field name="freight_type" />
-                            <field name="container_type" />
+                            <field name="ship_mode" />
                             <field name="booking_id" invisible="record_level == 'house'" />
                             <field name="master_job_no" invisible="record_level == 'house'" />
                             <field name="job_date" />
@@ -321,14 +321,14 @@
                 <field name="booking_id" />
                 <field name="customer_id" />
                 <field name="freight_type" />
-                <field name="container_type" />
+                <field name="ship_mode" />
                 <separator />
                 <filter name="filter_import" string="Import"
                     domain="[('freight_type', '=', 'import')]" />
                 <filter name="filter_export" string="Export"
                     domain="[('freight_type', '=', 'export')]" />
-                <filter name="filter_fcl" string="FCL" domain="[('container_type', '=', 'fcl')]" />
-                <filter name="filter_lcl" string="LCL" domain="[('container_type', '=', 'lcl')]" />
+                <filter name="filter_fcl" string="FCL" domain="[('ship_mode', '=', 'fcl')]" />
+                <filter name="filter_lcl" string="LCL" domain="[('ship_mode', '=', 'lcl')]" />
                 <separator />
                 <filter name="filter_master" string="Master"
                     domain="[('record_level', '=', 'master')]" />
@@ -350,7 +350,7 @@
         <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
-        <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'fcl')]</field>
+        <field name="domain">[('freight_type', '=', 'import'), ('ship_mode', '=', 'fcl')]</field>
     </record>
 
     <record id="action_sea_hbl_import_lcl" model="ir.actions.act_window">
@@ -358,7 +358,7 @@
         <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
-        <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'lcl')]</field>
+        <field name="domain">[('freight_type', '=', 'import'), ('ship_mode', '=', 'lcl')]</field>
     </record>
 
     <record id="action_sea_hbl_export_fcl" model="ir.actions.act_window">
@@ -366,7 +366,7 @@
         <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
-        <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'fcl')]</field>
+        <field name="domain">[('freight_type', '=', 'export'), ('ship_mode', '=', 'fcl')]</field>
     </record>
 
     <record id="action_sea_hbl_export_lcl" model="ir.actions.act_window">
@@ -374,7 +374,7 @@
         <field name="res_model">freight.sea.job</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_sea_hbl_search" />
-        <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'lcl')]</field>
+        <field name="domain">[('freight_type', '=', 'export'), ('ship_mode', '=', 'lcl')]</field>
     </record>
 
 </odoo>

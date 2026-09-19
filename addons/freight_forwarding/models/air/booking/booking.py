@@ -184,7 +184,11 @@ class FreightAirBooking(models.Model):
             'booking_id': self.id,
             'freight_type': self.freight_type,
             'company_id': self.company_id.id,
-            'partner_id': self.partner_id.id,
+            # FF-75 follow-up (Section E): Master TIDAK boleh mengambil
+            # Customer dari Booking secara otomatis -- semantic Customer
+            # Master consolidation belum dipastikan. Direct (out of scope)
+            # tetap pakai behavior existing (partner_id dari Booking).
+            'partner_id': self.partner_id.id if is_direct else False,
             'customer_ref': self.customer_reference,
             'is_nomination': self.is_nomination,
             'nomination_remark': self.nomination_remark,
@@ -220,7 +224,12 @@ class FreightAirBooking(models.Model):
             'flight_routing_ids': flight_lines,
             'dimension_ids': dimension_lines,
         }
-        if self.sale_order_ids:
+        if is_direct and self.sale_order_ids:
+            # FF-75 follow-up (Section D): Master TIDAK boleh menerima
+            # sale_order_ids Booking untuk commercial ownership -- House
+            # (bukan Master) yang menjadi Job commercial untuk Q1 (dari
+            # source_quotation_id-nya sendiri, lihat _prepare_house_vals_from_quotation).
+            # Direct (out of scope) tetap pakai behavior existing.
             hawb_vals['sale_order_ids'] = [(6, 0, self.sale_order_ids.ids)]
         job = self.env['freight.air.job'].create(hawb_vals)
 

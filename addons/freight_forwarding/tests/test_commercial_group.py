@@ -75,21 +75,27 @@ class TestCommercialGroupJobsheet(FreightTestBase):
         self.assertEqual(hbl.source_quotation_id, quotation)
         self.assertEqual(hbl._get_source_quotation(), quotation)
 
-    def test_root_quotation_derived_via_booking_for_export_flow(self):
-        """Export lewat Booking: HBL sendiri TIDAK menyimpan source_quotation_id
-        (sengaja kosong), tapi _get_source_quotation() tetap resolve lewat
-        booking_id -> booking._get_source_quotation()."""
+    def test_master_is_not_commercial_owner_via_booking_for_export_flow(self):
+        """FF-75 semantic consistency: Sea tidak punya Direct, jadi Master
+        TIDAK BOLEH resolve source quotation lewat booking_id sama sekali
+        -- Booking.source_quotation_id murni operational (bukan komersial
+        untuk Job di bawahnya). House (bukan Master) yang punya
+        source_quotation_id sendiri dan jadi commercial owner Q1."""
         quotation = self._create_quotation()
         booking_result = quotation.action_convert_to_booking_direct()
         booking = self.env["freight.sea.booking"].browse(booking_result["res_id"])
 
-        hbl_result = booking.action_create_job()
-        hbl = self.env["freight.sea.job"].browse(hbl_result["res_id"])
+        job_result = booking.action_create_job()
+        master = self.env["freight.sea.job"].browse(job_result["res_id"])
+        house = master.house_job_ids
 
-        self.assertFalse(hbl.source_quotation_id,
-            msg="HBL hasil export-via-booking sengaja tidak menyimpan source_quotation_id sendiri")
-        self.assertEqual(hbl._get_source_quotation(), quotation,
-            msg="_get_source_quotation() harus tetap resolve lewat booking_id")
+        self.assertFalse(master.source_quotation_id,
+            msg="Master hasil export-via-booking tidak menyimpan source_quotation_id sendiri")
+        self.assertFalse(master._get_source_quotation(),
+            msg="Master BUKAN commercial owner Quotation manapun -- tidak boleh fallback lewat booking_id")
+        self.assertEqual(house.source_quotation_id, quotation)
+        self.assertEqual(house._get_source_quotation(), quotation,
+            msg="House resolve source quotation langsung dari field sendiri")
 
     def test_commercial_group_includes_variant_created_after_jobsheet(self):
         quotation = self._create_quotation(freight_type="import")

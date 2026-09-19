@@ -44,7 +44,7 @@
 
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="freight_type" invisible="not is_freight_quotation" readonly="state == 'sale'" />
-                <field name="container_type" invisible="not is_freight_quotation" readonly="state == 'sale'" />
+                <field name="sea_ship_mode" invisible="not is_freight_quotation" readonly="state == 'sale'" />
                 <field name="quotation_title" invisible="not is_freight_quotation" />
             </xpath>
 
@@ -181,7 +181,7 @@
                 <field name="name" string="Number" decoration-bf="1" />
                 <field name="create_date" string="Creation Date" />
                 <field name="freight_type" string="Quotation Type" />
-                <field name="container_type" string="Container Type" />
+                <field name="sea_ship_mode" string="Ship Mode" />
                 <field name="partner_id" string="Customer" />
                 <field name="user_id" string="Salesperson" />
                 <field name="amount_total" string="Total" />
@@ -204,7 +204,7 @@
                 <field name="team_id"/>
                 <field name="state"/>
                 <field name="freight_type"/>
-                <field name="container_type"/>
+                <field name="sea_ship_mode"/>
                 <separator/>
                 <filter name="my_quotation" string="My Quotations" domain="[('user_id', '=', uid)]"/>
                 <filter name="filter_draft_sent" string="Quotation" domain="[('state', 'in', ['draft', 'sent'])]"/>

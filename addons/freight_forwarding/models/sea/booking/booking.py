@@ -128,10 +128,9 @@ class SeaBooking(models.Model):
     hbl_no = fields.Char(string="B/L No.")
     job_no = fields.Char(string="Job No.")
     nomination_cargo = fields.Boolean(string="Nomination Cargo")
-    container_type = fields.Selection(
-        selection=[("fcl", "FCL"), ("lcl", "LCL")],
-        string="Container Type",
-    )
+    # FF-75 follow-up: `container_type` (FCL/LCL) dihapus -- duplicate
+    # semantic dengan `ship_mode` yang sudah ada lewat
+    # freight.sea.shipment.info.mixin (_inherit di atas).
     job_date = fields.Date(string="Job Date")
     import_job_no = fields.Char(string="Import Job Number (Optional)")
     railing = fields.Boolean(string="Railing")
@@ -335,11 +334,15 @@ class SeaBooking(models.Model):
                     "booking_id": self.id,
                     "record_level": "master",
                     "freight_type": self.freight_type,
-                    "container_type": self.container_type,
+                    "ship_mode": self.ship_mode,
                     "shipment_type_id": self.shipment_type_id.id if self.shipment_type_id else False,
                     "commodity_id": self.commodity_id.id if self.commodity_id else False,
                     "delivery_type_id": self.delivery_type_id.id if self.delivery_type_id else False,
-                    "customer_id": self.partner_id.id,
+                    # FF-75 follow-up (Section E): Master TIDAK boleh
+                    # mengambil Customer dari Booking secara otomatis --
+                    # semantic Customer Master consolidation belum
+                    # dipastikan. customer_id Master tetap optional/False
+                    # kecuali diisi eksplisit oleh user lewat flow lain.
                     "customer_ref": self.customer_reference,
                     "shipper_id": self.shipper_id.id if self.shipper_id else False,
                     "consignee_id": self.consignee_id.id if self.consignee_id else False,

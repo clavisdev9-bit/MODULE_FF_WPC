@@ -50,7 +50,7 @@ class TestMinimalRequiredFields(FreightTestBase):
         hbl = self.env["freight.sea.job"].create({})
         self.assertTrue(hbl.exists())
         self.assertFalse(hbl.freight_type)
-        self.assertFalse(hbl.container_type)
+        self.assertFalse(hbl.ship_mode)
 
     def test_air_hawb_minimal(self):
         """FF-73 follow-up: freight_type TIDAK lagi punya default='export' --
@@ -59,7 +59,7 @@ class TestMinimalRequiredFields(FreightTestBase):
         Sebelum fix ini, freight_type diam-diam jadi 'export' walau job_no
         (lihat TestConvertDoesNotGuessEmptyBusinessFields di bawah) memakai
         sequence netral -- semantic inconsistency."""
-        hawb = self.env["freight.air.job"].create({})
+        hawb = self.env["freight.air.job"].create({"shipment_type": "direct"})
         self.assertTrue(hawb.exists())
         self.assertFalse(hawb.partner_id)
         self.assertFalse(hawb.freight_type)
@@ -171,7 +171,7 @@ class TestConvertDoesNotGuessEmptyBusinessFields(FreightTestBase):
             msg="job_no HBL tanpa freight_type harus pakai sequence netral, bukan EXP/IMP")
 
     def test_air_hawb_job_no_uses_neutral_sequence_when_freight_type_empty(self):
-        hawb = self.env["freight.air.job"].create({})
+        hawb = self.env["freight.air.job"].create({"shipment_type": "direct"})
         self.assertTrue(hawb.job_no)
         self.assertTrue(hawb.job_no.startswith("JKT-AJOB/"),
             msg="job_no HAWB tanpa freight_type harus pakai sequence netral, bukan AE/AI")
@@ -197,7 +197,7 @@ class TestConvertDoesNotGuessEmptyBusinessFields(FreightTestBase):
         kosong -> job_no pakai sequence netral JKT-AJOB/), sehingga hasil
         akhirnya freight_type='export' TAPI job_no berprefix netral --
         semantic inconsistency yang dilaporkan lewat assertion di bawah."""
-        hawb = self.env["freight.air.job"].create({})
+        hawb = self.env["freight.air.job"].create({"shipment_type": "direct"})
 
         self.assertFalse(
             hawb.freight_type,

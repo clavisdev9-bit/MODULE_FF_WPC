@@ -54,13 +54,17 @@ class SeaQuotation(models.Model):
         copy=False,
     )
 
-    # Container Type (sea-specific, juga di-sync ke sale_order)
-    container_type = fields.Selection(
+    # FF-75 follow-up: field ini dulu bernama `container_type`, tapi
+    # semantic-nya sama persis dengan `ship_mode` milik Booking/Job
+    # (fcl/lcl) -- direname jadi `sea_ship_mode` (technical name sea-specific
+    # karena sale.order juga dipakai Air, dan `ship_mode` Air punya semantic
+    # berbeda). Konversi ke Booking/Job: sea_ship_mode -> ship_mode.
+    sea_ship_mode = fields.Selection(
         selection=[
             ("fcl", "FCL"),
             ("lcl", "LCL"),
         ],
-        string="Container Type",
+        string="Ship Mode",
     )
 
 
@@ -193,7 +197,7 @@ class SeaQuotation(models.Model):
             "to_city": self.delivery_city.id,
             "salesman_id": self.salesman_id.id,
             "payment_term_id": self.payment_term_id.id,
-            "container_type": self.container_type,
+            "ship_mode": self.sea_ship_mode,
             "commodity_id": self.commodity_id.id,
             "service_level": self.service_level,
             "freight_type": self.freight_type,
@@ -226,7 +230,7 @@ class SeaQuotation(models.Model):
         parties, dst. sama seperti Master hasil flow Export) yang tetap bisa
         diisi/diedit normal oleh user lewat form yang sama. Hanya saja tidak
         ada Booking untuk menyalin data awal, jadi field operasionalnya
-        dimulai kosong (selain freight_type/container_type/company_id/
+        dimulai kosong (selain freight_type/ship_mode/company_id/
         job_date) -- bukan berarti recordnya dibatasi jadi shell. Data
         customer/commercial TIDAK dipaksakan ke Master (semantic Customer
         Master consolidation belum dipastikan -- lihat customer_id optional
@@ -237,7 +241,7 @@ class SeaQuotation(models.Model):
         master = self.env["freight.sea.job"].create({
             "record_level": "master",
             "freight_type": self.freight_type,
-            "container_type": self.container_type,
+            "ship_mode": self.sea_ship_mode,
             "company_id": self.company_id.id,
             "job_date": fields.Date.today(),
         })

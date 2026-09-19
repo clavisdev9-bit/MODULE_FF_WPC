@@ -34,10 +34,20 @@ class FreightCommercialGroupMixin(models.AbstractModel):
     )
 
     def _get_source_quotation(self):
-        """Source quotation milik record ini sendiri. Subclass yang bisa
-        mendapatkan source secara tidak langsung (misal Direct Job yang
-        dibuat lewat Booking tanpa source_quotation_id sendiri) WAJIB
-        override method ini, bukan cuma mengandalkan source_quotation_id."""
+        """Source quotation milik record ini sendiri (base impl, dipakai
+        apa adanya oleh Booking Sea/Air dan Sea Job -- Sea tidak punya
+        konsep Direct, jadi Sea Job TIDAK override method ini sama sekali,
+        murni field sendiri, tanpa fallback lewat booking_id).
+
+        Subclass yang bisa mendapatkan source secara tidak langsung WAJIB
+        override method ini secara eksplisit dan sesempit mungkin -- jangan
+        sampai fallback berlaku untuk Master/House (keduanya harus selalu
+        resolve dari source_quotation_id sendiri, TIDAK boleh lewat
+        Booking). Satu-satunya override saat ini adalah Air Job untuk
+        shipment_type == 'direct' (lihat freight.air.job._get_source_quotation),
+        karena Direct adalah standalone Job yang bisa dibuat lewat Booking
+        tanpa source_quotation_id sendiri -- di luar scope FF-75, behavior
+        existing dipertahankan apa adanya."""
         self.ensure_one()
         return self.source_quotation_id
 

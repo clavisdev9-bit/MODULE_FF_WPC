@@ -22,7 +22,7 @@ class TestSeaQuotationHblCount(FreightTestBase):
         (lihat _get_commercial_group_jobsheets)."""
         quotation = self._create_quotation()
         booking = self._create_booking(quotation_id=quotation.id)
-        master = self._create_hbl(booking=booking, record_level="master", container_type="lcl")
+        master = self._create_hbl(booking=booking, record_level="master", ship_mode="lcl")
 
         # Buat 2 House, digabung ke Master
         self._create_hbl(quotation_id=quotation.id, master_job_id=master.id)

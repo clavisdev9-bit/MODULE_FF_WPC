@@ -16,7 +16,7 @@ class TestSeaBookingFields(FreightTestBase):
         berhasil dibuat."""
         booking = self.env["freight.sea.booking"].create({
             "partner_id": self.partner.id,
-            # freight_type, container_type, vessel_id, delivery_type_id
+            # freight_type, ship_mode, vessel_id, delivery_type_id
             # sengaja tidak diisi -- harus tetap berhasil.
         })
         self.assertTrue(booking.exists())

@@ -22,13 +22,21 @@ class SeaAddToMasterWizard(models.TransientModel):
         string="Type",
         readonly=True,
     )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        readonly=True,
+    )
     master_job_id = fields.Many2one(
         "freight.sea.job",
         string="Master Job",
         required=True,
         domain="[('record_level', '=', 'master'), ('freight_type', '=', freight_type),"
-               " '|', ('container_type', '!=', 'fcl'), ('house_job_ids', '=', False)]",
-        help="Sea FCL yang sudah punya 1 House tidak akan muncul di sini.",
+               " ('company_id', '=', company_id), ('state', 'not in', ['closed', 'cancelled']),"
+               " '|', ('ship_mode', '!=', 'fcl'), ('house_job_ids', '=', False)]",
+        help="Master harus Freight Type & Company yang sama dengan Quotation, "
+             "berstatus aktif (bukan Closed/Cancelled). Sea FCL yang sudah "
+             "punya 1 House tidak akan muncul di sini.",
     )
 
     @api.model
@@ -39,18 +47,26 @@ class SeaAddToMasterWizard(models.TransientModel):
             quotation = self.env["sale.order"].browse(quotation_id)
             res["quotation_id"] = quotation.id
             res["freight_type"] = quotation.freight_type
+            res["company_id"] = quotation.company_id.id
         return res
 
     def action_add_to_master(self):
+        """Section G: validasi ulang di backend -- domain wizard hanya untuk
+        UX, RPC/API lain yang menulis master_job_id langsung harus tetap
+        ditolak kalau kandidat tidak valid."""
         self.ensure_one()
-        if self.master_job_id.record_level != "master":
+        master = self.master_job_id
+        if master.record_level != "master":
             raise UserError("Job yang dipilih harus berupa Master Job.")
-        if (
-            self.master_job_id.container_type == "fcl"
-            and self.master_job_id.house_job_ids
-        ):
+        if master.freight_type != self.quotation_id.freight_type:
+            raise UserError("Master harus punya Type (Import/Export) yang sama dengan Quotation.")
+        if master.company_id != self.quotation_id.company_id:
+            raise UserError("Master harus berada di Company yang sama dengan Quotation.")
+        if master.state in ("closed", "cancelled"):
+            raise UserError("Master (%s) sudah %s, tidak bisa menerima House baru." % (master.job_no, master.state))
+        if master.ship_mode == "fcl" and master.house_job_ids:
             raise UserError(
-                "Sea FCL (%s) sudah memiliki 1 House Job." % self.master_job_id.job_no
+                "Sea FCL (%s) sudah memiliki 1 House Job." % master.job_no
             )
 
         house_vals = self.env["freight.sea.job"]._prepare_house_vals_from_quotation(

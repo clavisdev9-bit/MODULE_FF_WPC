@@ -27,8 +27,10 @@ class FreightAirHawb(models.Model):
         string='Master Job',
         domain="[('shipment_type', '=', 'master'), ('id', '!=', id)]",
         tracking=True,
-        help='Master Job tempat House AWB ini bergabung. Kosong untuk Master '
-             'itu sendiri, untuk Direct, dan untuk House yang belum digabungkan.',
+        ondelete='restrict',
+        help='Master Job tempat House AWB ini bergabung. WAJIB terisi untuk '
+             'House (House tidak boleh berdiri sendiri). Kosong untuk Master '
+             'dan untuk Direct.',
     )
     house_job_ids = fields.One2many(
         'freight.air.job',
@@ -194,13 +196,22 @@ class FreightAirHawb(models.Model):
             rec.sales_order_count = len(rec.sale_order_ids)
 
     def _get_source_quotation(self):
-        """FF-73: Export HAWB (dibuat lewat Booking) tidak punya source_quotation_id
-        sendiri — root-nya diambil dari Booking. Import direct sudah mengisi
-        source_quotation_id langsung (lihat action_convert_to_jobsheet_direct_air)."""
+        """FF-75 semantic consistency: Master BUKAN commercial owner
+        Quotation manapun -- TIDAK boleh resolve source lewat Booking.
+        House selalu punya source_quotation_id sendiri (diisi langsung saat
+        dibuat), jadi tidak butuh fallback apa pun.
+
+        Direct (out of scope FF-75, behavior existing dipertahankan) tetap
+        boleh fallback ke Booking: Direct adalah standalone Job yang bisa
+        dibuat lewat Booking tanpa source_quotation_id sendiri (lihat
+        action_create_job Booking) -- root-nya diambil dari
+        Booking._get_source_quotation() persis seperti sebelum FF-75."""
         self.ensure_one()
-        return self.source_quotation_id or (
-            self.booking_id._get_source_quotation() if self.booking_id else False
-        )
+        if self.source_quotation_id:
+            return self.source_quotation_id
+        if self.shipment_type == 'direct' and self.booking_id:
+            return self.booking_id._get_source_quotation()
+        return False
 
     @api.depends('purchase_order_ids')
     def _compute_purchase_order_count(self):
@@ -214,11 +225,26 @@ class FreightAirHawb(models.Model):
                 raise ValidationError(
                     "Master Job dan Direct AWB tidak boleh memiliki master_job_id (master_job_id harus kosong)."
                 )
+            if rec.shipment_type == 'house' and not rec.master_job_id:
+                raise ValidationError("House AWB wajib menunjuk ke Master Job (master_job_id tidak boleh kosong).")
             if rec.master_job_id:
                 if rec.master_job_id.id == rec.id:
                     raise ValidationError("Job tidak boleh menjadi Master Job untuk dirinya sendiri.")
                 if rec.master_job_id.shipment_type != 'master':
                     raise ValidationError("master_job_id harus menunjuk ke Job dengan Shipment Type 'Master'.")
+
+    @api.constrains('shipment_type')
+    def _check_master_cannot_become_house_or_direct(self):
+        """FF-75 follow-up: proteksi dari sisi parent -- Master yang sudah
+        punya House tidak boleh diubah jadi House/Direct lewat write/RPC."""
+        for rec in self:
+            if rec.shipment_type in ('house', 'direct') and rec.house_job_ids:
+                raise ValidationError(
+                    "Job (%s) tidak bisa diubah dari Master menjadi %s karena masih "
+                    "memiliki House Job (%s)." % (
+                        rec.job_no, rec.shipment_type, ", ".join(rec.house_job_ids.mapped("job_no"))
+                    )
+                )
 
     @api.constrains('analytic_account_id', 'master_job_id')
     def _check_house_analytic_matches_master(self):
