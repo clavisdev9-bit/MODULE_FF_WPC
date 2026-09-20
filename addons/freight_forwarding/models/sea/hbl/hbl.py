@@ -20,7 +20,7 @@ class SeaHBL(models.Model):
 
     record_level = fields.Selection(
         [("master", "Master"), ("house", "House")],
-        string="Record Level",
+        string="Shipment Type",
         default="house",
         required=True,
         tracking=True,

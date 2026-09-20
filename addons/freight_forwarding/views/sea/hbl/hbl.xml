@@ -62,7 +62,7 @@
                     </h1>
                     <group string="Header Information">
                         <group>
-                            <field name="record_level" string="Shipment Type" widget="radio" options="{'horizontal': true}" />
+                            <field name="record_level" widget="radio" options="{'horizontal': true}" />
                             <field name="master_job_id" string="Master Job No." invisible="record_level != 'house'" />
                             <field name="freight_type" />
                             <field name="ship_mode" />

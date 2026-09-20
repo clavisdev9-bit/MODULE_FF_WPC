@@ -13,7 +13,7 @@ class SeaHBLCargoInfo(models.Model):
         ondelete="cascade",
     )
     bl_no = fields.Char(
-        string="Jobsheet No.",
+        string="B/L No.",
         related="job_id.bl_no",
         store=True,
         readonly=True,

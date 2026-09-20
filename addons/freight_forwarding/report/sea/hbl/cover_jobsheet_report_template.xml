@@ -103,7 +103,7 @@
                         <tr>
                             <td>MB/L NO.</td>
                             <td>:</td>
-                            <td><span t-field="o.master_job_id.bl_no"/></td>
+                            <td><t t-esc="(o.bl_no if o.record_level == 'master' else o.master_job_id.bl_no) or ''"/></td>
                             <td>ETA</td>
                             <td>:</td>
                             <td><span t-field="o.eta" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/></td>
@@ -111,7 +111,7 @@
                         <tr>
                             <td>HB/L NO.</td>
                             <td>:</td>
-                            <td><span t-field="o.bl_no"/></td>
+                            <td><t t-esc="(o.bl_no if o.record_level == 'house' else '') or ''"/></td>
                             <td>ETD</td>
                             <td>:</td>
                             <td><span t-field="o.etd" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/></td>
