@@ -19,3 +19,6 @@ graphify-out/
 # Odoo Enterprise — JANGAN pernah di-commit ke repo publik
 /enterprise/
 
+# PR template lokal (pr-creator skill) -- tidak di-share lewat repo
+/.github/pull_request_template.md
+
