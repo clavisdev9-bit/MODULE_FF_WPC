@@ -431,3 +431,115 @@ class TestAwbReviewFindings(AirAwbTestBase):
         self.assertFalse(awb.is_executed)
         awb.write({"awb_type": "sea"})
         self.assertEqual(awb.awb_type, "sea")
+
+
+class TestAwbChainLockFinalHardening(AirAwbTestBase):
+    """Final hardening FF-76 Air: proteksi delete AWB Master yang sudah
+    used/terikat, dan lock identity Booking->Master AWB chain."""
+
+    def test_unused_awb_master_can_unlink(self):
+        """1. Unused AWB Master boleh dihapus."""
+        awb = self._create_awb("04012345678")
+        awb.unlink()
+        self.assertFalse(awb.exists())
+
+    def test_executed_awb_master_cannot_unlink(self):
+        """2. Executed AWB Master tidak boleh dihapus."""
+        awb = self._create_awb("04112345678")
+        self.env["freight.air.job"].create({
+            "shipment_type": "direct", "freight_type": "export", "awb_master_id": awb.id,
+        })
+        self.assertTrue(awb.is_executed)
+        with self.assertRaises(ValidationError):
+            awb.unlink()
+
+    def test_historical_used_awb_cannot_unlink_after_owner_deleted(self):
+        """3. AWB historical-used tetap tidak bisa dihapus setelah owner
+        relation-nya hilang (is_executed tetap True -- one-time usage rule
+        tidak boleh ter-bypass lewat unlink lalu create ulang nomor sama)."""
+        awb = self._create_awb("04212345678")
+        direct = self.env["freight.air.job"].create({
+            "shipment_type": "direct", "freight_type": "export", "awb_master_id": awb.id,
+        })
+        direct.unlink()
+        awb.invalidate_recordset()
+        self.assertTrue(awb.is_executed)
+        self.assertFalse(awb.air_job_ids)
+        with self.assertRaises(ValidationError):
+            awb.unlink()
+
+    def test_booking_awb_editable_before_master_exists(self):
+        """4. Booking.awb_master_id tetap editable sebelum Master ada."""
+        awb1 = self._create_awb("04312345678")
+        awb2 = self._create_awb("04412345678")
+        booking = self._create_air_booking(awb_master_id=awb1.id)
+        self.assertEqual(booking.air_job_count, 0)
+        booking.write({"awb_master_id": awb2.id})
+        self.assertEqual(booking.awb_master_id, awb2)
+
+    def test_booking_awb_cannot_change_after_master_exists(self):
+        """5. Booking.awb_master_id tidak boleh berubah setelah Master ada."""
+        awb1 = self._create_awb("04512345678")
+        awb2 = self._create_awb("04612345678")
+        booking = self._create_air_booking(awb_master_id=awb1.id)
+        booking.action_create_job()
+        self.assertTrue(booking.air_job_ids)
+        with self.assertRaises(ValidationError):
+            booking.write({"awb_master_id": awb2.id})
+
+    def test_booking_awb_same_value_write_is_noop_allowed(self):
+        """6. Write awb_master_id ke value yang SAMA tetap boleh (no-op) meski Master sudah ada."""
+        awb1 = self._create_awb("04712345678")
+        booking = self._create_air_booking(awb_master_id=awb1.id)
+        booking.action_create_job()
+        booking.write({"awb_master_id": awb1.id})
+        self.assertEqual(booking.awb_master_id, awb1)
+
+    def test_booking_created_master_awb_cannot_change(self):
+        """7. Master.awb_master_id (hasil Booking) tidak boleh diedit independen."""
+        awb1 = self._create_awb("04812345678")
+        awb2 = self._create_awb("04912345678")
+        booking = self._create_air_booking(awb_master_id=awb1.id)
+        result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(result["res_id"])
+        with self.assertRaises(ValidationError):
+            master.write({"awb_master_id": awb2.id})
+
+    def test_booking_created_master_invariant_requires_same_awb(self):
+        """8. Invariant: Master dengan booking_id harus awb_master_id ==
+        booking_id.awb_master_id -- ditangkap constrain kalau di-bypass
+        lewat write booking_id ke Booking lain yang AWB-nya berbeda."""
+        awb1 = self._create_awb("05012345678")
+        awb2 = self._create_awb("05112345678")
+        booking1 = self._create_air_booking(awb_master_id=awb1.id)
+        result = booking1.action_create_job()
+        master = self.env["freight.air.job"].browse(result["res_id"])
+
+        other_booking = self._create_air_booking(awb_master_id=awb2.id)
+        with self.assertRaises(ValidationError):
+            master.write({"booking_id": other_booking.id})
+
+    def test_booking_create_job_same_awb_flow_still_passes(self):
+        """9. Flow existing Booking -> Create Job dengan AWB yang sama tetap legal."""
+        awb = self._create_awb("05212345678")
+        booking = self._create_air_booking(awb_master_id=awb.id)
+        result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(result["res_id"])
+        self.assertEqual(master.awb_master_id, awb)
+        self.assertEqual(master.booking_id, booking)
+        house = master.house_job_ids
+        self.assertFalse(house.awb_master_id if house else False,
+            msg="House pertama tetap AWB kosong")
+
+    def test_manual_master_without_booking_outside_chain_lock(self):
+        """10. Manual Master (tanpa booking_id) tidak terkena lock chain
+        Booking -- awb_master_id-nya tetap bisa diedit selama masih legal
+        (AWB baru yang available)."""
+        awb1 = self._create_awb("05312345678")
+        awb2 = self._create_awb("05412345678")
+        master = self.env["freight.air.job"].create({
+            "shipment_type": "master", "freight_type": "export", "awb_master_id": awb1.id,
+        })
+        self.assertFalse(master.booking_id)
+        master.write({"awb_master_id": awb2.id})
+        self.assertEqual(master.awb_master_id, awb2)

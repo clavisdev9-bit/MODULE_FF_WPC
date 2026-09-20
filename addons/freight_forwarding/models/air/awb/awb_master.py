@@ -202,6 +202,20 @@ class FreightAwbMaster(models.Model):
             "executed_booking_id": booking.id,
         })
 
+    def unlink(self):
+        """Final hardening FF-76: AWB yang sudah pernah dipakai (is_executed)
+        atau masih terikat ke Booking/Job (booking_ids/air_job_ids) TIDAK
+        boleh dihapus -- kalau boleh, nomor yang sama bisa dibuat ulang dan
+        one-time usage rule (is_executed) ter-bypass. AWB yang benar-benar
+        unused/unbound tetap boleh dihapus seperti biasa."""
+        for rec in self:
+            if rec.is_executed or rec.booking_ids or rec.air_job_ids:
+                raise ValidationError(
+                    "AWB %s sudah pernah digunakan/terikat ke Booking atau Job -- "
+                    "tidak boleh dihapus." % rec.awb_no
+                )
+        return super().unlink()
+
     def _snapshot_from_job(self, job):
         """FF-76: snapshot Execution Info dari Job (Master/House/Direct),
         HANYA sekali per AWB. Lihat catatan idempotency di _snapshot_from_booking."""

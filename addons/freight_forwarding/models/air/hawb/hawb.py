@@ -363,6 +363,22 @@ class FreightAirHawb(models.Model):
                     "ulang oleh Job ini." % awb.awb_no
                 )
 
+    @api.constrains('awb_master_id', 'booking_id', 'shipment_type')
+    def _check_master_awb_matches_booking_awb(self):
+        """Final hardening FF-76: Master yang punya booking_id (hasil
+        action_create_job) HARUS memakai AWB yang EXACT sama dengan
+        Booking-nya. Menangkap mismatch dari jalur mana pun (write
+        awb_master_id langsung -- sudah ditolak lebih awal di write() --
+        ATAU perubahan booking_id/shipment_type lewat ORM/RPC lain). TIDAK
+        live-sync/cascade -- kalau mismatch, tolak."""
+        for rec in self:
+            if rec.shipment_type == 'master' and rec.booking_id:
+                if rec.awb_master_id != rec.booking_id.awb_master_id:
+                    raise ValidationError(
+                        "Master Job (%s) harus memakai AWB No. yang sama dengan "
+                        "Booking-nya (%s)." % (rec.job_no, rec.booking_id.name)
+                    )
+
     def _get_effective_booking(self):
         self.ensure_one()
         return self.booking_id or (
@@ -522,6 +538,14 @@ class FreightAirHawb(models.Model):
         return records
 
     def write(self, vals):
+        if 'awb_master_id' in vals:
+            new_awb_id = vals.get('awb_master_id')
+            for rec in self:
+                if rec.shipment_type == 'master' and rec.booking_id and new_awb_id != rec.awb_master_id.id:
+                    raise ValidationError(
+                        "Master Job (%s) dibuat dari Booking (%s) -- AWB No. tidak "
+                        "boleh diedit independen dari Master." % (rec.job_no, rec.booking_id.name)
+                    )
         if 'master_job_id' in vals and 'analytic_account_id' not in vals:
             # FF-75: House mengikuti analytic Master -- disamakan di vals
             # SEBELUM super().write() supaya @api.constrains tidak melihat

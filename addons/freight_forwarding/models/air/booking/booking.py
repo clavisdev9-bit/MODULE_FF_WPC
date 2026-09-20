@@ -157,6 +157,17 @@ class FreightAirBooking(models.Model):
         return records
 
     def write(self, vals):
+        if 'awb_master_id' in vals:
+            new_awb_id = vals.get('awb_master_id')
+            for rec in self:
+                if new_awb_id == rec.awb_master_id.id:
+                    continue
+                master = rec.air_job_ids.filtered(lambda j: j.shipment_type == 'master')
+                if master:
+                    raise ValidationError(
+                        "Booking %s sudah memiliki Master Job (%s) -- AWB No. tidak "
+                        "boleh diubah lagi setelah Master terbentuk." % (rec.name, master[:1].job_no)
+                    )
         res = super(FreightAirBooking, self).write(vals)
         if 'awb_master_id' in vals:
             for rec in self:
