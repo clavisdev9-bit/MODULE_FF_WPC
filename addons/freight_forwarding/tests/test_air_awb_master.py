@@ -399,3 +399,35 @@ class TestAwbReviewFindings(AirAwbTestBase):
         real_airline = self._create_airline_partner("Real Airline", "009")
         awb.invalidate_recordset(["airline_id"])
         self.assertEqual(awb.airline_id, real_airline)
+
+    def test_historical_used_awb_stays_blocked_after_owner_deleted(self):
+        """Edge case follow-up: is_executed adalah source of truth historical
+        usage -- BUKAN executed_job_id/executed_booking_id atau
+        booking_ids/air_job_ids (yang bisa kosong kalau owner-nya dihapus).
+        AWB yang pernah dieksekusi TETAP tidak boleh diubah Air -> Sea
+        meski Job/Booking pemiliknya sudah dihapus."""
+        awb = self._create_awb("03012345678")
+        direct = self.env["freight.air.job"].create({
+            "shipment_type": "direct", "freight_type": "export", "awb_master_id": awb.id,
+        })
+        self.assertTrue(awb.is_executed)
+
+        direct.unlink()
+        awb.invalidate_recordset()
+        self.assertTrue(awb.is_executed,
+            msg="is_executed harus tetap True setelah owner Job dihapus")
+        self.assertFalse(awb.executed_job_id,
+            msg="executed_job_id boleh jadi null (ondelete set null) setelah owner dihapus")
+        self.assertFalse(awb.air_job_ids,
+            msg="reverse relation air_job_ids ikut kosong setelah owner dihapus")
+
+        with self.assertRaises(ValidationError):
+            awb.write({"awb_type": "sea"})
+
+    def test_unused_air_awb_can_still_become_sea(self):
+        """Existing behavior yang harus tetap lulus: AWB Air yang belum
+        pernah dipakai sama sekali tetap boleh diubah ke Sea."""
+        awb = self._create_awb("03112345678")
+        self.assertFalse(awb.is_executed)
+        awb.write({"awb_type": "sea"})
+        self.assertEqual(awb.awb_type, "sea")

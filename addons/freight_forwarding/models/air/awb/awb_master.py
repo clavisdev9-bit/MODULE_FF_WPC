@@ -142,11 +142,17 @@ class FreightAwbMaster(models.Model):
         """Review follow-up FF-76: AWB yang sudah terikat (Booking/Job) atau
         pernah di-execute lewat chain Air TIDAK boleh diubah awb_type-nya
         dari Air ke Sea -- akan merusak invariant Air Booking/Job
-        (awb_master_id.awb_type == 'air') yang sudah divalidasi terpisah."""
+        (awb_master_id.awb_type == 'air') yang sudah divalidasi terpisah.
+
+        `is_executed` adalah source of truth historical usage -- BUKAN
+        `executed_booking_id`/`executed_job_id` (pointer itu bisa jadi null
+        kalau owner Booking/Job-nya dihapus, ondelete set null) dan BUKAN
+        cuma `booking_ids`/`air_job_ids` (reverse relation ikut kosong kalau
+        owner dihapus). AWB yang pernah is_executed=True TETAP historical-used
+        selamanya, terlepas relation-nya masih ada atau tidak."""
         for rec in self:
             if rec.awb_type != "air" and (
-                rec.booking_ids or rec.air_job_ids
-                or rec.executed_booking_id or rec.executed_job_id
+                rec.is_executed or rec.booking_ids or rec.air_job_ids
             ):
                 raise ValidationError(
                     "AWB %s sudah terikat/pernah digunakan oleh Air Booking atau "
