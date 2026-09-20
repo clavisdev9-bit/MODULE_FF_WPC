@@ -69,7 +69,6 @@ class SeaHBL(models.Model):
     partner_tel = fields.Char(string="Consignee Tel", compute="_compute_partner_contact_fields", readonly=True, store=False)
     partner_fax = fields.Char(string="Consignee Fax", compute="_compute_partner_contact_fields", readonly=True, store=False)
     notice_date = fields.Date(string="Notice Date")
-    vessel_voy = fields.Char(string="Vessel / Voyage")
     bl_no = fields.Char(string="B/L No.")
     carrier_id = fields.Many2one(
         "res.partner",

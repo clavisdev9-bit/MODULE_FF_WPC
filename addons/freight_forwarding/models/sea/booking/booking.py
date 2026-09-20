@@ -175,8 +175,6 @@ class SeaBooking(models.Model):
 
     # Vessel Information
     pod_port_id = fields.Many2one("freight.port", string="Port of Delivery")
-    vessel_id = fields.Many2one("freight.vessel", string="Vessel Name")
-    voyage_no = fields.Char(string="Voyage No.")
 
     # Notebook
     # NOTE (FF-22): field shipment_info_ids (One2many ke
