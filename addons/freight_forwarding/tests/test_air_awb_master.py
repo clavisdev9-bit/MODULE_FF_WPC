@@ -46,6 +46,20 @@ class AirAwbTestBase(FreightTestBase):
         vals.update(kwargs)
         return self.env["sale.order"].create(vals)
 
+    def _create_airline_partner(self, name, airline_code):
+        """Airline partner sungguhan (is_airline=True) -- lewat category_id
+        dengan freight_role_code='airline', bukan hanya airline_code Char
+        saja (is_airline adalah computed field dari kategori tsb)."""
+        category = self.env["res.partner.category"].create({
+            "name": "Airline (%s)" % name,
+            "freight_role_code": "airline",
+        })
+        return self.env["res.partner"].create({
+            "name": name,
+            "airline_code": airline_code,
+            "category_id": [(6, 0, [category.id])],
+        })
+
 
 class TestAwbMasterModel(AirAwbTestBase):
     def test_awb_no_unique(self):
@@ -277,7 +291,7 @@ class TestAwbAirlinePrefixLookup(AirAwbTestBase):
     def test_master_awb_prefix_resolves_airline_code_with_leading_zero(self):
         """18. Master/Direct AWB '001...' resolve airline_code '001' tanpa
         menghilangkan leading zero."""
-        airline = self.env["res.partner"].create({"name": "Test Airline", "airline_code": "001"})
+        airline = self._create_airline_partner("Test Airline", "001")
         awb = self._create_awb("00123456789")
         self.env["freight.air.job"].create({
             "shipment_type": "master", "freight_type": "export", "awb_master_id": awb.id,
@@ -286,7 +300,7 @@ class TestAwbAirlinePrefixLookup(AirAwbTestBase):
 
     def test_house_awb_does_not_do_airline_prefix_lookup(self):
         """19. House AWB tidak melakukan airline prefix lookup."""
-        self.env["res.partner"].create({"name": "Test Airline 2", "airline_code": "002"})
+        self._create_airline_partner("Test Airline 2", "002")
         master = self.env["freight.air.job"].create({"shipment_type": "master", "freight_type": "export"})
         house_awb = self._create_awb("00223456789")
         self.env["freight.air.job"].create({
@@ -295,3 +309,93 @@ class TestAwbAirlinePrefixLookup(AirAwbTestBase):
         })
         self.assertFalse(house_awb.airline_id,
             msg="House AWB tidak boleh resolve Airline dari prefix")
+
+
+class TestAwbReviewFindings(AirAwbTestBase):
+    """Independent-review follow-up FF-76 Air: available-only candidate
+    domain semantics, Air/Sea type invariant, controlled name_create, dan
+    airline lookup guard (is_airline=True)."""
+
+    def test_used_awb_excluded_from_available_domain_but_self_included(self):
+        """1. Used AWB (chain lain) tidak termasuk candidate domain
+        is_available=True; tapi domain gaya-view yang mengizinkan current
+        value sendiri tetap meloloskan record itu untuk pemilik chain-nya."""
+        awb = self._create_awb("02012345678")
+        booking = self._create_air_booking(awb_master_id=awb.id)
+
+        plain_available = self.env["freight.awb.master"].search([("is_available", "=", True)])
+        self.assertNotIn(awb, plain_available,
+            msg="AWB yang sudah used tidak boleh muncul di domain is_available=True")
+
+        view_style_domain = ["|", ("is_available", "=", True), ("id", "=", booking.awb_master_id.id)]
+        self_included = self.env["freight.awb.master"].search(view_style_domain)
+        self.assertIn(awb, self_included,
+            msg="Domain gaya-view (is_available OR current value) harus tetap meloloskan AWB milik record sendiri")
+
+    def test_sea_type_awb_rejected_on_air_booking(self):
+        """2. Sea-type AWB ditolak jika assign ke Air Booking."""
+        sea_awb = self._create_awb("02112345678", awb_type="sea")
+        with self.assertRaises(ValidationError):
+            self._create_air_booking(awb_master_id=sea_awb.id)
+
+    def test_sea_type_awb_rejected_on_air_job(self):
+        """3. Sea-type AWB ditolak jika assign ke Air Job."""
+        sea_awb = self._create_awb("02212345678", awb_type="sea")
+        with self.assertRaises(ValidationError):
+            self.env["freight.air.job"].create({
+                "shipment_type": "direct", "freight_type": "export", "awb_master_id": sea_awb.id,
+            })
+
+    def test_executed_air_awb_cannot_become_sea(self):
+        """4. Executed Air AWB tidak boleh diubah awb_type menjadi Sea."""
+        awb = self._create_awb("02312345678")
+        self.env["freight.air.job"].create({
+            "shipment_type": "direct", "freight_type": "export", "awb_master_id": awb.id,
+        })
+        self.assertTrue(awb.is_executed)
+        with self.assertRaises(ValidationError):
+            awb.write({"awb_type": "sea"})
+
+    def test_name_create_existing_available_reuses_no_duplicate(self):
+        """5. name_create existing+available -> reuse, tidak membuat duplicate."""
+        existing = self._create_awb("02412345678")
+        before_count = self.env["freight.awb.master"].search_count([("awb_no", "=", "02412345678")])
+        self.assertEqual(before_count, 1)
+
+        result_id, _ = self.env["freight.awb.master"].name_create("02412345678")
+        self.assertEqual(result_id, existing.id)
+        after_count = self.env["freight.awb.master"].search_count([("awb_no", "=", "02412345678")])
+        self.assertEqual(after_count, 1, msg="name_create tidak boleh membuat duplicate untuk AWB yang sudah ada dan available")
+
+    def test_name_create_existing_used_raises_clear_error(self):
+        """6. name_create existing+used -> ValidationError jelas."""
+        awb = self._create_awb("02512345678")
+        self._create_air_booking(awb_master_id=awb.id)
+        with self.assertRaises(ValidationError):
+            self.env["freight.awb.master"].name_create("02512345678")
+
+    def test_name_create_missing_creates_new_air_awb_from_context(self):
+        """7. name_create tidak ada -> create baru, awb_type Air dari context."""
+        result_id, _ = self.env["freight.awb.master"].with_context(
+            default_awb_type="air"
+        ).name_create("02612345678")
+        new_awb = self.env["freight.awb.master"].browse(result_id)
+        self.assertEqual(new_awb.awb_no, "02612345678")
+        self.assertEqual(new_awb.awb_type, "air")
+
+    def test_airline_prefix_only_resolves_is_airline_true_partner(self):
+        """8. Airline prefix hanya resolve partner dengan is_airline=True --
+        partner dengan airline_code yang cocok tapi BUKAN airline (tanpa
+        category freight_role_code=airline) tidak boleh ke-resolve."""
+        fake = self.env["res.partner"].create({"name": "Bukan Airline", "airline_code": "009"})
+        self.assertFalse(fake.is_airline)
+        awb = self._create_awb("00912345678")
+        self.env["freight.air.job"].create({
+            "shipment_type": "direct", "freight_type": "export", "awb_master_id": awb.id,
+        })
+        self.assertFalse(awb.airline_id,
+            msg="Partner dengan airline_code cocok tapi is_airline=False tidak boleh ke-resolve")
+
+        real_airline = self._create_airline_partner("Real Airline", "009")
+        awb.invalidate_recordset(["airline_id"])
+        self.assertEqual(awb.airline_id, real_airline)

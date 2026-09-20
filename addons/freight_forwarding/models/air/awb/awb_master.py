@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class FreightAwbMaster(models.Model):
@@ -132,9 +133,47 @@ class FreightAwbMaster(models.Model):
             ):
                 prefix = rec.awb_no[:3]
                 airline = self.env["res.partner"].search(
-                    [("airline_code", "=", prefix)], limit=1
+                    [("airline_code", "=", prefix), ("is_airline", "=", True)], limit=1
                 )
             rec.airline_id = airline.id if airline else False
+
+    @api.constrains("awb_type")
+    def _check_awb_type_immutable_once_bound_to_air(self):
+        """Review follow-up FF-76: AWB yang sudah terikat (Booking/Job) atau
+        pernah di-execute lewat chain Air TIDAK boleh diubah awb_type-nya
+        dari Air ke Sea -- akan merusak invariant Air Booking/Job
+        (awb_master_id.awb_type == 'air') yang sudah divalidasi terpisah."""
+        for rec in self:
+            if rec.awb_type != "air" and (
+                rec.booking_ids or rec.air_job_ids
+                or rec.executed_booking_id or rec.executed_job_id
+            ):
+                raise ValidationError(
+                    "AWB %s sudah terikat/pernah digunakan oleh Air Booking atau "
+                    "Air Job -- AWB Type tidak boleh diubah dari Air menjadi Sea." % rec.awb_no
+                )
+
+    @api.model
+    def name_create(self, name):
+        """Review follow-up FF-76: exact AWB No. quick-create yang
+        terkontrol (dipakai widget Many2one Booking/House saat user
+        mengetik nomor baru):
+        - exact match sudah ada + available -> reuse record itu, jangan
+          create duplicate.
+        - exact match sudah ada tapi sudah used -> ValidationError jelas,
+          jangan diam-diam gagal lewat SQL unique.
+        - belum ada sama sekali -> create baru, awb_type ikut context
+          default_awb_type (default Air untuk flow Air)."""
+        existing = self.search([("awb_no", "=", name)], limit=1)
+        if existing:
+            if not existing.is_available:
+                raise ValidationError(
+                    "AWB %s sudah pernah digunakan / tidak available." % name
+                )
+            return existing.id, existing.display_name
+        awb_type = self.env.context.get("default_awb_type") or "air"
+        new_awb = self.create({"awb_no": name, "awb_type": awb_type})
+        return new_awb.id, new_awb.display_name
 
     def _snapshot_from_booking(self, booking):
         """FF-76: snapshot Execution Info dari Booking, HANYA sekali per AWB.

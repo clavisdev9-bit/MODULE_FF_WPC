@@ -59,17 +59,17 @@
                                  AVAILABLE only, no quick-create). -->
                             <field name="awb_master_id" string="House AWB No."
                                 invisible="shipment_type != 'house'"
-                                domain="[('awb_type', '=', 'air')]"
+                                domain="[('awb_type', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', awb_master_id)]"
                                 context="{'default_awb_type': 'air'}" />
                             <field name="smawb_no" invisible="shipment_type != 'house'"/>
                             <field name="master_awb_master_id" invisible="shipment_type != 'house'" readonly="1"/>
                             <field name="awb_master_id" string="Direct AWB No."
                                 invisible="shipment_type != 'direct'"
-                                domain="[('awb_type', '=', 'air')]"
+                                domain="[('awb_type', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', awb_master_id)]"
                                 options="{'no_create': True, 'no_quick_create': True}" />
                             <field name="awb_master_id" string="MAWB No."
                                 invisible="shipment_type != 'master'"
-                                domain="[('awb_type', '=', 'air')]"
+                                domain="[('awb_type', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', awb_master_id)]"
                                 options="{'no_create': True, 'no_quick_create': True}" />
                             <field name="booking_id" invisible="shipment_type == 'house'"/>
                         </group>
@@ -322,17 +322,17 @@
                         <field name="master_job_id" invisible="shipment_type != 'house'"/>
                         <field name="awb_master_id" string="House AWB No."
                             invisible="shipment_type != 'house'"
-                            domain="[('awb_type', '=', 'air')]"
+                            domain="[('awb_type', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', awb_master_id)]"
                             context="{'default_awb_type': 'air'}" />
                         <field name="smawb_no" invisible="shipment_type != 'house'"/>
                         <field name="master_awb_master_id" invisible="shipment_type != 'house'" readonly="1"/>
                         <field name="awb_master_id" string="Direct AWB No."
                             invisible="shipment_type != 'direct'"
-                            domain="[('awb_type', '=', 'air')]"
+                            domain="[('awb_type', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', awb_master_id)]"
                             options="{'no_create': True, 'no_quick_create': True}" />
                         <field name="awb_master_id" string="MAWB No."
                             invisible="shipment_type != 'master'"
-                            domain="[('awb_type', '=', 'air')]"
+                            domain="[('awb_type', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', awb_master_id)]"
                             options="{'no_create': True, 'no_quick_create': True}" />
                         <field name="clearance"/>
                         <field name="is_transhipment"/>

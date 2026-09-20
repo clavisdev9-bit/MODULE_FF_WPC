@@ -345,6 +345,11 @@ class FreightAirHawb(models.Model):
             awb = rec.awb_master_id
             if not awb:
                 continue
+            if awb.awb_type != 'air':
+                raise ValidationError(
+                    "AWB %s bertipe '%s' -- Air Job hanya boleh memakai "
+                    "AWB Type Air." % (awb.awb_no, awb.awb_type)
+                )
             if not awb.is_executed:
                 continue
             legal = awb.executed_job_id == rec or (

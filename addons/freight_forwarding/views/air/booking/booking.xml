@@ -66,7 +66,7 @@
                                 <field name="booking_date" />
                                 <field name="job_no" />
                                 <field name="awb_master_id"
-                                    domain="[('awb_type', '=', 'air')]"
+                                    domain="[('awb_type', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', awb_master_id)]"
                                     context="{'default_awb_type': 'air'}" />
                                 <field name="freight_type" invisible="1" />
                                 <field name="ship_mode" />

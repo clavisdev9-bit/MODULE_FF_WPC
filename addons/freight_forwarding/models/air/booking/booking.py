@@ -107,6 +107,11 @@ class FreightAirBooking(models.Model):
             awb = rec.awb_master_id
             if not awb:
                 continue
+            if awb.awb_type != 'air':
+                raise ValidationError(
+                    "AWB %s bertipe '%s' -- Air Booking hanya boleh memakai "
+                    "AWB Type Air." % (awb.awb_no, awb.awb_type)
+                )
             if awb.is_executed and awb.executed_booking_id != rec:
                 raise ValidationError(
                     "AWB %s sudah pernah digunakan dan tidak dapat dipakai "
