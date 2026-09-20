@@ -1,6 +1,5 @@
 from . import commodity
 from . import incoterm
-from . import shipment_type
 from . import job_type
 from . import permit
 from . import declaration

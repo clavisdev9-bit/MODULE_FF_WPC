@@ -58,7 +58,6 @@ class SeaHBL(models.Model):
         tracking=True,
     )
     job_no = fields.Char(string="Job No.", required=True, default=lambda self: "New", copy=False, readonly=True)
-    hbl_no = fields.Char(string="HBL No.", copy=False)
     partner_id = fields.Many2one(
         "res.partner",
         string="Consignee / To",
@@ -134,17 +133,10 @@ class SeaHBL(models.Model):
     origin_country_id = fields.Many2one("res.country", string="Origin Country")
     to_city = fields.Many2one("res.city", string="To")
     destination_country_id = fields.Many2one("res.country", string="Destination Country")
-    master_job_no = fields.Char(string="Master Job No.")
     no_of_original_bl = fields.Char(string="No. of Original B/L")
-    mbl_no = fields.Char(string="MBL No.")
-    effective_mbl_no = fields.Char(
-        string="MBL No. (Effective)",
-        compute="_compute_effective_mbl_no",
-        help="MBL No. Master jika record ini House yang sudah tergabung; "
-             "kalau tidak, MBL No. milik record ini sendiri.",
-    )
+    obl_no = fields.Char(string="OB/L No.")
+    original_bl_no = fields.Char(string="Original BL No.")
     bl_surrendered = fields.Boolean(string="BL Surrendered")
-    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
     delivery_type_id = fields.Many2one("account.incoterms", string="Delivery Type")
     # do_ready_on = fields.Selection([('yes', 'Yes'), ('no', 'No')], string="Do Ready On")
     do_ready_on = fields.Boolean(string="Do Ready On")
@@ -224,13 +216,6 @@ class SeaHBL(models.Model):
     def _compute_booking_count(self):
         for rec in self:
             rec.booking_count = 1 if rec._get_effective_booking() else 0
-
-    @api.depends("mbl_no", "master_job_id.mbl_no")
-    def _compute_effective_mbl_no(self):
-        for rec in self:
-            rec.effective_mbl_no = (
-                rec.master_job_id.mbl_no if rec.master_job_id else False
-            ) or rec.mbl_no
 
     def _get_effective_booking(self):
         self.ensure_one()

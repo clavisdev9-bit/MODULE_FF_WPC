@@ -48,7 +48,7 @@
                             <group>
                                 <field name="freight_type" />
                                 <field name="ship_mode" />
-                                <field name="hbl_no" />
+                                <field name="bl_no" />
                                 <field name="job_no" />
                                 <field name="nomination_cargo" />
 
@@ -58,7 +58,6 @@
                                 <field name="job_date" />
                                 <field name="railing" />
                                 <field name="commodity_id"/>
-                                <field name="shipment_type_id" />
                                 <field name="delivery_type_id" />
                             </group>
                         </group>

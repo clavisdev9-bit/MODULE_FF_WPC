@@ -159,7 +159,7 @@
                                         <tr>
                                             <td class="cm-info-label">OCEAN B/L NO</td>
                                             <td class="cm-info-colon">:</td>
-                                            <td><t t-esc="doc.mbl_no or ''"/></td>
+                                            <td><t t-esc="doc.master_job_id.bl_no or ''"/></td>
                                         </tr>
                                         <tr>
                                             <td class="cm-info-label">ETD</td>
@@ -224,7 +224,7 @@
                                                 <tr>
                                                     <td class="cm-field-key">HB/L</td>
                                                     <td class="cm-field-colon">:</td>
-                                                    <td class="cm-field-value"><t t-esc="doc.hbl_no or ''"/></td>
+                                                    <td class="cm-field-value"><t t-esc="doc.bl_no or ''"/></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="cm-field-key">POS</td>

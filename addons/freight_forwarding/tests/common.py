@@ -151,12 +151,12 @@ class FreightTestBase(TransactionCase):
         FreightTestBase._hbl_counter += 1
         quotation_id = kwargs.pop("quotation_id", None)
         vals = {
-            "hbl_no": f"TEST-HBL-{FreightTestBase._hbl_counter:03d}" if "hbl_no" not in kwargs else kwargs["hbl_no"],
+            "bl_no": f"TEST-BL-{FreightTestBase._hbl_counter:03d}" if "bl_no" not in kwargs else kwargs["bl_no"],
             "freight_type": "export",
             "ship_mode": "fcl",
         }
-        if "hbl_no" in kwargs and kwargs["hbl_no"] is False:
-            vals.pop("hbl_no")
+        if "bl_no" in kwargs and kwargs["bl_no"] is False:
+            vals.pop("bl_no")
 
         if booking:
             vals["booking_id"] = booking.id

@@ -232,7 +232,7 @@
                             <tr>
                                 <td class="noa-label">MBL NO.</td>
                                 <td class="noa-colon">:</td>
-                                <td class="noa-value"><t t-esc="doc.mbl_no or ''"/></td>
+                                <td class="noa-value"><t t-esc="doc.master_job_id.bl_no or ''"/></td>
                                 <td class="noa-label">POD</td>
                                 <td class="noa-colon">:</td>
                                 <td class="noa-value">
@@ -242,7 +242,7 @@
                             <tr>
                                 <td class="noa-label">BL NO.</td>
                                 <td class="noa-colon">:</td>
-                                <td class="noa-value"><t t-esc="doc.hbl_no or ''"/></td>
+                                <td class="noa-value"><t t-esc="doc.bl_no or ''"/></td>
                                 <td class="noa-label">DO READY ON</td>
                                 <td class="noa-colon">:</td>
                                 <td class="noa-value"><t t-esc="'Yes' if doc.do_ready_on else ''"/></td>

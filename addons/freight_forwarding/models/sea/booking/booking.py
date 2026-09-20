@@ -48,6 +48,14 @@ class SeaBooking(models.Model):
         for rec in self:
             rec.sales_order_count = len(rec.sale_order_ids)
 
+    @api.depends("sea_job_ids.job_no", "sea_job_ids.record_level")
+    def _compute_job_no(self):
+        """FF-76: Booking tidak lagi punya identity job_no independen --
+        menampilkan Job No. Master Job terkait (kosong sebelum Master ada)."""
+        for rec in self:
+            master = rec.sea_job_ids.filtered(lambda j: j.record_level == "master")[:1]
+            rec.job_no = master.job_no if master else False
+
 
 
     @api.onchange("from_city")
@@ -125,8 +133,14 @@ class SeaBooking(models.Model):
         copy=False,
     )
     booking_date = fields.Datetime(string="Date & Time")
-    hbl_no = fields.Char(string="B/L No.")
-    job_no = fields.Char(string="Job No.")
+    bl_no = fields.Char(string="B/L No.")
+    job_no = fields.Char(
+        string="Job No.",
+        compute="_compute_job_no",
+        help="Job No. Master Job yang terkait Booking ini (FF-76). Kosong "
+             "sebelum Master dibuat lewat Create Job; bukan identity "
+             "independen Booking sendiri.",
+    )
     nomination_cargo = fields.Boolean(string="Nomination Cargo")
     # FF-75 follow-up: `container_type` (FCL/LCL) dihapus -- duplicate
     # semantic dengan `ship_mode` yang sudah ada lewat
@@ -134,7 +148,6 @@ class SeaBooking(models.Model):
     job_date = fields.Date(string="Job Date")
     import_job_no = fields.Char(string="Import Job Number (Optional)")
     railing = fields.Boolean(string="Railing")
-    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
 
     # Customer & Contact Data
     partner_id = fields.Many2one(
@@ -241,7 +254,7 @@ class SeaBooking(models.Model):
 
 
         header_fields = [
-            "shipment_type_id",
+            "bl_no",
             "delivery_type_id",
             "commodity_id",
         ]
@@ -333,7 +346,6 @@ class SeaBooking(models.Model):
                     "record_level": "master",
                     "freight_type": self.freight_type,
                     "ship_mode": self.ship_mode,
-                    "shipment_type_id": self.shipment_type_id.id if self.shipment_type_id else False,
                     "commodity_id": self.commodity_id.id if self.commodity_id else False,
                     "delivery_type_id": self.delivery_type_id.id if self.delivery_type_id else False,
                     # FF-75 follow-up (Section E): Master TIDAK boleh
@@ -349,7 +361,6 @@ class SeaBooking(models.Model):
                     "delivery_agent_id": self.delivery_agent_id.id if self.delivery_agent_id else False,
                     "term_payment": self.payment_term_id.id,
                     "job_date": self.job_date,
-                    "master_job_no": self.job_no,
                     "salesman_id": self.salesman_id.id if self.salesman_id else False,
                     "from_city": self.from_city.id if self.from_city else False,
                     "origin_country_id": self.origin_country_id.id if self.origin_country_id else False,

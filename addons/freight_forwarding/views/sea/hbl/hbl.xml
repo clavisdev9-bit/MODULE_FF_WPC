@@ -7,8 +7,8 @@
             <list>
                 <field name="job_no" />
                 <field name="record_level" widget="badge" decoration-success="record_level == 'master'" decoration-info="record_level == 'house'" />
-                <field name="master_job_id" />
-                <field name="hbl_no" />
+                <field name="master_job_id" string="Master Job No." />
+                <field name="bl_no" />
                 <field name="freight_type" />
                 <field name="ship_mode" />
                 <field name="sale_order_ids" widget="many2many_tags" />
@@ -62,23 +62,21 @@
                     </h1>
                     <group string="Header Information">
                         <group>
-                            <field name="record_level" widget="radio" options="{'horizontal': true}" />
-                            <field name="master_job_id" invisible="record_level != 'house'" />
+                            <field name="record_level" string="Shipment Type" widget="radio" options="{'horizontal': true}" />
+                            <field name="master_job_id" string="Master Job No." invisible="record_level != 'house'" />
                             <field name="freight_type" />
                             <field name="ship_mode" />
                             <field name="booking_id" invisible="record_level == 'house'" />
-                            <field name="master_job_no" invisible="record_level == 'house'" />
                             <field name="job_date" />
                             <field name="job_city_id" />
                         </group>
                         <group>
+                            <field name="bl_no" />
+                            <field name="obl_no" />
+                            <field name="original_bl_no" />
                             <field name="no_of_original_bl" />
-                            <field name="mbl_no" invisible="record_level == 'house'" />
-                            <field name="effective_mbl_no" invisible="record_level != 'house'" />
-                            <field name="hbl_no" />
                             <field name="bl_surrendered" />
                             <field name="commodity_id" />
-                            <field name="shipment_type_id" />
                             <field name="delivery_type_id" />
                         </group>
                     </group>
@@ -270,7 +268,7 @@
                             <field name="house_job_ids" nolabel="1">
                                 <list>
                                     <field name="job_no" />
-                                    <field name="hbl_no" />
+                                    <field name="bl_no" />
                                     <field name="customer_id" />
                                     <field name="source_quotation_id" />
                                     <field name="state" />
@@ -317,7 +315,8 @@
         <field name="model">freight.sea.job</field>
         <field name="arch" type="xml">
             <search>
-                <field name="hbl_no" string="Jobsheet No." />
+                <field name="job_no" />
+                <field name="bl_no" />
                 <field name="booking_id" />
                 <field name="customer_id" />
                 <field name="freight_type" />

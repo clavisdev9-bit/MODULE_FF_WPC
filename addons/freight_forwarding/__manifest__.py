@@ -98,7 +98,6 @@
         "views/master_data/delivery_type.xml",
         "views/master_data/commodity.xml",
         "views/master_data/permit.xml",
-        "views/master_data/shipment_type.xml",
         # Master Data - Account
         "views/master_data/acct/area.xml",
         "views/master_data/acct/charge_code.xml",
