@@ -9,8 +9,11 @@ class FreightAwbMaster(models.Model):
 
     AWB Code (nomor 3-digit prefix airline sebagai entity terpisah) SENGAJA
     belum diimplementasikan di tahap ini -- exact relationship-nya belum
-    terbukti (lihat instruksi FF-76 tahap Air). Airline hanya di-derive
-    read-only dari 3 karakter pertama awb_no, bukan FK wajib.
+    terbukti (lihat instruksi FF-76 tahap Air).
+
+    UAT revision: SysFreight AWB Master form tidak menampilkan field
+    Airline sama sekali -- field `airline_id` + prefix lookup adalah
+    inference implementasi yang tidak terbukti dari evidence, sudah dihapus.
     """
 
     _name = "freight.awb.master"
@@ -38,27 +41,29 @@ class FreightAwbMaster(models.Model):
     )
 
     # ------------------------------------------------------------------
-    # Execution Info -- SNAPSHOT, bukan related/live-sync ke Booking/Job.
-    # Diisi sekali saat AWB pertama kali di-assign (lihat _snapshot_from_*).
+    # Execution Info -- UAT revision: SysFreight mengisi field-field ini
+    # SECARA MANUAL oleh user, bukan auto-fill/snapshot dari Booking/Job.
+    # Semua field di bawah ini editable dan TIDAK live-sync ke perubahan
+    # Booking/Job manapun (lihat FreightAwbMaster._mark_executed -- hanya
+    # menandai historical usage internal, tidak menyentuh field-field ini).
     # ------------------------------------------------------------------
     execution_shipment_type = fields.Selection(
         [("master", "Master"), ("house", "House"), ("direct", "Direct")],
         string="Shipment Type",
-        readonly=True,
         copy=False,
     )
     execution_shipper_id = fields.Many2one(
-        "res.partner", string="Shipper", readonly=True, copy=False,
+        "res.partner", string="Shipper", copy=False,
     )
     execution_destination_id = fields.Many2one(
-        "freight.airport", string="Destination", readonly=True, copy=False,
+        "freight.airport", string="Destination", copy=False,
     )
-    execution_pcs = fields.Integer(string="Pcs", readonly=True, copy=False)
-    execution_gross_weight = fields.Float(string="Gross Weight", readonly=True, copy=False)
+    execution_pcs = fields.Integer(string="Pcs", copy=False)
+    execution_gross_weight = fields.Float(string="Gross Weight", copy=False)
     execute_by_id = fields.Many2one(
-        "res.users", string="Execute By", readonly=True, copy=False,
+        "res.users", string="Execute By", copy=False,
     )
-    execute_date = fields.Datetime(string="Execute Date", readonly=True, copy=False)
+    execute_date = fields.Datetime(string="Execute Date", copy=False)
 
     is_executed = fields.Boolean(
         string="Executed",
@@ -102,16 +107,6 @@ class FreightAwbMaster(models.Model):
              "one-time-use registry.",
     )
 
-    airline_id = fields.Many2one(
-        "res.partner",
-        string="Airline",
-        compute="_compute_airline_id",
-        help="Derived read-only dari 3 karakter pertama AWB No. (exact "
-             "match ke res.partner.airline_code), hanya untuk AWB Type Air "
-             "dengan Execution Shipment Type Master/Direct. House tidak "
-             "melakukan prefix lookup (House AWB bisa arbitrary/internal).",
-    )
-
     @api.depends("is_executed")
     def _compute_is_available(self):
         for rec in self:
@@ -120,22 +115,6 @@ class FreightAwbMaster(models.Model):
     def _search_is_available(self, operator, value):
         is_true = (operator == "=" and value) or (operator == "!=" and not value)
         return [("is_executed", "!=" if is_true else "=", True)]
-
-    @api.depends("awb_no", "awb_type", "execution_shipment_type")
-    def _compute_airline_id(self):
-        for rec in self:
-            airline = False
-            if (
-                rec.awb_type == "air"
-                and rec.execution_shipment_type in ("master", "direct")
-                and rec.awb_no
-                and len(rec.awb_no) >= 3
-            ):
-                prefix = rec.awb_no[:3]
-                airline = self.env["res.partner"].search(
-                    [("airline_code", "=", prefix), ("is_airline", "=", True)], limit=1
-                )
-            rec.airline_id = airline.id if airline else False
 
     @api.constrains("awb_type")
     def _check_awb_type_immutable_once_bound_to_air(self):
@@ -181,26 +160,26 @@ class FreightAwbMaster(models.Model):
         new_awb = self.create({"awb_no": name, "awb_type": awb_type})
         return new_awb.id, new_awb.display_name
 
-    def _snapshot_from_booking(self, booking):
-        """FF-76: snapshot Execution Info dari Booking, HANYA sekali per AWB.
-        Dipanggil setiap kali awb_master_id di-set pada Booking; no-op kalau
-        AWB ini sudah pernah di-execute sebelumnya (mis. Master yang dibuat
-        dari Booking memakai AWB yang sama -- snapshot A1 milik Booking
-        TIDAK boleh ditimpa lagi)."""
+    def _mark_executed(self, booking=None, job=None):
+        """UAT revision FF-76: Execution Info sekarang diisi MANUAL oleh
+        user (lihat komentar field di atas) -- TIDAK ada lagi auto-fill/
+        snapshot dari Booking/Job. Method ini HANYA menandai internal
+        one-time historical usage (`is_executed` + pointer ownership untuk
+        validasi chain), dipisahkan total dari Execution Info yang visible.
+
+        Dipanggil setiap kali awb_master_id di-set pada Booking/Job;
+        no-op kalau AWB ini sudah pernah di-execute sebelumnya (one-time
+        semantic -- owner pointer pertama yang menang, chain legality lain
+        divalidasi lewat _check_awb_master_chain masing-masing model)."""
         self.ensure_one()
         if self.is_executed:
             return
-        self.write({
-            "execution_shipment_type": "master",
-            "execution_shipper_id": booking.shipper_id.id if booking.shipper_id else False,
-            "execution_destination_id": booking.destination_id.id if booking.destination_id else False,
-            "execution_pcs": booking.pcs,
-            "execution_gross_weight": booking.gross_weight,
-            "execute_by_id": self.env.uid,
-            "execute_date": fields.Datetime.now(),
-            "is_executed": True,
-            "executed_booking_id": booking.id,
-        })
+        vals = {"is_executed": True}
+        if booking is not None:
+            vals["executed_booking_id"] = booking.id
+        if job is not None:
+            vals["executed_job_id"] = job.id
+        self.write(vals)
 
     def unlink(self):
         """Final hardening FF-76: AWB yang sudah pernah dipakai (is_executed)
@@ -215,21 +194,3 @@ class FreightAwbMaster(models.Model):
                     "tidak boleh dihapus." % rec.awb_no
                 )
         return super().unlink()
-
-    def _snapshot_from_job(self, job):
-        """FF-76: snapshot Execution Info dari Job (Master/House/Direct),
-        HANYA sekali per AWB. Lihat catatan idempotency di _snapshot_from_booking."""
-        self.ensure_one()
-        if self.is_executed:
-            return
-        self.write({
-            "execution_shipment_type": job.shipment_type,
-            "execution_shipper_id": job.shipper_id.id if job.shipper_id else False,
-            "execution_destination_id": job.destination_id.id if job.destination_id else False,
-            "execution_pcs": job.pcs,
-            "execution_gross_weight": job.gross_weight,
-            "execute_by_id": self.env.uid,
-            "execute_date": fields.Datetime.now(),
-            "is_executed": True,
-            "executed_job_id": job.id,
-        })

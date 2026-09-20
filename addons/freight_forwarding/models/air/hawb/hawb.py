@@ -534,17 +534,33 @@ class FreightAirHawb(models.Model):
         records._sync_analytic_to_related_docs()
         for rec in records:
             if rec.awb_master_id:
-                rec.awb_master_id._snapshot_from_job(rec)
+                rec.awb_master_id._mark_executed(job=rec)
         return records
 
     def write(self, vals):
         if 'awb_master_id' in vals:
             new_awb_id = vals.get('awb_master_id')
             for rec in self:
-                if rec.shipment_type == 'master' and rec.booking_id and new_awb_id != rec.awb_master_id.id:
+                if (rec.shipment_type == 'master' and rec.booking_id
+                        and rec.awb_master_id and new_awb_id != rec.awb_master_id.id):
                     raise ValidationError(
                         "Master Job (%s) dibuat dari Booking (%s) -- AWB No. tidak "
                         "boleh diedit independen dari Master." % (rec.job_no, rec.booking_id.name)
+                    )
+            # UAT revision (late assignment): Booking boleh Create Job tanpa
+            # AWB (Master ikut kosong). Setelah itu, AWB HANYA boleh
+            # di-assign lewat Master (Booking tetap bukan entry point --
+            # lihat guard di freight.air.booking.write()) -- begitu
+            # ter-assign, cascade ke Booking supaya satu chain berakhir pada
+            # AWB Master yang sama. Cascade dilakukan SEBELUM super().write()
+            # supaya _check_master_awb_matches_booking_awb melihat state
+            # yang sudah konsisten begitu constrain jalan.
+            for rec in self:
+                if (rec.shipment_type == 'master' and rec.booking_id
+                        and not rec.awb_master_id and new_awb_id
+                        and not rec.booking_id.awb_master_id):
+                    rec.booking_id.with_context(_awb_master_cascade=True).write(
+                        {'awb_master_id': new_awb_id}
                     )
         if 'master_job_id' in vals and 'analytic_account_id' not in vals:
             # FF-75: House mengikuti analytic Master -- disamakan di vals
@@ -570,7 +586,7 @@ class FreightAirHawb(models.Model):
         if 'awb_master_id' in vals:
             for rec in self:
                 if rec.awb_master_id:
-                    rec.awb_master_id._snapshot_from_job(rec)
+                    rec.awb_master_id._mark_executed(job=rec)
         return res
 
     def _sync_analytic_to_related_docs(self):

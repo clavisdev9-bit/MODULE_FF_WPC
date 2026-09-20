@@ -2,6 +2,7 @@
 Booking/Master/House/Direct AWB identity normalization."""
 from psycopg2 import IntegrityError
 
+from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.tools import mute_logger
 
@@ -46,20 +47,6 @@ class AirAwbTestBase(FreightTestBase):
         vals.update(kwargs)
         return self.env["sale.order"].create(vals)
 
-    def _create_airline_partner(self, name, airline_code):
-        """Airline partner sungguhan (is_airline=True) -- lewat category_id
-        dengan freight_role_code='airline', bukan hanya airline_code Char
-        saja (is_airline adalah computed field dari kategori tsb)."""
-        category = self.env["res.partner.category"].create({
-            "name": "Airline (%s)" % name,
-            "freight_role_code": "airline",
-        })
-        return self.env["res.partner"].create({
-            "name": name,
-            "airline_code": airline_code,
-            "category_id": [(6, 0, [category.id])],
-        })
-
 
 class TestAwbMasterModel(AirAwbTestBase):
     def test_awb_no_unique(self):
@@ -83,20 +70,50 @@ class TestAwbMasterModel(AirAwbTestBase):
 
 
 class TestAwbBookingAssignment(AirAwbTestBase):
-    def test_booking_assign_existing_awb_snapshots_execution_info(self):
-        """3. Booking assign existing available AWB -> snapshot Master info."""
+    def test_booking_assign_existing_awb_marks_executed_without_autofill(self):
+        """3. UAT revision: Booking assign existing available AWB -> hanya
+        menandai is_executed (historical usage internal); Execution Info
+        TIDAK auto-fill dari Booking sama sekali (diisi manual oleh user)."""
         awb = self._create_awb("00112345678")
         booking = self._create_air_booking(awb_master_id=awb.id)
 
         self.assertTrue(awb.is_executed)
-        self.assertEqual(awb.execution_shipment_type, "master")
-        self.assertEqual(awb.execution_shipper_id, self.shipper)
-        self.assertEqual(awb.execution_destination_id, self.airport_dest)
-        self.assertEqual(awb.execution_pcs, 10)
-        self.assertEqual(awb.execution_gross_weight, 100.0)
-        self.assertEqual(awb.execute_by_id, self.env.user)
-        self.assertTrue(awb.execute_date)
         self.assertEqual(awb.executed_booking_id, booking)
+        self.assertFalse(awb.execution_shipment_type,
+            msg="Execution Info tidak boleh auto-fill dari Booking")
+        self.assertFalse(awb.execution_shipper_id)
+        self.assertFalse(awb.execution_destination_id)
+        self.assertEqual(awb.execution_pcs, 0)
+        self.assertEqual(awb.execution_gross_weight, 0.0)
+        self.assertFalse(awb.execute_by_id)
+        self.assertFalse(awb.execute_date)
+
+    def test_execution_info_is_manual_and_editable(self):
+        """UAT revision: Execution Info bisa ditulis manual oleh user, kapan
+        saja, dan tidak ter-overwrite oleh AWB assignment berikutnya."""
+        awb = self._create_awb("00122345678")
+        booking = self._create_air_booking(awb_master_id=awb.id)
+        self.assertFalse(awb.execution_shipment_type)
+
+        awb.write({
+            "execution_shipment_type": "master",
+            "execution_shipper_id": self.shipper.id,
+            "execution_destination_id": self.airport_dest.id,
+            "execution_pcs": 5,
+            "execution_gross_weight": 50.0,
+            "execute_by_id": self.env.uid,
+            "execute_date": fields.Datetime.now(),
+        })
+        self.assertEqual(awb.execution_shipment_type, "master")
+        self.assertEqual(awb.execution_pcs, 5)
+
+        # Assignment lanjutan (mis. Master hasil Create Job) TIDAK boleh
+        # menimpa ulang Execution Info yang sudah ditulis manual.
+        result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(result["res_id"])
+        self.assertEqual(master.awb_master_id, awb)
+        self.assertEqual(awb.execution_pcs, 5,
+            msg="Execution Info manual tidak boleh ter-overwrite oleh AWB assignment")
 
     def test_booking_register_new_awb_defaults_air(self):
         """4. Booking register AWB baru -> default AWB Type Air."""
@@ -169,7 +186,8 @@ class TestAwbMasterManualAndHouse(AirAwbTestBase):
         })
         self.assertEqual(master.awb_master_id, awb)
         self.assertTrue(awb.is_executed)
-        self.assertEqual(awb.execution_shipment_type, "master")
+        self.assertFalse(awb.execution_shipment_type,
+            msg="Execution Info tidak boleh auto-fill dari Job")
 
     def test_house_can_assign_existing_available_awb(self):
         """9. House dapat assign existing AVAILABLE AWB."""
@@ -182,7 +200,9 @@ class TestAwbMasterManualAndHouse(AirAwbTestBase):
             "awb_master_id": awb.id,
         })
         self.assertEqual(house.awb_master_id, awb)
-        self.assertEqual(awb.execution_shipment_type, "house")
+        self.assertTrue(awb.is_executed)
+        self.assertFalse(awb.execution_shipment_type,
+            msg="Execution Info tidak boleh auto-fill dari Job")
 
     def test_house_can_register_new_awb(self):
         """10. House dapat register AWB baru."""
@@ -241,7 +261,9 @@ class TestAwbMasterDirect(AirAwbTestBase):
             "shipment_type": "direct", "freight_type": "export", "awb_master_id": awb.id,
         })
         self.assertEqual(direct.awb_master_id, awb)
-        self.assertEqual(awb.execution_shipment_type, "direct")
+        self.assertTrue(awb.is_executed)
+        self.assertFalse(awb.execution_shipment_type,
+            msg="Execution Info tidak boleh auto-fill dari Job")
 
     def test_direct_cannot_reuse_awb_from_other_chain(self):
         """14. Direct tidak boleh reuse AWB yang sudah dipakai Master/House/Booking lain."""
@@ -287,34 +309,9 @@ class TestAwbSearchHelpers(AirAwbTestBase):
         self.assertIn(house, found_by_booking)
 
 
-class TestAwbAirlinePrefixLookup(AirAwbTestBase):
-    def test_master_awb_prefix_resolves_airline_code_with_leading_zero(self):
-        """18. Master/Direct AWB '001...' resolve airline_code '001' tanpa
-        menghilangkan leading zero."""
-        airline = self._create_airline_partner("Test Airline", "001")
-        awb = self._create_awb("00123456789")
-        self.env["freight.air.job"].create({
-            "shipment_type": "master", "freight_type": "export", "awb_master_id": awb.id,
-        })
-        self.assertEqual(awb.airline_id, airline)
-
-    def test_house_awb_does_not_do_airline_prefix_lookup(self):
-        """19. House AWB tidak melakukan airline prefix lookup."""
-        self._create_airline_partner("Test Airline 2", "002")
-        master = self.env["freight.air.job"].create({"shipment_type": "master", "freight_type": "export"})
-        house_awb = self._create_awb("00223456789")
-        self.env["freight.air.job"].create({
-            "shipment_type": "house", "master_job_id": master.id,
-            "freight_type": "export", "awb_master_id": house_awb.id,
-        })
-        self.assertFalse(house_awb.airline_id,
-            msg="House AWB tidak boleh resolve Airline dari prefix")
-
-
 class TestAwbReviewFindings(AirAwbTestBase):
     """Independent-review follow-up FF-76 Air: available-only candidate
-    domain semantics, Air/Sea type invariant, controlled name_create, dan
-    airline lookup guard (is_airline=True)."""
+    domain semantics, Air/Sea type invariant, controlled name_create."""
 
     def test_used_awb_excluded_from_available_domain_but_self_included(self):
         """1. Used AWB (chain lain) tidak termasuk candidate domain
@@ -382,23 +379,6 @@ class TestAwbReviewFindings(AirAwbTestBase):
         new_awb = self.env["freight.awb.master"].browse(result_id)
         self.assertEqual(new_awb.awb_no, "02612345678")
         self.assertEqual(new_awb.awb_type, "air")
-
-    def test_airline_prefix_only_resolves_is_airline_true_partner(self):
-        """8. Airline prefix hanya resolve partner dengan is_airline=True --
-        partner dengan airline_code yang cocok tapi BUKAN airline (tanpa
-        category freight_role_code=airline) tidak boleh ke-resolve."""
-        fake = self.env["res.partner"].create({"name": "Bukan Airline", "airline_code": "009"})
-        self.assertFalse(fake.is_airline)
-        awb = self._create_awb("00912345678")
-        self.env["freight.air.job"].create({
-            "shipment_type": "direct", "freight_type": "export", "awb_master_id": awb.id,
-        })
-        self.assertFalse(awb.airline_id,
-            msg="Partner dengan airline_code cocok tapi is_airline=False tidak boleh ke-resolve")
-
-        real_airline = self._create_airline_partner("Real Airline", "009")
-        awb.invalidate_recordset(["airline_id"])
-        self.assertEqual(awb.airline_id, real_airline)
 
     def test_historical_used_awb_stays_blocked_after_owner_deleted(self):
         """Edge case follow-up: is_executed adalah source of truth historical
@@ -543,3 +523,64 @@ class TestAwbChainLockFinalHardening(AirAwbTestBase):
         self.assertFalse(master.booking_id)
         master.write({"awb_master_id": awb2.id})
         self.assertEqual(master.awb_master_id, awb2)
+
+
+class TestAwbLateAssignment(AirAwbTestBase):
+    """UAT revision FF-76: Booking AWB optional -- Create Job harus tetap
+    berhasil tanpa AWB, dan AWB boleh di-assign belakangan lewat Master
+    tanpa memaksa user menghapus Job."""
+
+    def test_booking_without_awb_create_job_succeeds_master_empty(self):
+        """Booking tanpa AWB -> Create Job sukses, Master juga kosong."""
+        booking = self._create_air_booking()
+        self.assertFalse(booking.awb_master_id)
+
+        result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(result["res_id"])
+        self.assertEqual(master.shipment_type, "master")
+        self.assertFalse(master.awb_master_id)
+        self.assertFalse(booking.awb_master_id)
+
+    def test_late_assign_awb_from_master_propagates_to_booking(self):
+        """Late assignment: assign AWB lewat Master -> Booking ikut
+        mereferensikan AWB yang sama (satu source of truth per chain)."""
+        booking = self._create_air_booking()
+        result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(result["res_id"])
+
+        awb = self._create_awb("06012345678")
+        master.write({"awb_master_id": awb.id})
+
+        self.assertEqual(master.awb_master_id, awb)
+        self.assertEqual(booking.awb_master_id, awb,
+            msg="Booking harus ikut mereferensikan AWB yang sama setelah late assignment dari Master")
+        self.assertTrue(awb.is_executed)
+
+    def test_after_late_assignment_booking_and_master_cannot_diverge(self):
+        """Setelah AWB terpasang lewat late assignment, Booking dan Master
+        tidak boleh diedit independen menjadi AWB berbeda."""
+        booking = self._create_air_booking()
+        result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(result["res_id"])
+        awb = self._create_awb("06112345678")
+        master.write({"awb_master_id": awb.id})
+
+        other_awb = self._create_awb("06212345678")
+        with self.assertRaises(ValidationError):
+            master.write({"awb_master_id": other_awb.id})
+        with self.assertRaises(ValidationError):
+            booking.write({"awb_master_id": other_awb.id})
+
+    def test_late_assignment_does_not_touch_execution_info(self):
+        """AWB assignment (termasuk late assignment) tidak boleh mengisi
+        atau menimpa Execution Info -- itu tetap murni manual."""
+        booking = self._create_air_booking()
+        result = booking.action_create_job()
+        master = self.env["freight.air.job"].browse(result["res_id"])
+        awb = self._create_awb("06312345678")
+        master.write({"awb_master_id": awb.id})
+
+        self.assertFalse(awb.execution_shipment_type)
+        self.assertFalse(awb.execution_shipper_id)
+        self.assertFalse(awb.execute_by_id)
+        self.assertFalse(awb.execute_date)

@@ -102,7 +102,14 @@ class FreightAirBooking(models.Model):
         dilepas), tolak -- one-time semantic, bukan cuma cek relation kosong.
         SQL unique constraint (awb_master_id_uniq) sudah menangani duplikasi
         antar Booking yang relation-nya masih aktif; constrain ini menutup
-        celah reuse setelah AWB dilepas."""
+        celah reuse setelah AWB dilepas.
+
+        UAT revision (late assignment): chain bisa juga terbentuk dari arah
+        Master duluan (Booking kosong saat Create Job, AWB baru di-assign
+        belakangan lewat Master -- lihat freight.air.job.write()). Dalam
+        kasus itu `executed_job_id` yang jadi pointer pertama, bukan
+        `executed_booking_id` -- keduanya legal selama Job tsb memang
+        Master milik Booking ini."""
         for rec in self:
             awb = rec.awb_master_id
             if not awb:
@@ -112,7 +119,12 @@ class FreightAirBooking(models.Model):
                     "AWB %s bertipe '%s' -- Air Booking hanya boleh memakai "
                     "AWB Type Air." % (awb.awb_no, awb.awb_type)
                 )
-            if awb.is_executed and awb.executed_booking_id != rec:
+            if not awb.is_executed:
+                continue
+            legal = awb.executed_booking_id == rec or (
+                awb.executed_job_id and awb.executed_job_id.booking_id == rec
+            )
+            if not legal:
                 raise ValidationError(
                     "AWB %s sudah pernah digunakan dan tidak dapat dipakai "
                     "ulang oleh Booking ini." % awb.awb_no
@@ -153,11 +165,17 @@ class FreightAirBooking(models.Model):
         records = super(FreightAirBooking, self).create(vals_list)
         for rec in records:
             if rec.awb_master_id:
-                rec.awb_master_id._snapshot_from_booking(rec)
+                rec.awb_master_id._mark_executed(booking=rec)
         return records
 
     def write(self, vals):
-        if 'awb_master_id' in vals:
+        if 'awb_master_id' in vals and not self.env.context.get('_awb_master_cascade'):
+            # UAT revision: cascade write dari freight.air.job.write() (late
+            # assignment Master -> Booking) sengaja melewati guard ini lewat
+            # context flag -- itulah satu-satunya jalur yang boleh mengubah
+            # AWB Booking setelah Master terbentuk (Booking sendiri TETAP
+            # bukan entry point perubahan AWB, lihat komentar di
+            # freight.air.job.write()).
             new_awb_id = vals.get('awb_master_id')
             for rec in self:
                 if new_awb_id == rec.awb_master_id.id:
@@ -166,13 +184,14 @@ class FreightAirBooking(models.Model):
                 if master:
                     raise ValidationError(
                         "Booking %s sudah memiliki Master Job (%s) -- AWB No. tidak "
-                        "boleh diubah lagi setelah Master terbentuk." % (rec.name, master[:1].job_no)
+                        "boleh diubah lagi setelah Master terbentuk. Assign AWB lewat "
+                        "Master Job." % (rec.name, master[:1].job_no)
                     )
         res = super(FreightAirBooking, self).write(vals)
         if 'awb_master_id' in vals:
             for rec in self:
                 if rec.awb_master_id:
-                    rec.awb_master_id._snapshot_from_booking(rec)
+                    rec.awb_master_id._mark_executed(booking=rec)
         return res
 
     def action_confirm(self):
@@ -263,9 +282,9 @@ class FreightAirBooking(models.Model):
             'term_payment': self.payment_term_id.id if self.payment_term_id else False,
             'salesman_id': self.salesman_id.id if self.salesman_id else False,
             # FF-76: Master harus memakai AWB Master yang EXACT sama dengan
-            # Booking (legal chain exception) -- snapshot Booking (kalau
-            # ada) TIDAK ditimpa lagi saat Job.create() memanggil
-            # _snapshot_from_job (no-op karena awb.is_executed sudah True).
+            # Booking (legal chain exception), atau kosong kalau Booking
+            # belum punya AWB (late assignment lewat Master, lihat
+            # freight.air.job.write()).
             'awb_master_id': self.awb_master_id.id if self.awb_master_id else False,
             # Parties
             'shipper_id': self.shipper_id.id if self.shipper_id else False,

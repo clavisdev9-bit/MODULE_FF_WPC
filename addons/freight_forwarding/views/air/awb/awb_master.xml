@@ -17,7 +17,6 @@
                         <group string="Data Utama">
                             <field name="awb_type"/>
                             <field name="service_level"/>
-                            <field name="airline_id" readonly="1"/>
                         </group>
                         <group string="Execution Info">
                             <field name="execution_shipment_type"/>
