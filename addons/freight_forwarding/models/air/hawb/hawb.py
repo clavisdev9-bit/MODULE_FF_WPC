@@ -16,6 +16,8 @@ class FreightAirHawb(models.Model):
     _rec_name = 'job_no'
     _sql_constraints = [
         ('job_no_uniq', 'unique(job_no)', 'Job No. harus unik.'),
+        ('awb_master_id_uniq', 'unique(awb_master_id)',
+         'AWB ini sudah dipakai Job lain.'),
     ]
 
     job_no = fields.Char(string='Job No.', required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
@@ -38,16 +40,36 @@ class FreightAirHawb(models.Model):
         string='House Jobs',
     )
     job_date = fields.Date(string='Job Date', default=fields.Date.context_today, tracking=True)
-    hawb_no = fields.Char(string='House AWB No.', tracking=True)
     smawb_no = fields.Char(string='SMawb No.', tracking=True)
-    mawb_no = fields.Char(string='Mawb No.', tracking=True)
-    effective_mawb_no = fields.Char(
-        string='Mawb No. (Effective)',
-        compute='_compute_effective_mawb_no',
-        help='Mawb No. Master jika record ini House yang sudah tergabung; '
-             'kalau tidak, Mawb No. milik record ini sendiri.',
+    # FF-76: hawb_no/mawb_no/effective_mawb_no/direct_awb_no (raw Char per
+    # shipment_type) dihapus -- diganti satu relation canonical
+    # awb_master_id. Canonical meaning tergantung shipment_type: Master =
+    # own Master AWB, House = own House AWB, Direct = own Direct AWB. Label
+    # UI dibedakan lewat form view (string override), bukan field teknis
+    # terpisah.
+    awb_master_id = fields.Many2one(
+        'freight.awb.master',
+        string='AWB No.',
+        domain="[('awb_type', '=', 'air')]",
+        tracking=True,
     )
-    direct_awb_no = fields.Char(string='Direct AWB No.', tracking=True)
+    # FF-76: House TIDAK menyimpan duplicate MAWB Char -- MAWB House
+    # berasal dari master_job_id.awb_master_id (non-canonical, readonly
+    # helper, hanya supaya bisa dipakai sebagai field form/search biasa).
+    master_awb_master_id = fields.Many2one(
+        'freight.awb.master',
+        string='MAWB No.',
+        compute='_compute_master_awb_master_id',
+        store=True,
+    )
+    # FF-76: Booking reference House juga berasal dari Master -- helper
+    # readonly/searchable, BUKAN duplicate Booking No. Char.
+    effective_booking_id = fields.Many2one(
+        'freight.air.booking',
+        string='Booking',
+        compute='_compute_effective_booking_id',
+        store=True,
+    )
     known_shipper_flag = fields.Char(string='Know Shipper', size=15, tracking=True)
 
     state = fields.Selection([
@@ -291,12 +313,50 @@ class FreightAirHawb(models.Model):
                     "harus sama dengan Master Job (%s)." % (rec.job_no, rec.master_job_id.job_no)
                 )
 
-    @api.depends('mawb_no', 'master_job_id.mawb_no')
-    def _compute_effective_mawb_no(self):
+    @api.depends('shipment_type', 'master_job_id.awb_master_id')
+    def _compute_master_awb_master_id(self):
         for rec in self:
-            rec.effective_mawb_no = (
-                rec.master_job_id.mawb_no if rec.master_job_id else False
-            ) or rec.mawb_no
+            rec.master_awb_master_id = rec.master_job_id.awb_master_id if rec.master_job_id else False
+
+    @api.depends('shipment_type', 'booking_id', 'master_job_id.booking_id')
+    def _compute_effective_booking_id(self):
+        """FF-76: House -> master_job_id.booking_id; Master/Direct -> own
+        booking_id. Berbeda dari _get_effective_booking() (fallback chain
+        generik yang sudah ada untuk tombol/counter) -- field ini murni
+        untuk kebutuhan search/list canonical berdasarkan shipment_type."""
+        for rec in self:
+            if rec.shipment_type == 'house' and rec.master_job_id:
+                rec.effective_booking_id = rec.master_job_id.booking_id
+            else:
+                rec.effective_booking_id = rec.booking_id
+
+    @api.constrains('awb_master_id')
+    def _check_awb_master_chain(self):
+        """FF-76: AWB availability/ownership rule terpusat di sini.
+        - SQL unique constraint (awb_master_id_uniq) sudah menolak 2 Job
+          mana pun (Master/House/Direct apa saja) berbagi AWB yang sama.
+        - Satu-satunya exception LEGAL: Master hasil action_create_job dari
+          Booking yang SAMA memakai AWB yang sudah dieksekusi Booking
+          tersebut (chain Booking->Master).
+        - Kalau AWB sudah pernah dieksekusi (is_executed) oleh chain lain
+          (Job lain, atau Booking yang bukan booking_id milik rec), tolak --
+          one-time semantic, bukan cuma cek relation kosong."""
+        for rec in self:
+            awb = rec.awb_master_id
+            if not awb:
+                continue
+            if not awb.is_executed:
+                continue
+            legal = awb.executed_job_id == rec or (
+                rec.shipment_type == 'master'
+                and awb.executed_booking_id
+                and rec.booking_id == awb.executed_booking_id
+            )
+            if not legal:
+                raise ValidationError(
+                    "AWB %s sudah pernah digunakan dan tidak dapat dipakai "
+                    "ulang oleh Job ini." % awb.awb_no
+                )
 
     def _get_effective_booking(self):
         self.ensure_one()
@@ -451,6 +511,9 @@ class FreightAirHawb(models.Model):
 
         records = super(FreightAirHawb, self).create(vals_list)
         records._sync_analytic_to_related_docs()
+        for rec in records:
+            if rec.awb_master_id:
+                rec.awb_master_id._snapshot_from_job(rec)
         return records
 
     def write(self, vals):
@@ -475,6 +538,10 @@ class FreightAirHawb(models.Model):
                     if stale_houses:
                         stale_houses.write({'analytic_account_id': rec.analytic_account_id.id})
         self._sync_analytic_to_related_docs()
+        if 'awb_master_id' in vals:
+            for rec in self:
+                if rec.awb_master_id:
+                    rec.awb_master_id._snapshot_from_job(rec)
         return res
 
     def _sync_analytic_to_related_docs(self):

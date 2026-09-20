@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <!-- AWB INVENTORY -->
+    <menuitem id="menu_sub_parent_air_awb_inventory" name="AWB Inventory"
+        parent="menu_parent_air"
+        sequence="25" />
+
+    <menuitem id="menu_air_awb_master" name="AWB Master"
+        parent="menu_sub_parent_air_awb_inventory"
+        action="action_freight_awb_master_air"
+        sequence="10" />
+
     <!-- SALES -->
     <menuitem id="menu_sub_parent_air_sales" name="Sales"
         parent="menu_parent_air"

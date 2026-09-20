@@ -65,8 +65,9 @@
                             <group string="Shipment Info">
                                 <field name="booking_date" />
                                 <field name="job_no" />
-                                <field name="awb_no" />
-                                <field name="mawb_no" />
+                                <field name="awb_master_id"
+                                    domain="[('awb_type', '=', 'air')]"
+                                    context="{'default_awb_type': 'air'}" />
                                 <field name="freight_type" invisible="1" />
                                 <field name="ship_mode" />
                                 <field name="payment_term_id" string="Credit Term" />

@@ -33,7 +33,10 @@
         "security/sea/master_data/ir.model.access.csv",
         # Data
         "data/air/air_booking_sequence.xml",
-        "data/air/air_mawb_sequence.xml",
+        # FF-76: air_mawb_sequence.xml (code freight.air.mawb) DIHAPUS --
+        # dead sequence, tidak pernah dipanggil next_by_code; MAWB No.
+        # sekarang canonical lewat freight.awb.master.awb_no (manual/register,
+        # bukan auto-generated).
         "data/air/air_hawb_sequence.xml",
         "data/sea/sea_booking_sequence.xml",
         "data/sea/sea_hbl_sequence.xml",
@@ -80,6 +83,7 @@
         "views/sea/hbl/hbl.xml",
         "views/sea/import/purchasing.xml",
         # Air
+        "views/air/awb/awb_master.xml",
         "views/air/booking/booking.xml",
         "views/air/hawb/document_list_views.xml",
         "views/air/hawb/hawb.xml",
@@ -142,5 +146,6 @@
         "tests/test_generic_duplicate_commercial_group.py",
         "tests/test_ff73_migration_regression.py",
         "tests/test_ff75_hierarchy_followup.py",
+        "tests/test_air_awb_master.py",
     ],
 }

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FORM VIEW -->
+    <record id="view_freight_awb_master_form" model="ir.ui.view">
+        <field name="name">freight.awb.master.form</field>
+        <field name="model">freight.awb.master</field>
+        <field name="arch" type="xml">
+            <form string="AWB Master">
+                <sheet>
+                    <widget name="web_ribbon" title="Used" bg_color="text-bg-danger" invisible="is_available"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="awb_no" placeholder="AWB No."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Data Utama">
+                            <field name="awb_type"/>
+                            <field name="service_level"/>
+                            <field name="airline_id" readonly="1"/>
+                        </group>
+                        <group string="Execution Info">
+                            <field name="execution_shipment_type"/>
+                            <field name="execution_shipper_id"/>
+                            <field name="execution_destination_id"/>
+                            <field name="execution_pcs"/>
+                            <field name="execution_gross_weight"/>
+                            <field name="execute_by_id"/>
+                            <field name="execute_date"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_freight_awb_master_list" model="ir.ui.view">
+        <field name="name">freight.awb.master.list</field>
+        <field name="model">freight.awb.master</field>
+        <field name="arch" type="xml">
+            <list string="AWB Master">
+                <field name="awb_no"/>
+                <field name="awb_type"/>
+                <field name="service_level"/>
+                <field name="execution_shipment_type"/>
+                <field name="execution_shipper_id"/>
+                <field name="execution_destination_id"/>
+                <field name="execution_pcs"/>
+                <field name="execution_gross_weight"/>
+                <field name="execute_by_id"/>
+                <field name="execute_date"/>
+                <field name="is_available" widget="boolean_toggle" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_freight_awb_master_search" model="ir.ui.view">
+        <field name="name">freight.awb.master.search</field>
+        <field name="model">freight.awb.master</field>
+        <field name="arch" type="xml">
+            <search string="Search AWB Master">
+                <field name="awb_no"/>
+                <field name="execution_shipper_id" string="Shipper"/>
+                <field name="execution_destination_id" string="Destination"/>
+                <separator/>
+                <filter name="filter_air" string="Air" domain="[('awb_type', '=', 'air')]"/>
+                <filter name="filter_sea" string="Sea" domain="[('awb_type', '=', 'sea')]"/>
+                <separator/>
+                <filter name="filter_available" string="Available" domain="[('is_available', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_awb_type" string="AWB Type" domain="[]" context="{'group_by': 'awb_type'}"/>
+                    <filter name="group_execution_shipment_type" string="Shipment Type" domain="[]" context="{'group_by': 'execution_shipment_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION: ALL -->
+    <record id="action_freight_awb_master" model="ir.actions.act_window">
+        <field name="name">AWB Master</field>
+        <field name="res_model">freight.awb.master</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_awb_master_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new AWB Master
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION: AIR ONLY (Air &gt; AWB Inventory) -->
+    <record id="action_freight_awb_master_air" model="ir.actions.act_window">
+        <field name="name">AWB Master</field>
+        <field name="res_model">freight.awb.master</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_awb_master_search"/>
+        <field name="domain">[('awb_type', '=', 'air')]</field>
+        <field name="context">{'default_awb_type': 'air', 'search_default_filter_air': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air AWB Master
+            </p>
+        </field>
+    </record>
+</odoo>

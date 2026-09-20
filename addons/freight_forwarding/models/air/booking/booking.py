@@ -1,4 +1,5 @@
 from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 class FreightAirBooking(models.Model):
     _name = 'freight.air.booking'
@@ -12,6 +13,10 @@ class FreightAirBooking(models.Model):
         'freight.commercial.group.mixin',
     ]
     _order = 'id desc'
+    _sql_constraints = [
+        ('awb_master_id_uniq', 'unique(awb_master_id)',
+         'AWB ini sudah dipakai Booking lain.'),
+    ]
 
     name = fields.Char(string='Booking No.', required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
     booking_date = fields.Datetime(string='Booking Date', default=fields.Datetime.now)
@@ -56,9 +61,19 @@ class FreightAirBooking(models.Model):
     footnote = fields.Text(string='Footnote')
 
     # Job / AWB References
-    job_no = fields.Char(string='Job No.')
-    awb_no = fields.Char(string='Awb No.')
-    mawb_no = fields.Char(string='Mawb No.')
+    job_no = fields.Char(
+        string='Job No.',
+        compute='_compute_job_no',
+        help='Job No. Master Job yang terkait Booking ini (FF-76). Kosong '
+             'sebelum Master dibuat lewat Create Job; bukan identity '
+             'independen Booking sendiri.',
+    )
+    awb_master_id = fields.Many2one(
+        'freight.awb.master',
+        string='AWB No.',
+        domain="[('awb_type', '=', 'air')]",
+        tracking=True,
+    )
 
     # Relational Tables
     flight_routing_ids = fields.One2many('freight.air.booking.flight.routing', 'booking_id', string='Flight Routings')
@@ -70,6 +85,33 @@ class FreightAirBooking(models.Model):
     def _compute_sales_order_count(self):
         for rec in self:
             rec.sales_order_count = len(rec.sale_order_ids)
+
+    @api.depends('air_job_ids.job_no', 'air_job_ids.shipment_type')
+    def _compute_job_no(self):
+        """FF-76: Booking tidak lagi punya identity job_no independen --
+        menampilkan Job No. Master Job terkait (kosong sebelum Master ada)."""
+        for rec in self:
+            master = rec.air_job_ids.filtered(lambda j: j.shipment_type == 'master')[:1]
+            rec.job_no = master.job_no if master else False
+
+    @api.constrains('awb_master_id')
+    def _check_awb_master_chain(self):
+        """FF-76: AWB availability/ownership -- satu AWB Master hanya boleh
+        dipakai oleh SATU Booking. Kalau AWB ini sudah pernah dieksekusi
+        (is_executed) oleh Booking LAIN (termasuk yang relation-nya sudah
+        dilepas), tolak -- one-time semantic, bukan cuma cek relation kosong.
+        SQL unique constraint (awb_master_id_uniq) sudah menangani duplikasi
+        antar Booking yang relation-nya masih aktif; constrain ini menutup
+        celah reuse setelah AWB dilepas."""
+        for rec in self:
+            awb = rec.awb_master_id
+            if not awb:
+                continue
+            if awb.is_executed and awb.executed_booking_id != rec:
+                raise ValidationError(
+                    "AWB %s sudah pernah digunakan dan tidak dapat dipakai "
+                    "ulang oleh Booking ini." % awb.awb_no
+                )
 
     def action_view_sales_orders(self):
         self.ensure_one()
@@ -103,7 +145,19 @@ class FreightAirBooking(models.Model):
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = self.env['ir.sequence'].next_by_code('freight.air.booking') or _('New')
-        return super(FreightAirBooking, self).create(vals_list)
+        records = super(FreightAirBooking, self).create(vals_list)
+        for rec in records:
+            if rec.awb_master_id:
+                rec.awb_master_id._snapshot_from_booking(rec)
+        return records
+
+    def write(self, vals):
+        res = super(FreightAirBooking, self).write(vals)
+        if 'awb_master_id' in vals:
+            for rec in self:
+                if rec.awb_master_id:
+                    rec.awb_master_id._snapshot_from_booking(rec)
+        return res
 
     def action_confirm(self):
         for rec in self:
@@ -192,8 +246,11 @@ class FreightAirBooking(models.Model):
             'nomination_remark': self.nomination_remark,
             'term_payment': self.payment_term_id.id if self.payment_term_id else False,
             'salesman_id': self.salesman_id.id if self.salesman_id else False,
-            'hawb_no': self.awb_no or False,
-            'mawb_no': self.mawb_no or False,
+            # FF-76: Master harus memakai AWB Master yang EXACT sama dengan
+            # Booking (legal chain exception) -- snapshot Booking (kalau
+            # ada) TIDAK ditimpa lagi saat Job.create() memanggil
+            # _snapshot_from_job (no-op karena awb.is_executed sudah True).
+            'awb_master_id': self.awb_master_id.id if self.awb_master_id else False,
             # Parties
             'shipper_id': self.shipper_id.id if self.shipper_id else False,
             'consignee_id': self.consignee_id.id if self.consignee_id else False,
