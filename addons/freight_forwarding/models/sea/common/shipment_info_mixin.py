@@ -13,8 +13,10 @@ class FreightShipmentInfoMixin(models.AbstractModel):
     via_port_id = fields.Many2one("freight.port", string="Via Port")
     terminal_id = fields.Many2one("freight.location", string="Terminal")
 
-    feeder_vessel_id = fields.Many2one("freight.vessel", string="Feeder Vessel")
-    feeder_voyage_no = fields.Char(string="Feeder Voyage No.")
+    # Label bisnis SysFreight: "Feeder/Direct Vessel" & "Feeder/Direct Voyage"
+    # (nama technical field feeder_vessel_id/feeder_voyage_no TIDAK diubah).
+    feeder_vessel_id = fields.Many2one("freight.vessel", string="Feeder/Direct Vessel")
+    feeder_voyage_no = fields.Char(string="Feeder/Direct Voyage")
     mother_vessel_id = fields.Many2one("freight.vessel", string="Mother Vessel")
     mother_voyage_no = fields.Char(string="Mother Voyage No.")
     shipping_line_id = fields.Many2one(
