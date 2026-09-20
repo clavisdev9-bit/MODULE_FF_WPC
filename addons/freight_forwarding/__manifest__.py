@@ -73,7 +73,6 @@
         "views/sea/booking/booking.xml",
         "views/sea/booking/extra_info_views.xml",
         "views/sea/booking/cargo_info.xml",
-        "views/sea/booking/booking_convert_wizard.xml",
         "views/sea/hbl/cargo_info.xml",
         "views/sea/hbl/custom_permit.xml",
         "views/sea/hbl/tax_refund_doc_views.xml",

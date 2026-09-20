@@ -16,11 +16,13 @@ class TestSeaBookingFields(FreightTestBase):
         berhasil dibuat."""
         booking = self.env["freight.sea.booking"].create({
             "partner_id": self.partner.id,
-            # freight_type, ship_mode, vessel_id, delivery_type_id
-            # sengaja tidak diisi -- harus tetap berhasil.
+            # freight_type, ship_mode, feeder_vessel_id/mother_vessel_id,
+            # delivery_type_id sengaja tidak diisi -- harus tetap berhasil.
         })
         self.assertTrue(booking.exists())
         self.assertFalse(booking.freight_type)
+        self.assertFalse(booking.feeder_vessel_id)
+        self.assertFalse(booking.mother_vessel_id)
 
     def test_freight_type_valid_values(self):
         """freight_type hanya menerima 'import' atau 'export' (lowercase)."""
@@ -173,5 +175,34 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
         self.assertEqual(hbl.commodity_id, self.commodity)
         self.assertEqual(hbl.delivery_type_id, self.delivery_type)
         self.assertEqual(hbl.shipment_type_id, shipment_type)
+
+    def test_convert_copies_canonical_vessel_routing(self):
+        """FF-74: feeder/mother vessel + voyage (canonical) dari Booking
+        harus tersalin ke Master saat action_create_job."""
+        mother_vessel = self.env["freight.vessel"].create({
+            "code": "MV002",
+            "name": "Test Mother Vessel",
+        })
+        booking = self._create_booking(
+            feeder_vessel_id=self.vessel.id,
+            feeder_voyage_no="FDR-001",
+            mother_vessel_id=mother_vessel.id,
+            mother_voyage_no="MTR-001",
+        )
+        booking.action_create_job()
+
+        master = booking.sea_job_ids[0]
+        self.assertEqual(master.feeder_vessel_id, self.vessel)
+        self.assertEqual(master.feeder_voyage_no, "FDR-001")
+        self.assertEqual(master.mother_vessel_id, mother_vessel)
+        self.assertEqual(master.mother_voyage_no, "MTR-001")
+
+    def test_generic_vessel_fields_no_longer_exist(self):
+        """FF-74: representasi generic/duplicate vessel_id, voyage_no
+        (Booking) dan vessel_voy (HBL/Job) harus sudah dihapus."""
+        booking = self._create_booking()
+        self.assertNotIn("vessel_id", booking._fields)
+        self.assertNotIn("voyage_no", booking._fields)
+        self.assertNotIn("vessel_voy", self.env["freight.sea.job"]._fields)
 
 

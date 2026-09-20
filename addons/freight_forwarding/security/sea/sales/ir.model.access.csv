@@ -27,8 +27,6 @@ access_freight_sea_booking_extra_info_user,Freight Sea Booking Extra Info User,m
 access_freight_sea_booking_extra_info_admin,Freight Sea Booking Extra Info Admin,model_freight_sea_booking_extra_info,base.group_system,1,1,1,1
 access_freight_sea_booking_vessel_schedule_user,Freight Sea Booking Vessel Schedule User,model_freight_sea_booking_vessel_schedule,base.group_user,1,1,1,0
 access_freight_sea_booking_vessel_schedule_admin,Freight Sea Booking Vessel Schedule Admin,model_freight_sea_booking_vessel_schedule,base.group_system,1,1,1,1
-access_freight_sea_booking_convert_wizard_user,Freight Sea Booking Convert Wizard User,model_freight_sea_booking_convert_wizard,base.group_user,1,1,1,1
-access_freight_sea_booking_convert_wizard_admin,Freight Sea Booking Convert Wizard Admin,model_freight_sea_booking_convert_wizard,base.group_system,1,1,1,1
 access_freight_sea_quotation_migration_wizard_admin,Freight Sea Quotation Migration Wizard Admin,model_freight_sea_quotation_migration_wizard,base.group_system,1,1,1,1
 access_freight_sea_booking_shipment_info_user,Freight Sea Booking Shipment Info User,model_freight_sea_booking_shipment_info,base.group_user,1,1,1,0
 access_freight_sea_booking_shipment_info_admin,Freight Sea Booking Shipment Info Admin,model_freight_sea_booking_shipment_info,base.group_system,1,1,1,1

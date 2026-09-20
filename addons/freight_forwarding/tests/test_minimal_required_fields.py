@@ -34,7 +34,8 @@ class TestMinimalRequiredFields(FreightTestBase):
         booking = self.env["freight.sea.booking"].create({})
         self.assertTrue(booking.exists())
         self.assertFalse(booking.freight_type)
-        self.assertFalse(booking.vessel_id)
+        self.assertFalse(booking.feeder_vessel_id)
+        self.assertFalse(booking.mother_vessel_id)
         self.assertFalse(booking.partner_id)
 
     def test_air_booking_minimal(self):
@@ -76,10 +77,17 @@ class TestMinimalRequiredFields(FreightTestBase):
         booking_result = quotation.action_convert_to_booking_direct()
         booking = self.env["freight.sea.booking"].browse(booking_result["res_id"])
         self.assertTrue(booking.exists())
+        self.assertFalse(booking.feeder_vessel_id,
+            msg="Sea Booking dari Quotation Export harus tetap bisa dibuat tanpa Vessel")
+        self.assertFalse(booking.mother_vessel_id)
 
         hbl_result = booking.action_create_job()
-        hbl = self.env["freight.sea.job"].browse(hbl_result["res_id"])
-        self.assertTrue(hbl.exists())
+        master = self.env["freight.sea.job"].browse(hbl_result["res_id"])
+        self.assertTrue(master.exists())
+        self.assertEqual(master.record_level, "master",
+            msg="Booking -> Create Job harus membuat Master Job (FF-75)")
+        self.assertEqual(len(master.house_job_ids), 1,
+            msg="Booking -> Create Job harus otomatis membuat 1 House Job (FF-75)")
 
     def test_sea_quotation_direct_import_to_jobsheet_minimal(self):
         """Import direct: Quotation (cukup Customer) -> Jobsheet langsung."""

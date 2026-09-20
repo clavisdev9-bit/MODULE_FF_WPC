@@ -264,7 +264,7 @@
                     <field name="partner_id" />
                     <field name="ship_mode" />
                     <field name="freight_type" />
-                    <field name="vessel_id" />
+                    <field name="feeder_vessel_id" />
                     <field name="etd" />
                     <field name="eta" />
                 </list>
@@ -279,7 +279,7 @@
                 <search>
                     <field name="name" string="Booking No." />
                     <field name="partner_id" />
-                    <field name="vessel_id" />
+                    <field name="feeder_vessel_id" />
                     <field name="ship_mode" />
                     <field name="freight_type" />
                     <separator />

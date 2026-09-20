@@ -114,7 +114,8 @@ class FreightTestBase(TransactionCase):
             "partner_id": self.partner.id,
             "port_of_loading_id": self.port_loading.id,
             "port_of_discharge_id": self.port_discharge.id,
-            "vessel_id": self.vessel.id,
+            "feeder_vessel_id": self.vessel.id,
+            "feeder_voyage_no": "V001",
             "delivery_type_id": self.delivery_type.id,
         }
         vals.update(kwargs)
