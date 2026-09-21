@@ -5,8 +5,8 @@ class FreightChargeCodeAccountMapping(models.Model):
     _name = 'freight.charge.code.account.mapping'
     _description = 'Freight Charge Code Account Mapping'
 
-    charge_code_id = fields.Many2one(
-        'freight.charge.code', required=True, ondelete='cascade',
+    product_tmpl_id = fields.Many2one(
+        'product.template', required=True, ondelete='cascade',
     )
     module_code = fields.Char(string='Module')
     job_type_id = fields.Many2one('freight.job.type', string='Job Type')
