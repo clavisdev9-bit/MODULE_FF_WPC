@@ -6,10 +6,11 @@
             <field name="model">freight.sea.booking.cargo.info</field>
             <field name="arch" type="xml">
                 <list>
-                    <field name="container_no" column_invisible="parent.container_type != 'fcl'" />
+                    <field name="container_no" column_invisible="parent.ship_mode != 'fcl'" />
                     <field name="container_type_id"
-                        column_invisible="parent.container_type != 'fcl'" />
-                    <field name="package_type_id" column_invisible="parent.container_type == 'fcl'" />
+                        string="Container Size / Type"
+                        column_invisible="parent.ship_mode != 'fcl'" />
+                    <field name="package_type_id" column_invisible="parent.ship_mode == 'fcl'" />
                     <field name="quantity" />
                     <field name="gross_weight" />
                 </list>
@@ -33,7 +34,7 @@
                                 <field name="package_type_id" />
                                 <field name="container_no" />
                                 <field name="seal_no" />
-                                <field name="container_type_id" />
+                                <field name="container_type_id" string="Container Size / Type" />
                             </group>
                             <group string="Qty &amp; Type">
                                 <field name="types_of_cargo" />

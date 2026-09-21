@@ -1,45 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="0">
-        <record id="seq_freight_sea_hbl_bl_no" model="ir.sequence">
-            <field name="name">Sea Jobsheet BL Number (FCL)</field>
-            <field name="code">freight.sea.hbl.bl_no</field>
-            <field name="prefix">%(month)s/FCL-JKTPUS/%(y)s</field>
-            <field name="padding">3</field>
-            <field name="use_date_range">True</field>
-            <field name="company_id" eval="False"/>
-        </record>
-
-        <record id="seq_freight_sea_hbl_bl_no_lcl" model="ir.sequence">
-            <field name="name">Sea Jobsheet BL Number (LCL)</field>
-            <field name="code">freight.sea.hbl.bl_no.lcl</field>
-            <field name="prefix">%(month)s/LCL-JKTPUS/%(y)s</field>
-            <field name="padding">3</field>
-            <field name="use_date_range">True</field>
-            <field name="company_id" eval="False"/>
-        </record>
-
-        <record id="seq_freight_sea_hbl_bl_no_consol" model="ir.sequence">
-            <field name="name">Sea Jobsheet BL Number (Consol)</field>
-            <field name="code">freight.sea.hbl.bl_no.consol</field>
-            <field name="prefix">%(month)s/CONSOL-JKTPUS/%(y)s</field>
-            <field name="padding">3</field>
-            <field name="use_date_range">True</field>
-            <field name="company_id" eval="False"/>
-        </record>
-
-        <record id="seq_freight_sea_hbl_job_no_imp" model="ir.sequence">
+        <!-- FF-76: sequence BL (seq_freight_sea_job_bl_no dan
+             seq_freight_sea_job_bl_no_lcl) DIHAPUS. bl_no bukan lagi field
+             auto-generated, murni manual/optional milik masing-masing Sea
+             Job (Master maupun House). Job No. sequence di bawah TIDAK
+             berubah. -->
+        <record id="seq_freight_sea_job_job_no_imp" model="ir.sequence">
             <field name="name">Sea Jobsheet Job Number (Import)</field>
-            <field name="code">freight.sea.hbl.job_no.imp</field>
+            <field name="code">freight.sea.job.job_no.imp</field>
             <field name="prefix">JKT-IMP/%(y)s/%(month)s/</field>
             <field name="padding">3</field>
             <field name="use_date_range">True</field>
             <field name="company_id" eval="False"/>
         </record>
 
-        <record id="seq_freight_sea_hbl_job_no_exp" model="ir.sequence">
+        <record id="seq_freight_sea_job_job_no_exp" model="ir.sequence">
             <field name="name">Sea Jobsheet Job Number (Export)</field>
-            <field name="code">freight.sea.hbl.job_no.exp</field>
+            <field name="code">freight.sea.job.job_no.exp</field>
             <field name="prefix">JKT-EXP/%(y)s/%(month)s/</field>
             <field name="padding">3</field>
             <field name="use_date_range">True</field>
@@ -50,9 +28,9 @@
              saat Jobsheet dibuat (mis. direct create tanpa Quotation Type),
              supaya job_no tetap tergenerate tanpa diam-diam menganggapnya
              Export/Import. -->
-        <record id="seq_freight_sea_hbl_job_no_neutral" model="ir.sequence">
+        <record id="seq_freight_sea_job_job_no_neutral" model="ir.sequence">
             <field name="name">Sea Jobsheet Job Number (Direction Belum Ditentukan)</field>
-            <field name="code">freight.sea.hbl.job_no</field>
+            <field name="code">freight.sea.job.job_no</field>
             <field name="prefix">JKT-JOB/%(y)s/%(month)s/</field>
             <field name="padding">3</field>
             <field name="use_date_range">True</field>

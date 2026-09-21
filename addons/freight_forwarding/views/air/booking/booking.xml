@@ -10,8 +10,8 @@
                     <header>
                         <button name="action_confirm" string="Confirm" type="object"
                             class="oe_highlight" invisible="state != 'draft'" />
-                        <button name="action_create_hawb" string="Create Jobsheet" type="object"
-                            class="oe_highlight" invisible="state != 'confirmed'" />
+                        <button name="action_create_job" string="Create Job" type="object"
+                            class="oe_highlight" invisible="air_job_count &gt; 0 or state != 'confirmed'" />
                         <button name="action_cancel" string="Cancel" type="object"
                             invisible="state not in ('draft','confirmed')" />
                         <button name="action_draft" string="Set to Draft" type="object"
@@ -30,7 +30,7 @@
                                     <span class="o_stat_text">Sales Orders</span>
                                 </div>
                             </button>
-                            <button name="action_view_hawbs" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="hawb_count == 0">
+                            <button name="action_view_jobs" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="air_job_count == 0">
                                 <div class="o_stat_info">
                                     <span class="o_stat_text">Jobsheet</span>
                                 </div>
@@ -65,10 +65,11 @@
                             <group string="Shipment Info">
                                 <field name="booking_date" />
                                 <field name="job_no" />
-                                <field name="awb_no" />
-                                <field name="mawb_no" />
+                                <field name="document_id"
+                                    domain="[('transport_mode', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', document_id)]"
+                                    context="{'default_transport_mode': 'air'}"
+                                    readonly="air_job_count &gt; 0" />
                                 <field name="freight_type" invisible="1" />
-                                <field name="shipment_type" />
                                 <field name="ship_mode" />
                                 <field name="payment_term_id" string="Credit Term" />
                                 <field name="wt_val" />

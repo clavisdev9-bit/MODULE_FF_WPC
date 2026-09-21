@@ -210,7 +210,7 @@
                                             <td class="align-top w-50">
                                                 <div class="bl-label">BL NO.</div>
                                                 <div class="bl-field-sm">
-                                                    <span t-field="doc.hbl_no" />
+                                                    <span t-field="doc.bl_no" />
                                                 </div>
                                             </td>
                                         </tr>
@@ -255,7 +255,7 @@
                                             <td class="align-top">
                                                 <div class="bl-label">TYPE OF SERVICE</div>
                                                 <div class="bl-field-sm">
-                                                    <span t-field="doc.container_type" />
+                                                    <span t-field="doc.ship_mode" />
                                                 </div>
                                             </td>
                                         </tr>
@@ -725,7 +725,7 @@
                                     <td style="width: 14%; font-weight: bold; padding: 2px 0; border: none !important;">B/L NO.</td>
                                     <td style="width: 2%; font-weight: bold; padding: 2px 0; border: none !important;">:</td>
                                     <td style="width: 34%; padding: 2px 0; border: none !important;">
-                                        <span t-field="doc.hbl_no"/>
+                                        <span t-field="doc.bl_no"/>
                                     </td>
                                     <td style="width: 18%; font-weight: bold; padding: 2px 0; border: none !important;">Port of Loading</td>
                                     <td style="width: 2%; font-weight: bold; padding: 2px 0; border: none !important;">:</td>

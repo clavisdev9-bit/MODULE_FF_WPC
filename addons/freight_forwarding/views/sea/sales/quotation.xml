@@ -12,7 +12,7 @@
             <xpath expr="//sheet" position="inside">
                 <field name="is_freight_quotation" invisible="1" />
                 <field name="booking_count" invisible="1" />
-                <field name="hbl_count" invisible="1" />
+                <field name="sea_job_count" invisible="1" />
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_bookings"
@@ -24,13 +24,13 @@
                         <span class="o_stat_text">Booking</span>
                     </div>
                 </button>
-                <button name="action_view_hbls"
+                <button name="action_view_sea_jobs"
                     type="object"
                     class="oe_stat_button"
                     icon="fa-file-text-o"
-                    invisible="not is_freight_quotation or hbl_count == 0">
+                    invisible="not is_freight_quotation or sea_job_count == 0">
                     <div class="o_stat_info">
-                        <span class="o_stat_text">Jobsheet</span>
+                        <span class="o_stat_text">Job</span>
                     </div>
                 </button>
                 <button name="action_view_currency_variants"
@@ -44,7 +44,7 @@
 
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="freight_type" invisible="not is_freight_quotation" readonly="state == 'sale'" />
-                <field name="container_type" invisible="not is_freight_quotation" readonly="state == 'sale'" />
+                <field name="sea_ship_mode" invisible="not is_freight_quotation" readonly="state == 'sale'" />
                 <field name="quotation_title" invisible="not is_freight_quotation" />
             </xpath>
 
@@ -113,20 +113,35 @@
 
             <xpath expr="//header" position="inside">
                 <field name="original_quotation_id" invisible="1" />
-                <button
-                    name="action_convert_quotation"
-                    type="object"
-                    string="Create Booking"
-                    class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_type != 'export' or state != 'sale' or booking_count &gt; 0"
-                />
-                <button
-                    name="action_convert_quotation"
-                    type="object"
-                    string="Create Jobsheet"
-                    class="oe_highlight"
-                    invisible="not is_freight_quotation or freight_type != 'import' or state != 'sale' or hbl_count &gt; 0"
-                />
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="before">
+                <group name="freight_actions" string="Freight Actions"
+                    invisible="not is_freight_quotation or state != 'sale'">
+                    <div class="o_row">
+                        <button
+                            name="action_convert_quotation"
+                            type="object"
+                            string="Create Booking"
+                            class="btn-primary"
+                            invisible="freight_type != 'export' or booking_count &gt; 0"
+                        />
+                        <button
+                            name="action_open_sea_add_to_master_wizard"
+                            type="object"
+                            string="Add to Master"
+                            class="btn-secondary"
+                            invisible="freight_type != 'export' or sea_job_count &gt; 0"
+                        />
+                        <button
+                            name="action_convert_quotation"
+                            type="object"
+                            string="Create Job"
+                            class="btn-primary"
+                            invisible="freight_type != 'import' or sea_job_count &gt; 0"
+                        />
+                    </div>
+                </group>
             </xpath>
 
             <xpath expr="//page[@name='other_information']" position="inside">
@@ -166,7 +181,7 @@
                 <field name="name" string="Number" decoration-bf="1" />
                 <field name="create_date" string="Creation Date" />
                 <field name="freight_type" string="Quotation Type" />
-                <field name="container_type" string="Container Type" />
+                <field name="sea_ship_mode" string="Ship Mode" />
                 <field name="partner_id" string="Customer" />
                 <field name="user_id" string="Salesperson" />
                 <field name="amount_total" string="Total" />
@@ -189,7 +204,7 @@
                 <field name="team_id"/>
                 <field name="state"/>
                 <field name="freight_type"/>
-                <field name="container_type"/>
+                <field name="sea_ship_mode"/>
                 <separator/>
                 <filter name="my_quotation" string="My Quotations" domain="[('user_id', '=', uid)]"/>
                 <filter name="filter_draft_sent" string="Quotation" domain="[('state', 'in', ['draft', 'sent'])]"/>

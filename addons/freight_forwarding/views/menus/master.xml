@@ -37,11 +37,6 @@
         parent="menu_parent_master"
         action="action_freight_dg_class_code"
         sequence="90" />
-    <menuitem id="menu_master_shipment_type" name="Shipment Type"
-        parent="menu_parent_master"
-        action="action_freight_shipment_type"
-        sequence="100" />
-
     <!-- ACCOUNT -->
     <menuitem id="menu_parent_acct" name="Account"
         parent="menu_parent_master"

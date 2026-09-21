@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <!-- B/L INVENTORY (FF-76 Step 2: Sea-specific entry point to the
+         shared transport document registry, mirroring Air's "AWB
+         Inventory". Separate menu/action, same underlying model). -->
+    <menuitem id="menu_sub_parent_sea_bl_inventory" name="B/L Inventory"
+        parent="menu_parent_sea"
+        sequence="15" />
+
+    <menuitem id="menu_sea_bl_code" name="B/L Code"
+        parent="menu_sub_parent_sea_bl_inventory"
+        action="action_freight_bl_code_sea"
+        sequence="5" />
+
+    <menuitem id="menu_sea_bl_master" name="B/L Master"
+        parent="menu_sub_parent_sea_bl_inventory"
+        action="action_freight_bl_master_sea"
+        sequence="10" />
+
     <!-- SALES -->
     <menuitem id="menu_sub_parent_sea_sales" name="Sales"
         parent="menu_parent_sea"
@@ -23,10 +40,6 @@
         parent="menu_sub_parent_sea_import"
         action="action_sea_hbl_import_lcl"
         sequence="20" />
-    <menuitem id="menu_sea_import_job_consol" name="Import Job Consol"
-        parent="menu_sub_parent_sea_import"
-        action="action_sea_hbl_import_consol"
-        sequence="30" />
 
     <!-- EXPORT -->
     <menuitem id="menu_sub_parent_sea_export" name="Export"
@@ -56,8 +69,4 @@
         parent="menu_sub_parent_sea_export_job"
         action="action_sea_hbl_export_lcl"
         sequence="20" />
-    <menuitem id="menu_sea_export_job_consol" name="Export Job Consol"
-        parent="menu_sub_parent_sea_export_job"
-        action="action_sea_hbl_export_consol"
-        sequence="30" />
 </odoo>

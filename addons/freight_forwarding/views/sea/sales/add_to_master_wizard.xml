@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_sea_add_to_master_wizard_form" model="ir.ui.view">
+            <field name="name">Sea Add to Master Wizard Form</field>
+            <field name="model">freight.sea.add.to.master.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Add to Master">
+                    <group>
+                        <field name="quotation_id" readonly="1" />
+                        <field name="freight_type" invisible="1" />
+                        <field name="company_id" invisible="1" />
+                        <field name="master_job_id" required="1" />
+                    </group>
+                    <footer>
+                        <button
+                            name="action_add_to_master"
+                            type="object"
+                            string="Add to Master"
+                            class="btn-primary"
+                        />
+                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

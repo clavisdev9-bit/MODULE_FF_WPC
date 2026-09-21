@@ -2,8 +2,8 @@
 <odoo>
     <!-- Invoice Views -->
     <record id="view_sea_hbl_invoice_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.invoice.list</field>
-        <field name="model">freight.sea.hbl.invoice</field>
+        <field name="name">freight.sea.job.invoice.list</field>
+        <field name="model">freight.sea.job.invoice</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -14,13 +14,13 @@
     </record>
 
     <record id="view_sea_hbl_invoice_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.invoice.form</field>
-        <field name="model">freight.sea.hbl.invoice</field>
+        <field name="name">freight.sea.job.invoice.form</field>
+        <field name="model">freight.sea.job.invoice</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hbl_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -39,8 +39,8 @@
 
     <!-- Debit Note Views -->
     <record id="view_sea_hbl_debit_note_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.debit.note.list</field>
-        <field name="model">freight.sea.hbl.debit.note</field>
+        <field name="name">freight.sea.job.debit.note.list</field>
+        <field name="model">freight.sea.job.debit.note</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -51,13 +51,13 @@
     </record>
 
     <record id="view_sea_hbl_debit_note_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.debit.note.form</field>
-        <field name="model">freight.sea.hbl.debit.note</field>
+        <field name="name">freight.sea.job.debit.note.form</field>
+        <field name="model">freight.sea.job.debit.note</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hbl_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -76,8 +76,8 @@
 
     <!-- Credit Note Views -->
     <record id="view_sea_hbl_credit_note_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.credit.note.list</field>
-        <field name="model">freight.sea.hbl.credit.note</field>
+        <field name="name">freight.sea.job.credit.note.list</field>
+        <field name="model">freight.sea.job.credit.note</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -88,13 +88,13 @@
     </record>
 
     <record id="view_sea_hbl_credit_note_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.credit.note.form</field>
-        <field name="model">freight.sea.hbl.credit.note</field>
+        <field name="name">freight.sea.job.credit.note.form</field>
+        <field name="model">freight.sea.job.credit.note</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hbl_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -113,8 +113,8 @@
 
     <!-- Provision Cost Views -->
     <record id="view_sea_hbl_provision_cost_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.provision.cost.list</field>
-        <field name="model">freight.sea.hbl.provision.cost</field>
+        <field name="name">freight.sea.job.provision.cost.list</field>
+        <field name="model">freight.sea.job.provision.cost</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -125,13 +125,13 @@
     </record>
 
     <record id="view_sea_hbl_provision_cost_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.provision.cost.form</field>
-        <field name="model">freight.sea.hbl.provision.cost</field>
+        <field name="name">freight.sea.job.provision.cost.form</field>
+        <field name="model">freight.sea.job.provision.cost</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hbl_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -150,8 +150,8 @@
 
     <!-- Vendor Invoice Views -->
     <record id="view_sea_hbl_vendor_invoice_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.vendor.invoice.list</field>
-        <field name="model">freight.sea.hbl.vendor.invoice</field>
+        <field name="name">freight.sea.job.vendor.invoice.list</field>
+        <field name="model">freight.sea.job.vendor.invoice</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -162,13 +162,13 @@
     </record>
 
     <record id="view_sea_hbl_vendor_invoice_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.vendor.invoice.form</field>
-        <field name="model">freight.sea.hbl.vendor.invoice</field>
+        <field name="name">freight.sea.job.vendor.invoice.form</field>
+        <field name="model">freight.sea.job.vendor.invoice</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hbl_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -187,8 +187,8 @@
 
     <!-- Vendor Debit Note Views -->
     <record id="view_sea_hbl_vendor_debit_note_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.vendor.debit.note.list</field>
-        <field name="model">freight.sea.hbl.vendor.debit.note</field>
+        <field name="name">freight.sea.job.vendor.debit.note.list</field>
+        <field name="model">freight.sea.job.vendor.debit.note</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -199,13 +199,13 @@
     </record>
 
     <record id="view_sea_hbl_vendor_debit_note_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.vendor.debit.note.form</field>
-        <field name="model">freight.sea.hbl.vendor.debit.note</field>
+        <field name="name">freight.sea.job.vendor.debit.note.form</field>
+        <field name="model">freight.sea.job.vendor.debit.note</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hbl_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -224,8 +224,8 @@
 
     <!-- Vendor Credit Note Views -->
     <record id="view_sea_hbl_vendor_credit_note_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.vendor.credit.note.list</field>
-        <field name="model">freight.sea.hbl.vendor.credit.note</field>
+        <field name="name">freight.sea.job.vendor.credit.note.list</field>
+        <field name="model">freight.sea.job.vendor.credit.note</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -236,13 +236,13 @@
     </record>
 
     <record id="view_sea_hbl_vendor_credit_note_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.vendor.credit.note.form</field>
-        <field name="model">freight.sea.hbl.vendor.credit.note</field>
+        <field name="name">freight.sea.job.vendor.credit.note.form</field>
+        <field name="model">freight.sea.job.vendor.credit.note</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hbl_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
@@ -261,8 +261,8 @@
 
     <!-- Cash Purchase Views -->
     <record id="view_sea_hbl_cash_purchase_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.cash.purchase.list</field>
-        <field name="model">freight.sea.hbl.cash.purchase</field>
+        <field name="name">freight.sea.job.cash.purchase.list</field>
+        <field name="model">freight.sea.job.cash.purchase</field>
         <field name="arch" type="xml">
             <list>
                 <field name="no_document" />
@@ -273,13 +273,13 @@
     </record>
 
     <record id="view_sea_hbl_cash_purchase_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.cash.purchase.form</field>
-        <field name="model">freight.sea.hbl.cash.purchase</field>
+        <field name="name">freight.sea.job.cash.purchase.form</field>
+        <field name="model">freight.sea.job.cash.purchase</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="hbl_id" />
+                        <field name="job_id" />
                         <field name="no_document" />
                         <field name="description" />
                     </group>
