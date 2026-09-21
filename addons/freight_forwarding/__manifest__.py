@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.11",
+    "version": "18.0.1.12",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -35,8 +35,8 @@
         "data/air/air_booking_sequence.xml",
         # FF-76: air_mawb_sequence.xml (code freight.air.mawb) DIHAPUS --
         # dead sequence, tidak pernah dipanggil next_by_code; MAWB No.
-        # sekarang canonical lewat freight.awb.master.awb_no (manual/register,
-        # bukan auto-generated).
+        # sekarang canonical lewat freight.transport.document.document_no
+        # (manual/register, bukan auto-generated).
         "data/air/air_hawb_sequence.xml",
         "data/sea/sea_booking_sequence.xml",
         "data/sea/sea_hbl_sequence.xml",

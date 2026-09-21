@@ -6,3 +6,4 @@ from . import purchase_order
 from . import partner_address
 from . import partner_category
 from . import airline_partner
+from . import transport_document
