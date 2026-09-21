@@ -65,8 +65,10 @@
                             <group string="Shipment Info">
                                 <field name="booking_date" />
                                 <field name="job_no" />
-                                <field name="awb_no" />
-                                <field name="mawb_no" />
+                                <field name="document_id"
+                                    domain="[('transport_mode', '=', 'air'), '|', ('is_available', '=', True), ('id', '=', document_id)]"
+                                    context="{'default_transport_mode': 'air'}"
+                                    readonly="air_job_count &gt; 0" />
                                 <field name="freight_type" invisible="1" />
                                 <field name="ship_mode" />
                                 <field name="payment_term_id" string="Credit Term" />

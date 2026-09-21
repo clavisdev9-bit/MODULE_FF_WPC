@@ -48,7 +48,17 @@
                             <group>
                                 <field name="freight_type" />
                                 <field name="ship_mode" />
-                                <field name="hbl_no" />
+                                <!-- FF-76 Step 2 (corrective): document_id
+                                     adalah SATU-SATUNYA cara user mengisi/
+                                     mengubah B/L. bl_no di bawah sekarang
+                                     derived read-only alias (compatibility
+                                     display), bukan entry point lagi. -->
+                                <field name="document_id"
+                                    string="B/L No."
+                                    domain="[('transport_mode', '=', 'sea'), '|', ('is_available', '=', True), ('id', '=', document_id)]"
+                                    context="{'default_transport_mode': 'sea'}"
+                                    readonly="sea_job_count &gt; 0" />
+                                <field name="bl_no" invisible="1" />
                                 <field name="job_no" />
                                 <field name="nomination_cargo" />
 
@@ -58,7 +68,6 @@
                                 <field name="job_date" />
                                 <field name="railing" />
                                 <field name="commodity_id"/>
-                                <field name="shipment_type_id" />
                                 <field name="delivery_type_id" />
                             </group>
                         </group>

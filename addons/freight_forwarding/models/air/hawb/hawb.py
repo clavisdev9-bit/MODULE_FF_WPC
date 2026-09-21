@@ -16,6 +16,8 @@ class FreightAirHawb(models.Model):
     _rec_name = 'job_no'
     _sql_constraints = [
         ('job_no_uniq', 'unique(job_no)', 'Job No. harus unik.'),
+        ('document_id_uniq', 'unique(document_id)',
+         'AWB ini sudah dipakai Job lain.'),
     ]
 
     job_no = fields.Char(string='Job No.', required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
@@ -38,16 +40,36 @@ class FreightAirHawb(models.Model):
         string='House Jobs',
     )
     job_date = fields.Date(string='Job Date', default=fields.Date.context_today, tracking=True)
-    hawb_no = fields.Char(string='House AWB No.', tracking=True)
     smawb_no = fields.Char(string='SMawb No.', tracking=True)
-    mawb_no = fields.Char(string='Mawb No.', tracking=True)
-    effective_mawb_no = fields.Char(
-        string='Mawb No. (Effective)',
-        compute='_compute_effective_mawb_no',
-        help='Mawb No. Master jika record ini House yang sudah tergabung; '
-             'kalau tidak, Mawb No. milik record ini sendiri.',
+    # FF-76: hawb_no/mawb_no/effective_mawb_no/direct_awb_no (raw Char per
+    # shipment_type) dihapus -- diganti satu relation canonical document_id
+    # (ke registry shared freight.transport.document). Canonical meaning
+    # tergantung shipment_type: Master = own Master AWB, House = own House
+    # AWB, Direct = own Direct AWB. Label UI dibedakan lewat form view
+    # (string override), bukan field teknis terpisah.
+    document_id = fields.Many2one(
+        'freight.transport.document',
+        string='AWB No.',
+        domain="[('transport_mode', '=', 'air')]",
+        tracking=True,
     )
-    direct_awb_no = fields.Char(string='Direct AWB No.', tracking=True)
+    # FF-76: House TIDAK menyimpan duplicate MAWB Char -- MAWB House
+    # berasal dari master_job_id.document_id (non-canonical, readonly
+    # helper, hanya supaya bisa dipakai sebagai field form/search biasa).
+    master_document_id = fields.Many2one(
+        'freight.transport.document',
+        string='MAWB No.',
+        compute='_compute_master_document_id',
+        store=True,
+    )
+    # FF-76: Booking reference House juga berasal dari Master -- helper
+    # readonly/searchable, BUKAN duplicate Booking No. Char.
+    effective_booking_id = fields.Many2one(
+        'freight.air.booking',
+        string='Booking',
+        compute='_compute_effective_booking_id',
+        store=True,
+    )
     known_shipper_flag = fields.Char(string='Know Shipper', size=15, tracking=True)
 
     state = fields.Selection([
@@ -291,12 +313,71 @@ class FreightAirHawb(models.Model):
                     "harus sama dengan Master Job (%s)." % (rec.job_no, rec.master_job_id.job_no)
                 )
 
-    @api.depends('mawb_no', 'master_job_id.mawb_no')
-    def _compute_effective_mawb_no(self):
+    @api.depends('shipment_type', 'master_job_id.document_id')
+    def _compute_master_document_id(self):
         for rec in self:
-            rec.effective_mawb_no = (
-                rec.master_job_id.mawb_no if rec.master_job_id else False
-            ) or rec.mawb_no
+            rec.master_document_id = rec.master_job_id.document_id if rec.master_job_id else False
+
+    @api.depends('shipment_type', 'booking_id', 'master_job_id.booking_id')
+    def _compute_effective_booking_id(self):
+        """FF-76: House -> master_job_id.booking_id; Master/Direct -> own
+        booking_id. Berbeda dari _get_effective_booking() (fallback chain
+        generik yang sudah ada untuk tombol/counter) -- field ini murni
+        untuk kebutuhan search/list canonical berdasarkan shipment_type."""
+        for rec in self:
+            if rec.shipment_type == 'house' and rec.master_job_id:
+                rec.effective_booking_id = rec.master_job_id.booking_id
+            else:
+                rec.effective_booking_id = rec.booking_id
+
+    @api.constrains('document_id')
+    def _check_awb_master_chain(self):
+        """FF-76: AWB availability/ownership rule terpusat di sini.
+        - SQL unique constraint (document_id_uniq) sudah menolak 2 Job
+          mana pun (Master/House/Direct apa saja) berbagi document yang sama.
+        - Satu-satunya exception LEGAL: Master hasil action_create_job dari
+          Booking yang SAMA memakai document yang sudah dipakai Booking
+          tersebut (chain Booking->Master).
+        - Kalau document sudah pernah dipakai (is_used) oleh chain lain
+          (Job lain, atau Booking yang bukan booking_id milik rec), tolak --
+          one-time semantic, bukan cuma cek relation kosong."""
+        for rec in self:
+            awb = rec.document_id
+            if not awb:
+                continue
+            if awb.transport_mode != 'air':
+                raise ValidationError(
+                    "AWB %s bertipe '%s' -- Air Job hanya boleh memakai "
+                    "AWB Type Air." % (awb.document_no, awb.transport_mode)
+                )
+            if not awb.is_used:
+                continue
+            legal = awb.used_air_job_id == rec or (
+                rec.shipment_type == 'master'
+                and awb.used_air_booking_id
+                and rec.booking_id == awb.used_air_booking_id
+            )
+            if not legal:
+                raise ValidationError(
+                    "AWB %s sudah pernah digunakan dan tidak dapat dipakai "
+                    "ulang oleh Job ini." % awb.document_no
+                )
+
+    @api.constrains('document_id', 'booking_id', 'shipment_type')
+    def _check_master_awb_matches_booking_awb(self):
+        """Final hardening FF-76: Master yang punya booking_id (hasil
+        action_create_job) HARUS memakai document yang EXACT sama dengan
+        Booking-nya. Menangkap mismatch dari jalur mana pun (write
+        document_id langsung -- sudah ditolak lebih awal di write() --
+        ATAU perubahan booking_id/shipment_type lewat ORM/RPC lain). TIDAK
+        live-sync/cascade -- kalau mismatch, tolak."""
+        for rec in self:
+            if rec.shipment_type == 'master' and rec.booking_id:
+                if rec.document_id != rec.booking_id.document_id:
+                    raise ValidationError(
+                        "Master Job (%s) harus memakai AWB No. yang sama dengan "
+                        "Booking-nya (%s)." % (rec.job_no, rec.booking_id.name)
+                    )
 
     def _get_effective_booking(self):
         self.ensure_one()
@@ -451,9 +532,36 @@ class FreightAirHawb(models.Model):
 
         records = super(FreightAirHawb, self).create(vals_list)
         records._sync_analytic_to_related_docs()
+        for rec in records:
+            if rec.document_id:
+                rec.document_id._mark_used(air_job=rec)
         return records
 
     def write(self, vals):
+        if 'document_id' in vals:
+            new_awb_id = vals.get('document_id')
+            for rec in self:
+                if (rec.shipment_type == 'master' and rec.booking_id
+                        and rec.document_id and new_awb_id != rec.document_id.id):
+                    raise ValidationError(
+                        "Master Job (%s) dibuat dari Booking (%s) -- AWB No. tidak "
+                        "boleh diedit independen dari Master." % (rec.job_no, rec.booking_id.name)
+                    )
+            # UAT revision (late assignment): Booking boleh Create Job tanpa
+            # AWB (Master ikut kosong). Setelah itu, AWB HANYA boleh
+            # di-assign lewat Master (Booking tetap bukan entry point --
+            # lihat guard di freight.air.booking.write()) -- begitu
+            # ter-assign, cascade ke Booking supaya satu chain berakhir pada
+            # AWB Master yang sama. Cascade dilakukan SEBELUM super().write()
+            # supaya _check_master_awb_matches_booking_awb melihat state
+            # yang sudah konsisten begitu constrain jalan.
+            for rec in self:
+                if (rec.shipment_type == 'master' and rec.booking_id
+                        and not rec.document_id and new_awb_id
+                        and not rec.booking_id.document_id):
+                    rec.booking_id.with_context(_awb_master_cascade=True).write(
+                        {'document_id': new_awb_id}
+                    )
         if 'master_job_id' in vals and 'analytic_account_id' not in vals:
             # FF-75: House mengikuti analytic Master -- disamakan di vals
             # SEBELUM super().write() supaya @api.constrains tidak melihat
@@ -475,6 +583,10 @@ class FreightAirHawb(models.Model):
                     if stale_houses:
                         stale_houses.write({'analytic_account_id': rec.analytic_account_id.id})
         self._sync_analytic_to_related_docs()
+        if 'document_id' in vals:
+            for rec in self:
+                if rec.document_id:
+                    rec.document_id._mark_used(air_job=rec)
         return res
 
     def _sync_analytic_to_related_docs(self):

@@ -54,34 +54,61 @@ class TestSeaHblOndelete(FreightTestBase):
 
 
 class TestSeaHblSequence(FreightTestBase):
-    """Verifikasi auto-generate nomor HBL dan Job No."""
-
-    def test_hbl_no_auto_generated(self):
-        """hbl_no di-generate otomatis saat tidak diisi."""
-        # Pass hbl_no=False secara eksplisit untuk trigger auto-generate
-        hbl = self._create_hbl(hbl_no=False)
-        self.assertTrue(hbl.hbl_no,
-            msg="hbl_no harus ter-generate otomatis")
-
-    def test_hbl_no_unique_per_record(self):
-        """Dua HBL yang dibuat berurutan harus punya nomor berbeda."""
-        hbl1 = self._create_hbl(hbl_no=False)
-        hbl2 = self._create_hbl(hbl_no=False)
-
-        self.assertNotEqual(hbl1.hbl_no, hbl2.hbl_no,
-            msg="Setiap HBL harus punya nomor unik")
-
-    def test_hbl_no_manual_not_overridden(self):
-        """Jika hbl_no sudah diisi manual, tidak di-override oleh sequence."""
-        hbl = self._create_hbl(hbl_no="MANUAL-001")
-        self.assertEqual(hbl.hbl_no, "MANUAL-001",
-            msg="hbl_no manual tidak boleh di-override")
+    """Verifikasi job_no tetap auto-generate, bl_no TIDAK (FF-76)."""
 
     def test_job_no_auto_generated(self):
         """job_no di-generate otomatis saat tidak diisi."""
         hbl = self._create_hbl(job_no=False)
         self.assertTrue(hbl.job_no,
             msg="job_no harus ter-generate otomatis")
+
+    def test_bl_no_can_be_created_empty_without_sequence(self):
+        """FF-76: bl_no boleh kosong -- tidak ada BL sequence yang
+        auto-generate nilainya."""
+        hbl = self._create_hbl(bl_no=False)
+        self.assertFalse(hbl.bl_no,
+            msg="bl_no harus tetap kosong, tidak di-auto-generate oleh sequence apa pun")
+        self.assertTrue(hbl.job_no,
+            msg="job_no tetap ter-generate meski bl_no kosong")
+
+    def test_bl_no_manual_value_preserved(self):
+        """Nilai bl_no manual tersimpan apa adanya."""
+        hbl = self._create_hbl(bl_no="MANUAL-001")
+        self.assertEqual(hbl.bl_no, "MANUAL-001",
+            msg="bl_no manual harus tersimpan tanpa perubahan")
+
+    def test_master_and_house_can_have_different_bl_no(self):
+        """FF-76: Master dan House masing-masing punya own bl_no independen."""
+        master = self._create_hbl(record_level="master", bl_no="MASTER-BL-001")
+        house = self._create_hbl(record_level="house", master_job_id=master.id, bl_no="HOUSE-BL-001")
+
+        self.assertEqual(master.bl_no, "MASTER-BL-001")
+        self.assertEqual(house.bl_no, "HOUSE-BL-001")
+        self.assertNotEqual(master.bl_no, house.bl_no)
+
+    def test_obl_no_optional_and_independent(self):
+        """FF-76: obl_no (OB/L No.) optional dan tidak diturunkan dari bl_no Master."""
+        master = self._create_hbl(record_level="master", bl_no="MASTER-BL-002")
+        house = self._create_hbl(record_level="house", master_job_id=master.id, bl_no="HOUSE-BL-002")
+
+        self.assertFalse(house.obl_no,
+            msg="obl_no harus kosong secara default -- tidak auto-derive dari mana pun")
+
+        house.obl_no = "OBL-XYZ"
+        self.assertEqual(house.obl_no, "OBL-XYZ")
+        self.assertNotEqual(house.obl_no, master.bl_no,
+            msg="obl_no independen, tidak otomatis disamakan dengan bl_no Master")
+
+    def test_original_bl_fields_still_available(self):
+        """FF-76: original_bl_no, no_of_original_bl, bl_surrendered tetap tersedia."""
+        hbl = self._create_hbl(
+            original_bl_no="OBL-ORIGINAL-001",
+            no_of_original_bl="3",
+            bl_surrendered=True,
+        )
+        self.assertEqual(hbl.original_bl_no, "OBL-ORIGINAL-001")
+        self.assertEqual(hbl.no_of_original_bl, "3")
+        self.assertTrue(hbl.bl_surrendered)
 
 
 class TestSeaBlInfoNotifySameAsConsignee(FreightTestBase):

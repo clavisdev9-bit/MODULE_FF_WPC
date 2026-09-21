@@ -1,4 +1,5 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_freight_awb_master,access.freight.transport.document,model_freight_transport_document,base.group_user,1,1,1,1
 access_freight_air_booking,access.freight.air.booking,model_freight_air_booking,base.group_user,1,1,1,1
 access_freight_air_job,access.freight.air.job,model_freight_air_job,base.group_user,1,1,1,1
 access_freight_air_job_invoice,access.freight.air.job.invoice,model_freight_air_job_invoice,base.group_user,1,1,1,1

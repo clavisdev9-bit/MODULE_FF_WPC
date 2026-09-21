@@ -119,18 +119,6 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
         self.assertEqual(hbl.notify_party_id, self.partner)
         self.assertTrue(hbl.notify_same_as_consignee)
 
-    def test_convert_copies_shipment_type(self):
-        """shipment_type_id (Many2one freight.shipment.type) tersalin otomatis ke HBL saat convert (FF-52)."""
-        shipment_type = self.env["freight.shipment.type"].create({
-            "name": "FCL / FCL",
-        })
-        booking = self._create_booking(shipment_type_id=shipment_type.id)
-        booking.action_create_job()
-
-        hbl = booking.sea_job_ids[0]
-        self.assertEqual(hbl.shipment_type_id, shipment_type,
-            msg="shipment_type_id harus ter-copy dari Booking ke HBL")
-
     def test_convert_copies_customer_reference_and_depot(self):
         """customer_reference disalin ke customer_ref, dan depot (id, code, address) disalin ke HBL (FF-53)."""
         booking = self._create_booking(
@@ -149,12 +137,11 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
         self.assertEqual(hbl.depot_address, "Jl. Depot Raya No. 1")
 
     def test_convert_copies_all_parties_and_routing(self):
-        """shipper, consignee, notify, delivery agent, commodity, delivery_type, shipment_type disalin (FF-53)."""
+        """shipper, consignee, notify, delivery agent, commodity, delivery_type disalin (FF-53)."""
         shipper = self.env["res.partner"].create({"name": "Shipper Test"})
         consignee = self.env["res.partner"].create({"name": "Consignee Test"})
         notify = self.env["res.partner"].create({"name": "Notify Test"})
         delivery_agent = self.env["res.partner"].create({"name": "Agent Test"})
-        shipment_type = self.env["freight.shipment.type"].create({"name": "LCL / LCL"})
 
         booking = self._create_booking(
             shipper_id=shipper.id,
@@ -163,7 +150,6 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
             delivery_agent_id=delivery_agent.id,
             commodity_id=self.commodity.id,
             delivery_type_id=self.delivery_type.id,
-            shipment_type_id=shipment_type.id,
         )
         booking.action_create_job()
 
@@ -174,7 +160,39 @@ class TestSeaBookingConvertToHbl(FreightTestBase):
         self.assertEqual(hbl.delivery_agent_id, delivery_agent)
         self.assertEqual(hbl.commodity_id, self.commodity)
         self.assertEqual(hbl.delivery_type_id, self.delivery_type)
-        self.assertEqual(hbl.shipment_type_id, shipment_type)
+
+    def test_convert_copies_bl_no_to_master(self):
+        """FF-76: Booking.bl_no tersalin ke Master Job.bl_no saat action_create_job()."""
+        booking = self._create_booking(bl_no="BOOKING-BL-001")
+        booking.action_create_job()
+
+        master = booking.sea_job_ids.filtered(lambda j: j.record_level == "master")
+        self.assertEqual(master.bl_no, "BOOKING-BL-001",
+            msg="Master.bl_no harus mengikuti Booking.bl_no saat Create Job")
+
+    def test_convert_first_house_does_not_inherit_booking_bl_no(self):
+        """FF-76: House pertama TIDAK otomatis mendapat Booking/Master bl_no."""
+        quotation = self._create_quotation(freight_type="export")
+        booking = self._create_booking(bl_no="BOOKING-BL-002", quotation_id=quotation.id)
+        booking.action_create_job()
+
+        master = booking.sea_job_ids.filtered(lambda j: j.record_level == "master")
+        house = master.house_job_ids
+        self.assertTrue(house, msg="House pertama harus otomatis dibuat dari source_quotation_id")
+        self.assertFalse(house.bl_no,
+            msg="House pertama tidak boleh otomatis mewarisi bl_no dari Booking/Master")
+
+    def test_booking_job_no_derived_from_master(self):
+        """FF-76: Booking.job_no adalah Job No. Master terkait -- kosong sebelum
+        Master ada, terisi otomatis dari Master.job_no setelah Create Job."""
+        booking = self._create_booking()
+        self.assertFalse(booking.job_no,
+            msg="Booking.job_no harus kosong sebelum Master dibuat")
+
+        booking.action_create_job()
+        master = booking.sea_job_ids.filtered(lambda j: j.record_level == "master")
+        self.assertEqual(booking.job_no, master.job_no,
+            msg="Booking.job_no harus mengikuti Job No. Master setelah Create Job")
 
     def test_convert_copies_canonical_vessel_routing(self):
         """FF-74: feeder/mother vessel + voyage (canonical) dari Booking

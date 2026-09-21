@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FF-76 Step 2: Sea-specific registry UI over the SHARED core model
+         freight.transport.document (source at
+         models/common/transport_document.py). UI terminology here stays
+         B/L-specific on purpose, mirroring the Air-specific UI at
+         views/air/awb/awb_master.xml: Sea users must keep seeing
+         "B/L Master" / "B/L No.", never generic "Transport Document"
+         wording. There is deliberately NO cross-mode ("Air + Sea combined")
+         menu or action. This action is scoped to transport_mode = sea
+         only, entirely separate from the Air action. -->
+    <!-- FORM VIEW -->
+    <record id="view_freight_bl_master_form" model="ir.ui.view">
+        <field name="name">freight.transport.document.sea.form</field>
+        <field name="model">freight.transport.document</field>
+        <field name="arch" type="xml">
+            <form string="B/L Master">
+                <sheet>
+                    <widget name="web_ribbon" title="Used" bg_color="text-bg-danger" invisible="is_available"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="document_no" placeholder="B/L No."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="service_level" />
+                    </group>
+                    <group>
+                        <group string="Execution Info">
+                            <field name="shipment_type" />
+                            <field name="shipper_id" />
+                            <field name="destination_id" />
+                            <field name="pcs" />
+                            <field name="gross_weight" />
+                            <field name="execute_by_id" />
+                            <field name="execute_date" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_freight_bl_master_list" model="ir.ui.view">
+        <field name="name">freight.transport.document.sea.list</field>
+        <field name="model">freight.transport.document</field>
+        <field name="arch" type="xml">
+            <list string="B/L Master">
+                <field name="document_no" string="B/L No."/>
+                <field name="service_level"/>
+                <field name="shipment_type"/>
+                <field name="shipper_id"/>
+                <field name="destination_id"/>
+                <field name="pcs"/>
+                <field name="gross_weight"/>
+                <field name="execute_by_id"/>
+                <field name="execute_date"/>
+                <field name="is_available" widget="boolean_toggle" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_freight_bl_master_search" model="ir.ui.view">
+        <field name="name">freight.transport.document.sea.search</field>
+        <field name="model">freight.transport.document</field>
+        <field name="arch" type="xml">
+            <search string="Search B/L Master">
+                <field name="document_no" string="B/L No."/>
+                <field name="shipper_id" string="Shipper"/>
+                <field name="destination_id" string="Destination"/>
+                <separator/>
+                <filter name="filter_available" string="Available" domain="[('is_available', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_execution_shipment_type" string="Shipment Type" domain="[]" context="{'group_by': 'shipment_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION: SEA B/L MASTER (Sea &gt; B/L Inventory). The only entry
+         point at this stage; there is no combined Air+Sea action.
+         Explicit ir.actions.act_window.view bindings below are REQUIRED.
+         freight.transport.document also has Air's view records
+         (view_freight_awb_master_*), and without an explicit binding
+         Odoo's default view resolution can pick those instead, leaking
+         AWB terminology into this Sea-only screen (same root cause as the
+         Air Import/Export view leak fixed earlier in FF-76). -->
+    <record id="action_freight_bl_master_sea" model="ir.actions.act_window">
+        <field name="name">B/L Master</field>
+        <field name="res_model">freight.transport.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_bl_master_search"/>
+        <field name="domain">[('transport_mode', '=', 'sea')]</field>
+        <field name="context">{'default_transport_mode': 'sea'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Sea B/L Master
+            </p>
+        </field>
+    </record>
+    <record id="action_freight_bl_master_sea_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_freight_bl_master_list"/>
+        <field name="act_window_id" ref="action_freight_bl_master_sea"/>
+    </record>
+    <record id="action_freight_bl_master_sea_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_freight_bl_master_form"/>
+        <field name="act_window_id" ref="action_freight_bl_master_sea"/>
+    </record>
+</odoo>

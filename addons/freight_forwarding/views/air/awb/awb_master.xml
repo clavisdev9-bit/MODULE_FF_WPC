@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FF-76 (corrected): this file is the Air-specific registry UI over
+         the SHARED core model freight.transport.document (source now at
+         models/common/transport_document.py). UI terminology here stays
+         AWB-specific on purpose: Air users must keep seeing "AWB Master" /
+         "AWB No." / "AWB Type", never generic "Transport Document" wording.
+         There is deliberately NO cross-mode ("Air + Sea combined") menu or
+         action; when Sea is integrated later it gets its OWN action/menu/
+         view under views/sea/... with B/L terminology, still pointing at
+         the same shared model filtered by transport_mode. XML record IDs
+         (view_freight_awb_master_*, action_freight_awb_master_air) are
+         kept as legacy/stable identifiers even though the model behind
+         them changed name. -->
+    <!-- FORM VIEW -->
+    <record id="view_freight_awb_master_form" model="ir.ui.view">
+        <field name="name">freight.transport.document.air.form</field>
+        <field name="model">freight.transport.document</field>
+        <field name="arch" type="xml">
+            <form string="AWB Master">
+                <sheet>
+                    <widget name="web_ribbon" title="Used" bg_color="text-bg-danger" invisible="is_available"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="document_no" placeholder="AWB No."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="service_level" />
+                    </group>
+                    <group>
+                        <group string="Execution Info">
+                            <field name="shipment_type" />
+                            <field name="shipper_id" />
+                            <field name="destination_id" />
+                            <field name="pcs" />
+                            <field name="gross_weight" />
+                            <field name="execute_by_id" />
+                            <field name="execute_date" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_freight_awb_master_list" model="ir.ui.view">
+        <field name="name">freight.transport.document.air.list</field>
+        <field name="model">freight.transport.document</field>
+        <field name="arch" type="xml">
+            <list string="AWB Master">
+                <field name="document_no" string="AWB No."/>
+                <field name="transport_mode" string="AWB Type"/>
+                <field name="service_level"/>
+                <field name="shipment_type"/>
+                <field name="shipper_id"/>
+                <field name="destination_id"/>
+                <field name="pcs"/>
+                <field name="gross_weight"/>
+                <field name="execute_by_id"/>
+                <field name="execute_date"/>
+                <field name="is_available" widget="boolean_toggle" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_freight_awb_master_search" model="ir.ui.view">
+        <field name="name">freight.transport.document.air.search</field>
+        <field name="model">freight.transport.document</field>
+        <field name="arch" type="xml">
+            <search string="Search AWB Master">
+                <field name="document_no" string="AWB No."/>
+                <field name="shipper_id" string="Shipper"/>
+                <field name="destination_id" string="Destination"/>
+                <separator/>
+                <filter name="filter_air" string="Air" domain="[('transport_mode', '=', 'air')]"/>
+                <separator/>
+                <filter name="filter_available" string="Available" domain="[('is_available', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_awb_type" string="AWB Type" domain="[]" context="{'group_by': 'transport_mode'}"/>
+                    <filter name="group_execution_shipment_type" string="Shipment Type" domain="[]" context="{'group_by': 'shipment_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION: AIR AWB MASTER (Air &gt; AWB Inventory). The only entry
+         point at this stage; there is no combined Air+Sea action. -->
+    <record id="action_freight_awb_master_air" model="ir.actions.act_window">
+        <field name="name">AWB Master</field>
+        <field name="res_model">freight.transport.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_awb_master_search"/>
+        <field name="domain">[('transport_mode', '=', 'air')]</field>
+        <field name="context">{'default_transport_mode': 'air', 'search_default_filter_air': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Air AWB Master
+            </p>
+        </field>
+    </record>
+</odoo>
