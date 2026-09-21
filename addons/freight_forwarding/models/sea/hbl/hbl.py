@@ -425,15 +425,6 @@ class SeaHBL(models.Model):
             vals["master_job_id"] = master.id
         return vals
 
-    def _get_root_quotation(self):
-        """FF-73: Export HBL (dibuat lewat Booking) tidak punya root_quotation_id
-        sendiri -- root-nya diambil dari Booking. Import direct sudah mengisi
-        root_quotation_id langsung."""
-        self.ensure_one()
-        return self.root_quotation_id or (
-            self.booking_id._get_root_quotation() if self.booking_id else False
-        )
-
     @api.onchange("from_city")
     def _onchange_from_city(self):
         for rec in self:

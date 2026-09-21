@@ -37,18 +37,16 @@ def migrate(cr, version):
     airline_cat_id = category.id
 
     # 2. Read all freight.airline records via raw SQL
-    # Build SELECT defensively — table may be partially migrated from a prior run
-    all_cols = [
-        'id', 'partner_id', 'code', 'airline_identifier', 'iata_code',
-        'commission_percentage', 'terminal', 'neutral_awb',
-        'column_offset', 'row_offset', 'ccn',
-        'left_margin', 'top_margin', 'analysis_code',
-    ]
-    select_clause = ', '.join(
-        c if _column_exists(cr, 'freight_airline', c) else f'NULL AS {c}'
-        for c in all_cols
+    cr.execute(
+        """
+        SELECT id, partner_id, code, airline_identifier, iata_code,
+               commission_percentage, terminal, neutral_awb,
+               column_offset, row_offset, ccn,
+               left_margin, top_margin, analysis_code
+        FROM freight_airline
+        WHERE partner_id IS NOT NULL
+        """
     )
-    cr.execute(f"SELECT {select_clause} FROM freight_airline WHERE partner_id IS NOT NULL")
     rows = cr.fetchall()
     _logger.info("Migrating %s freight.airline records to res.partner", len(rows))
 
