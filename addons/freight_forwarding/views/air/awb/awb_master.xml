@@ -26,18 +26,17 @@
                         </h1>
                     </div>
                     <group>
-                        <group string="Data Utama">
-                            <field name="transport_mode" string="AWB Type"/>
-                            <field name="service_level"/>
-                        </group>
+                        <field name="service_level" />
+                    </group>
+                    <group>
                         <group string="Execution Info">
-                            <field name="shipment_type"/>
-                            <field name="shipper_id"/>
-                            <field name="destination_id"/>
-                            <field name="pcs"/>
-                            <field name="gross_weight"/>
-                            <field name="execute_by_id"/>
-                            <field name="execute_date"/>
+                            <field name="shipment_type" />
+                            <field name="shipper_id" />
+                            <field name="destination_id" />
+                            <field name="pcs" />
+                            <field name="gross_weight" />
+                            <field name="execute_by_id" />
+                            <field name="execute_date" />
                         </group>
                     </group>
                 </sheet>
