@@ -56,7 +56,7 @@ class FreightAwbMaster(models.Model):
         "res.partner", string="Shipper", copy=False,
     )
     execution_destination_id = fields.Many2one(
-        "freight.airport", string="Destination", copy=False,
+        "res.city", string="Destination", copy=False,
     )
     execution_pcs = fields.Integer(string="Pcs", copy=False)
     execution_gross_weight = fields.Float(string="Gross Weight", copy=False)

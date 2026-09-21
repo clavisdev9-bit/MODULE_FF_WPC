@@ -312,6 +312,7 @@
         <field name="name">freight.air.job.form.import</field>
         <field name="model">freight.air.job</field>
         <field name="inherit_id" ref="view_freight_air_job_form"/>
+        <field name="mode">primary</field>
         <field name="arch" type="xml">
             <!-- Header block: Job/AWB identity + Clearance/Transshipment,
                  Credit Term/Ship Mode/Service Level moved up per reviewed layout -->
