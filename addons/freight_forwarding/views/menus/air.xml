@@ -5,6 +5,11 @@
         parent="menu_parent_air"
         sequence="25" />
 
+    <menuitem id="menu_air_awb_code" name="AWB Code"
+        parent="menu_sub_parent_air_awb_inventory"
+        action="action_freight_awb_code_air"
+        sequence="5" />
+
     <menuitem id="menu_air_awb_master" name="AWB Master"
         parent="menu_sub_parent_air_awb_inventory"
         action="action_freight_awb_master_air"

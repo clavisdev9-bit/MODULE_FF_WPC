@@ -7,6 +7,11 @@
         parent="menu_parent_sea"
         sequence="15" />
 
+    <menuitem id="menu_sea_bl_code" name="B/L Code"
+        parent="menu_sub_parent_sea_bl_inventory"
+        action="action_freight_bl_code_sea"
+        sequence="5" />
+
     <menuitem id="menu_sea_bl_master" name="B/L Master"
         parent="menu_sub_parent_sea_bl_inventory"
         action="action_freight_bl_master_sea"

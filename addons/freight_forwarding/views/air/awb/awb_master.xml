@@ -51,6 +51,7 @@
         <field name="arch" type="xml">
             <list string="AWB Master">
                 <field name="document_no" string="AWB No."/>
+                <field name="document_code" string="AWB Code"/>
                 <field name="transport_mode" string="AWB Type"/>
                 <field name="service_level"/>
                 <field name="shipment_type"/>

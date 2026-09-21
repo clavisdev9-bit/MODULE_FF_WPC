@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FF-78: Air-specific UI over the SHARED core model
+         freight.transport.document.code (source at
+         models/common/transport_document_code.py), mirroring the
+         FF-76 pattern for freight.transport.document. This is standalone
+         Code/Config master data, with no relation to Airline and no
+         relation to freight.transport.document. -->
+    <!-- FORM VIEW -->
+    <record id="view_freight_awb_code_form" model="ir.ui.view">
+        <field name="name">freight.transport.document.code.air.form</field>
+        <field name="model">freight.transport.document.code</field>
+        <field name="arch" type="xml">
+            <form string="AWB Code">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="code" placeholder="AWB Code"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name" string="AWB Name"/>
+                            <field name="document_length" string="AWB Length"/>
+                            <field name="is_neutral" string="Neutral AWB?"/>
+                            <field name="check_digit"/>
+                            <field name="transport_mode" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="reorder_qty"/>
+                            <field name="qty_on_hand"/>
+                            <field name="mtd_usage" string="MTD AWB Use"/>
+                            <field name="ytd_usage" string="YTD AWB Use"/>
+                            <field name="last_year_usage" string="Last Yr AWB Use"/>
+                            <field name="last_use_date"/>
+                            <field name="last_receipt_date"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_freight_awb_code_list" model="ir.ui.view">
+        <field name="name">freight.transport.document.code.air.list</field>
+        <field name="model">freight.transport.document.code</field>
+        <field name="arch" type="xml">
+            <list string="AWB Code">
+                <field name="code" string="AWB Code"/>
+                <field name="name" string="AWB Name"/>
+                <field name="document_length" string="AWB Length"/>
+                <field name="reorder_qty"/>
+                <field name="qty_on_hand"/>
+                <field name="mtd_usage" string="MTD AWB Use"/>
+                <field name="ytd_usage" string="YTD AWB Use"/>
+                <field name="last_year_usage" string="Last Yr AWB Use"/>
+                <field name="last_use_date"/>
+                <field name="last_receipt_date"/>
+                <field name="is_neutral" string="Neutral AWB?"/>
+                <field name="check_digit"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_freight_awb_code_search" model="ir.ui.view">
+        <field name="name">freight.transport.document.code.air.search</field>
+        <field name="model">freight.transport.document.code</field>
+        <field name="arch" type="xml">
+            <search string="Search AWB Code">
+                <field name="code" string="AWB Code"/>
+                <field name="name" string="AWB Name"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION: AIR AWB CODE (Air &gt; AWB Inventory). Explicit
+         ir.actions.act_window.view bindings below are REQUIRED:
+         freight.transport.document.code also has Sea's view records
+         (view_freight_bl_code_*), and without an explicit binding Odoo's
+         default view resolution can pick those instead (same root cause
+         fixed for FF-76). -->
+    <record id="action_freight_awb_code_air" model="ir.actions.act_window">
+        <field name="name">AWB Code</field>
+        <field name="res_model">freight.transport.document.code</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_awb_code_search"/>
+        <field name="domain">[('transport_mode', '=', 'air')]</field>
+        <field name="context">{'default_transport_mode': 'air'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new AWB Code
+            </p>
+        </field>
+    </record>
+    <record id="action_freight_awb_code_air_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_freight_awb_code_list"/>
+        <field name="act_window_id" ref="action_freight_awb_code_air"/>
+    </record>
+    <record id="action_freight_awb_code_air_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_freight_awb_code_form"/>
+        <field name="act_window_id" ref="action_freight_awb_code_air"/>
+    </record>
+</odoo>
