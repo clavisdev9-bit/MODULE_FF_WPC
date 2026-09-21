@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.10",
+    "version": "18.0.1.13",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -11,6 +11,7 @@
     "license": "LGPL-3",
     "depends": [
         "base",
+        "product",
         "account",
         "contacts",
         "base_address_extended",
@@ -141,5 +142,6 @@
         "tests/test_currency_variant_view.py",
         "tests/test_generic_duplicate_commercial_group.py",
         "tests/test_ff73_migration_regression.py",
+        "tests/test_charge_code_product.py",
     ],
 }

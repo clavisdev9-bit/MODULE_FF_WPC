@@ -1,99 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="view_freight_charge_code_list" model="ir.ui.view">
-        <field name="name">freight.charge.code.list</field>
-        <field name="model">freight.charge.code</field>
+    <!-- ============================================================
+         Tab Freight pada form Product (product.template)
+         Hanya tampil saat is_charge_code = True
+    ============================================================ -->
+    <record id="view_product_template_freight_charge_code_form" model="ir.ui.view">
+        <field name="name">product.template.freight.charge.code.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <list>
-                <field name="item_code"/>
-                <field name="item_description"/>
-                <field name="charge_type"/>
-                <field name="module_code"/>
-                <field name="billing_currency_id"/>
-                <field name="sales_cost_type"/>
-                <field name="active" widget="boolean_toggle"/>
-            </list>
-        </field>
-    </record>
 
-    <record id="view_freight_charge_code_form" model="ir.ui.view">
-        <field name="name">freight.charge.code.form</field>
-        <field name="model">freight.charge.code</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <div class="oe_title">
-                        <h1>
-                            <field name="item_code" placeholder="Item Code"/>
-                        </h1>
-                    </div>
+            <notebook position="inside">
+                <page string="Freight" name="freight_charge_code"
+                      invisible="not is_charge_code">
 
                     <group string="Charge Identity">
                         <group>
-                            <field name="item_code"/>
-                            <field name="item_description"/>
+                            <field name="cc_item_code"/>
+                            <field name="cc_item_description"/>
                         </group>
                         <group>
-                            <field name="local_name"/>
-                            <field name="item_short_code"/>
-                            <field name="charge_type"/>
+                            <field name="cc_local_name"/>
+                            <field name="cc_item_short_code"/>
+                            <field name="cc_charge_type"/>
                         </group>
                     </group>
 
                     <group string="Scope / Behaviour">
                         <group>
-                            <field name="module_code"/>
-                            <field name="department_code"/>
-                            <field name="recoverable"/>
+                            <field name="cc_module_code"/>
+                            <field name="cc_department_code"/>
+                            <field name="cc_recoverable"/>
                         </group>
                         <group>
-                            <field name="split_by_method"/>
-                            <field name="charge_unit"/>
-                            <field name="uom_id"/>
-                            <field name="site_code"/>
+                            <field name="cc_split_by_method"/>
+                            <field name="cc_charge_unit"/>
+                            <field name="cc_uom_id"/>
+                            <field name="cc_site_code"/>
                         </group>
                     </group>
 
                     <group string="Accounting">
                         <group>
-                            <field name="sales_account_id"/>
-                            <field name="cost_account_id"/>
-                            <field name="sales_provision_account_id"/>
-                            <field name="provision_account_id"/>
+                            <field name="cc_sales_account_id"/>
+                            <field name="cc_cost_account_id"/>
+                            <field name="cc_sales_provision_account_id"/>
+                            <field name="cc_provision_account_id"/>
                         </group>
                         <group>
-                            <field name="cost_center_code"/>
-                            <field name="sales_analysis_code"/>
-                            <field name="cost_analysis_code"/>
+                            <field name="cc_cost_center_code"/>
+                            <field name="cc_sales_analysis_code"/>
+                            <field name="cc_cost_analysis_code"/>
                         </group>
                     </group>
 
                     <group string="Tax / Currency">
                         <group>
-                            <field name="billing_currency_id"/>
-                            <field name="vat_id"/>
+                            <field name="cc_billing_currency_id"/>
+                            <field name="cc_vat_id"/>
                         </group>
                         <group>
-                            <field name="cost_vat_id"/>
-                            <field name="wht_tax_id"/>
+                            <field name="cc_cost_vat_id"/>
+                            <field name="cc_wht_tax_id"/>
                         </group>
                     </group>
 
                     <group string="Other Configuration">
                         <group>
-                            <field name="consolidation_item_id"/>
-                            <field name="locked"/>
+                            <field name="cc_consolidation_item_id"/>
+                            <field name="cc_locked"/>
                         </group>
                         <group>
-                            <field name="sales_cost_type"/>
-                            <field name="cost_amount"/>
-                            <field name="cost_percent"/>
+                            <field name="cc_sales_cost_type"/>
+                            <field name="cc_cost_amount"/>
+                            <field name="cc_cost_percent"/>
                         </group>
                     </group>
 
+                    <!-- ====================================================
+                         Sub-tab: Module / Job Type Account Mapping
+                         (nested notebook agar tampil sebagai tab sendiri,
+                         bukan menyatu dengan group-group di atas)
+                    ==================================================== -->
                     <notebook>
-                        <page string="Module / Job Type Account Mapping" name="account_mapping">
-                            <field name="account_mapping_ids">
+                        <page string="Module / Job Type Account Mapping" name="module_job_type_mapping">
+                            <field name="cc_account_mapping_ids">
                                 <list editable="bottom">
                                     <field name="module_code"/>
                                     <field name="job_type_id"/>
@@ -107,40 +98,78 @@
                         </page>
                     </notebook>
 
-                    <field name="active" invisible="1"/>
-                </sheet>
-            </form>
+                </page>
+            </notebook>
         </field>
     </record>
 
-    <record id="view_freight_charge_code_search" model="ir.ui.view">
-        <field name="name">freight.charge.code.search</field>
-        <field name="model">freight.charge.code</field>
+    <!-- ============================================================
+         List view Charge Code (product.template filtered)
+    ============================================================ -->
+    <record id="view_product_template_charge_code_list" model="ir.ui.view">
+        <field name="name">product.template.charge.code.list</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="cc_item_code"/>
+                <field name="cc_item_description"/>
+                <field name="cc_charge_type"/>
+                <field name="cc_module_code"/>
+                <field name="cc_billing_currency_id"/>
+                <field name="cc_sales_cost_type"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Search view Charge Code
+    ============================================================ -->
+    <record id="view_product_template_charge_code_search" model="ir.ui.view">
+        <field name="name">product.template.charge.code.search</field>
+        <field name="model">product.template</field>
         <field name="arch" type="xml">
             <search>
-                <field name="item_code" string="Item Code"/>
-                <field name="item_description" string="Item Description"/>
-                <field name="module_code" string="Module"/>
+                <field name="cc_item_code" string="Item Code"/>
+                <field name="cc_item_description" string="Item Description"/>
+                <field name="cc_module_code" string="Module"/>
                 <separator/>
-                <filter name="filter_sales" string="Sales" domain="[('sales_cost_type', '=', 'S')]"/>
-                <filter name="filter_cost" string="Cost" domain="[('sales_cost_type', '=', 'C')]"/>
+                <filter name="filter_sales" string="Sales"
+                        domain="[('cc_sales_cost_type', '=', 'S')]"/>
+                <filter name="filter_cost" string="Cost"
+                        domain="[('cc_sales_cost_type', '=', 'C')]"/>
                 <separator/>
-                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
-                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="filter_active" string="Active"
+                        domain="[('active', '=', True)]"/>
+                <filter name="filter_archived" string="Archived"
+                        domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
-                    <filter name="group_charge_type" string="Charge Type" domain="[]" context="{'group_by': 'charge_type'}"/>
+                    <filter name="group_charge_type" string="Charge Type"
+                            domain="[]" context="{'group_by': 'cc_charge_type'}"/>
                 </group>
             </search>
         </field>
     </record>
 
+    <!-- ============================================================
+         Action: Charge Code → product.template filtered by is_charge_code
+    ============================================================ -->
     <record id="action_freight_charge_code" model="ir.actions.act_window">
         <field name="name">Charge Code</field>
-        <field name="res_model">freight.charge.code</field>
+        <field name="res_model">product.template</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[]</field>
-        <field name="context">{}</field>
-        <field name="search_view_id" ref="view_freight_charge_code_search"/>
+        <field name="domain">[('is_charge_code', '=', True)]</field>
+        <field name="context">{
+            'default_is_charge_code': True,
+            'default_type': 'service',
+            'search_default_filter_active': 1
+        }</field>
+        <field name="search_view_id" ref="view_product_template_charge_code_search"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_product_template_charge_code_list')}),
+        ]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new Charge Code
