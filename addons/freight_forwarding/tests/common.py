@@ -95,6 +95,25 @@ class FreightTestBase(TransactionCase):
         root = quotation.original_quotation_id or quotation
         return root.id
 
+    def _get_or_create_sea_document(self, document_no):
+        """FF-76 Step 2 (corrective): `bl_no` sekarang derived/readonly alias
+        dari `document_id.document_no` di freight.sea.booking/freight.sea.job
+        -- source of truth-nya adalah `freight.transport.document`
+        (transport_mode='sea'), bukan Char langsung. Factory di bawah
+        (`_create_booking`/`_create_hbl`) menerima kwarg `bl_no=` demi
+        kompatibilitas nama parameter existing test, tapi secara internal
+        selalu membuat/reuse registry record ini lalu assign `document_id`."""
+        if not document_no:
+            return False
+        existing = self.env["freight.transport.document"].search([
+            ("transport_mode", "=", "sea"),
+            ("document_no", "=", document_no),
+        ], limit=1)
+        return existing or self.env["freight.transport.document"].create({
+            "document_no": document_no,
+            "transport_mode": "sea",
+        })
+
     def _create_booking(self, **kwargs):
         """Buat Sea Booking dengan default nilai yang valid.
 
@@ -104,9 +123,14 @@ class FreightTestBase(TransactionCase):
         supaya fixture merepresentasikan arsitektur yang sama dengan
         `_action_convert_to_booking_direct_sea` produksi, bukan cuma jalur
         legacy sale_order_ids yang sudah tidak jadi source of truth resolver.
-        """
+
+        `bl_no=<str>` (kompatibilitas nama parameter) membuat/reuse
+        `freight.transport.document` (Sea) dan assign lewat `document_id`
+        -- lihat `_get_or_create_sea_document`. `bl_no` sendiri sudah bukan
+        field writable lagi (derived dari document_id.document_no)."""
         FreightTestBase._booking_counter += 1
         quotation_id = kwargs.pop("quotation_id", None)
+        bl_no = kwargs.pop("bl_no", None)
         vals = {
             "name": f"TEST-BOOK-{FreightTestBase._booking_counter:03d}",
             "freight_type": "export",
@@ -118,6 +142,8 @@ class FreightTestBase(TransactionCase):
             "feeder_voyage_no": "V001",
             "delivery_type_id": self.delivery_type.id,
         }
+        if bl_no and "document_id" not in kwargs:
+            vals["document_id"] = self._get_or_create_sea_document(bl_no).id
         vals.update(kwargs)
         if quotation_id and "sale_order_ids" not in kwargs:
             vals["sale_order_ids"] = [(6, 0, [quotation_id])]
@@ -150,13 +176,13 @@ class FreightTestBase(TransactionCase):
         """
         FreightTestBase._hbl_counter += 1
         quotation_id = kwargs.pop("quotation_id", None)
+        bl_no = kwargs.pop("bl_no", f"TEST-BL-{FreightTestBase._hbl_counter:03d}")
         vals = {
-            "bl_no": f"TEST-BL-{FreightTestBase._hbl_counter:03d}" if "bl_no" not in kwargs else kwargs["bl_no"],
             "freight_type": "export",
             "ship_mode": "fcl",
         }
-        if "bl_no" in kwargs and kwargs["bl_no"] is False:
-            vals.pop("bl_no")
+        if bl_no and "document_id" not in kwargs:
+            vals["document_id"] = self._get_or_create_sea_document(bl_no).id
 
         if booking:
             vals["booking_id"] = booking.id

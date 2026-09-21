@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class SeaBooking(models.Model):
@@ -13,6 +14,20 @@ class SeaBooking(models.Model):
     ]
     _description = "Sea Booking"
     _rec_name = "name"
+    _sql_constraints = [
+        ("document_id_uniq", "unique(document_id)",
+         "B/L ini sudah dipakai Booking lain."),
+    ]
+
+    # FF-76 Step 2: canonical shared transport document relation (paralel
+    # dengan Air). SATU-SATUNYA writable source of truth untuk B/L --
+    # `bl_no` di bawah adalah derived read-only alias, lihat definisinya.
+    document_id = fields.Many2one(
+        "freight.transport.document",
+        string="B/L No.",
+        domain="[('transport_mode', '=', 'sea')]",
+        tracking=True,
+    )
 
 
 
@@ -55,6 +70,39 @@ class SeaBooking(models.Model):
         for rec in self:
             master = rec.sea_job_ids.filtered(lambda j: j.record_level == "master")[:1]
             rec.job_no = master.job_no if master else False
+
+    @api.constrains("document_id")
+    def _check_document_chain(self):
+        """FF-76 Step 2: sama persis dengan pola Air (freight.air.booking)
+        -- satu transport document hanya boleh dipakai oleh SATU Sea
+        Booking. Kalau document ini sudah pernah dipakai (is_used) oleh
+        Booking LAIN (termasuk yang relation-nya sudah dilepas), tolak --
+        one-time semantic. SQL unique constraint (document_id_uniq) sudah
+        menangani duplikasi antar Booking yang relation-nya masih aktif;
+        constrain ini menutup celah reuse setelah document dilepas.
+
+        Late assignment (chain terbentuk dari arah Master duluan) juga
+        legal selama Job tsb memang Master milik Booking ini -- lihat
+        `used_sea_job_id`."""
+        for rec in self:
+            doc = rec.document_id
+            if not doc:
+                continue
+            if doc.transport_mode != "sea":
+                raise ValidationError(
+                    "B/L %s bertipe '%s' -- Sea Booking hanya boleh memakai "
+                    "document Sea." % (doc.document_no, doc.transport_mode)
+                )
+            if not doc.is_used:
+                continue
+            legal = doc.used_sea_booking_id == rec or (
+                doc.used_sea_job_id and doc.used_sea_job_id.booking_id == rec
+            )
+            if not legal:
+                raise ValidationError(
+                    "B/L %s sudah pernah digunakan dan tidak dapat dipakai "
+                    "ulang oleh Booking ini." % doc.document_no
+                )
 
 
 
@@ -133,7 +181,19 @@ class SeaBooking(models.Model):
         copy=False,
     )
     booking_date = fields.Datetime(string="Date & Time")
-    bl_no = fields.Char(string="B/L No.")
+    # FF-76 Step 2 (corrective pass): `bl_no` DIRETIRE sebagai canonical
+    # source of truth -- sekarang derived read-only alias dari
+    # `document_id.document_no`, dipertahankan HANYA untuk compatibility
+    # display (report QWeb, list/search) yang butuh membaca "own B/L"
+    # tanpa join manual. TIDAK writable independen lagi -- `related` tanpa
+    # `readonly=False` tidak membuat inverse, jadi satu-satunya cara
+    # mengubah nilai ini adalah lewat `document_id`.
+    bl_no = fields.Char(
+        string="B/L No.",
+        related="document_id.document_no",
+        store=True,
+        readonly=True,
+    )
     job_no = fields.Char(
         string="Job No.",
         compute="_compute_job_no",
@@ -217,7 +277,38 @@ class SeaBooking(models.Model):
                 vals["name"] = self.env["ir.sequence"].next_by_code(
                     "freight.sea.booking"
                 ) or "New"
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.document_id:
+                rec.document_id._mark_used(sea_booking=rec)
+        return records
+
+    def write(self, vals):
+        if "document_id" in vals and not self.env.context.get("_sea_document_cascade"):
+            # FF-76 Step 2: pola sama dengan Air -- cascade write dari
+            # freight.sea.job.write() (late assignment Master -> Booking)
+            # sengaja melewati guard ini lewat context flag. Itulah
+            # satu-satunya jalur yang boleh mengubah document Booking
+            # setelah Master terbentuk (Booking sendiri TETAP bukan entry
+            # point perubahan document, lihat komentar di
+            # freight.sea.job.write()).
+            new_doc_id = vals.get("document_id")
+            for rec in self:
+                if new_doc_id == rec.document_id.id:
+                    continue
+                master = rec.sea_job_ids.filtered(lambda j: j.record_level == "master")
+                if master:
+                    raise ValidationError(
+                        "Booking %s sudah memiliki Master Job (%s) -- B/L No. tidak "
+                        "boleh diubah lagi setelah Master terbentuk. Assign B/L lewat "
+                        "Master Job." % (rec.name, master[:1].job_no)
+                    )
+        res = super().write(vals)
+        if "document_id" in vals:
+            for rec in self:
+                if rec.document_id:
+                    rec.document_id._mark_used(sea_booking=rec)
+        return res
 
     def _copy_records_to_hbl(self, source_records, target_model_name, target_field_name, extra_values=None, excluded_fields=None):
         target_model = self.env[target_model_name]
@@ -254,7 +345,11 @@ class SeaBooking(models.Model):
 
 
         header_fields = [
-            "bl_no",
+            # FF-76 Step 2: "bl_no" DIHAPUS dari list ini -- sekarang derived
+            # read-only alias dari document_id (lihat definisi field), tidak
+            # writable lewat generic copy ini lagi. "document_id" yang
+            # jadi canonical relation dicopy sebagai gantinya.
+            "document_id",
             "delivery_type_id",
             "commodity_id",
         ]
@@ -346,6 +441,11 @@ class SeaBooking(models.Model):
                     "record_level": "master",
                     "freight_type": self.freight_type,
                     "ship_mode": self.ship_mode,
+                    # FF-76 Step 2: Master harus memakai transport document
+                    # yang EXACT sama dengan Booking (legal chain exception),
+                    # atau kosong kalau Booking belum punya B/L (late
+                    # assignment lewat Master, lihat freight.sea.job.write()).
+                    "document_id": self.document_id.id if self.document_id else False,
                     "commodity_id": self.commodity_id.id if self.commodity_id else False,
                     "delivery_type_id": self.delivery_type_id.id if self.delivery_type_id else False,
                     # FF-75 follow-up (Section E): Master TIDAK boleh

@@ -16,7 +16,19 @@ class SeaHBL(models.Model):
     _rec_name = "job_no"
     _sql_constraints = [
         ("job_no_uniq", "unique(job_no)", "Job No. harus unik."),
+        ("document_id_uniq", "unique(document_id)", "B/L ini sudah dipakai Job lain."),
     ]
+
+    # FF-76 Step 2: canonical shared transport document relation (paralel
+    # dengan Air freight.air.job.document_id). Master vs House sudah
+    # dibedakan oleh `record_level` -- SATU field canonical ini dipakai
+    # oleh keduanya, bukan master_bl_id/house_bl_id terpisah.
+    document_id = fields.Many2one(
+        "freight.transport.document",
+        string="B/L No.",
+        domain="[('transport_mode', '=', 'sea')]",
+        tracking=True,
+    )
 
     record_level = fields.Selection(
         [("master", "Master"), ("house", "House")],
@@ -68,7 +80,18 @@ class SeaHBL(models.Model):
     partner_tel = fields.Char(string="Consignee Tel", compute="_compute_partner_contact_fields", readonly=True, store=False)
     partner_fax = fields.Char(string="Consignee Fax", compute="_compute_partner_contact_fields", readonly=True, store=False)
     notice_date = fields.Date(string="Notice Date")
-    bl_no = fields.Char(string="B/L No.")
+    # FF-76 Step 2 (corrective pass): `bl_no` DIRETIRE sebagai canonical
+    # source of truth -- lihat catatan setara di freight.sea.booking.bl_no.
+    # Derived read-only alias dari document_id.document_no (Master maupun
+    # House pakai relation canonical yang sama, dibedakan lewat
+    # record_level), dipertahankan untuk compatibility display (report
+    # QWeb, cargo_info.py, list/search) saja. TIDAK writable independen.
+    bl_no = fields.Char(
+        string="B/L No.",
+        related="document_id.document_no",
+        store=True,
+        readonly=True,
+    )
     carrier_id = fields.Many2one(
         "res.partner",
         string="Carrier / Shipping Line",
@@ -314,6 +337,53 @@ class SeaHBL(models.Model):
                     "menghasilkan maksimal 1 House Job." % (root.name, duplicates[0].job_no)
                 )
 
+    @api.constrains("document_id")
+    def _check_document_chain(self):
+        """FF-76 Step 2: sama persis dengan pola Air (freight.air.job) --
+        AWB/BL availability/ownership rule terpusat di sini.
+        - SQL unique constraint (document_id_uniq) sudah menolak 2 Job
+          mana pun (Master/House) berbagi document yang sama.
+        - Satu-satunya exception LEGAL: Master hasil action_create_job dari
+          Booking yang SAMA memakai document yang sudah dipakai Booking
+          tersebut (chain Booking->Master).
+        - Kalau document sudah pernah dipakai (is_used) oleh chain lain,
+          tolak -- one-time semantic, bukan cuma cek relation kosong."""
+        for rec in self:
+            doc = rec.document_id
+            if not doc:
+                continue
+            if doc.transport_mode != "sea":
+                raise ValidationError(
+                    "B/L %s bertipe '%s' -- Sea Job hanya boleh memakai "
+                    "document Sea." % (doc.document_no, doc.transport_mode)
+                )
+            if not doc.is_used:
+                continue
+            legal = doc.used_sea_job_id == rec or (
+                rec.record_level == "master"
+                and doc.used_sea_booking_id
+                and rec.booking_id == doc.used_sea_booking_id
+            )
+            if not legal:
+                raise ValidationError(
+                    "B/L %s sudah pernah digunakan dan tidak dapat dipakai "
+                    "ulang oleh Job ini." % doc.document_no
+                )
+
+    @api.constrains("document_id", "booking_id", "record_level")
+    def _check_master_document_matches_booking_document(self):
+        """FF-76 Step 2: sama persis dengan pola Air -- Master yang punya
+        booking_id (hasil action_create_job) HARUS memakai document yang
+        EXACT sama dengan Booking-nya. TIDAK live-sync/cascade -- kalau
+        mismatch, tolak."""
+        for rec in self:
+            if rec.record_level == "master" and rec.booking_id:
+                if rec.document_id != rec.booking_id.document_id:
+                    raise ValidationError(
+                        "Master Job (%s) harus memakai B/L No. yang sama dengan "
+                        "Booking-nya (%s)." % (rec.job_no, rec.booking_id.name)
+                    )
+
     @api.constrains("analytic_account_id", "master_job_id")
     def _check_house_analytic_matches_master(self):
         """FF-75: invariant keras -- House TIDAK BOLEH punya analytic account
@@ -488,9 +558,34 @@ class SeaHBL(models.Model):
 
         records = super().create(vals_list)
         records._sync_analytic_to_related_docs()
+        for rec in records:
+            if rec.document_id:
+                rec.document_id._mark_used(sea_job=rec)
         return records
 
     def write(self, vals):
+        if "document_id" in vals:
+            new_doc_id = vals.get("document_id")
+            for rec in self:
+                if (rec.record_level == "master" and rec.booking_id
+                        and rec.document_id and new_doc_id != rec.document_id.id):
+                    raise ValidationError(
+                        "Master Job (%s) dibuat dari Booking (%s) -- B/L No. tidak "
+                        "boleh diedit independen dari Master." % (rec.job_no, rec.booking_id.name)
+                    )
+            # FF-76 Step 2 (late assignment): sama persis dengan pola Air --
+            # kalau Booking dan Master sama-sama masih kosong, assign B/L
+            # lewat Master harus ikut mencerminkan ke Booking-nya. Cascade
+            # dilakukan SEBELUM super().write() supaya
+            # _check_master_document_matches_booking_document melihat state
+            # yang sudah konsisten begitu constrain jalan.
+            for rec in self:
+                if (rec.record_level == "master" and rec.booking_id
+                        and not rec.document_id and new_doc_id
+                        and not rec.booking_id.document_id):
+                    rec.booking_id.with_context(_sea_document_cascade=True).write(
+                        {"document_id": new_doc_id}
+                    )
         if "master_job_id" in vals and "analytic_account_id" not in vals:
             # FF-75: House mengikuti analytic Master -- disamakan di vals
             # SEBELUM super().write() supaya @api.constrains tidak melihat
@@ -500,6 +595,10 @@ class SeaHBL(models.Model):
                 master = self.browse(master_job_id)
                 vals["analytic_account_id"] = master.analytic_account_id.id
         res = super().write(vals)
+        if "document_id" in vals:
+            for rec in self:
+                if rec.document_id:
+                    rec.document_id._mark_used(sea_job=rec)
         if "analytic_account_id" in vals:
             # FF-75: Master.analytic_account_id berubah -> cascade ke semua
             # House-nya, supaya tidak ada House yang nyangkut di nilai lama

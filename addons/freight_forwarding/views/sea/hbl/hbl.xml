@@ -71,7 +71,23 @@
                             <field name="job_city_id" />
                         </group>
                         <group>
-                            <field name="bl_no" />
+                            <!-- FF-76 Step 2 (corrective): document_id
+                                 adalah SATU-SATUNYA cara user mengisi/
+                                 mengubah B/L. bl_no sekarang derived
+                                 read-only alias (compatibility display,
+                                 disembunyikan dari form ini), bukan entry
+                                 point lagi. Manual UAT: berbeda dari Air,
+                                 di mana Master Air existing-only, Sea Master
+                                 JUGA boleh create/quick-create B/L baru,
+                                 sama seperti House. Jadi dirender dengan
+                                 satu domain/context yang sama untuk kedua
+                                 record_level, tanpa no_create/no_quick_create. -->
+                            <field name="document_id"
+                                string="B/L No."
+                                invisible="record_level not in ('house', 'master')"
+                                domain="[('transport_mode', '=', 'sea'), '|', ('is_available', '=', True), ('id', '=', document_id)]"
+                                context="{'default_transport_mode': 'sea'}" />
+                            <field name="bl_no" invisible="1" />
                             <field name="obl_no" />
                             <field name="original_bl_no" />
                             <field name="no_of_original_bl" />
