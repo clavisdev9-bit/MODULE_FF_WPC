@@ -8,7 +8,7 @@ class SeaBookingVesselSchedule(models.Model):
     _sql_constraints = [
         (
             "booking_or_hbl_required",
-            "CHECK(booking_id IS NOT NULL OR hbl_id IS NOT NULL)",
+            "CHECK(booking_id IS NOT NULL OR job_id IS NOT NULL)",
             "Vessel Schedule harus terhubung ke Booking atau Jobsheet.",
         )
     ]
@@ -17,15 +17,15 @@ class SeaBookingVesselSchedule(models.Model):
     # (model perantara yang sudah dihapus). Model ini dipakai bersama oleh
     # Booking dan HBL lewat field vessel_schedule_id di
     # freight.sea.shipment.info.mixin, jadi FK diarahkan langsung ke
-    # booking_id / hbl_id -- keduanya opsional (hanya salah satu yang
+    # booking_id / job_id -- keduanya opsional (hanya salah satu yang
     # terisi tergantung record ini dibuat dari konteks Booking atau HBL).
     booking_id = fields.Many2one(
         "freight.sea.booking",
         string="Booking",
         ondelete="cascade",
     )
-    hbl_id = fields.Many2one(
-        "freight.sea.hbl",
+    job_id = fields.Many2one(
+        "freight.sea.job",
         string="Jobsheet",
         ondelete="cascade",
     )

@@ -2,12 +2,12 @@ from odoo import fields, models
 
 
 class FreightAirHawbInvoice(models.Model):
-    _name = "freight.air.hawb.invoice"
+    _name = "freight.air.job.invoice"
     _description = "Air Jobsheet Invoice"
-    _rec_name = "hawb_id"
+    _rec_name = "job_id"
 
-    hawb_id = fields.Many2one(
-        "freight.air.hawb",
+    job_id = fields.Many2one(
+        "freight.air.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",
@@ -21,12 +21,12 @@ class FreightAirHawbInvoice(models.Model):
 
 
 class FreightAirHawbDebitNote(models.Model):
-    _name = "freight.air.hawb.debit.note"
+    _name = "freight.air.job.debit.note"
     _description = "Air Jobsheet Debit Note"
-    _rec_name = "hawb_id"
+    _rec_name = "job_id"
 
-    hawb_id = fields.Many2one(
-        "freight.air.hawb",
+    job_id = fields.Many2one(
+        "freight.air.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",
@@ -40,12 +40,12 @@ class FreightAirHawbDebitNote(models.Model):
 
 
 class FreightAirHawbCreditNote(models.Model):
-    _name = "freight.air.hawb.credit.note"
+    _name = "freight.air.job.credit.note"
     _description = "Air Jobsheet Credit Note"
-    _rec_name = "hawb_id"
+    _rec_name = "job_id"
 
-    hawb_id = fields.Many2one(
-        "freight.air.hawb",
+    job_id = fields.Many2one(
+        "freight.air.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",
@@ -59,12 +59,12 @@ class FreightAirHawbCreditNote(models.Model):
 
 
 class FreightAirHawbProvisionCost(models.Model):
-    _name = "freight.air.hawb.provision.cost"
+    _name = "freight.air.job.provision.cost"
     _description = "Air Jobsheet Provision Cost"
-    _rec_name = "hawb_id"
+    _rec_name = "job_id"
 
-    hawb_id = fields.Many2one(
-        "freight.air.hawb",
+    job_id = fields.Many2one(
+        "freight.air.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",
@@ -78,12 +78,12 @@ class FreightAirHawbProvisionCost(models.Model):
 
 
 class FreightAirHawbVendorInvoice(models.Model):
-    _name = "freight.air.hawb.vendor.invoice"
+    _name = "freight.air.job.vendor.invoice"
     _description = "Air Jobsheet Vendor Invoice"
-    _rec_name = "hawb_id"
+    _rec_name = "job_id"
 
-    hawb_id = fields.Many2one(
-        "freight.air.hawb",
+    job_id = fields.Many2one(
+        "freight.air.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",
@@ -97,12 +97,12 @@ class FreightAirHawbVendorInvoice(models.Model):
 
 
 class FreightAirHawbVendorDebitNote(models.Model):
-    _name = "freight.air.hawb.vendor.debit.note"
+    _name = "freight.air.job.vendor.debit.note"
     _description = "Air Jobsheet Vendor Debit Note"
-    _rec_name = "hawb_id"
+    _rec_name = "job_id"
 
-    hawb_id = fields.Many2one(
-        "freight.air.hawb",
+    job_id = fields.Many2one(
+        "freight.air.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",
@@ -116,12 +116,12 @@ class FreightAirHawbVendorDebitNote(models.Model):
 
 
 class FreightAirHawbVendorCreditNote(models.Model):
-    _name = "freight.air.hawb.vendor.credit.note"
+    _name = "freight.air.job.vendor.credit.note"
     _description = "Air Jobsheet Vendor Credit Note"
-    _rec_name = "hawb_id"
+    _rec_name = "job_id"
 
-    hawb_id = fields.Many2one(
-        "freight.air.hawb",
+    job_id = fields.Many2one(
+        "freight.air.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",
@@ -135,12 +135,12 @@ class FreightAirHawbVendorCreditNote(models.Model):
 
 
 class FreightAirHawbCashPurchase(models.Model):
-    _name = "freight.air.hawb.cash.purchase"
+    _name = "freight.air.job.cash.purchase"
     _description = "Air Jobsheet Cash Purchase"
-    _rec_name = "hawb_id"
+    _rec_name = "job_id"
 
-    hawb_id = fields.Many2one(
-        "freight.air.hawb",
+    job_id = fields.Many2one(
+        "freight.air.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",

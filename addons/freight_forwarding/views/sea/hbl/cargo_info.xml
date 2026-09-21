@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="view_sea_hbl_cargo_info_list" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.cargo.info.list</field>
-        <field name="model">freight.sea.hbl.cargo.info</field>
+        <field name="name">freight.sea.job.cargo.info.list</field>
+        <field name="model">freight.sea.job.cargo.info</field>
         <field name="arch" type="xml">
             <list>
-                <field name="container_no" column_invisible="parent.container_type != 'fcl'" />
+                <field name="container_no" column_invisible="parent.ship_mode != 'fcl'" />
                 <field name="container_type_id"
-                    column_invisible="parent.container_type != 'fcl'" />
-                <field name="package_type_id" column_invisible="parent.container_type == 'fcl'" />
+                    string="Container Size / Type"
+                    column_invisible="parent.ship_mode != 'fcl'" />
+                <field name="package_type_id" column_invisible="parent.ship_mode == 'fcl'" />
                 <field name="quantity" />
                 <field name="gross_weight" />
             </list>
@@ -16,14 +17,14 @@
     </record>
 
     <record id="view_sea_hbl_cargo_info_form" model="ir.ui.view">
-        <field name="name">freight.sea.hbl.cargo.info.form</field>
-        <field name="model">freight.sea.hbl.cargo.info</field>
+        <field name="name">freight.sea.job.cargo.info.form</field>
+        <field name="model">freight.sea.job.cargo.info</field>
         <field name="inherit_id" eval="False" />
         <field name="arch" type="xml">
             <form string="Sea Jobsheet Cargo Info">
                 <sheet>
                     <group>
-                        <field name="hbl_id" invisible="1" />
+                        <field name="job_id" invisible="1" />
                     </group>
 
                     <group>
@@ -31,7 +32,7 @@
                             <field name="package_type_id" />
                             <field name="container_no" />
                             <field name="seal_no" />
-                            <field name="container_type_id" />
+                            <field name="container_type_id" string="Container Size / Type" />
                         </group>
                         <group string="Qty &amp; Type">
                             <field name="types_of_cargo" />

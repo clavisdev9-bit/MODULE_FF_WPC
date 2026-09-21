@@ -2,12 +2,12 @@ from odoo import fields, models
 
 
 class SeaHBLCustomPermit(models.Model):
-    _name = "freight.sea.hbl.custom.permit"
+    _name = "freight.sea.job.custom.permit"
     _description = "Sea Jobsheet Custom Permit"
-    _rec_name = "hbl_id"
+    _rec_name = "job_id"
 
-    hbl_id = fields.Many2one(
-        "freight.sea.hbl",
+    job_id = fields.Many2one(
+        "freight.sea.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",

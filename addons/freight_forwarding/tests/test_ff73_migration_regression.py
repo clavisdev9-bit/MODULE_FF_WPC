@@ -4,7 +4,7 @@ Migration lama memilih root secara arbitrer (MIN(sale_order_id)). Test ini
 memverifikasi logic baru: root hanya diisi kalau SELURUH anggota
 sale_order_ids resolve ke EXACTLY satu root (COALESCE(original_quotation_id,
 id)); kalau tidak ada anggota, atau anggota resolve ke >1 root berbeda,
-root_quotation_id harus tetap kosong -- TIDAK ada pilihan arbitrer.
+source_quotation_id harus tetap kosong -- TIDAK ada pilihan arbitrer.
 
 Juga memverifikasi migration melengkapi compatibility mirror (sale_order_ids)
 supaya berisi SELURUH commercial group (root + seluruh variant-nya) begitu
@@ -12,8 +12,8 @@ root berhasil di-resolve dengan aman -- bukan cuma anggota yang sudah ada
 sebelum migration.
 
 Data legacy disimulasikan lewat ORM langsung (create Booking/HBL dengan
-sale_order_ids terisi TAPI root_quotation_id sengaja dibiarkan kosong --
-persis kondisi sebelum FF-73/kolom root_quotation_id ada), lalu memanggil
+sale_order_ids terisi TAPI source_quotation_id sengaja dibiarkan kosong --
+persis kondisi sebelum FF-73/kolom source_quotation_id ada), lalu memanggil
 migrate() yang sesungguhnya di atas cursor test yang realistis (Postgres
 sungguhan, bukan mock)."""
 import importlib.util
@@ -78,11 +78,11 @@ class TestSeaBookingMigrationRegression(FreightTestBase):
         booking = self.env["freight.sea.booking"].create({
             "sale_order_ids": [(6, 0, [root.id, variant.id])],
         })
-        self.assertFalse(booking.root_quotation_id)
+        self.assertFalse(booking.source_quotation_id)
 
         self._run_migration()
 
-        self.assertEqual(booking.root_quotation_id, root)
+        self.assertEqual(booking.source_quotation_id, root)
         self.assertEqual(set(booking.sale_order_ids.ids), {root.id, variant.id})
 
     def test_scenario_2_sale_order_ids_only_variant_resolves_root_and_adds_root_to_mirror(self):
@@ -95,12 +95,12 @@ class TestSeaBookingMigrationRegression(FreightTestBase):
         booking = self.env["freight.sea.booking"].create({
             "sale_order_ids": [(6, 0, [variant.id])],
         })
-        self.assertFalse(booking.root_quotation_id)
+        self.assertFalse(booking.source_quotation_id)
         self.assertNotIn(root, booking.sale_order_ids)
 
         self._run_migration()
 
-        self.assertEqual(booking.root_quotation_id, root)
+        self.assertEqual(booking.source_quotation_id, root)
         self.assertEqual(set(booking.sale_order_ids.ids), {root.id, variant.id})
 
     def test_scenario_3_two_different_roots_leaves_root_empty_no_canonicalization(self):
@@ -112,12 +112,12 @@ class TestSeaBookingMigrationRegression(FreightTestBase):
         booking = self.env["freight.sea.booking"].create({
             "sale_order_ids": [(6, 0, [root_a.id, root_x.id])],
         })
-        self.assertFalse(booking.root_quotation_id)
+        self.assertFalse(booking.source_quotation_id)
 
         self._run_migration()
 
         self.assertFalse(
-            booking.root_quotation_id,
+            booking.source_quotation_id,
             msg="Booking dengan sale_order_ids yang resolve ke >1 root harus "
                 "TETAP kosong -- tidak boleh diam-diam pilih A atau X",
         )
@@ -125,14 +125,14 @@ class TestSeaBookingMigrationRegression(FreightTestBase):
         self.assertEqual(set(booking.sale_order_ids.ids), {root_a.id, root_x.id})
 
     def test_scenario_4_no_sale_order_ids_leaves_root_empty(self):
-        """sale_order_ids kosong -> root_quotation_id tetap kosong."""
+        """sale_order_ids kosong -> source_quotation_id tetap kosong."""
         booking = self.env["freight.sea.booking"].create({})
-        self.assertFalse(booking.root_quotation_id)
+        self.assertFalse(booking.source_quotation_id)
         self.assertFalse(booking.sale_order_ids)
 
         self._run_migration()
 
-        self.assertFalse(booking.root_quotation_id)
+        self.assertFalse(booking.source_quotation_id)
         self.assertFalse(booking.sale_order_ids)
 
     def test_migration_is_idempotent(self):
@@ -146,12 +146,12 @@ class TestSeaBookingMigrationRegression(FreightTestBase):
         })
 
         self._run_migration()
-        first_root = booking.root_quotation_id
+        first_root = booking.source_quotation_id
         first_mirror = set(booking.sale_order_ids.ids)
 
         self._run_migration()
 
-        self.assertEqual(booking.root_quotation_id, first_root)
+        self.assertEqual(booking.source_quotation_id, first_root)
         self.assertEqual(set(booking.sale_order_ids.ids), first_mirror)
 
 
@@ -173,14 +173,14 @@ class TestSeaJobsheetDirectMigrationRegression(FreightTestBase):
         variant_result = root.action_create_currency_variant()
         variant = self.env["sale.order"].browse(variant_result["res_id"])  # B
 
-        hbl = self.env["freight.sea.hbl"].create({
+        hbl = self.env["freight.sea.job"].create({
             "sale_order_ids": [(6, 0, [variant.id])],
         })
-        self.assertFalse(hbl.root_quotation_id)
+        self.assertFalse(hbl.source_quotation_id)
 
         self._run_migration()
 
-        self.assertEqual(hbl.root_quotation_id, root)
+        self.assertEqual(hbl.source_quotation_id, root)
         self.assertEqual(set(hbl.sale_order_ids.ids), {root.id, variant.id})
 
     def test_jobsheet_with_booking_id_is_skipped_even_if_ambiguous(self):
@@ -191,18 +191,18 @@ class TestSeaJobsheetDirectMigrationRegression(FreightTestBase):
         root_a = self._create_quotation()
         root_x = self._create_quotation()
 
-        hbl = self.env["freight.sea.hbl"].create({
+        hbl = self.env["freight.sea.job"].create({
             "booking_id": booking.id,
             "sale_order_ids": [(6, 0, [root_a.id, root_x.id])],
         })
-        self.assertFalse(hbl.root_quotation_id)
+        self.assertFalse(hbl.source_quotation_id)
 
         self._run_migration()
 
         self.assertFalse(
-            hbl.root_quotation_id,
+            hbl.source_quotation_id,
             msg="Jobsheet dengan booking_id terisi tidak boleh mendapat "
-                "root_quotation_id sendiri dari migration",
+                "source_quotation_id sendiri dari migration",
         )
 
 
@@ -214,7 +214,7 @@ class TestJobsheetViaBookingMigrationMirrorRegression(FreightTestBase):
     sendiri sudah benar di-resolve & di-normalisasi. Fix: mirror sale_order_ids
     Jobsheet-via-Booking ikut dinormalisasi ke root Booking (via
     _normalize_jobsheet_mirror_via_booking, dipakai generic untuk Sea & Air),
-    root_quotation_id Jobsheet TETAP tidak disentuh (root tetap derived lewat
+    source_quotation_id Jobsheet TETAP tidak disentuh (root tetap derived lewat
     Booking, bukan disimpan dobel)."""
 
     @classmethod
@@ -227,13 +227,13 @@ class TestJobsheetViaBookingMigrationMirrorRegression(FreightTestBase):
         self.env.invalidate_all()
 
     def test_sea_jobsheet_via_booking_mirror_normalized_to_booking_root(self):
-        """Root A + Variant B. Legacy Booking X: root_quotation_id=NULL,
+        """Root A + Variant B. Legacy Booking X: source_quotation_id=NULL,
         sale_order_ids=[A]. Legacy Jobsheet J: booking_id=X,
-        root_quotation_id=NULL, sale_order_ids=[A].
+        source_quotation_id=NULL, sale_order_ids=[A].
 
         Expected setelah migration:
-        - Booking X.root_quotation_id == A, Booking X.sale_order_ids == {A,B}
-        - Jobsheet J.root_quotation_id tetap False (derived lewat Booking)
+        - Booking X.source_quotation_id == A, Booking X.sale_order_ids == {A,B}
+        - Jobsheet J.source_quotation_id tetap False (derived lewat Booking)
         - Jobsheet J.booking_id tetap X
         - Jobsheet J.sale_order_ids == {A,B} (dinormalisasi ke root Booking)
         """
@@ -244,22 +244,22 @@ class TestJobsheetViaBookingMigrationMirrorRegression(FreightTestBase):
         booking = self.env["freight.sea.booking"].create({
             "sale_order_ids": [(6, 0, [root.id])],
         })
-        jobsheet = self.env["freight.sea.hbl"].create({
+        jobsheet = self.env["freight.sea.job"].create({
             "booking_id": booking.id,
             "sale_order_ids": [(6, 0, [root.id])],
         })
-        self.assertFalse(booking.root_quotation_id)
-        self.assertFalse(jobsheet.root_quotation_id)
+        self.assertFalse(booking.source_quotation_id)
+        self.assertFalse(jobsheet.source_quotation_id)
 
         self._run_migration()
 
-        self.assertEqual(booking.root_quotation_id, root,
-            msg="Booking X harus resolve root_quotation_id = A")
+        self.assertEqual(booking.source_quotation_id, root,
+            msg="Booking X harus resolve source_quotation_id = A")
         self.assertEqual(set(booking.sale_order_ids.ids), {root.id, variant.id},
             msg="Booking X.sale_order_ids harus dinormalisasi jadi {A, B}")
 
-        self.assertFalse(jobsheet.root_quotation_id,
-            msg="Jobsheet via Booking TIDAK boleh diberi root_quotation_id sendiri")
+        self.assertFalse(jobsheet.source_quotation_id,
+            msg="Jobsheet via Booking TIDAK boleh diberi source_quotation_id sendiri")
         self.assertEqual(jobsheet.booking_id, booking,
             msg="Jobsheet.booking_id tidak boleh berubah")
         self.assertEqual(set(jobsheet.sale_order_ids.ids), {root.id, variant.id},
@@ -275,15 +275,15 @@ class TestJobsheetViaBookingMigrationMirrorRegression(FreightTestBase):
         booking = self.env["freight.sea.booking"].create({
             "sale_order_ids": [(6, 0, [root_a.id, root_x.id])],  # ambigu
         })
-        jobsheet = self.env["freight.sea.hbl"].create({
+        jobsheet = self.env["freight.sea.job"].create({
             "booking_id": booking.id,
             "sale_order_ids": [(6, 0, [root_a.id])],
         })
 
         self._run_migration()
 
-        self.assertFalse(booking.root_quotation_id)
-        self.assertFalse(jobsheet.root_quotation_id)
+        self.assertFalse(booking.source_quotation_id)
+        self.assertFalse(jobsheet.source_quotation_id)
         self.assertEqual(
             set(jobsheet.sale_order_ids.ids), {root_a.id},
             msg="Mirror Jobsheet tidak boleh berubah kalau Booking-nya sendiri tidak resolve",
@@ -310,17 +310,17 @@ class TestJobsheetViaBookingMigrationMirrorRegression(FreightTestBase):
         booking = self.env["freight.air.booking"].create({
             "sale_order_ids": [(6, 0, [root.id])],
         })
-        hawb = self.env["freight.air.hawb"].create({
+        hawb = self.env["freight.air.job"].create({
             "booking_id": booking.id,
             "sale_order_ids": [(6, 0, [root.id])],
         })
-        self.assertFalse(booking.root_quotation_id)
-        self.assertFalse(hawb.root_quotation_id)
+        self.assertFalse(booking.source_quotation_id)
+        self.assertFalse(hawb.source_quotation_id)
 
         self._run_migration()
 
-        self.assertEqual(booking.root_quotation_id, root)
+        self.assertEqual(booking.source_quotation_id, root)
         self.assertEqual(set(booking.sale_order_ids.ids), {root.id, variant.id})
-        self.assertFalse(hawb.root_quotation_id)
+        self.assertFalse(hawb.source_quotation_id)
         self.assertEqual(hawb.booking_id, booking)
         self.assertEqual(set(hawb.sale_order_ids.ids), {root.id, variant.id})

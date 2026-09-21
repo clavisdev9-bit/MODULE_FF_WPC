@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.13",
+    "version": "18.0.1.14",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -34,7 +34,10 @@
         "security/sea/master_data/ir.model.access.csv",
         # Data
         "data/air/air_booking_sequence.xml",
-        "data/air/air_mawb_sequence.xml",
+        # FF-76: air_mawb_sequence.xml (code freight.air.mawb) DIHAPUS --
+        # dead sequence, tidak pernah dipanggil next_by_code; MAWB No.
+        # sekarang canonical lewat freight.transport.document.document_no
+        # (manual/register, bukan auto-generated).
         "data/air/air_hawb_sequence.xml",
         "data/sea/sea_booking_sequence.xml",
         "data/sea/sea_hbl_sequence.xml",
@@ -65,21 +68,26 @@
         # Sea Quotation
         "views/sea/sales/quotation.xml",
         "views/sea/sales/migration_wizard.xml",
+        "views/sea/sales/add_to_master_wizard.xml",
 
         "views/sea/sales/rate_enquiry_actions.xml",
         # Air Quotation
         "views/air/sales/quotation.xml",
+        "views/air/sales/add_to_master_wizard.xml",
         "views/sea/booking/booking.xml",
         "views/sea/booking/extra_info_views.xml",
         "views/sea/booking/cargo_info.xml",
-        "views/sea/booking/booking_convert_wizard.xml",
         "views/sea/hbl/cargo_info.xml",
         "views/sea/hbl/custom_permit.xml",
         "views/sea/hbl/tax_refund_doc_views.xml",
         "views/sea/hbl/document_list_views.xml",
         "views/sea/hbl/hbl.xml",
+        "views/sea/bl/bl_code.xml",
+        "views/sea/bl/bl_master.xml",
         "views/sea/import/purchasing.xml",
         # Air
+        "views/air/awb/awb_code.xml",
+        "views/air/awb/awb_master.xml",
         "views/air/booking/booking.xml",
         "views/air/hawb/document_list_views.xml",
         "views/air/hawb/hawb.xml",
@@ -98,7 +106,6 @@
         "views/master_data/delivery_type.xml",
         "views/master_data/commodity.xml",
         "views/master_data/permit.xml",
-        "views/master_data/shipment_type.xml",
         # Master Data - Account
         "views/master_data/acct/area.xml",
         "views/master_data/acct/charge_code.xml",
@@ -142,6 +149,5 @@
         "tests/test_currency_variant_view.py",
         "tests/test_generic_duplicate_commercial_group.py",
         "tests/test_ff73_migration_regression.py",
-        "tests/test_charge_code_product.py",
     ],
 }

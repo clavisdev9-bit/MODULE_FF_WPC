@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class SeaBooking(models.Model):
@@ -13,6 +14,20 @@ class SeaBooking(models.Model):
     ]
     _description = "Sea Booking"
     _rec_name = "name"
+    _sql_constraints = [
+        ("document_id_uniq", "unique(document_id)",
+         "B/L ini sudah dipakai Booking lain."),
+    ]
+
+    # FF-76 Step 2: canonical shared transport document relation (paralel
+    # dengan Air). SATU-SATUNYA writable source of truth untuk B/L --
+    # `bl_no` di bawah adalah derived read-only alias, lihat definisinya.
+    document_id = fields.Many2one(
+        "freight.transport.document",
+        string="B/L No.",
+        domain="[('transport_mode', '=', 'sea')]",
+        tracking=True,
+    )
 
 
 
@@ -28,25 +43,66 @@ class SeaBooking(models.Model):
     )
 
     # Field relasi narik data Jobsheet (HBL) yang terkait sama Booking ini
-    hbl_ids = fields.One2many("freight.sea.hbl", "booking_id", string="Sea Jobsheets")
+    sea_job_ids = fields.One2many("freight.sea.job", "booking_id", string="Sea Jobsheets")
 
     # Field count buat trigger sembunyi/tampil tombol
-    hbl_count = fields.Integer(string="Jobsheet Count", compute="_compute_hbl_count")
+    sea_job_count = fields.Integer(string="Jobsheet Count", compute="_compute_hbl_count")
 
     # Field buat show quotation (one-to-many relationship)
     sales_order_count = fields.Integer(
         string="Sales Order Count", compute="_compute_sales_order_count"
     )
 
-    @api.depends("hbl_ids")
+    @api.depends("sea_job_ids")
     def _compute_hbl_count(self):
         for rec in self:
-            rec.hbl_count = len(rec.hbl_ids)
+            rec.sea_job_count = len(rec.sea_job_ids)
 
     @api.depends("sale_order_ids")
     def _compute_sales_order_count(self):
         for rec in self:
             rec.sales_order_count = len(rec.sale_order_ids)
+
+    @api.depends("sea_job_ids.job_no", "sea_job_ids.record_level")
+    def _compute_job_no(self):
+        """FF-76: Booking tidak lagi punya identity job_no independen --
+        menampilkan Job No. Master Job terkait (kosong sebelum Master ada)."""
+        for rec in self:
+            master = rec.sea_job_ids.filtered(lambda j: j.record_level == "master")[:1]
+            rec.job_no = master.job_no if master else False
+
+    @api.constrains("document_id")
+    def _check_document_chain(self):
+        """FF-76 Step 2: sama persis dengan pola Air (freight.air.booking)
+        -- satu transport document hanya boleh dipakai oleh SATU Sea
+        Booking. Kalau document ini sudah pernah dipakai (is_used) oleh
+        Booking LAIN (termasuk yang relation-nya sudah dilepas), tolak --
+        one-time semantic. SQL unique constraint (document_id_uniq) sudah
+        menangani duplikasi antar Booking yang relation-nya masih aktif;
+        constrain ini menutup celah reuse setelah document dilepas.
+
+        Late assignment (chain terbentuk dari arah Master duluan) juga
+        legal selama Job tsb memang Master milik Booking ini -- lihat
+        `used_sea_job_id`."""
+        for rec in self:
+            doc = rec.document_id
+            if not doc:
+                continue
+            if doc.transport_mode != "sea":
+                raise ValidationError(
+                    "B/L %s bertipe '%s' -- Sea Booking hanya boleh memakai "
+                    "document Sea." % (doc.document_no, doc.transport_mode)
+                )
+            if not doc.is_used:
+                continue
+            legal = doc.used_sea_booking_id == rec or (
+                doc.used_sea_job_id and doc.used_sea_job_id.booking_id == rec
+            )
+            if not legal:
+                raise ValidationError(
+                    "B/L %s sudah pernah digunakan dan tidak dapat dipakai "
+                    "ulang oleh Booking ini." % doc.document_no
+                )
 
 
 
@@ -74,14 +130,14 @@ class SeaBooking(models.Model):
             rec.state = "draft"
 
     # Fungsi pas tombol Jobsheet di klik
-    def action_view_hbl(self):
+    def action_view_jobs(self):
         self.ensure_one()
-        hbls = self.hbl_ids
+        hbls = self.sea_job_ids
 
         return {
             "name": "Sea Jobsheet",
             "type": "ir.actions.act_window",
-            "res_model": "freight.sea.hbl",
+            "res_model": "freight.sea.job",
             "view_mode": "form" if len(hbls) == 1 else "list,form",
             "domain": [("id", "in", hbls.ids)],
             "res_id": hbls.id if len(hbls) == 1 else False,
@@ -125,17 +181,33 @@ class SeaBooking(models.Model):
         copy=False,
     )
     booking_date = fields.Datetime(string="Date & Time")
-    hbl_no = fields.Char(string="B/L No.")
-    job_no = fields.Char(string="Job No.")
-    nomination_cargo = fields.Boolean(string="Nomination Cargo")
-    container_type = fields.Selection(
-        selection=[("fcl", "FCL"), ("lcl", "LCL"), ("consol", "Consol")],
-        string="Container Type",
+    # FF-76 Step 2 (corrective pass): `bl_no` DIRETIRE sebagai canonical
+    # source of truth -- sekarang derived read-only alias dari
+    # `document_id.document_no`, dipertahankan HANYA untuk compatibility
+    # display (report QWeb, list/search) yang butuh membaca "own B/L"
+    # tanpa join manual. TIDAK writable independen lagi -- `related` tanpa
+    # `readonly=False` tidak membuat inverse, jadi satu-satunya cara
+    # mengubah nilai ini adalah lewat `document_id`.
+    bl_no = fields.Char(
+        string="B/L No.",
+        related="document_id.document_no",
+        store=True,
+        readonly=True,
     )
+    job_no = fields.Char(
+        string="Job No.",
+        compute="_compute_job_no",
+        help="Job No. Master Job yang terkait Booking ini (FF-76). Kosong "
+             "sebelum Master dibuat lewat Create Job; bukan identity "
+             "independen Booking sendiri.",
+    )
+    nomination_cargo = fields.Boolean(string="Nomination Cargo")
+    # FF-75 follow-up: `container_type` (FCL/LCL) dihapus -- duplicate
+    # semantic dengan `ship_mode` yang sudah ada lewat
+    # freight.sea.shipment.info.mixin (_inherit di atas).
     job_date = fields.Date(string="Job Date")
     import_job_no = fields.Char(string="Import Job Number (Optional)")
     railing = fields.Boolean(string="Railing")
-    shipment_type_id = fields.Many2one("freight.shipment.type", string="Shipment Type")
 
     # Customer & Contact Data
     partner_id = fields.Many2one(
@@ -171,13 +243,11 @@ class SeaBooking(models.Model):
     from_city = fields.Many2one("res.city", string="From")
     to_city = fields.Many2one("res.city", string="To")
     delivery_type_id = fields.Many2one(
-        "account.incoterms", string="Delivery Type", required=True
+        "account.incoterms", string="Delivery Type"
     )
 
     # Vessel Information
     pod_port_id = fields.Many2one("freight.port", string="Port of Delivery")
-    vessel_id = fields.Many2one("freight.vessel", string="Vessel Name")
-    voyage_no = fields.Char(string="Voyage No.")
 
     # Notebook
     # NOTE (FF-22): field shipment_info_ids (One2many ke
@@ -207,7 +277,38 @@ class SeaBooking(models.Model):
                 vals["name"] = self.env["ir.sequence"].next_by_code(
                     "freight.sea.booking"
                 ) or "New"
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.document_id:
+                rec.document_id._mark_used(sea_booking=rec)
+        return records
+
+    def write(self, vals):
+        if "document_id" in vals and not self.env.context.get("_sea_document_cascade"):
+            # FF-76 Step 2: pola sama dengan Air -- cascade write dari
+            # freight.sea.job.write() (late assignment Master -> Booking)
+            # sengaja melewati guard ini lewat context flag. Itulah
+            # satu-satunya jalur yang boleh mengubah document Booking
+            # setelah Master terbentuk (Booking sendiri TETAP bukan entry
+            # point perubahan document, lihat komentar di
+            # freight.sea.job.write()).
+            new_doc_id = vals.get("document_id")
+            for rec in self:
+                if new_doc_id == rec.document_id.id:
+                    continue
+                master = rec.sea_job_ids.filtered(lambda j: j.record_level == "master")
+                if master:
+                    raise ValidationError(
+                        "Booking %s sudah memiliki Master Job (%s) -- B/L No. tidak "
+                        "boleh diubah lagi setelah Master terbentuk. Assign B/L lewat "
+                        "Master Job." % (rec.name, master[:1].job_no)
+                    )
+        res = super().write(vals)
+        if "document_id" in vals:
+            for rec in self:
+                if rec.document_id:
+                    rec.document_id._mark_used(sea_booking=rec)
+        return res
 
     def _copy_records_to_hbl(self, source_records, target_model_name, target_field_name, extra_values=None, excluded_fields=None):
         target_model = self.env[target_model_name]
@@ -223,28 +324,32 @@ class SeaBooking(models.Model):
             target_model.create(values)
 
     def _copy_cargo_info_lines_to_hbl(self, booking_cargo_info_records, hbl):
-        hbl_cargo_model = self.env["freight.sea.hbl.cargo.info"]
+        hbl_cargo_model = self.env["freight.sea.job.cargo.info"]
 
         for booking_cargo_info in booking_cargo_info_records:
-            cargo_values = booking_cargo_info.copy_data(default={"hbl_id": hbl.id})[0]
+            cargo_values = booking_cargo_info.copy_data(default={"job_id": hbl.id})[0]
             for field_name in ["booking_id", "sale_order_ids"]:
                 cargo_values.pop(field_name, None)
             for field_name in list(cargo_values.keys()):
                 if field_name not in hbl_cargo_model._fields:
                     cargo_values.pop(field_name, None)
-            cargo_values["hbl_id"] = hbl.id
+            cargo_values["job_id"] = hbl.id
             hbl_cargo_model.create(cargo_values)
 
     def _copy_booking_data_to_hbl(self, booking, hbl):
         # NOTE (FF-22): pemanggilan copy shipment_info_ids DIHAPUS di sini
         # karena model freight.sea.booking.shipment.info /
-        # freight.sea.hbl.shipment.info sudah tidak ada. Field-field
+        # freight.sea.job.shipment.info sudah tidak ada. Field-field
         # shipment info sekarang langsung ada di Booking & HBL (lewat mixin),
         # jadi tidak perlu proses copy antar model perantara lagi.
 
 
         header_fields = [
-            "shipment_type_id",
+            # FF-76 Step 2: "bl_no" DIHAPUS dari list ini -- sekarang derived
+            # read-only alias dari document_id (lihat definisi field), tidak
+            # writable lewat generic copy ini lagi. "document_id" yang
+            # jadi canonical relation dicopy sebagai gantinya.
+            "document_id",
             "delivery_type_id",
             "commodity_id",
         ]
@@ -302,11 +407,11 @@ class SeaBooking(models.Model):
         # -> Jobsheet ini dijalankan, sehingga guard kosong itu membuat
         # variant lain (B, dan C yang dibuat belakangan) tidak pernah
         # tersinkronkan. Root/anchor commercial group-nya adalah Booking
-        # (root_quotation_id + variant_ids), bukan snapshot hbl.sale_order_ids
+        # (source_quotation_id + variant_ids), bukan snapshot hbl.sale_order_ids
         # -- sinkronkan lewat shared FF-73 mirror sync (sale.order
         # _sync_sale_order_ids_mirror), dipanggil untuk setiap anggota
         # commercial group supaya Booking & Jobsheet canonical konsisten.
-        root = booking._get_root_quotation()
+        root = booking._get_source_quotation()
         if root:
             for order in root | root.variant_ids:
                 order._sync_sale_order_ids_mirror()
@@ -317,26 +422,37 @@ class SeaBooking(models.Model):
         if not hbl.purchase_order_ids and booking.purchase_order_ids:
             hbl.write({"purchase_order_ids": [(6, 0, booking.purchase_order_ids.ids)]})
 
-    def action_convert_to_hbl(self):
+    def action_create_job(self):
+        """FF-75: Booking Export -> Create Job. Membuat 1 Master Job (kalau
+        belum ada) dan House Job PERTAMA otomatis dari
+        Booking.source_quotation_id, langsung ter-gabung ke Master tersebut.
+        Idempotent: dipanggil ulang tidak membuat Master/House kedua."""
         self.ensure_one()
 
-        existing_hbl = self.env["freight.sea.hbl"].search(
-            [("booking_id", "=", self.id)],
+        master = self.env["freight.sea.job"].search(
+            [("booking_id", "=", self.id), ("record_level", "=", "master")],
             limit=1,
             order="id desc",
         )
-        if existing_hbl:
-            hbl = existing_hbl
-        else:
-            hbl = self.env["freight.sea.hbl"].create(
+        if not master:
+            master = self.env["freight.sea.job"].create(
                 {
                     "booking_id": self.id,
+                    "record_level": "master",
                     "freight_type": self.freight_type,
-                    "container_type": self.container_type,
-                    "shipment_type_id": self.shipment_type_id.id if self.shipment_type_id else False,
+                    "ship_mode": self.ship_mode,
+                    # FF-76 Step 2: Master harus memakai transport document
+                    # yang EXACT sama dengan Booking (legal chain exception),
+                    # atau kosong kalau Booking belum punya B/L (late
+                    # assignment lewat Master, lihat freight.sea.job.write()).
+                    "document_id": self.document_id.id if self.document_id else False,
                     "commodity_id": self.commodity_id.id if self.commodity_id else False,
                     "delivery_type_id": self.delivery_type_id.id if self.delivery_type_id else False,
-                    "customer_id": self.partner_id.id,
+                    # FF-75 follow-up (Section E): Master TIDAK boleh
+                    # mengambil Customer dari Booking secara otomatis --
+                    # semantic Customer Master consolidation belum
+                    # dipastikan. customer_id Master tetap optional/False
+                    # kecuali diisi eksplisit oleh user lewat flow lain.
                     "customer_ref": self.customer_reference,
                     "shipper_id": self.shipper_id.id if self.shipper_id else False,
                     "consignee_id": self.consignee_id.id if self.consignee_id else False,
@@ -345,7 +461,6 @@ class SeaBooking(models.Model):
                     "delivery_agent_id": self.delivery_agent_id.id if self.delivery_agent_id else False,
                     "term_payment": self.payment_term_id.id,
                     "job_date": self.job_date,
-                    "master_job_no": self.job_no,
                     "salesman_id": self.salesman_id.id if self.salesman_id else False,
                     "from_city": self.from_city.id if self.from_city else False,
                     "origin_country_id": self.origin_country_id.id if self.origin_country_id else False,
@@ -357,13 +472,22 @@ class SeaBooking(models.Model):
                 }
             )
 
-        self._copy_booking_data_to_hbl(self, hbl)
+        self._copy_booking_data_to_hbl(self, master)
+
+        # House pertama otomatis dari source_quotation_id Booking (FF-75) --
+        # hanya kalau Master belum punya House sama sekali (idempotent) dan
+        # Booking punya source_quotation_id untuk diprefill.
+        if not master.house_job_ids and self.source_quotation_id:
+            house_vals = self.env["freight.sea.job"]._prepare_house_vals_from_quotation(
+                self.source_quotation_id, master=master
+            )
+            self.env["freight.sea.job"].create(house_vals)
 
         return {
             "type": "ir.actions.act_window",
-            "name": "Sea Jobsheet",
-            "res_model": "freight.sea.hbl",
-            "res_id": hbl.id,
+            "name": "Sea Job",
+            "res_model": "freight.sea.job",
+            "res_id": master.id,
             "view_mode": "form",
             "target": "current",
         }

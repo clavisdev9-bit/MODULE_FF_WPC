@@ -10,9 +10,9 @@
                     <header>
                         <button name="action_confirm" string="Confirm Booking" type="object"
                             class="oe_highlight" invisible="state != 'draft'" />
-                        <button name="action_convert_to_hbl" type="object"
-                            string="Convert to Jobsheet" class="oe_highlight"
-                            invisible="hbl_count &gt; 0 or state != 'confirmed'" />
+                        <button name="action_create_job" type="object"
+                            string="Create Job" class="oe_highlight"
+                            invisible="sea_job_count &gt; 0 or state != 'confirmed'" />
                         <button name="action_cancel" string="Cancel" type="object"
                             invisible="state in ('cancelled', 'confirmed')" />
                         <button name="action_draft" string="Set to Draft" type="object"
@@ -31,11 +31,11 @@
                                     <span class="o_stat_text">Sales Orders</span>
                                 </div>
                             </button>
-                            <button name="action_view_hbl"
+                            <button name="action_view_jobs"
                                 type="object"
                                 class="oe_stat_button"
                                 icon="fa-file-text-o"
-                                invisible="hbl_count == 0">
+                                invisible="sea_job_count == 0">
                                 <div class="o_stat_info">
                                     <span class="o_stat_text">Jobsheet</span>
                                 </div>
@@ -47,8 +47,18 @@
                         <group string="Header Information">
                             <group>
                                 <field name="freight_type" />
-                                <field name="container_type" />
-                                <field name="hbl_no" />
+                                <field name="ship_mode" />
+                                <!-- FF-76 Step 2 (corrective): document_id
+                                     adalah SATU-SATUNYA cara user mengisi/
+                                     mengubah B/L. bl_no di bawah sekarang
+                                     derived read-only alias (compatibility
+                                     display), bukan entry point lagi. -->
+                                <field name="document_id"
+                                    string="B/L No."
+                                    domain="[('transport_mode', '=', 'sea'), '|', ('is_available', '=', True), ('id', '=', document_id)]"
+                                    context="{'default_transport_mode': 'sea'}"
+                                    readonly="sea_job_count &gt; 0" />
+                                <field name="bl_no" invisible="1" />
                                 <field name="job_no" />
                                 <field name="nomination_cargo" />
 
@@ -58,7 +68,6 @@
                                 <field name="job_date" />
                                 <field name="railing" />
                                 <field name="commodity_id"/>
-                                <field name="shipment_type_id" />
                                 <field name="delivery_type_id" />
                             </group>
                         </group>
@@ -262,9 +271,9 @@
                     <field name="name" />
                     <field name="sale_order_ids" widget="many2many_tags" />
                     <field name="partner_id" />
-                    <field name="container_type" />
+                    <field name="ship_mode" />
                     <field name="freight_type" />
-                    <field name="vessel_id" />
+                    <field name="feeder_vessel_id" />
                     <field name="etd" />
                     <field name="eta" />
                 </list>
@@ -279,8 +288,8 @@
                 <search>
                     <field name="name" string="Booking No." />
                     <field name="partner_id" />
-                    <field name="vessel_id" />
-                    <field name="container_type" />
+                    <field name="feeder_vessel_id" />
+                    <field name="ship_mode" />
                     <field name="freight_type" />
                     <separator />
                     <filter name="filter_import" string="Import"
@@ -288,13 +297,11 @@
                     <filter name="filter_export" string="Export"
                         domain="[('freight_type', '=', 'export')]" />
                     <filter name="filter_fc" string="Full Container"
-                        domain="[('container_type', '=', 'fcl')]" />
+                        domain="[('ship_mode', '=', 'fcl')]" />
                     <filter name="filter_lc" string="Less Than Container"
-                        domain="[('container_type', 'in', ['lcl', 'consol'])]" />
-                    <filter name="filter_fcl" string="FCL" domain="[('container_type', '=', 'fcl')]" />
-                    <filter name="filter_lcl" string="LCL" domain="[('container_type', '=', 'lcl')]" />
-                    <filter name="filter_consol" string="Consol"
-                        domain="[('container_type', '=', 'consol')]" />
+                        domain="[('ship_mode', '=', 'lcl')]" />
+                    <filter name="filter_fcl" string="FCL" domain="[('ship_mode', '=', 'fcl')]" />
+                    <filter name="filter_lcl" string="LCL" domain="[('ship_mode', '=', 'lcl')]" />
                 </search>
             </field>
         </record>
@@ -313,7 +320,7 @@
             <field name="res_model">freight.sea.booking</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="view_sea_booking_search" />
-            <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'fcl')]</field>
+            <field name="domain">[('freight_type', '=', 'import'), ('ship_mode', '=', 'fcl')]</field>
         </record>
 
         <record id="action_sea_booking_import_lcl" model="ir.actions.act_window">
@@ -321,16 +328,7 @@
             <field name="res_model">freight.sea.booking</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="view_sea_booking_search" />
-            <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=', 'lcl')]</field>
-        </record>
-
-        <record id="action_sea_booking_import_consol" model="ir.actions.act_window">
-            <field name="name">Import Consol Shipment</field>
-            <field name="res_model">freight.sea.booking</field>
-            <field name="view_mode">list,form</field>
-            <field name="search_view_id" ref="view_sea_booking_search" />
-            <field name="domain">[('freight_type', '=', 'import'), ('container_type', '=',
-                'consol')]</field>
+            <field name="domain">[('freight_type', '=', 'import'), ('ship_mode', '=', 'lcl')]</field>
         </record>
 
         <record id="action_sea_booking_export_fcl" model="ir.actions.act_window">
@@ -338,7 +336,7 @@
             <field name="res_model">freight.sea.booking</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="view_sea_booking_search" />
-            <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'fcl')]</field>
+            <field name="domain">[('freight_type', '=', 'export'), ('ship_mode', '=', 'fcl')]</field>
         </record>
 
         <record id="action_sea_booking_export_lcl" model="ir.actions.act_window">
@@ -346,16 +344,7 @@
             <field name="res_model">freight.sea.booking</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="view_sea_booking_search" />
-            <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=', 'lcl')]</field>
-        </record>
-
-        <record id="action_sea_booking_export_consol" model="ir.actions.act_window">
-            <field name="name">Export Consol Booking</field>
-            <field name="res_model">freight.sea.booking</field>
-            <field name="view_mode">list,form</field>
-            <field name="search_view_id" ref="view_sea_booking_search" />
-            <field name="domain">[('freight_type', '=', 'export'), ('container_type', '=',
-                'consol')]</field>
+            <field name="domain">[('freight_type', '=', 'export'), ('ship_mode', '=', 'lcl')]</field>
         </record>
 
     </data>

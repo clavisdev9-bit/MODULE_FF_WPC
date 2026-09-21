@@ -3,14 +3,24 @@ from odoo.exceptions import ValidationError
 
 
 class FreightCommercialGroupMixin(models.AbstractModel):
-    """Mixin bersama untuk Booking dan Jobsheet (Sea & Air) — FF-73.
+    """Mixin bersama untuk Booking dan Job (Sea & Air) — FF-73 / FF-75.
 
-    Sebelumnya, commercial group (root quotation + seluruh currency variant-nya)
-    hanya bisa diketahui lewat snapshot `sale_order_ids` yang diisi sekali waktu
-    convert. Mixin ini menjadikan root quotation (`root_quotation_id`) sebagai
-    anchor eksplisit, sehingga commercial group bisa selalu didapat ulang secara
-    live (root + `root.variant_ids`) — termasuk currency variant yang dibuat
-    SETELAH Booking/Jobsheet sudah ada.
+    `source_quotation_id` menyimpan Quotation yang menjadi SOURCE ketika
+    record ini pertama dibuat — bukan commercial root untuk seluruh
+    keluarga Master/House.
+
+    Booking dan House bisa punya `source_quotation_id` sendiri (House
+    tidak dipaksa mengikuti source_quotation_id milik Booking/Master-nya,
+    FF-75). Master TIDAK memiliki canonical commercial source apa pun --
+    `source_quotation_id` Master selalu kosong dan TIDAK boleh di-resolve
+    lewat Booking (Master bukan commercial owner Quotation). Satu
+    pengecualian: Air Direct (di luar scope hierarchy Master/House FF-75)
+    punya fallback khusus lewat `booking_id._get_source_quotation()` kalau
+    `source_quotation_id`-nya sendiri kosong -- lihat
+    `freight.air.job._get_source_quotation()`.
+
+    Field ini tetap dipakai sebagai anchor untuk mendapatkan commercial group
+    (root + `root.variant_ids`) secara live milik record itu SENDIRI.
 
     `sale_order_ids` (masing-masing didefinisikan di model konkretnya sendiri,
     bukan di mixin ini) tetap dipertahankan untuk compatibility finance/report/
@@ -21,27 +31,39 @@ class FreightCommercialGroupMixin(models.AbstractModel):
     _name = "freight.commercial.group.mixin"
     _description = "Freight Commercial Group Mixin"
 
-    root_quotation_id = fields.Many2one(
+    source_quotation_id = fields.Many2one(
         "sale.order",
-        string="Root Quotation",
+        string="Source Quotation",
         index=True,
-        help="Quotation utama (root) yang menjadi anchor commercial group "
-             "untuk record ini. Untuk currency variant, ini selalu menunjuk "
-             "ke root-nya, bukan ke variant itu sendiri.",
+        help="Quotation yang menjadi SOURCE ketika record ini pertama dibuat. "
+             "Untuk currency variant, ini selalu menunjuk ke root-nya, bukan "
+             "ke variant itu sendiri. Tidak berarti seluruh House di bawah "
+             "Master yang sama berasal dari Quotation ini.",
     )
 
-    def _get_root_quotation(self):
-        """Root quotation commercial group. Subclass yang bisa mendapatkan
-        root secara tidak langsung (misal Jobsheet Export lewat Booking-nya)
-        WAJIB override method ini, bukan cuma mengandalkan root_quotation_id."""
+    def _get_source_quotation(self):
+        """Source quotation milik record ini sendiri (base impl, dipakai
+        apa adanya oleh Booking Sea/Air dan Sea Job -- Sea tidak punya
+        konsep Direct, jadi Sea Job TIDAK override method ini sama sekali,
+        murni field sendiri, tanpa fallback lewat booking_id).
+
+        Subclass yang bisa mendapatkan source secara tidak langsung WAJIB
+        override method ini secara eksplisit dan sesempit mungkin -- jangan
+        sampai fallback berlaku untuk Master/House (keduanya harus selalu
+        resolve dari source_quotation_id sendiri, TIDAK boleh lewat
+        Booking). Satu-satunya override saat ini adalah Air Job untuk
+        shipment_type == 'direct' (lihat freight.air.job._get_source_quotation),
+        karena Direct adalah standalone Job yang bisa dibuat lewat Booking
+        tanpa source_quotation_id sendiri -- di luar scope FF-75, behavior
+        existing dipertahankan apa adanya."""
         self.ensure_one()
-        return self.root_quotation_id
+        return self.source_quotation_id
 
     def _get_commercial_group(self):
-        """Root quotation + seluruh currency variant-nya. Live query, bukan
+        """Source quotation + seluruh currency variant-nya. Live query, bukan
         snapshot — currency variant yang dibuat kapan pun akan selalu ikut."""
         self.ensure_one()
-        root = self._get_root_quotation()
+        root = self._get_source_quotation()
         if not root:
             return self.env["sale.order"]
         return root | root.variant_ids
@@ -51,9 +73,9 @@ class FreightCommercialGroupMixin(models.AbstractModel):
         for rec in self:
             if not rec.sale_order_ids:
                 continue
-            root = rec._get_root_quotation()
+            root = rec._get_source_quotation()
             if not root:
-                # root_quotation_id belum/tidak terisi (data lama yang belum
+                # source_quotation_id belum/tidak terisi (data lama yang belum
                 # di-backfill, atau kasus lain) — jangan blokir, tidak ada
                 # commercial group yang bisa dijadikan acuan validasi.
                 continue

@@ -22,13 +22,13 @@ class TestAnalyticSync(FreightTestBase):
         })
 
     def test_po_line_auto_populates_analytic_distribution_from_jobsheet(self):
-        """Saat menambahkan PO dengan sea_hbl_id, order_line otomatis terisi analytic_distribution 100%."""
+        """Saat menambahkan PO dengan sea_job_id, order_line otomatis terisi analytic_distribution 100%."""
         hbl = self._create_hbl()
         self.assertTrue(hbl.analytic_account_id, "HBL harus memiliki akun analitik")
 
         po = self.env["purchase.order"].create({
             "partner_id": self.vendor.id,
-            "sea_hbl_id": hbl.id,
+            "sea_job_id": hbl.id,
         })
         self.assertIn(po, hbl.purchase_order_ids, "PO harus otomatis tertaut ke purchase_order_ids pada HBL")
 
@@ -47,11 +47,11 @@ class TestAnalyticSync(FreightTestBase):
         )
 
     def test_so_line_auto_populates_analytic_distribution_from_jobsheet(self):
-        """Saat menambahkan SO dengan sea_hbl_id, order_line otomatis terisi analytic_distribution 100%."""
+        """Saat menambahkan SO dengan sea_job_id, order_line otomatis terisi analytic_distribution 100%."""
         hbl = self._create_hbl()
         self.assertTrue(hbl.analytic_account_id, "HBL harus memiliki akun analitik")
 
-        so = self._create_quotation(sea_hbl_id=hbl.id)
+        so = self._create_quotation(sea_job_id=hbl.id)
         self.assertIn(so, hbl.sale_order_ids, "SO harus otomatis tertaut ke sale_order_ids pada HBL")
 
         line = self.env["sale.order.line"].create({
@@ -69,11 +69,11 @@ class TestAnalyticSync(FreightTestBase):
         )
 
     def test_vendor_bill_bridge_from_po(self):
-        """_prepare_invoice dan _prepare_account_move_line pada PO menjamin sea_hbl_id dan analytic_distribution tersalurkan ke Vendor Bill."""
+        """_prepare_invoice dan _prepare_account_move_line pada PO menjamin sea_job_id dan analytic_distribution tersalurkan ke Vendor Bill."""
         hbl = self._create_hbl()
         po = self.env["purchase.order"].create({
             "partner_id": self.vendor.id,
-            "sea_hbl_id": hbl.id,
+            "sea_job_id": hbl.id,
         })
         po_line = self.env["purchase.order.line"].create({
             "order_id": po.id,
@@ -84,9 +84,9 @@ class TestAnalyticSync(FreightTestBase):
 
         invoice_vals = po._prepare_invoice()
         self.assertEqual(
-            invoice_vals.get("sea_hbl_id"),
+            invoice_vals.get("sea_job_id"),
             hbl.id,
-            "Vendor Bill yang di-prepare dari PO harus membawa sea_hbl_id Jobsheet",
+            "Vendor Bill yang di-prepare dari PO harus membawa sea_job_id Jobsheet",
         )
 
         move_line_vals = po_line._prepare_account_move_line()
@@ -140,5 +140,5 @@ class TestAnalyticSync(FreightTestBase):
             expected_distribution,
             "SO line harus tersinkronkan analytic_distribution-nya setelah dihubungkan ke Jobsheet",
         )
-        self.assertEqual(po.sea_hbl_id, hbl)
-        self.assertEqual(so.sea_hbl_id, hbl)
+        self.assertEqual(po.sea_job_id, hbl)
+        self.assertEqual(so.sea_job_id, hbl)

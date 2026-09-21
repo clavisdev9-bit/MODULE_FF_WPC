@@ -55,7 +55,7 @@ Most `ir.actions.act_window` records for these models share the *same* model and
 `security/*/ir.model.access.csv` grants full CRUD to `base.group_user` across the board — there are no `ir.rule` record rules anywhere in the module.
 
 ### Sequences and migrations
-Job/booking numbering (`job_no`, `awb_no`, etc.) comes from `ir.sequence` records under `data/air/*.xml` / `data/sea/*.xml`, referenced by code (e.g. `freight.air.hawb.job_no.exp` / `.imp`) rather than hardcoded. Schema/data fixes ship as `migrations/<version>/pre-migrate.py`, keyed to the `version` in `__manifest__.py` — bump the manifest version when adding a new migration folder.
+`job_no` numbering (Sea and Air Job/Booking) comes from `ir.sequence` records under `data/air/*.xml` / `data/sea/*.xml`, referenced by code (e.g. `freight.air.job.job_no.exp` / `.imp`). AWB/BL numbers (`bl_no`, and Air's canonical `freight.awb.master.awb_no`) are **not** sequence-generated — they're manually entered/registered identity fields (FF-76). Schema/data fixes ship as `migrations/<version>/pre-migrate.py`, keyed to the `version` in `__manifest__.py` — bump the manifest version when adding a new migration folder.
 
 ### Knowledge graph
 This repo has a graphify knowledge graph at `graphify-out/` (see `.agents/rules/graphify.md`). For architecture/relationship questions, prefer `graphify query "<question>"` / `graphify path` / `graphify explain` over broad grep when that folder is present, and run `graphify update .` after modifying code in a session.

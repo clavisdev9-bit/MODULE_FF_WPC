@@ -2,12 +2,12 @@ from odoo import fields, models
 
 
 class SeaHBLCashPurchase(models.Model):
-    _name = "freight.sea.hbl.cash.purchase"
+    _name = "freight.sea.job.cash.purchase"
     _description = "Sea Jobsheet Cash Purchase"
-    _rec_name = "hbl_id"
+    _rec_name = "job_id"
 
-    hbl_id = fields.Many2one(
-        "freight.sea.hbl",
+    job_id = fields.Many2one(
+        "freight.sea.job",
         string="Jobsheet No",
         required=True,
         ondelete="cascade",

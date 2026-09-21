@@ -34,7 +34,8 @@ class TestMinimalRequiredFields(FreightTestBase):
         booking = self.env["freight.sea.booking"].create({})
         self.assertTrue(booking.exists())
         self.assertFalse(booking.freight_type)
-        self.assertFalse(booking.vessel_id)
+        self.assertFalse(booking.feeder_vessel_id)
+        self.assertFalse(booking.mother_vessel_id)
         self.assertFalse(booking.partner_id)
 
     def test_air_booking_minimal(self):
@@ -47,10 +48,10 @@ class TestMinimalRequiredFields(FreightTestBase):
         self.assertFalse(booking.freight_type)
 
     def test_sea_hbl_minimal(self):
-        hbl = self.env["freight.sea.hbl"].create({})
+        hbl = self.env["freight.sea.job"].create({})
         self.assertTrue(hbl.exists())
         self.assertFalse(hbl.freight_type)
-        self.assertFalse(hbl.container_type)
+        self.assertFalse(hbl.ship_mode)
 
     def test_air_hawb_minimal(self):
         """FF-73 follow-up: freight_type TIDAK lagi punya default='export' --
@@ -59,7 +60,7 @@ class TestMinimalRequiredFields(FreightTestBase):
         Sebelum fix ini, freight_type diam-diam jadi 'export' walau job_no
         (lihat TestConvertDoesNotGuessEmptyBusinessFields di bawah) memakai
         sequence netral -- semantic inconsistency."""
-        hawb = self.env["freight.air.hawb"].create({})
+        hawb = self.env["freight.air.job"].create({"shipment_type": "direct"})
         self.assertTrue(hawb.exists())
         self.assertFalse(hawb.partner_id)
         self.assertFalse(hawb.freight_type)
@@ -76,10 +77,17 @@ class TestMinimalRequiredFields(FreightTestBase):
         booking_result = quotation.action_convert_to_booking_direct()
         booking = self.env["freight.sea.booking"].browse(booking_result["res_id"])
         self.assertTrue(booking.exists())
+        self.assertFalse(booking.feeder_vessel_id,
+            msg="Sea Booking dari Quotation Export harus tetap bisa dibuat tanpa Vessel")
+        self.assertFalse(booking.mother_vessel_id)
 
-        hbl_result = booking.action_convert_to_hbl()
-        hbl = self.env["freight.sea.hbl"].browse(hbl_result["res_id"])
-        self.assertTrue(hbl.exists())
+        hbl_result = booking.action_create_job()
+        master = self.env["freight.sea.job"].browse(hbl_result["res_id"])
+        self.assertTrue(master.exists())
+        self.assertEqual(master.record_level, "master",
+            msg="Booking -> Create Job harus membuat Master Job (FF-75)")
+        self.assertEqual(len(master.house_job_ids), 1,
+            msg="Booking -> Create Job harus otomatis membuat 1 House Job (FF-75)")
 
     def test_sea_quotation_direct_import_to_jobsheet_minimal(self):
         """Import direct: Quotation (cukup Customer) -> Jobsheet langsung."""
@@ -90,7 +98,7 @@ class TestMinimalRequiredFields(FreightTestBase):
             "freight_type": "import",
         })
         result = quotation.action_convert_to_jobsheet_direct()
-        hbl = self.env["freight.sea.hbl"].browse(result["res_id"])
+        hbl = self.env["freight.sea.job"].browse(result["res_id"])
         self.assertTrue(hbl.exists())
 
     def test_air_quotation_direct_import_to_jobsheet_minimal(self):
@@ -101,7 +109,7 @@ class TestMinimalRequiredFields(FreightTestBase):
             "freight_type": "import",
         })
         result = quotation.action_convert_to_jobsheet_direct()
-        hawb = self.env["freight.air.hawb"].browse(result["res_id"])
+        hawb = self.env["freight.air.job"].browse(result["res_id"])
         self.assertTrue(hawb.exists())
 
     def test_air_quotation_to_booking_to_jobsheet_minimal(self):
@@ -115,8 +123,8 @@ class TestMinimalRequiredFields(FreightTestBase):
         booking = self.env["freight.air.booking"].browse(booking_result["res_id"])
         self.assertTrue(booking.exists())
 
-        hawb_result = booking.action_create_hawb()
-        hawb = self.env["freight.air.hawb"].browse(hawb_result["res_id"])
+        hawb_result = booking.action_create_job()
+        hawb = self.env["freight.air.job"].browse(hawb_result["res_id"])
         self.assertTrue(hawb.exists())
 
 
@@ -165,13 +173,13 @@ class TestConvertDoesNotGuessEmptyBusinessFields(FreightTestBase):
         """job_no tetap tergenerate (technical identity field), tapi TIDAK
         boleh memakai sequence Export maupun Import kalau freight_type
         belum ditentukan."""
-        hbl = self.env["freight.sea.hbl"].create({})
+        hbl = self.env["freight.sea.job"].create({})
         self.assertTrue(hbl.job_no)
         self.assertTrue(hbl.job_no.startswith("JKT-JOB/"),
             msg="job_no HBL tanpa freight_type harus pakai sequence netral, bukan EXP/IMP")
 
     def test_air_hawb_job_no_uses_neutral_sequence_when_freight_type_empty(self):
-        hawb = self.env["freight.air.hawb"].create({})
+        hawb = self.env["freight.air.job"].create({"shipment_type": "direct"})
         self.assertTrue(hawb.job_no)
         self.assertTrue(hawb.job_no.startswith("JKT-AJOB/"),
             msg="job_no HAWB tanpa freight_type harus pakai sequence netral, bukan AE/AI")
@@ -197,11 +205,11 @@ class TestConvertDoesNotGuessEmptyBusinessFields(FreightTestBase):
         kosong -> job_no pakai sequence netral JKT-AJOB/), sehingga hasil
         akhirnya freight_type='export' TAPI job_no berprefix netral --
         semantic inconsistency yang dilaporkan lewat assertion di bawah."""
-        hawb = self.env["freight.air.hawb"].create({})
+        hawb = self.env["freight.air.job"].create({"shipment_type": "direct"})
 
         self.assertFalse(
             hawb.freight_type,
-            msg="freight.air.hawb.create({}) TIDAK boleh diam-diam "
+            msg="freight.air.job.create({}) TIDAK boleh diam-diam "
                 "terklasifikasi 'export' -- business field kosong harus tetap kosong",
         )
         self.assertTrue(hawb.job_no.startswith("JKT-AJOB/"))
