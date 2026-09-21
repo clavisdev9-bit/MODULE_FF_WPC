@@ -513,6 +513,9 @@
         <field name="name">Air Export House AWB</field>
         <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
+        <field name="views"
+               eval="[(ref('view_freight_air_job_tree'), 'list'),
+                      (ref('view_freight_air_job_form'), 'form')]"/>
         <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('shipment_type', '=', 'house')]</field>
         <field name="context">{'default_freight_type': 'export', 'default_shipment_type': 'house'}</field>
@@ -528,6 +531,9 @@
         <field name="name">Air Export Direct AWB</field>
         <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
+        <field name="views"
+               eval="[(ref('view_freight_air_job_tree'), 'list'),
+                      (ref('view_freight_air_job_form'), 'form')]"/>
         <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('shipment_type', '=', 'direct')]</field>
         <field name="context">{'default_freight_type': 'export', 'default_shipment_type': 'direct'}</field>
@@ -543,6 +549,9 @@
         <field name="name">Air Export Master AWB</field>
         <field name="res_model">freight.air.job</field>
         <field name="view_mode">list,form</field>
+        <field name="views"
+               eval="[(ref('view_freight_air_job_tree'), 'list'),
+                      (ref('view_freight_air_job_form'), 'form')]"/>
         <field name="search_view_id" ref="view_freight_air_job_search" />
         <field name="domain">[('freight_type', '=', 'export'), ('shipment_type', '=', 'master')]</field>
         <field name="context">{'default_freight_type': 'export', 'default_shipment_type': 'master'}</field>
