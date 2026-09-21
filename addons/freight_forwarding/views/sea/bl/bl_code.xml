@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FF-78: Sea-specific UI over the SHARED core model
+         freight.transport.document.code (source at
+         models/common/transport_document_code.py), mirroring the
+         Air-specific UI at views/air/awb/awb_code.xml. Standalone
+         Code/Config master data, with no relation to Shipping Line and
+         no relation to freight.transport.document. -->
+    <!-- FORM VIEW -->
+    <record id="view_freight_bl_code_form" model="ir.ui.view">
+        <field name="name">freight.transport.document.code.sea.form</field>
+        <field name="model">freight.transport.document.code</field>
+        <field name="arch" type="xml">
+            <form string="B/L Code">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="code" placeholder="B/L Code"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name" string="B/L Name"/>
+                            <field name="document_length" string="B/L Length"/>
+                            <field name="is_neutral" string="Neutral B/L?"/>
+                            <field name="check_digit"/>
+                            <field name="transport_mode" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="reorder_qty"/>
+                            <field name="qty_on_hand"/>
+                            <field name="mtd_usage" string="MTD Usage"/>
+                            <field name="ytd_usage" string="YTD Usage"/>
+                            <field name="last_year_usage" string="Last Yr Usage"/>
+                            <field name="last_use_date"/>
+                            <field name="last_receipt_date"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW -->
+    <record id="view_freight_bl_code_list" model="ir.ui.view">
+        <field name="name">freight.transport.document.code.sea.list</field>
+        <field name="model">freight.transport.document.code</field>
+        <field name="arch" type="xml">
+            <list string="B/L Code">
+                <field name="code" string="B/L Code"/>
+                <field name="name" string="B/L Name"/>
+                <field name="document_length" string="B/L Length"/>
+                <field name="reorder_qty"/>
+                <field name="qty_on_hand"/>
+                <field name="mtd_usage" string="MTD Usage"/>
+                <field name="ytd_usage" string="YTD Usage"/>
+                <field name="last_year_usage" string="Last Yr Usage"/>
+                <field name="last_use_date"/>
+                <field name="last_receipt_date"/>
+                <field name="is_neutral" string="Neutral B/L?"/>
+                <field name="check_digit"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_freight_bl_code_search" model="ir.ui.view">
+        <field name="name">freight.transport.document.code.sea.search</field>
+        <field name="model">freight.transport.document.code</field>
+        <field name="arch" type="xml">
+            <search string="Search B/L Code">
+                <field name="code" string="B/L Code"/>
+                <field name="name" string="B/L Name"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION: SEA B/L CODE (Sea &gt; B/L Inventory). Explicit
+         ir.actions.act_window.view bindings below are REQUIRED:
+         freight.transport.document.code also has Air's view records
+         (view_freight_awb_code_*), and without an explicit binding Odoo's
+         default view resolution can pick those instead. -->
+    <record id="action_freight_bl_code_sea" model="ir.actions.act_window">
+        <field name="name">B/L Code</field>
+        <field name="res_model">freight.transport.document.code</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_freight_bl_code_search"/>
+        <field name="domain">[('transport_mode', '=', 'sea')]</field>
+        <field name="context">{'default_transport_mode': 'sea'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new B/L Code
+            </p>
+        </field>
+    </record>
+    <record id="action_freight_bl_code_sea_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_freight_bl_code_list"/>
+        <field name="act_window_id" ref="action_freight_bl_code_sea"/>
+    </record>
+    <record id="action_freight_bl_code_sea_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_freight_bl_code_form"/>
+        <field name="act_window_id" ref="action_freight_bl_code_sea"/>
+    </record>
+</odoo>

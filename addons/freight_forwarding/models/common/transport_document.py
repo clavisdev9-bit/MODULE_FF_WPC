@@ -59,6 +59,17 @@ class FreightTransportDocument(models.Model):
     ]
 
     document_no = fields.Char(string="Document No.", required=True, index=True, copy=False)
+    document_code = fields.Char(
+        string="Document Code",
+        compute="_compute_document_code",
+        store=True,
+        readonly=True,
+        help="FF-78: first 3 characters of Document No., literal substring "
+             "-- no numeric validation, no uppercase conversion, no "
+             "airline/shipping-line lookup, no separator parsing. Not a "
+             "relation to freight.transport.document.code (Code Master); "
+             "the two are deliberately separate concepts.",
+    )
     transport_mode = fields.Selection(
         [("air", "Air"), ("sea", "Sea")],
         string="Transport Mode",
@@ -166,6 +177,11 @@ class FreightTransportDocument(models.Model):
              "operasional (USE/EXE/RSV dsb Sysfreight) -- murni indikator "
              "one-time-use registry.",
     )
+
+    @api.depends("document_no")
+    def _compute_document_code(self):
+        for rec in self:
+            rec.document_code = rec.document_no[:3] if rec.document_no else False
 
     @api.depends("is_used")
     def _compute_is_available(self):

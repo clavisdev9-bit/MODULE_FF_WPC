@@ -48,6 +48,7 @@
         <field name="arch" type="xml">
             <list string="B/L Master">
                 <field name="document_no" string="B/L No."/>
+                <field name="document_code" string="B/L Code"/>
                 <field name="service_level"/>
                 <field name="shipment_type"/>
                 <field name="shipper_id"/>

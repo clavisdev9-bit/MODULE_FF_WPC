@@ -1,1 +1,2 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_freight_transport_document_code,access.freight.transport.document.code,model_freight_transport_document_code,base.group_user,1,1,1,1
