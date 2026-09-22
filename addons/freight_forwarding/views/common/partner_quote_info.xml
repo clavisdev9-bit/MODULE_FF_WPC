@@ -30,7 +30,7 @@
                             <field name="freight_business_type" string="Business Type" />
                             <field name="freight_type" string="Type" />
                             <field name="quotation_title" string="Quote Title" />
-                            <field name="user_id" string="Salesman" />
+                            <field name="user_id" string="Salesperson" />
                             <field name="valid_from" string="Eff Date" />
                             <field name="validity_date" string="Exp Date" />
                             <field name="state" string="App" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'sale'"/>

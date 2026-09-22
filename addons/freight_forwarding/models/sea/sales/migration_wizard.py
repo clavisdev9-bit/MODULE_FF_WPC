@@ -17,9 +17,13 @@ class SeaQuotationMigrationWizard(models.TransientModel):
         # ke kolom sale_order.salesman_id lama yang sudah dead/orphan
         # (field Python-nya sudah dihapus, tapi fisiknya belum tentu
         # di-drop -- jangan ditulis/dibaca lagi lewat jalur mana pun).
-        # Kalau employee tidak punya linked user, JANGAN menebak --
-        # so.user_id dibiarkan apa adanya (COALESCE ke nilai existing,
-        # yang biasanya sudah terisi default current user dari create()).
+        #
+        # Semantic eksplisit (FF-80 UAT fix): fsq.salesman_id kosong ->
+        # pertahankan so.user_id existing apa adanya. fsq.salesman_id
+        # TERISI -> ikuti he.user_id APA ADANYA, termasuk saat NULL
+        # (employee tanpa linked user) -- so.user_id HARUS ikut jadi
+        # kosong di kasus itu, bukan dipertahankan/fallback ke user lain
+        # (JANGAN menebak).
         self.env.cr.execute("""
             SELECT fsq.id, fsq.salesman_id
             FROM freight_sea_quotation fsq
@@ -32,7 +36,7 @@ class SeaQuotationMigrationWizard(models.TransientModel):
                 "FF-80 Sea Quotation migration wizard: %s row(s) in legacy "
                 "freight_sea_quotation have salesman_id pointing to an "
                 "hr.employee WITHOUT a linked user -- sale_order.user_id "
-                "left untouched (not guessed) for: %s",
+                "will be left EMPTY (not guessed) for: %s",
                 len(unresolved), unresolved,
             )
 
@@ -42,7 +46,10 @@ class SeaQuotationMigrationWizard(models.TransientModel):
             SET freight_business_type = 'sea',
                 freight_type = fsq.freight_type,
                 quotation_title = fsq.quotation_title,
-                user_id = COALESCE(he.user_id, so.user_id),
+                user_id = CASE
+                    WHEN fsq.salesman_id IS NULL THEN so.user_id
+                    ELSE he.user_id
+                END,
                 partner_id = fsq.partner_id,
                 service_level = fsq.service_level,
                 delivery_type_id = fsq.delivery_type_id,

@@ -402,7 +402,7 @@ class FreightAirHawb(models.Model):
             'partner_id': quotation.partner_id.id if quotation.partner_id else False,
             'customer_ref': quotation.reference_number or quotation.client_order_ref or False,
             'term_payment': quotation.payment_term_id.id if quotation.payment_term_id else False,
-            'user_id': quotation.user_id.id if quotation.user_id else self.env.uid,
+            'user_id': quotation.user_id.id,
             'company_id': quotation.company_id.id if quotation.company_id else self.env.company.id,
         }
         if master:
