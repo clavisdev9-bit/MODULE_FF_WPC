@@ -17,6 +17,14 @@ def _rename_column(cr, table, old, new):
         _logger.info("Renamed column %s.%s -> %s.%s", table, old, table, new)
 
 
+def _table_exists(cr, table):
+    cr.execute(
+        "SELECT 1 FROM information_schema.tables WHERE table_name = %s",
+        (table,),
+    )
+    return cr.fetchone() is not None
+
+
 def migrate(cr, version):
     """
     Migration 18.0.1.12 (FF-76 genericize transport document registry):
@@ -36,6 +44,13 @@ def migrate(cr, version):
     these are brand-new columns/models and leave the old ones as orphaned
     stale data (violating "no duplicate old+new canonical fields").
     """
+    if not _table_exists(cr, "freight_awb_master"):
+        _logger.info(
+            "Migration 18.0.1.12: freight_awb_master table does not exist "
+            "(fresh install), skipping."
+        )
+        return
+
     _logger.info("Migration 18.0.1.12: genericizing freight.awb.master -> freight.transport.document")
 
     # 1. Reflect the model rename in ir_model / ir_model_fields / ir_model_data
