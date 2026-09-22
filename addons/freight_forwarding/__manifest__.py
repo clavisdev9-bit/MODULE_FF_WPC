@@ -50,6 +50,8 @@
         "views/common/purchase_order.xml",
         "views/common/partner_address.xml",
         "views/common/partner_category.xml",
+        "views/common/partner_delivery_info.xml",
+        "views/common/partner_quote_info.xml",
         "views/common/sale_order_list.xml",
         # Report
         "report/sea/quotation/quotation_report_template.xml",

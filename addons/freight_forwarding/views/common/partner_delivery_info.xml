@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Delivery Info tab on res.partner form (FF-66) -->
+    <record id="view_partner_form_delivery_info" model="ir.ui.view">
+        <field name="name">res.partner.form.delivery.info</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Delivery Info" name="delivery_info">
+                    <group>
+                        <field name="special_instruction"/>
+                        <field name="delivery_instruction"/>
+                        <field name="billing_instruction"/>
+                        <field name="cfs_charge_instruction"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>
