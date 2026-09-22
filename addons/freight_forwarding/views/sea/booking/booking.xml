@@ -48,6 +48,8 @@
                             <group>
                                 <field name="freight_type" />
                                 <field name="ship_mode" />
+                                <field name="job_type_id"
+                                    domain="[('business_type', '=', 'sea'), ('freight_type', '=', freight_type), ('sea_ship_mode', '=', ship_mode)]" />
                                 <!-- FF-76 Step 2 (corrective): document_id
                                      adalah SATU-SATUNYA cara user mengisi/
                                      mengubah B/L. bl_no di bawah sekarang

@@ -11,9 +11,11 @@ class FreightAirHawb(models.Model):
         'freight.air.shipment.info.mixin',
         'freight.air.cargo.info.mixin',
         'freight.commercial.group.mixin',
+        'freight.job.type.resolver.mixin',
     ]
     _order = 'id desc'
     _rec_name = 'job_no'
+    _job_type_business_type = 'air'
     _sql_constraints = [
         ('job_no_uniq', 'unique(job_no)', 'Job No. harus unik.'),
         ('document_id_uniq', 'unique(document_id)',

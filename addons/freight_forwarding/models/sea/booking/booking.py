@@ -11,9 +11,11 @@ class SeaBooking(models.Model):
         "freight.sea.vessel.details.mixin",
         "freight.sea.bl.info.mixin",
         "freight.commercial.group.mixin",
+        "freight.job.type.resolver.mixin",
     ]
     _description = "Sea Booking"
     _rec_name = "name"
+    _job_type_business_type = "sea"
     _sql_constraints = [
         ("document_id_uniq", "unique(document_id)",
          "B/L ini sudah dipakai Booking lain."),
@@ -441,6 +443,11 @@ class SeaBooking(models.Model):
                     "record_level": "master",
                     "freight_type": self.freight_type,
                     "ship_mode": self.ship_mode,
+                    # FF-79: copy sekali saat create -- setelah ini Booking
+                    # dan Job TIDAK live-sync, job_type_id Job independen
+                    # dan boleh diubah manual (Change Job Type) tanpa
+                    # mempengaruhi Booking.
+                    "job_type_id": self.job_type_id.id if self.job_type_id else False,
                     # FF-76 Step 2: Master harus memakai transport document
                     # yang EXACT sama dengan Booking (legal chain exception),
                     # atau kosong kalau Booking belum punya B/L (late

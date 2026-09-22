@@ -76,6 +76,8 @@
                         <group>
                             <field name="job_date"/>
                             <field name="freight_type"/>
+                            <field name="job_type_id"
+                                domain="[('business_type', '=', 'air'), ('freight_type', '=', freight_type)]"/>
                             <field name="partner_id" string="Customer"/>
                             <label for="is_nomination" string="Nomination"/>
                             <div class="o_row">

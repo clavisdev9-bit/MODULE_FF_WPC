@@ -1,6 +1,6 @@
 {
     "name": "Freight Forwarding",
-    "version": "18.0.1.15",
+    "version": "18.0.1.16",
     "summary": "Custom Module for Freight Forwarding Management (Clavis Group)",
     "description": """
         Modul custom untuk operasional Freight Forwarding.
@@ -151,5 +151,6 @@
         "tests/test_ff73_migration_regression.py",
         "tests/test_ff75_hierarchy_followup.py",
         "tests/test_air_awb_master.py",
+        "tests/test_ff79_job_type_account_mapping.py",
     ],
 }

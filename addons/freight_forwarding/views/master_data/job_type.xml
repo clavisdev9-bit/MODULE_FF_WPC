@@ -7,6 +7,9 @@
             <list>
                 <field name="code"/>
                 <field name="name"/>
+                <field name="business_type"/>
+                <field name="freight_type"/>
+                <field name="sea_ship_mode"/>
                 <field name="module_code"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
@@ -22,6 +25,9 @@
                     <group>
                         <field name="code"/>
                         <field name="name"/>
+                        <field name="business_type"/>
+                        <field name="freight_type"/>
+                        <field name="sea_ship_mode" invisible="business_type != 'sea'"/>
                         <field name="module_code"/>
                         <field name="active" widget="boolean_toggle"/>
                     </group>
@@ -37,8 +43,14 @@
             <search>
                 <field name="code"/>
                 <field name="name"/>
+                <field name="business_type"/>
+                <field name="freight_type"/>
                 <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
                 <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_business_type" string="Business Type" context="{'group_by': 'business_type'}"/>
+                    <filter name="group_by_freight_type" string="Direction" context="{'group_by': 'freight_type'}"/>
+                </group>
             </search>
         </field>
     </record>

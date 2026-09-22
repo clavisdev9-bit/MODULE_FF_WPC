@@ -11,9 +11,11 @@ class SeaHBL(models.Model):
         "freight.sea.vessel.details.mixin",
         "freight.sea.bl.info.mixin",
         "freight.commercial.group.mixin",
+        "freight.job.type.resolver.mixin",
     ]
     _description = "Sea Job (Master/House)"
     _rec_name = "job_no"
+    _job_type_business_type = "sea"
     _sql_constraints = [
         ("job_no_uniq", "unique(job_no)", "Job No. harus unik."),
         ("document_id_uniq", "unique(document_id)", "B/L ini sudah dipakai Job lain."),
