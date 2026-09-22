@@ -1,18 +1,23 @@
-"""FF-80: Standarize Salesperson field across the Freight flow.
+"""FF-80: native sale.order.user_id as the single source of truth for
+Salesperson.
 
-Canonical: `user_id -> res.users` end-to-end. `sale.order` uses the native
-Odoo `user_id` (custom quotation `salesman_id` removed). Sea/Air
-Booking/Jobsheet expose their own `user_id -> res.users` (renamed from the
-old `salesman_id`, which was `hr.employee` on Sea and `res.users` on Air).
+Decision (post-UAT revision): Booking and Jobsheet (Sea + Air) must NOT
+carry a duplicate Salesperson field -- neither the old `salesman_id`
+(hr.employee on Sea, res.users on Air) nor a custom `user_id`. There is no
+propagation/copy of Salesperson from Quotation to Booking/Job. A downstream
+consumer that needs Salesperson resolves it via
+`source_quotation_id.user_id`, not a stored field. Master Job never has a
+Salesperson (it can group Houses from different quotations).
 
-These tests cover propagation for both Quotation -> Booking -> Jobsheet and
-the direct Quotation -> Jobsheet (Import) flow, for Sea and Air.
+`team_id` (Sales Team) stays independent and is never a Salesperson
+fallback.
 """
 from .common import FreightTestBase
 
 
 class TestFF80QuotationSalesperson(FreightTestBase):
-    """sale.order no longer exposes the custom `salesman_id` field."""
+    """sale.order is the sole source of truth: native `user_id`, no custom
+    `salesman_id`."""
 
     def test_sale_order_has_no_custom_salesman_id(self):
         self.assertNotIn(
@@ -26,129 +31,62 @@ class TestFF80QuotationSalesperson(FreightTestBase):
         self.assertEqual(quotation.user_id, self.env.user)
 
 
-class TestFF80SeaBookingJobsheetSalesperson(FreightTestBase):
-    """Sea Booking/Job expose user_id (res.users), not the old hr.employee
-    salesman_id."""
+class TestFF80BookingJobHaveNoCustomSalesperson(FreightTestBase):
+    """Sea/Air Booking and Job must not expose ANY custom Salesperson
+    field -- neither the pre-FF-80 `salesman_id` nor the reverted FF-80
+    `user_id` duplicate."""
 
-    def test_sea_booking_has_no_legacy_salesman_id(self):
-        self.assertNotIn("salesman_id", self.env["freight.sea.booking"]._fields)
-        self.assertIn("user_id", self.env["freight.sea.booking"]._fields)
-        field = self.env["freight.sea.booking"]._fields["user_id"]
-        self.assertEqual(field.comodel_name, "res.users")
+    def test_sea_booking_has_no_custom_salesperson_field(self):
+        fields_ = self.env["freight.sea.booking"]._fields
+        self.assertNotIn("salesman_id", fields_)
+        self.assertNotIn("user_id", fields_)
 
-    def test_sea_job_has_no_legacy_salesman_id(self):
-        self.assertNotIn("salesman_id", self.env["freight.sea.job"]._fields)
-        self.assertIn("user_id", self.env["freight.sea.job"]._fields)
-        field = self.env["freight.sea.job"]._fields["user_id"]
-        self.assertEqual(field.comodel_name, "res.users")
+    def test_sea_job_has_no_custom_salesperson_field(self):
+        fields_ = self.env["freight.sea.job"]._fields
+        self.assertNotIn("salesman_id", fields_)
+        self.assertNotIn("user_id", fields_)
 
-    def test_quotation_to_booking_carries_user_id(self):
-        quotation = self._create_quotation(user_id=self.env.user.id)
-        result = quotation.action_convert_to_booking_direct()
-        booking = self.env["freight.sea.booking"].browse(result["res_id"])
-        self.assertEqual(booking.user_id, self.env.user)
+    def test_air_booking_has_no_custom_salesperson_field(self):
+        fields_ = self.env["freight.air.booking"]._fields
+        self.assertNotIn("salesman_id", fields_)
+        self.assertNotIn("user_id", fields_)
 
-    def test_booking_to_job_carries_user_id(self):
-        """Booking -> Create Job (action_create_job) membawa user_id Booking
-        ke Master Job."""
-        booking = self._create_booking(user_id=self.env.user.id)
-        result = booking.action_create_job()
-        master = self.env["freight.sea.job"].browse(result["res_id"])
-        self.assertEqual(master.user_id, self.env.user)
+    def test_air_job_has_no_custom_salesperson_field(self):
+        fields_ = self.env["freight.air.job"]._fields
+        self.assertNotIn("salesman_id", fields_)
+        self.assertNotIn("user_id", fields_)
 
-    def test_direct_quotation_to_job_carries_user_id(self):
-        """Import quotation -> Create Job (tanpa Booking) tetap membawa
-        user_id ke House pertama."""
-        quotation = self._create_quotation(freight_type="import", user_id=self.env.user.id)
-        result = quotation.action_convert_to_jobsheet_direct()
-        master = self.env["freight.sea.job"].browse(result["res_id"])
-        house = master.house_job_ids
-        self.assertTrue(house)
-        self.assertEqual(house.user_id, self.env.user)
+    def test_sea_quotation_to_booking_to_job_flow_still_works(self):
+        """Regression: removing the Salesperson duplicate must not break
+        the underlying Quotation -> Booking -> Job conversion flow."""
+        quotation = self._create_quotation()
+        booking_result = quotation.action_convert_to_booking_direct()
+        booking = self.env["freight.sea.booking"].browse(booking_result["res_id"])
+        job_result = booking.action_create_job()
+        master = self.env["freight.sea.job"].browse(job_result["res_id"])
+        self.assertTrue(master.exists())
+        self.assertEqual(master.record_level, "master")
 
-
-class TestFF80AirBookingJobsheetSalesperson(FreightTestBase):
-    """Air Booking/Job: legacy salesman_id (res.users) renamed to user_id."""
-
-    def _create_air_quotation(self, **kwargs):
-        vals = {
+    def test_air_quotation_to_booking_to_job_flow_still_works(self):
+        quotation = self.env["sale.order"].create({
             "is_freight_quotation": True,
             "freight_business_type": "air",
             "freight_type": "export",
             "partner_id": self.partner.id,
-        }
-        vals.update(kwargs)
-        return self.env["sale.order"].create(vals)
-
-    def test_air_booking_has_no_legacy_salesman_id(self):
-        self.assertNotIn("salesman_id", self.env["freight.air.booking"]._fields)
-        self.assertIn("user_id", self.env["freight.air.booking"]._fields)
-        field = self.env["freight.air.booking"]._fields["user_id"]
-        self.assertEqual(field.comodel_name, "res.users")
-
-    def test_air_job_has_no_legacy_salesman_id(self):
-        self.assertNotIn("salesman_id", self.env["freight.air.job"]._fields)
-        self.assertIn("user_id", self.env["freight.air.job"]._fields)
-        field = self.env["freight.air.job"]._fields["user_id"]
-        self.assertEqual(field.comodel_name, "res.users")
-
-    def test_air_quotation_to_booking_carries_user_id(self):
-        quotation = self._create_air_quotation(user_id=self.env.user.id)
-        result = quotation.action_convert_to_booking_direct()
-        booking = self.env["freight.air.booking"].browse(result["res_id"])
-        self.assertEqual(booking.user_id, self.env.user)
-
-    def test_air_booking_to_job_carries_user_id(self):
-        quotation = self._create_air_quotation(user_id=self.env.user.id)
+        })
         booking_result = quotation.action_convert_to_booking_direct()
         booking = self.env["freight.air.booking"].browse(booking_result["res_id"])
-
         job_result = booking.action_create_job()
         master = self.env["freight.air.job"].browse(job_result["res_id"])
-        self.assertEqual(master.user_id, self.env.user)
-
-    def test_direct_air_quotation_to_job_carries_user_id(self):
-        """Import Air quotation -> Create Job (tanpa Booking) membawa
-        user_id ke House pertama."""
-        quotation = self._create_air_quotation(freight_type="import", user_id=self.env.user.id)
-        result = quotation.action_convert_to_jobsheet_direct()
-        master = self.env["freight.air.job"].browse(result["res_id"])
-        house = master.house_job_ids
-        self.assertTrue(house)
-        self.assertEqual(house.user_id, self.env.user)
-
-    def test_air_quotation_to_booking_no_fallback_to_current_user(self):
-        """FF-80 UAT fix: kalau quotation.user_id kosong, Booking.user_id
-        HARUS ikut kosong -- bukan diam-diam fallback ke self.env.uid
-        (user yang menjalankan action)."""
-        quotation = self._create_air_quotation(user_id=False)
-        self.assertFalse(quotation.user_id)
-        result = quotation.action_convert_to_booking_direct()
-        booking = self.env["freight.air.booking"].browse(result["res_id"])
-        self.assertFalse(
-            booking.user_id,
-            msg="Booking.user_id tidak boleh fallback ke env.uid saat source kosong",
-        )
-
-    def test_direct_air_quotation_to_job_no_fallback_to_current_user(self):
-        """FF-80 UAT fix: direct Quotation -> Job (Import) juga tidak boleh
-        fallback ke env.uid kalau quotation.user_id kosong."""
-        quotation = self._create_air_quotation(freight_type="import", user_id=False)
-        result = quotation.action_convert_to_jobsheet_direct()
-        master = self.env["freight.air.job"].browse(result["res_id"])
-        house = master.house_job_ids
-        self.assertTrue(house)
-        self.assertFalse(
-            house.user_id,
-            msg="House.user_id tidak boleh fallback ke env.uid saat source kosong",
-        )
+        self.assertTrue(master.exists())
+        self.assertEqual(master.shipment_type, "master")
 
 
 class TestFF80SeaLegacyQuotationMigrationWizard(FreightTestBase):
-    """FF-80 UAT fix: freight.sea.quotation.migration.wizard (legacy
-    freight_sea_quotation -> sale_order, active/executable code, NOT a
-    historical migration) must resolve Salesperson the same way as the
-    rest of FF-80 -- and must NOT preserve/guess a Salesperson when the
+    """freight.sea.quotation.migration.wizard (legacy freight_sea_quotation
+    -> sale_order, active/executable code, NOT a historical migration) must
+    resolve legacy salesman_id (hr.employee) to native sale_order.user_id
+    via hr.employee.user_id -- and must NOT guess a Salesperson when the
     legacy employee has no linked user."""
 
     _LEGACY_TABLE_COLUMNS = """
@@ -222,7 +160,7 @@ class TestFF80SeaLegacyQuotationMigrationWizard(FreightTestBase):
                 (so_id, salesman_id, self.partner.id),
             )
 
-    def test_migration_wizard_salesperson_semantic(self):
+    def test_migration_wizard_writes_to_native_user_id(self):
         employee_with_user = self.env["hr.employee"].create({
             "name": "FF-80 Employee With User",
             "user_id": self.env.user.id,

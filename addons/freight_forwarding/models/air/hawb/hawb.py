@@ -100,8 +100,6 @@ class FreightAirHawb(models.Model):
     is_nomination = fields.Boolean(string='Nomination Cargo')
     nomination_remark = fields.Char(string='Nomination Remark')
     term_payment = fields.Many2one('account.payment.term', string='Credit Term')
-    
-    user_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', copy=False)
 
     # -------------------------------------------------------------
@@ -402,7 +400,6 @@ class FreightAirHawb(models.Model):
             'partner_id': quotation.partner_id.id if quotation.partner_id else False,
             'customer_ref': quotation.reference_number or quotation.client_order_ref or False,
             'term_payment': quotation.payment_term_id.id if quotation.payment_term_id else False,
-            'user_id': quotation.user_id.id,
             'company_id': quotation.company_id.id if quotation.company_id else self.env.company.id,
         }
         if master:

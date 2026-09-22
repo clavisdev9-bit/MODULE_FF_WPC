@@ -195,7 +195,6 @@ class SeaQuotation(models.Model):
             "origin_country_id": origin_country.id if origin_country else False,
             "from_city": self.pickup_city.id,
             "to_city": self.delivery_city.id,
-            "user_id": self.user_id.id,
             "payment_term_id": self.payment_term_id.id,
             "ship_mode": self.sea_ship_mode,
             "commodity_id": self.commodity_id.id,

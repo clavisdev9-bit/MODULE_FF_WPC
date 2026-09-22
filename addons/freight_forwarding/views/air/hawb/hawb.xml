@@ -85,7 +85,6 @@
                                 <field name="nomination_remark" placeholder="Nomination Remark..." invisible="not is_nomination"/>
                             </div>
                             <field name="customer_ref"/>
-                            <field name="user_id"/>
                             <field name="analytic_account_id" readonly="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
@@ -355,7 +354,6 @@
                         <field name="ship_mode"/>
                         <field name="term_payment"/>
                         <field name="service_level"/>
-                        <field name="user_id"/>
                         <field name="analytic_account_id" readonly="1"/>
                         <field name="company_id" groups="base.group_multi_company"/>
                     </group>
@@ -472,7 +470,6 @@
                 <field name="partner_id" string="Customer" />
                 <field name="shipper_id" string="Shipper" />
                 <field name="consignee_id" string="Consignee" />
-                <field name="user_id" string="Salesperson" />
                 <separator />
                 <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'export')]" />
                 <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'import')]" />

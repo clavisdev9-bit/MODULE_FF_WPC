@@ -85,7 +85,6 @@
                             </group>
                             <group>
                                 <field name="payment_term_id" />
-                                <field name="user_id" />
                             </group>
                         </group>
 
