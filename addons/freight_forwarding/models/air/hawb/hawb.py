@@ -410,6 +410,15 @@ class FreightAirHawb(models.Model):
         }
         if master:
             vals['master_job_id'] = master.id
+            # FF-79: House pertama dari Booking->Master mengikuti job_type_id
+            # FINAL Master saat creation (copy sekali, bukan live-sync --
+            # sama seperti Master sendiri mengambil dari Booking di
+            # action_create_job(); Master/House boleh diubah manual setelah
+            # ini tanpa saling mempengaruhi). Untuk direct Quotation->House
+            # (master=False) job_type_id SENGAJA tidak diisi di sini --
+            # dibiarkan resolve sendiri dari freight_type di atas lewat
+            # auto-fill create() (freight.job.type.resolver.mixin).
+            vals['job_type_id'] = master.job_type_id.id if master.job_type_id else False
         return vals
 
     def action_view_booking(self):

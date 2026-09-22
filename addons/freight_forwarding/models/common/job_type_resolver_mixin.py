@@ -24,6 +24,16 @@ class FreightJobTypeResolverMixin(models.AbstractModel):
     (FCL/LCL) juga dipakai; untuk 'air', `ship_mode` model itu sendiri
     (semantic-nya routing order/free hands/transit, bukan FCL/LCL) sengaja
     TIDAK dipakai untuk klasifikasi.
+
+    Auto-fill berlaku lewat DUA jalur yang berbagi resolver yang sama
+    (`_resolve_job_type_id`/`_get_job_type_candidates`), supaya aturan
+    0/1/>1 kandidat konsisten baik lewat UI maupun lewat Python:
+    - `_onchange_job_type_classification()` -- jalur UI (record sudah ada
+      di memori, baca field langsung).
+    - `create()` -- jalur programmatic (Quotation -> Booking, Quotation ->
+      Job direct, Booking -> Create Job, dst.). `job_type_id` yang SUDAH
+      diberikan eksplisit di vals (key ada, apa pun isinya) tidak pernah
+      ditimpa oleh resolver.
     """
 
     _name = 'freight.job.type.resolver.mixin'
@@ -51,6 +61,21 @@ class FreightJobTypeResolverMixin(models.AbstractModel):
             business_type, freight_type, sea_ship_mode
         )
 
+    @api.model
+    def _resolve_job_type_id_from_vals(self, vals):
+        """Versi `_get_job_type_candidates()` yang bekerja dari `vals`
+        create() mentah (belum jadi record) -- dipakai `create()` supaya
+        logic pencarian kandidat TIDAK diduplikasi antara jalur onchange
+        (UUI) dan jalur programmatic (create). Sama seperti onchange:
+        kandidat tepat satu -> return id-nya; 0 atau >1 -> return False
+        (dibiarkan kosong, tidak pernah menebak)."""
+        business_type = self._job_type_business_type
+        sea_ship_mode = vals.get('ship_mode') if business_type == 'sea' else False
+        candidates = self.env['freight.job.type']._get_matching_job_types(
+            business_type, vals.get('freight_type'), sea_ship_mode
+        )
+        return candidates.id if len(candidates) == 1 else False
+
     @api.onchange('freight_type', 'ship_mode')
     def _onchange_job_type_classification(self):
         """Bantu isi/bersihkan job_type_id saat klasifikasi berubah:
@@ -65,3 +90,22 @@ class FreightJobTypeResolverMixin(models.AbstractModel):
                 record.job_type_id = False
             if not record.job_type_id and len(candidates) == 1:
                 record.job_type_id = candidates
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Jalur programmatic (Quotation -> Booking, Quotation -> Job
+        direct, dst.): onchange TIDAK pernah jalan saat record dibuat
+        lewat Python, jadi auto-fill job_type_id perlu di-resolve di sini
+        juga -- pakai resolver yang SAMA dengan onchange
+        (`_resolve_job_type_id_from_vals`), bukan logic terpisah.
+
+        `job_type_id` yang sudah diberikan eksplisit di vals (key ada,
+        termasuk kalau isinya False/kosong secara sengaja) TIDAK PERNAH
+        ditimpa -- resolver hanya mengisi saat key-nya benar-benar tidak
+        ada di vals."""
+        for vals in vals_list:
+            if 'job_type_id' not in vals:
+                resolved = self._resolve_job_type_id_from_vals(vals)
+                if resolved:
+                    vals['job_type_id'] = resolved
+        return super().create(vals_list)
