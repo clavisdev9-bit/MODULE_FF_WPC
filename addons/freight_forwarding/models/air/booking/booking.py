@@ -11,8 +11,10 @@ class FreightAirBooking(models.Model):
         'freight.air.shipment.info.mixin',
         'freight.air.cargo.info.mixin',
         'freight.commercial.group.mixin',
+        'freight.job.type.resolver.mixin',
     ]
     _order = 'id desc'
+    _job_type_business_type = 'air'
     _sql_constraints = [
         ('document_id_uniq', 'unique(document_id)',
          'AWB ini sudah dipakai Booking lain.'),
@@ -272,6 +274,10 @@ class FreightAirBooking(models.Model):
             'booking_id': self.id,
             'freight_type': self.freight_type,
             'company_id': self.company_id.id,
+            # FF-79: copy sekali saat create -- setelah ini Booking dan Job
+            # TIDAK live-sync, job_type_id Job independen dan boleh diubah
+            # manual (Change Job Type) tanpa mempengaruhi Booking.
+            'job_type_id': self.job_type_id.id if self.job_type_id else False,
             # FF-75 follow-up (Section E): Master TIDAK boleh mengambil
             # Customer dari Booking secara otomatis -- semantic Customer
             # Master consolidation belum dipastikan.

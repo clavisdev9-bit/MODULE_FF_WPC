@@ -130,6 +130,19 @@ class PurchaseOrder(models.Model):
 
         return invoice_vals
 
+    def _get_freight_job_type(self):
+        """FF-79: Job Type dari Sea/Air Jobsheet terkait PO ini, dipakai
+        resolve Cost Account mapping (Product/Charge Code x Job Type)."""
+        self.ensure_one()
+        job = self.sea_job_id or self.env["freight.sea.job"].search(
+            [("purchase_order_ids", "=", self.id)], limit=1
+        )
+        if not job:
+            job = self.air_job_id or self.env["freight.air.job"].search(
+                [("purchase_order_ids", "=", self.id)], limit=1
+            )
+        return job.job_type_id if job else self.env["freight.job.type"]
+
 
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
@@ -161,6 +174,13 @@ class PurchaseOrderLine(models.Model):
     def _get_freight_analytic_account(self):
         return self._get_sea_job_analytic_account() or self._get_air_job_analytic_account()
 
+    def _get_freight_job_type(self):
+        """FF-79: Job Type dari Jobsheet terkait PO ini, dipakai resolve
+        Cost Account mapping (Product/Charge Code x Job Type)."""
+        if self.order_id and hasattr(self.order_id, "_get_freight_job_type"):
+            return self.order_id._get_freight_job_type()
+        return self.env["freight.job.type"]
+
     @api.depends("product_id", "order_id.sea_job_id", "order_id.air_job_id")
     def _compute_analytic_distribution(self):
         super()._compute_analytic_distribution()
@@ -176,5 +196,13 @@ class PurchaseOrderLine(models.Model):
             analytic_account = self._get_freight_analytic_account()
             if analytic_account:
                 res["analytic_distribution"] = {str(analytic_account.id): 100.0}
+        if self.product_id and self.product_id.product_tmpl_id:
+            job_type = self._get_freight_job_type()
+            if job_type:
+                cost_account = self.env["freight.charge.code.account.mapping"]._resolve_account(
+                    self.product_id.product_tmpl_id, job_type, "cost_account_id"
+                )
+                if cost_account:
+                    res["account_id"] = cost_account.id
         return res
 

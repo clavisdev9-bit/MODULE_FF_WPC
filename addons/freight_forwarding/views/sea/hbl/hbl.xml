@@ -66,6 +66,8 @@
                             <field name="master_job_id" string="Master Job No." invisible="record_level != 'house'" />
                             <field name="freight_type" />
                             <field name="ship_mode" />
+                            <field name="job_type_id"
+                                domain="[('business_type', '=', 'sea'), ('freight_type', '=', freight_type), ('sea_ship_mode', '=', ship_mode)]" />
                             <field name="booking_id" invisible="record_level == 'house'" />
                             <field name="job_date" />
                             <field name="job_city_id" />

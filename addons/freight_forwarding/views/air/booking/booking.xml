@@ -71,6 +71,8 @@
                                     readonly="air_job_count &gt; 0" />
                                 <field name="freight_type" invisible="1" />
                                 <field name="ship_mode" />
+                                <field name="job_type_id"
+                                    domain="[('business_type', '=', 'air'), ('freight_type', '=', freight_type)]" />
                                 <field name="payment_term_id" string="Credit Term" />
                                 <field name="wt_val" />
                                 <field name="other" />

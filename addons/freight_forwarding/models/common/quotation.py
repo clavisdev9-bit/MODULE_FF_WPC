@@ -442,6 +442,29 @@ class FreightQuotation(models.AbstractModel):
                 return hawb.analytic_account_id
         return False
 
+    def _get_freight_job(self):
+        """FF-79: resolve Sea/Air Job terkait quotation ini, dipakai untuk
+        mengambil job_type_id (account mapping resolver) -- mirror strategi
+        resolve yang sudah dipakai _get_sea_job_analytic_account/
+        _get_air_job_analytic_account (sea_job_id/air_job_id langsung, atau
+        commercial group kalau resolve ke tepat satu Jobsheet)."""
+        self.ensure_one()
+        if hasattr(self, "sea_job_id") and self.sea_job_id:
+            return self.sea_job_id
+        if hasattr(self, "air_job_id") and self.air_job_id:
+            return self.air_job_id
+        hbls = self._get_commercial_group_jobsheets("freight.sea.job")
+        if len(hbls) == 1:
+            return hbls
+        hawbs = self._get_commercial_group_jobsheets("freight.air.job")
+        if len(hawbs) == 1:
+            return hawbs
+        return self.env["freight.sea.job"]
+
+    def _get_freight_job_type(self):
+        job = self._get_freight_job()
+        return job.job_type_id if job else self.env["freight.job.type"]
+
     def _prepare_invoice(self):
         invoice_vals = super()._prepare_invoice()
         if hasattr(self, "sea_job_id") and self.sea_job_id:
@@ -767,6 +790,13 @@ class SaleOrderLine(models.Model):
     def _get_freight_analytic_account(self):
         return self._get_sea_job_analytic_account() or self._get_air_job_analytic_account()
 
+    def _get_freight_job_type(self):
+        """FF-79: Job Type dari Jobsheet terkait order ini, dipakai resolve
+        Sales Account mapping (Product/Charge Code x Job Type)."""
+        if self.order_id and hasattr(self.order_id, "_get_freight_job_type"):
+            return self.order_id._get_freight_job_type()
+        return self.env["freight.job.type"]
+
     @api.depends("product_id", "order_id.sea_job_id", "order_id.air_job_id")
     def _compute_analytic_distribution(self):
         super()._compute_analytic_distribution()
@@ -782,5 +812,13 @@ class SaleOrderLine(models.Model):
             analytic_account = self._get_freight_analytic_account()
             if analytic_account:
                 res["analytic_distribution"] = {str(analytic_account.id): 100.0}
+        if self.product_id and self.product_id.product_tmpl_id:
+            job_type = self._get_freight_job_type()
+            if job_type:
+                sales_account = self.env["freight.charge.code.account.mapping"]._resolve_account(
+                    self.product_id.product_tmpl_id, job_type, "sales_account_id"
+                )
+                if sales_account:
+                    res["account_id"] = sales_account.id
         return res
 

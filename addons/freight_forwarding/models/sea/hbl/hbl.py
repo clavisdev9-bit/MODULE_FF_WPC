@@ -11,9 +11,11 @@ class SeaHBL(models.Model):
         "freight.sea.vessel.details.mixin",
         "freight.sea.bl.info.mixin",
         "freight.commercial.group.mixin",
+        "freight.job.type.resolver.mixin",
     ]
     _description = "Sea Job (Master/House)"
     _rec_name = "job_no"
+    _job_type_business_type = "sea"
     _sql_constraints = [
         ("job_no_uniq", "unique(job_no)", "Job No. harus unik."),
         ("document_id_uniq", "unique(document_id)", "B/L ini sudah dipakai Job lain."),
@@ -423,6 +425,15 @@ class SeaHBL(models.Model):
         }
         if master:
             vals["master_job_id"] = master.id
+            # FF-79: House pertama dari Booking->Master mengikuti job_type_id
+            # FINAL Master saat creation (copy sekali, bukan live-sync --
+            # sama seperti Master sendiri mengambil dari Booking di
+            # action_create_job(); Master/House boleh diubah manual setelah
+            # ini tanpa saling mempengaruhi). Untuk direct Quotation->House
+            # (master=False) job_type_id SENGAJA tidak diisi di sini --
+            # dibiarkan resolve sendiri dari freight_type/ship_mode di atas
+            # lewat auto-fill create() (freight.job.type.resolver.mixin).
+            vals["job_type_id"] = master.job_type_id.id if master.job_type_id else False
         return vals
 
     @api.onchange("from_city")

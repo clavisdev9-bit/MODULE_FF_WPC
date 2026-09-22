@@ -1,3 +1,4 @@
+from . import job_type_resolver_mixin
 from . import quotation
 from . import commercial_group_mixin
 from . import cargo_info_mixin
