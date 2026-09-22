@@ -52,7 +52,7 @@
                 <field name="email" invisible="not is_freight_quotation" />
                 <field name="phone" invisible="not is_freight_quotation" />
                 <field name="contact_person" invisible="not is_freight_quotation" />
-                <field name="salesman_id" invisible="not is_freight_quotation" />
+                <field name="user_id" invisible="not is_freight_quotation" />
             </xpath>
 
             <xpath expr="//group[@name='order_details']" position="replace">

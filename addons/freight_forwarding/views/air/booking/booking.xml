@@ -80,7 +80,7 @@
                                 <field name="delivery_type" />
                                 <field name="company_id" groups="base.group_multi_company"
                                     invisible="1" />
-                                <field name="salesman_id" invisible="1" />
+                                <field name="user_id" invisible="1" />
                             </group>
                         </group>
                         <group string="Routing &amp; Flights">
@@ -186,7 +186,7 @@
                     <field name="partner_id" string="Customer" />
                     <field name="departure_id" string="Departure" />
                     <field name="destination_id" string="Destination" />
-                    <field name="salesman_id" string="Salesperson" />
+                    <field name="user_id" string="Salesperson" />
                     <separator />
                     <filter name="filter_export" string="Export" domain="[('freight_type', '=', 'export')]" />
                     <filter name="filter_import" string="Import" domain="[('freight_type', '=', 'import')]" />

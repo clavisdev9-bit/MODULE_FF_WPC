@@ -176,7 +176,7 @@ class SeaHBL(models.Model):
     customer_ref = fields.Char(string="Customer Reference")
     actual_shipper = fields.Boolean(string="Actual Shipper")
     term_payment = fields.Many2one("account.payment.term", string="Terms of Payment")
-    salesman_id = fields.Many2one("hr.employee", string="Salesman")
+    user_id = fields.Many2one("res.users", string="Salesperson")
     export_sales_team_id = fields.Many2one(
         "res.partner",
         string="Export Sales Team",
@@ -420,6 +420,7 @@ class SeaHBL(models.Model):
             "ship_mode": quotation.sea_ship_mode,
             "customer_id": quotation.partner_id.id if quotation.partner_id else False,
             "term_payment": quotation.payment_term_id.id if quotation.payment_term_id else False,
+            "user_id": quotation.user_id.id if quotation.user_id else False,
             "job_date": fields.Date.context_today(self),
             "company_id": quotation.company_id.id if quotation.company_id else self.env.company.id,
         }

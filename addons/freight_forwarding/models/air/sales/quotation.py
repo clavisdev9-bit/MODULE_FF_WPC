@@ -164,10 +164,7 @@ class AirQuotation(models.Model):
         booking_vals = {
             "partner_id": self.partner_id.id,
             "customer_reference": self.reference_number or self.client_order_ref or False,
-            "salesman_id": (
-                self.user_id.id or
-                (self.salesman_id.user_id.id if hasattr(self.salesman_id, "user_id") and self.salesman_id.user_id else self.env.uid)
-            ),
+            "user_id": self.user_id.id if self.user_id else self.env.uid,
             "payment_term_id": self.payment_term_id.id if self.payment_term_id else False,
             "freight_type": self.freight_type,
             "company_id": self.company_id.id,

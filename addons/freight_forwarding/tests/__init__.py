@@ -12,4 +12,5 @@ from . import (
     test_ff75_hierarchy_followup,
     test_air_awb_master,
     test_ff79_job_type_account_mapping,
+    test_ff80_salesperson,
 )

@@ -46,7 +46,6 @@ class FreightQuotation(models.AbstractModel):
         compute="_compute_contact_person",
         store=False,
     )
-    salesman_id = fields.Many2one("hr.employee", string="Salesman")
     partner_id = fields.Many2one("res.partner", string="Customer")
     phone = fields.Char(related="partner_id.phone", string="Phone", readonly=True)
     email = fields.Char(related="partner_id.email", string="Email", readonly=True)
