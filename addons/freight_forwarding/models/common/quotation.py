@@ -693,7 +693,7 @@ class SaleOrderQuotation(models.Model):
             'order_line': [],
         })
         root = self.env["sale.order"].browse(original_id)
-        form_view_id = self._get_currency_variant_form_view_id(root.freight_business_type)
+        form_view_id = self._get_freight_quotation_form_view_id(root.freight_business_type)
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order',
@@ -703,19 +703,50 @@ class SaleOrderQuotation(models.Model):
             'target': 'current',
         }
 
-    _CURRENCY_VARIANT_FORM_VIEW_XMLID = {
+    # FF-73 UAT fix (Bug 2) mapping ini awalnya bernama _CURRENCY_VARIANT_FORM_VIEW_XMLID
+    # dan hanya dipakai untuk currency variant. FF-66 UAT follow-up: dipakai juga oleh
+    # Quote Info (action_open_freight_quotation_form) di luar konteks currency variant,
+    # jadi di-rename generic -- satu-satunya tempat mapping Sea/Air form view didefinisikan.
+    _FREIGHT_QUOTATION_FORM_VIEW_XMLID = {
         "air": "freight_forwarding.view_air_quotation_form",
         "sea": "freight_forwarding.view_sea_quotation_form",
     }
 
-    def _get_currency_variant_form_view_id(self, freight_business_type):
-        """FF-73 UAT fix (Bug 2): satu mekanisme pemilihan form view untuk
-        currency variant, dipakai bersama oleh action_create_currency_variant()
-        dan action_view_currency_variants(), berdasarkan freight_business_type
-        root -- supaya keduanya selalu konsisten (Sea/Air pakai form khusus,
-        selain itu fallback ke default form)."""
-        form_view_xmlid = self._CURRENCY_VARIANT_FORM_VIEW_XMLID.get(freight_business_type)
+    def _get_freight_quotation_form_view_id(self, freight_business_type):
+        """Satu mekanisme pemilihan form view Freight Quotation berdasarkan
+        freight_business_type, dipakai oleh action_create_currency_variant(),
+        action_view_currency_variants(), dan action_open_freight_quotation_form()
+        -- supaya semuanya selalu konsisten (Sea/Air pakai form khusus, selain
+        itu fallback ke False/default form)."""
+        form_view_xmlid = self._FREIGHT_QUOTATION_FORM_VIEW_XMLID.get(freight_business_type)
         return self.env.ref(form_view_xmlid).id if form_view_xmlid else False
+
+    def action_open_freight_quotation_form(self):
+        """FF-66 UAT follow-up: dipanggil dari tombol Open di tab Quote Info
+        milik res.partner. Embedded one2many (sale_order_ids) tidak bisa
+        menentukan form_view_ref secara dinamis per row berdasarkan
+        freight_business_type, jadi routing form dilakukan lewat action
+        eksplisit ini alih-alih mengandalkan default form resolution
+        sale.order.
+
+        Freight Quotation (is_freight_quotation=True) dengan
+        freight_business_type Sea/Air dibuka dengan form Freight yang sesuai.
+        Record non-Freight / tanpa freight_business_type yang dikenal jatuh
+        ke fallback aman: default sale.order form (tidak dipaksa pakai form
+        Freight)."""
+        self.ensure_one()
+        form_view_id = False
+        if self.is_freight_quotation:
+            form_view_id = self._get_freight_quotation_form_view_id(self.freight_business_type)
+        views = [(form_view_id, "form")] if form_view_id else [(False, "form")]
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "sale.order",
+            "res_id": self.id,
+            "view_mode": "form",
+            "views": views,
+            "target": "current",
+        }
 
     def action_view_currency_variants(self):
         """FF-73 UAT fix (Bug 1): action ini dulu tidak menentukan form view
@@ -730,7 +761,7 @@ class SaleOrderQuotation(models.Model):
         root = self.original_quotation_id if self.original_quotation_id else self
         domain = ['|', ('id', '=', root.id), ('original_quotation_id', '=', root.id)]
 
-        form_view = (self._get_currency_variant_form_view_id(root.freight_business_type), "form")
+        form_view = (self._get_freight_quotation_form_view_id(root.freight_business_type), "form")
 
         return {
             "name": "Currency Variants",

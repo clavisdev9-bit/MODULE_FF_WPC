@@ -4,24 +4,40 @@
          existing sale.order records (Quotation + confirmed Sales Order)
          linked via partner_id, using the native sale_order_ids One2many
          from the sale module. sale.order is the single source of truth
-         since FF-71, no data is copied to res.partner. -->
+         since FF-71, no data is copied to res.partner.
+
+         no_open="1" disables the default row click, which would otherwise
+         open the generic/default sale.order form, lacking the Sea/Air-
+         specific fields (e.g. sea_ship_mode); FF-66 UAT follow-up. The
+         explicit Open button below routes to the correct Freight form
+         (view_sea_quotation_form / view_air_quotation_form) via
+         action_open_freight_quotation_form(), based on
+         freight_business_type. -->
     <record id="view_partner_form_quote_info" model="ir.ui.view">
         <field name="name">res.partner.form.quote.info</field>
         <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
             <notebook position="inside">
                 <page string="Quote Info" name="quote_info">
                     <field name="sale_order_ids" nolabel="1" readonly="1">
-                        <list open_form_view="1">
-                            <field name="name" string="Quote No"/>
-                            <field name="date_order" string="Quote Date"/>
-                            <field name="freight_type" string="Type"/>
-                            <field name="quotation_title" string="Quote Title"/>
-                            <field name="salesman_id" string="Salesman"/>
-                            <field name="valid_from" string="Eff Date"/>
-                            <field name="validity_date" string="Exp Date"/>
-                            <field name="state" string="App"/>
+                        <list create="0"
+                            delete="0"
+                            edit="0"
+                            no_open="1">
+                            <field name="name" string="Quote No" />
+                            <field name="date_order" string="Quote Date" />
+                            <field name="freight_business_type" string="Business Type" />
+                            <field name="freight_type" string="Type" />
+                            <field name="quotation_title" string="Quote Title" />
+                            <field name="salesman_id" string="Salesman" />
+                            <field name="valid_from" string="Eff Date" />
+                            <field name="validity_date" string="Exp Date" />
+                            <field name="state" string="App" />
+                            <button name="action_open_freight_quotation_form"
+                                type="object"
+                                string="Open"
+                                icon="fa-external-link" />
                         </list>
                     </field>
                 </page>
