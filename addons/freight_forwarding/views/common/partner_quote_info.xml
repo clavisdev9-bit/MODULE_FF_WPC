@@ -33,7 +33,7 @@
                             <field name="salesman_id" string="Salesman" />
                             <field name="valid_from" string="Eff Date" />
                             <field name="validity_date" string="Exp Date" />
-                            <field name="state" string="App" />
+                            <field name="state" string="App" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'sale'"/>
                             <button name="action_open_freight_quotation_form"
                                 type="object"
                                 string="Open"
