@@ -223,6 +223,17 @@ class SeaBooking(models.Model):
         "account.payment.term",
         string="Payment Terms",
     )
+    # FF-80 (UAT revision): display-only, NOT a second source of truth --
+    # Salesperson tetap murni sale.order.user_id. Non-stored related supaya
+    # otomatis ikut berubah kalau quotation.user_id berubah, tanpa sync
+    # manual/propagation. Naming sengaja "salesperson_id" (bukan "user_id")
+    # supaya tidak terlihat seperti field canonical kedua.
+    salesperson_id = fields.Many2one(
+        "res.users",
+        string="Salesperson",
+        related="source_quotation_id.user_id",
+        readonly=True,
+    )
     sale_order_ids = fields.Many2many(
         "sale.order",
         string="Sales Orders",

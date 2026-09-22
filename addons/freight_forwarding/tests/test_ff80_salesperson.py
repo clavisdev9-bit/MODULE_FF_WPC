@@ -2,12 +2,17 @@
 Salesperson.
 
 Decision (post-UAT revision): Booking and Jobsheet (Sea + Air) must NOT
-carry a duplicate Salesperson field -- neither the old `salesman_id`
-(hr.employee on Sea, res.users on Air) nor a custom `user_id`. There is no
-propagation/copy of Salesperson from Quotation to Booking/Job. A downstream
-consumer that needs Salesperson resolves it via
-`source_quotation_id.user_id`, not a stored field. Master Job never has a
-Salesperson (it can group Houses from different quotations).
+carry a duplicate STORED Salesperson field -- neither the old `salesman_id`
+(hr.employee on Sea, res.users on Air) nor a custom stored `user_id`. There
+is no propagation/copy of Salesperson from Quotation to Booking/Job.
+
+Second UAT revision: downstream records with a clear source quotation may
+expose a READONLY, non-stored `salesperson_id` purely for display, derived
+live from `source_quotation_id.user_id` (Booking, House Job) or via
+`_get_source_quotation()` (Air Direct Job, existing FF-75 resolver). This is
+NOT a second source of truth -- it never diverges from the quotation and
+requires no sync. Master Job never has a Salesperson (it can group Houses
+from different quotations).
 
 `team_id` (Sales Team) stays independent and is never a Salesperson
 fallback.
@@ -32,29 +37,35 @@ class TestFF80QuotationSalesperson(FreightTestBase):
 
 
 class TestFF80BookingJobHaveNoCustomSalesperson(FreightTestBase):
-    """Sea/Air Booking and Job must not expose ANY custom Salesperson
-    field -- neither the pre-FF-80 `salesman_id` nor the reverted FF-80
-    `user_id` duplicate."""
+    """Sea/Air Booking and Job must not expose a STORED custom Salesperson
+    field -- neither the pre-FF-80 `salesman_id` nor the once-reverted FF-80
+    stored `user_id` duplicate. The display-only `salesperson_id` (added in
+    this revision) is expected to exist, but must be non-stored."""
 
-    def test_sea_booking_has_no_custom_salesperson_field(self):
-        fields_ = self.env["freight.sea.booking"]._fields
+    def _assert_display_only_salesperson_field(self, model_name):
+        fields_ = self.env[model_name]._fields
         self.assertNotIn("salesman_id", fields_)
         self.assertNotIn("user_id", fields_)
+        self.assertIn("salesperson_id", fields_)
+        field = fields_["salesperson_id"]
+        self.assertEqual(field.comodel_name, "res.users")
+        self.assertFalse(
+            field.store,
+            msg="salesperson_id harus non-stored -- murni display, bukan "
+                "source of truth kedua.",
+        )
 
-    def test_sea_job_has_no_custom_salesperson_field(self):
-        fields_ = self.env["freight.sea.job"]._fields
-        self.assertNotIn("salesman_id", fields_)
-        self.assertNotIn("user_id", fields_)
+    def test_sea_booking_has_no_stored_salesperson_field(self):
+        self._assert_display_only_salesperson_field("freight.sea.booking")
 
-    def test_air_booking_has_no_custom_salesperson_field(self):
-        fields_ = self.env["freight.air.booking"]._fields
-        self.assertNotIn("salesman_id", fields_)
-        self.assertNotIn("user_id", fields_)
+    def test_sea_job_has_no_stored_salesperson_field(self):
+        self._assert_display_only_salesperson_field("freight.sea.job")
 
-    def test_air_job_has_no_custom_salesperson_field(self):
-        fields_ = self.env["freight.air.job"]._fields
-        self.assertNotIn("salesman_id", fields_)
-        self.assertNotIn("user_id", fields_)
+    def test_air_booking_has_no_stored_salesperson_field(self):
+        self._assert_display_only_salesperson_field("freight.air.booking")
+
+    def test_air_job_has_no_stored_salesperson_field(self):
+        self._assert_display_only_salesperson_field("freight.air.job")
 
     def test_sea_quotation_to_booking_to_job_flow_still_works(self):
         """Regression: removing the Salesperson duplicate must not break
@@ -80,6 +91,102 @@ class TestFF80BookingJobHaveNoCustomSalesperson(FreightTestBase):
         master = self.env["freight.air.job"].browse(job_result["res_id"])
         self.assertTrue(master.exists())
         self.assertEqual(master.shipment_type, "master")
+
+
+class TestFF80DerivedSalespersonDisplay(FreightTestBase):
+    """salesperson_id (Booking Sea/Air, House Job Sea/Air) is a pure display
+    derivation of the related quotation's native user_id -- never stored,
+    never propagated/copied, and always in sync without manual action."""
+
+    def _create_air_quotation(self, **kwargs):
+        vals = {
+            "is_freight_quotation": True,
+            "freight_business_type": "air",
+            "freight_type": "export",
+            "partner_id": self.partner.id,
+        }
+        vals.update(kwargs)
+        return self.env["sale.order"].create(vals)
+
+    def test_sea_booking_salesperson_reads_from_quotation(self):
+        quotation = self._create_quotation(user_id=self.env.user.id)
+        booking = self._create_booking(quotation_id=quotation.id)
+        self.assertEqual(booking.salesperson_id, self.env.user)
+
+    def test_air_booking_salesperson_reads_from_quotation(self):
+        quotation = self._create_air_quotation(user_id=self.env.user.id)
+        booking = self.env["freight.air.booking"].create({
+            "partner_id": self.partner.id,
+            "source_quotation_id": quotation.id,
+        })
+        self.assertEqual(booking.salesperson_id, self.env.user)
+
+    def test_sea_house_job_salesperson_reads_from_quotation(self):
+        quotation = self._create_quotation(user_id=self.env.user.id)
+        master = self._create_hbl(record_level="master")
+        house = self._create_hbl(quotation_id=quotation.id, master_job_id=master.id)
+        self.assertEqual(house.salesperson_id, self.env.user)
+
+    def test_sea_master_job_has_no_canonical_salesperson(self):
+        master = self._create_hbl(record_level="master")
+        self.assertFalse(
+            master.salesperson_id,
+            msg="Master Job tidak punya source_quotation_id canonical -- "
+                "salesperson_id harus kosong.",
+        )
+
+    def test_air_house_job_salesperson_reads_from_quotation(self):
+        quotation = self._create_air_quotation(user_id=self.env.user.id)
+        master = self.env["freight.air.job"].create({"shipment_type": "master"})
+        house = self.env["freight.air.job"].create({
+            "shipment_type": "house",
+            "master_job_id": master.id,
+            "source_quotation_id": quotation.id,
+        })
+        self.assertEqual(house.salesperson_id, self.env.user)
+
+    def test_air_master_job_has_no_canonical_salesperson(self):
+        master = self.env["freight.air.job"].create({"shipment_type": "master"})
+        self.assertFalse(master.salesperson_id)
+
+    def test_air_direct_job_salesperson_uses_own_source_quotation(self):
+        quotation = self._create_air_quotation(user_id=self.env.user.id)
+        direct = self.env["freight.air.job"].create({
+            "shipment_type": "direct",
+            "source_quotation_id": quotation.id,
+        })
+        self.assertEqual(direct.salesperson_id, self.env.user)
+
+    def test_air_direct_job_salesperson_falls_back_to_booking_source(self):
+        """FF-75 existing resolver: Direct tanpa source_quotation_id sendiri
+        boleh resolve lewat booking_id._get_source_quotation() -- BUKAN
+        tebakan baru, murni dipakai untuk display Salesperson."""
+        quotation = self._create_air_quotation(user_id=self.env.user.id)
+        booking = self.env["freight.air.booking"].create({
+            "partner_id": self.partner.id,
+            "source_quotation_id": quotation.id,
+        })
+        direct = self.env["freight.air.job"].create({
+            "shipment_type": "direct",
+            "booking_id": booking.id,
+        })
+        self.assertEqual(direct.salesperson_id, self.env.user)
+
+    def test_sea_booking_salesperson_follows_quotation_change_without_manual_sync(self):
+        quotation = self._create_quotation(user_id=self.env.user.id)
+        booking = self._create_booking(quotation_id=quotation.id)
+        self.assertEqual(booking.salesperson_id, self.env.user)
+
+        other_user = self.env["res.users"].create({
+            "name": "FF-80 Other Salesperson",
+            "login": "ff80-other-salesperson@example.com",
+        })
+        quotation.write({"user_id": other_user.id})
+
+        self.assertEqual(
+            booking.salesperson_id, other_user,
+            msg="salesperson_id harus otomatis ikut berubah tanpa sync manual",
+        )
 
 
 class TestFF80SeaLegacyQuotationMigrationWizard(FreightTestBase):

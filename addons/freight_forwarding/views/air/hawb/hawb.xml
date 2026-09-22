@@ -85,6 +85,7 @@
                                 <field name="nomination_remark" placeholder="Nomination Remark..." invisible="not is_nomination"/>
                             </div>
                             <field name="customer_ref"/>
+                            <field name="salesperson_id" invisible="shipment_type == 'master'"/>
                             <field name="analytic_account_id" readonly="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
@@ -354,6 +355,7 @@
                         <field name="ship_mode"/>
                         <field name="term_payment"/>
                         <field name="service_level"/>
+                        <field name="salesperson_id" invisible="shipment_type == 'master'"/>
                         <field name="analytic_account_id" readonly="1"/>
                         <field name="company_id" groups="base.group_multi_company"/>
                     </group>

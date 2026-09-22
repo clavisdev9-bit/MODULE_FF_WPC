@@ -100,6 +100,21 @@ class FreightAirHawb(models.Model):
     is_nomination = fields.Boolean(string='Nomination Cargo')
     nomination_remark = fields.Char(string='Nomination Remark')
     term_payment = fields.Many2one('account.payment.term', string='Credit Term')
+    # FF-80 (UAT revision): display-only, NOT a second source of truth --
+    # Salesperson tetap murni sale.order.user_id. Non-stored compute (bukan
+    # `related=`) karena Direct butuh fallback lewat
+    # `_get_source_quotation()` (own source_quotation_id, atau
+    # booking_id._get_source_quotation() kalau Direct dibuat lewat Booking
+    # tanpa source_quotation_id sendiri -- resolver existing FF-75, BUKAN
+    # tebakan baru). Master TIDAK memiliki source quotation canonical
+    # (_get_source_quotation Master selalu False) sehingga otomatis kosong.
+    # Naming sengaja "salesperson_id" (bukan "user_id") supaya tidak
+    # terlihat seperti field canonical kedua.
+    salesperson_id = fields.Many2one(
+        'res.users',
+        string='Salesperson',
+        compute='_compute_salesperson_id',
+    )
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', copy=False)
 
     # -------------------------------------------------------------
@@ -234,6 +249,19 @@ class FreightAirHawb(models.Model):
         if self.shipment_type == 'direct' and self.booking_id:
             return self.booking_id._get_source_quotation()
         return False
+
+    # FF-80 (UAT revision): salesperson_id display field -- lihat definisi
+    # field untuk alasan pakai compute (bukan related=). Depends mengikuti
+    # persis jalur yang dibaca _get_source_quotation() di atas.
+    @api.depends(
+        'source_quotation_id.user_id',
+        'shipment_type',
+        'booking_id.source_quotation_id.user_id',
+    )
+    def _compute_salesperson_id(self):
+        for rec in self:
+            quotation = rec._get_source_quotation()
+            rec.salesperson_id = quotation.user_id if quotation else False
 
     @api.depends('purchase_order_ids')
     def _compute_purchase_order_count(self):

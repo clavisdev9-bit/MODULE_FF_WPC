@@ -74,6 +74,7 @@
                                 <field name="job_type_id"
                                     domain="[('business_type', '=', 'air'), ('freight_type', '=', freight_type)]" />
                                 <field name="payment_term_id" string="Credit Term" />
+                                <field name="salesperson_id" />
                                 <field name="wt_val" />
                                 <field name="other" />
                                 <field name="service_level" />
