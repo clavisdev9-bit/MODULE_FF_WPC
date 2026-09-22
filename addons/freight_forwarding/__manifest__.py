@@ -154,5 +154,6 @@
         "tests/test_ff75_hierarchy_followup.py",
         "tests/test_air_awb_master.py",
         "tests/test_ff79_job_type_account_mapping.py",
+        "tests/test_ff80_salesperson.py",
     ],
 }

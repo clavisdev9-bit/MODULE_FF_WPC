@@ -176,7 +176,20 @@ class SeaHBL(models.Model):
     customer_ref = fields.Char(string="Customer Reference")
     actual_shipper = fields.Boolean(string="Actual Shipper")
     term_payment = fields.Many2one("account.payment.term", string="Terms of Payment")
-    salesman_id = fields.Many2one("hr.employee", string="Salesman")
+    # FF-80 (UAT revision): display-only, NOT a second source of truth --
+    # Salesperson tetap murni sale.order.user_id. Non-stored related, relevan
+    # hanya untuk House (source_quotation_id House selalu terisi) -- Master
+    # TIDAK memiliki source_quotation_id canonical (lihat
+    # freight.commercial.group.mixin), jadi field ini otomatis kosong untuk
+    # Master tanpa perlu logic tambahan; form view menyembunyikannya untuk
+    # record_level != 'house'. Naming sengaja "salesperson_id" (bukan
+    # "user_id") supaya tidak terlihat seperti field canonical kedua.
+    salesperson_id = fields.Many2one(
+        "res.users",
+        string="Salesperson",
+        related="source_quotation_id.user_id",
+        readonly=True,
+    )
     export_sales_team_id = fields.Many2one(
         "res.partner",
         string="Export Sales Team",

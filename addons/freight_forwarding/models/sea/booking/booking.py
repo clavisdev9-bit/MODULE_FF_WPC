@@ -223,9 +223,16 @@ class SeaBooking(models.Model):
         "account.payment.term",
         string="Payment Terms",
     )
-    salesman_id = fields.Many2one(
-        "hr.employee",
-        string="Salesman",
+    # FF-80 (UAT revision): display-only, NOT a second source of truth --
+    # Salesperson tetap murni sale.order.user_id. Non-stored related supaya
+    # otomatis ikut berubah kalau quotation.user_id berubah, tanpa sync
+    # manual/propagation. Naming sengaja "salesperson_id" (bukan "user_id")
+    # supaya tidak terlihat seperti field canonical kedua.
+    salesperson_id = fields.Many2one(
+        "res.users",
+        string="Salesperson",
+        related="source_quotation_id.user_id",
+        readonly=True,
     )
     sale_order_ids = fields.Many2many(
         "sale.order",
@@ -468,7 +475,6 @@ class SeaBooking(models.Model):
                     "delivery_agent_id": self.delivery_agent_id.id if self.delivery_agent_id else False,
                     "term_payment": self.payment_term_id.id,
                     "job_date": self.job_date,
-                    "salesman_id": self.salesman_id.id if self.salesman_id else False,
                     "from_city": self.from_city.id if self.from_city else False,
                     "origin_country_id": self.origin_country_id.id if self.origin_country_id else False,
                     "to_city": self.to_city.id if self.to_city else False,

@@ -49,7 +49,17 @@ class FreightAirBooking(models.Model):
     booking_from = fields.Char(string='Booking From')
 
     payment_term_id = fields.Many2one('account.payment.term', string='Credit Term')
-    salesman_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
+    # FF-80 (UAT revision): display-only, NOT a second source of truth --
+    # Salesperson tetap murni sale.order.user_id. Non-stored related supaya
+    # otomatis ikut berubah kalau quotation.user_id berubah, tanpa sync
+    # manual/propagation. Naming sengaja "salesperson_id" (bukan "user_id")
+    # supaya tidak terlihat seperti field canonical kedua.
+    salesperson_id = fields.Many2one(
+        'res.users',
+        string='Salesperson',
+        related='source_quotation_id.user_id',
+        readonly=True,
+    )
     sale_order_ids = fields.Many2many(
         'sale.order',
         string='Sales Orders',
@@ -286,7 +296,6 @@ class FreightAirBooking(models.Model):
             'is_nomination': self.is_nomination,
             'nomination_remark': self.nomination_remark,
             'term_payment': self.payment_term_id.id if self.payment_term_id else False,
-            'salesman_id': self.salesman_id.id if self.salesman_id else False,
             # FF-76: Master harus memakai AWB Master yang EXACT sama dengan
             # Booking (legal chain exception), atau kosong kalau Booking
             # belum punya AWB (late assignment lewat Master, lihat
