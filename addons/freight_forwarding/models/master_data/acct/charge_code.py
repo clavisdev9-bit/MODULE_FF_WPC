@@ -24,40 +24,6 @@ CHARGE_UNIT_SELECTION = [
     ('invoice_charge_weight', 'Invoice Charge Weight'),
 ]
 
-# FF-81: Charge Units whose Quantity formula is documented/confirmed in the
-# UAT. Container-type units share the same "quantity = number of
-# containers" rule. Any Charge Unit not listed here has no confirmed
-# formula yet and must NOT be guessed (see FF-81 Out of Scope).
-_CONTAINER_CHARGE_UNITS = ('20ft', '40ft', '45ft', 'total_container')
-
-
-def compute_charge_quantity(charge_unit, container_count=None, cm3=None, kgs=None,
-                             house_count=None, volume=None, weight=None, pcs=None):
-    """Compute Quantity for a Charge Table / Cost Table line, based on the
-    effective Charge Unit, following the formulas confirmed in FF-81 UAT.
-
-    Returns ``None`` when `charge_unit` has no documented formula (the
-    Charge Unit selection stays available for those, but their quantity
-    behaviour is out of scope until a formula is confirmed).
-    """
-    if charge_unit in _CONTAINER_CHARGE_UNITS:
-        return container_count
-    if charge_unit == 'rev_ton_cw':
-        if cm3 is None or kgs is None:
-            return None
-        return max(cm3 / 6000.0, kgs)
-    if charge_unit == 'shipment':
-        return 1
-    if charge_unit == 'house':
-        return house_count
-    if charge_unit == 'volume':
-        return volume
-    if charge_unit == 'weight':
-        return weight
-    if charge_unit == 'pcs':
-        return pcs
-    return None
-
 
 class ProductTemplateChargeCode(models.Model):
     _inherit = 'product.template'

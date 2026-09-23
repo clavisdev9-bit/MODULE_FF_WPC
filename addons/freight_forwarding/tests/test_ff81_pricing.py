@@ -1,12 +1,7 @@
 """FF-81: Charge Table (product.pricelist header + product.pricelist.item
 rules) & Cost Table (flat product.supplierinfo) extension -- defaulting,
-Air/Sea isolation, editable override, and the documented Quantity
-Calculation formulas."""
+Air/Sea isolation, editable override, and the Cargo column."""
 from odoo.tests.common import TransactionCase
-
-from odoo.addons.freight_forwarding.models.master_data.acct.charge_code import (
-    compute_charge_quantity,
-)
 
 
 class TestFF81Pricing(TransactionCase):
@@ -150,29 +145,6 @@ class TestFF81Pricing(TransactionCase):
         self.assertNotIn(sea_line, air_result)
         self.assertIn(sea_line, sea_result)
         self.assertNotIn(air_line, sea_result)
-
-    # -- Quantity Calculation (documented formulas only) -----------------
-
-    def test_quantity_calculation_documented_formulas(self):
-        self.assertEqual(compute_charge_quantity('20ft', container_count=3), 3)
-        self.assertEqual(compute_charge_quantity('40ft', container_count=2), 2)
-        self.assertEqual(compute_charge_quantity('45ft', container_count=1), 1)
-        self.assertEqual(compute_charge_quantity('total_container', container_count=5), 5)
-        self.assertEqual(compute_charge_quantity('rev_ton_cw', cm3=12000, kgs=1.5), 2.0)
-        self.assertEqual(compute_charge_quantity('rev_ton_cw', cm3=3000, kgs=10), 10)
-        self.assertEqual(compute_charge_quantity('shipment'), 1)
-        self.assertEqual(compute_charge_quantity('house', house_count=4), 4)
-        self.assertEqual(compute_charge_quantity('volume', volume=7.5), 7.5)
-        self.assertEqual(compute_charge_quantity('weight', weight=120.0), 120.0)
-        self.assertEqual(compute_charge_quantity('pcs', pcs=8), 8)
-
-    def test_quantity_calculation_undocumented_unit_returns_none(self):
-        # rev_ton_rnd, subhouse_bl, ccfee, block_4m3, block_3m3,
-        # invoice_charge_weight have no confirmed formula in FF-81 -- must
-        # not be guessed.
-        for unit in ('rev_ton_rnd', 'subhouse_bl', 'ccfee', 'block_4m3',
-                     'block_3m3', 'invoice_charge_weight'):
-            self.assertIsNone(compute_charge_quantity(unit, container_count=1, kgs=1, cm3=1))
 
     # -- Explicitly out of scope ------------------------------------------
 
