@@ -62,4 +62,14 @@
         parent="menu_sub_parent_air_export_awb_preparation"
         action="action_freight_air_mawb_export"
         sequence="30" />
+
+    <!-- FF-81: Charge & Cost Table (native Sales/Vendor Pricelist) -->
+    <menuitem id="menu_air_charge_table" name="Charge Table"
+        parent="menu_parent_air"
+        action="action_freight_air_charge_table"
+        sequence="60" />
+    <menuitem id="menu_air_cost_table" name="Cost Table"
+        parent="menu_parent_air"
+        action="action_freight_air_cost_table"
+        sequence="70" />
 </odoo>

@@ -1,3 +1,5 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 access_freight_area,access.freight.area,model_freight_area,base.group_user,1,1,1,1
 access_freight_charge_code_account_mapping,access.freight.charge.code.account.mapping,model_freight_charge_code_account_mapping,base.group_user,1,1,1,1
+access_product_pricelist_item_freight_user,product.pricelist.item.freight.user,product.model_product_pricelist_item,base.group_user,1,1,1,1
+access_product_supplierinfo_freight_user,product.supplierinfo.freight.user,product.model_product_supplierinfo,base.group_user,1,1,1,1
