@@ -157,5 +157,6 @@
         "tests/test_ff79_job_type_account_mapping.py",
         "tests/test_ff80_salesperson.py",
         "tests/test_ff81_pricing.py",
+        "tests/test_ff81_pricelist_eligibility.py",
     ],
 }

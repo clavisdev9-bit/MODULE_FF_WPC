@@ -14,4 +14,5 @@ from . import (
     test_ff79_job_type_account_mapping,
     test_ff80_salesperson,
     test_ff81_pricing,
+    test_ff81_pricelist_eligibility,
 )

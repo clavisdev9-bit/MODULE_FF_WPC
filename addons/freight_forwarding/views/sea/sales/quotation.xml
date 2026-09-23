@@ -58,16 +58,23 @@
                 <group name="freight_order_details" invisible="not is_freight_quotation">
                     <field name="currency_id" />
                     <field name="currency_rate" />
-                    <field name="pricelist_id" />
+                    <field name="eligible_pricelist_ids" invisible="1" />
+                    <field name="pricelist_id" domain="[('id', 'in', eligible_pricelist_ids)]" />
                     <field name="payment_term_id" />
                     <field name="service_level" />
                     <field name="pricelist_id" readonly="state in ['cancel', 'sale']"
+                        domain="[('id', 'in', eligible_pricelist_ids)]"
                         groups="!product.group_product_pricelist" />
                     <field name="delivery_type_id" />
                     <field name="valid_from" />
                     <field name="validity_date" string="Valid To" />
                     <field name="reference_number" />
                     <field name="commodity_id" />
+                </group>
+                <group name="freight_charge" string="Freight Charge" invisible="not is_freight_quotation">
+                    <field name="port_of_loading_id" />
+                    <field name="port_of_discharge_id" />
+                    <field name="via_port_id" />
                 </group>
             </xpath>
 
