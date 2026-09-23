@@ -37,10 +37,10 @@
         <field name="inherit_id" ref="product.product_pricelist_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='item_ids']/list/field[@name='min_quantity']" position="after">
-                <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
-                <field name="ff_uom_id" optional="show" column_invisible="not context.get('ff_type_visible')"/>
-                <field name="ff_vat_id" optional="show" column_invisible="not context.get('ff_type_visible')"/>
-                <field name="ff_charge_unit" optional="show" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_cargo" optional="show" width="70px" invisible="not context.get('ff_cargo_visible')"/>
+                <field name="ff_uom_id" optional="show" width="70px" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_vat_id" optional="show" width="60px" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_charge_unit" optional="show" width="120px" column_invisible="not context.get('ff_type_visible')"/>
             </xpath>
             <!-- FF-81 additive header section: "Freight Forwarding". Sea vs
                  Air route fields are mutually exclusive via `ff_type`
@@ -70,8 +70,9 @@
                     <group>
                         <field name="ff_valid_flag"/>
                         <field name="ff_standard_charge_flag"/>
-                        <field name="ff_effective_date"/>
-                        <field name="ff_expiry_date"/>
+                        <field name="ff_effective_date" string="Validity Period" widget="daterange"
+                            options="{'end_date_field': 'ff_expiry_date', 'show_time': False}"/>
+                        <field name="ff_expiry_date" invisible="1"/>
                         <field name="ff_transit_time" string="Est. Transit Time (Day(s))"/>
                         <field name="ff_frequency"/>
                         <field name="ff_freight_collect"/>
@@ -118,10 +119,10 @@
         <field name="arch" type="xml">
             <field name="product_code" position="after">
                 <field name="ff_type" column_invisible="1"/>
-                <field name="ff_cargo" optional="show" column_invisible="not context.get('ff_type_visible') or not context.get('ff_cargo_visible')"/>
-                <field name="ff_uom_id" optional="show" column_invisible="not context.get('ff_type_visible')"/>
-                <field name="ff_vat_id" optional="show" column_invisible="not context.get('ff_type_visible')"/>
-                <field name="ff_charge_unit" optional="show" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_cargo" optional="show" width="70px" column_invisible="not context.get('ff_type_visible') or not context.get('ff_cargo_visible')"/>
+                <field name="ff_uom_id" optional="show" width="70px" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_vat_id" optional="show" width="60px" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_charge_unit" optional="show" width="120px" column_invisible="not context.get('ff_type_visible')"/>
             </field>
         </field>
     </record>

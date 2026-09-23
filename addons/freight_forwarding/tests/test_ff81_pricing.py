@@ -213,12 +213,13 @@ class TestFF81Pricing(TransactionCase):
         )
         arch = view['arch']
         for field_name in ('ff_uom_id', 'ff_vat_id', 'ff_charge_unit'):
+            self.assertIn(f'name="{field_name}" optional="show" width=', arch)
             self.assertIn(
-                f'name="{field_name}" optional="show" column_invisible="not context.get(\'ff_type_visible\')"',
+                f"column_invisible=\"not context.get('ff_type_visible')\"",
                 arch,
             )
+        self.assertIn('name="ff_cargo" optional="show" width=', arch)
         self.assertIn(
-            "name=\"ff_cargo\" optional=\"show\" "
             "column_invisible=\"not context.get('ff_type_visible') or "
             "not context.get('ff_cargo_visible')\"",
             arch,
@@ -258,11 +259,32 @@ class TestFF81Pricing(TransactionCase):
 
     def test_valid_flag_does_not_affect_native_active(self):
         pricelist = self.env['product.pricelist'].create({
-            'name': 'FF-81 Valid Flag Test', 'ff_type': 'sea', 'ff_valid_flag': 'N',
+            'name': 'FF-81 Valid Flag Test', 'ff_type': 'sea', 'ff_valid_flag': False,
         })
         self.assertTrue(pricelist.active)
         pricelist.active = False
-        self.assertEqual(pricelist.ff_valid_flag, 'N')
+        self.assertFalse(pricelist.ff_valid_flag)
+
+    def test_ff_flag_fields_are_boolean(self):
+        for field_name in ('ff_valid_flag', 'ff_standard_charge_flag', 'ff_freight_collect'):
+            self.assertEqual(
+                self.env['product.pricelist']._fields[field_name].type, 'boolean',
+                f'{field_name} must be a Boolean field',
+            )
+
+    def test_ff_note_is_text_note_code_is_char(self):
+        self.assertEqual(self.env['product.pricelist']._fields['ff_note'].type, 'text')
+        self.assertEqual(self.env['product.pricelist']._fields['ff_note_code'].type, 'char')
+
+    def test_header_validity_uses_daterange_widget(self):
+        view = self.env['product.pricelist'].get_view(
+            view_id=self.env.ref('freight_forwarding.view_pricelist_form_inherit_freight').id,
+            view_type='form',
+        )
+        arch = view['arch']
+        self.assertIn('widget="daterange"', arch)
+        self.assertIn("'end_date_field': 'ff_expiry_date'", arch)
+        self.assertIn('string="Validity Period"', arch)
 
     def test_job_type_module_related_readonly(self):
         job_type = self.env['freight.job.type'].create({
@@ -332,9 +354,9 @@ class TestFF81Pricing(TransactionCase):
         # actually computed for a rule -- only `fixed_price` matters here.
         pricelist = self.env['product.pricelist'].create({
             'name': 'FF-81 Storage Only Test', 'ff_type': 'sea',
-            'ff_valid_flag': 'N',
-            'ff_standard_charge_flag': 'N',
-            'ff_freight_collect': 'N',
+            'ff_valid_flag': False,
+            'ff_standard_charge_flag': False,
+            'ff_freight_collect': False,
             'ff_transit_time': 999,
             'ff_frequency': 'irrelevant',
             'ff_note': 'irrelevant',

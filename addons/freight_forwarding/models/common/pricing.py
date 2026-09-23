@@ -30,13 +30,6 @@ FF_PRICING_CARGO_SELECTION = [
     ('LCL', 'LCL'),
 ]
 
-# FF-81: Valid Flag / Standard Charge Flag / Freight Collect are storage-only
-# Y/N selections -- no business behaviour (see Jira "Field only" list).
-FF_YES_NO_SELECTION = [
-    ('Y', 'Y'),
-    ('N', 'N'),
-]
-
 # FF fields whose default comes from the Charge Code (product.template) and
 # that must be refreshed whenever the Product changes, unless the caller
 # explicitly supplied a value for that field in the same create/write call.
@@ -148,12 +141,12 @@ class ProductPricelistFreight(models.Model):
 
     # Field-only, no business behaviour (Jira "Field only" list) -- storage
     # only, must NOT drive `active`, pricing/rate matching, or billing.
-    ff_valid_flag = fields.Selection(FF_YES_NO_SELECTION, string='Valid Flag')
-    ff_standard_charge_flag = fields.Selection(FF_YES_NO_SELECTION, string='Standard Charge Flag')
+    ff_valid_flag = fields.Boolean(string='Valid Flag')
+    ff_standard_charge_flag = fields.Boolean(string='Standard Charge Flag')
     ff_transit_time = fields.Integer(string='Est. Transit Time')
     ff_frequency = fields.Char(string='Frequency')
-    ff_freight_collect = fields.Selection(FF_YES_NO_SELECTION, string='Freight Collect')
-    ff_note = fields.Char(string='Note')
+    ff_freight_collect = fields.Boolean(string='Freight Collect')
+    ff_note = fields.Text(string='Note')
     ff_note_code = fields.Char(string='Note Code')
 
     # Header validity -- see `_get_applicable_rules_domain` override below
