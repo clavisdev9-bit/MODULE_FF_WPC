@@ -183,3 +183,35 @@ class TestFF81Pricing(TransactionCase):
         keys = dict(charge_unit_field.selection)
         self.assertNotIn('cont', keys)
         self.assertNotIn('rate', keys)
+
+    # -- ff_cargo additive column on native list views ---------------------
+
+    def test_ff_cargo_column_present_on_pricelist_item_rules_list(self):
+        # Additive column on the native embedded Price Rules list -- must
+        # not touch/rename any native field (min_quantity stays intact).
+        view = self.env['product.pricelist'].get_view(
+            view_id=self.env.ref('freight_forwarding.view_pricelist_form_inherit_freight').id,
+            view_type='form',
+        )
+        self.assertIn('ff_cargo', view['arch'])
+        self.assertIn('min_quantity', view['arch'])
+
+    def test_ff_cargo_column_present_on_supplierinfo_list(self):
+        view = self.env['product.supplierinfo'].get_view(
+            view_id=self.env.ref('freight_forwarding.view_supplierinfo_list_inherit_freight').id,
+            view_type='list',
+        )
+        self.assertIn('ff_cargo', view['arch'])
+        self.assertIn('product_code', view['arch'])
+
+    def test_ff_cargo_hidden_for_air_visible_for_sea_on_pricelist_rules_list(self):
+        air_action = self.env.ref('freight_forwarding.action_freight_air_charge_table')
+        sea_action = self.env.ref('freight_forwarding.action_freight_sea_charge_table')
+        self.assertNotIn('ff_cargo_visible', air_action.context)
+        self.assertIn("'ff_cargo_visible': True", sea_action.context)
+
+    def test_ff_cargo_hidden_for_air_visible_for_sea_on_supplierinfo_list(self):
+        air_action = self.env.ref('freight_forwarding.action_freight_air_cost_table')
+        sea_action = self.env.ref('freight_forwarding.action_freight_sea_cost_table')
+        self.assertNotIn('ff_cargo_visible', air_action.context)
+        self.assertIn("'ff_cargo_visible': True", sea_action.context)

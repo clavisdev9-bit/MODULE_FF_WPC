@@ -16,7 +16,7 @@
                 <group string="Freight Forwarding" name="freight_forwarding_charge_table">
                     <group>
                         <field name="ff_description" readonly="1"/>
-                        <field name="ff_cargo" invisible="not context.get('ff_cargo_visible')"/>
+                        <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
                     </group>
                     <group>
                         <field name="ff_uom_id"/>
@@ -38,6 +38,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='item_ids']/list/field[@name='min_quantity']" position="after">
                 <field name="ff_description" readonly="1" optional="show"/>
+                <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
                 <field name="ff_uom_id" optional="show"/>
                 <field name="ff_vat_id" optional="show"/>
                 <field name="ff_charge_unit" optional="show"/>
@@ -57,7 +58,8 @@
                 <group string="Freight Forwarding" name="freight_forwarding_cost_table">
                     <group>
                         <field name="ff_description" readonly="1"/>
-                        <field name="ff_cargo" invisible="not context.get('ff_cargo_visible')"/>
+                        <field name="ff_cargo" optional="show"
+                            invisible="not context.get('ff_cargo_visible')" />
                     </group>
                     <group>
                         <field name="ff_uom_id"/>
@@ -78,6 +80,7 @@
         <field name="arch" type="xml">
             <field name="product_code" position="after">
                 <field name="ff_description" readonly="1" optional="show"/>
+                <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
                 <field name="ff_uom_id" optional="show"/>
                 <field name="ff_vat_id" optional="show"/>
                 <field name="ff_charge_unit" optional="show"/>
