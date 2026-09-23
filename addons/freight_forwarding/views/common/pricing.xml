@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- ============================================================
-         FF-81: Charge Table = native product.pricelist.item + FF fields.
-         Native form (product.product_pricelist_item_form_view) is only
-         extended additively with a new "Freight Forwarding" group;
-         no existing native field is hidden/renamed/moved.
+         FF-81: Charge Table = native product.pricelist header +
+         native product.pricelist.item rules. Native views (list, form,
+         search, and the embedded Price Rules list on the Pricelist form)
+         are only extended additively; no existing native field is
+         hidden/renamed/moved/rewritten.
     ============================================================ -->
     <record id="view_pricelist_item_form_inherit_freight" model="ir.ui.view">
         <field name="name">product.pricelist.item.form.inherit.freight</field>
@@ -27,44 +28,20 @@
         </field>
     </record>
 
-    <!-- Dedicated flat list for the Charge Table menu (Air/Sea). Kept
-         separate from the native product.pricelist.item.list views (used
-         inside Pricelist/Product screens) so those stay untouched. -->
-    <record id="view_pricelist_item_freight_charge_table_list" model="ir.ui.view">
-        <field name="name">product.pricelist.item.freight.charge.table.list</field>
-        <field name="model">product.pricelist.item</field>
+    <!-- Additive: surface the FF fields as extra columns on the native
+         "Price Rules" list embedded in the Pricelist form. No native
+         column is touched. -->
+    <record id="view_pricelist_form_inherit_freight" model="ir.ui.view">
+        <field name="name">product.pricelist.form.inherit.freight</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view"/>
         <field name="arch" type="xml">
-            <list string="Charge Table" editable="bottom">
-                <field name="pricelist_id"/>
-                <field name="product_tmpl_id" required="1" options="{'no_create_edit': 1}"/>
-                <field name="ff_description" readonly="1"/>
-                <field name="ff_cargo" column_invisible="not context.get('ff_cargo_visible')"/>
-                <field name="ff_uom_id"/>
-                <field name="ff_vat_id"/>
-                <field name="ff_charge_unit"/>
-                <field name="fixed_price" widget="monetary" string="Amount"
-                       options="{'currency_field': 'currency_id', 'field_digits': True}"/>
-                <field name="min_quantity"/>
-                <field name="currency_id" column_invisible="True"/>
-                <field name="applied_on" column_invisible="True"/>
-                <field name="compute_price" column_invisible="True"/>
-            </list>
-        </field>
-    </record>
-
-    <record id="view_pricelist_item_freight_charge_table_search" model="ir.ui.view">
-        <field name="name">product.pricelist.item.freight.charge.table.search</field>
-        <field name="model">product.pricelist.item</field>
-        <field name="arch" type="xml">
-            <search string="Charge Table">
-                <field name="product_tmpl_id"/>
-                <field name="pricelist_id"/>
-                <field name="ff_charge_unit"/>
-                <group expand="0" string="Group By">
-                    <filter name="group_pricelist" string="Pricelist" domain="[]" context="{'group_by': 'pricelist_id'}"/>
-                    <filter name="group_charge_unit" string="Charge Unit" domain="[]" context="{'group_by': 'ff_charge_unit'}"/>
-                </group>
-            </search>
+            <xpath expr="//field[@name='item_ids']/list/field[@name='min_quantity']" position="after">
+                <field name="ff_description" readonly="1" optional="show"/>
+                <field name="ff_uom_id" optional="show"/>
+                <field name="ff_vat_id" optional="show"/>
+                <field name="ff_charge_unit" optional="show"/>
+            </xpath>
         </field>
     </record>
 
@@ -92,50 +69,32 @@
         </field>
     </record>
 
-    <record id="view_supplierinfo_freight_cost_table_list" model="ir.ui.view">
-        <field name="name">product.supplierinfo.freight.cost.table.list</field>
+    <!-- Additive: surface the FF fields as extra columns on the native
+         Vendor Pricelist list. No native column is touched/renamed. -->
+    <record id="view_supplierinfo_list_inherit_freight" model="ir.ui.view">
+        <field name="name">product.supplierinfo.list.inherit.freight</field>
         <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
         <field name="arch" type="xml">
-            <list string="Cost Table" editable="bottom">
-                <field name="partner_id" required="1"/>
-                <field name="product_tmpl_id" required="1" options="{'no_create_edit': 1}"/>
-                <field name="ff_description" readonly="1"/>
-                <field name="ff_cargo" column_invisible="not context.get('ff_cargo_visible')"/>
-                <field name="ff_uom_id"/>
-                <field name="ff_vat_id"/>
-                <field name="ff_charge_unit"/>
-                <field name="price" widget="monetary" string="Amount"
-                       options="{'currency_field': 'currency_id', 'field_digits': True}"/>
-                <field name="min_qty"/>
-                <field name="currency_id" column_invisible="True"/>
-            </list>
-        </field>
-    </record>
-
-    <record id="view_supplierinfo_freight_cost_table_search" model="ir.ui.view">
-        <field name="name">product.supplierinfo.freight.cost.table.search</field>
-        <field name="model">product.supplierinfo</field>
-        <field name="arch" type="xml">
-            <search string="Cost Table">
-                <field name="product_tmpl_id"/>
-                <field name="partner_id"/>
-                <field name="ff_charge_unit"/>
-                <group expand="0" string="Group By">
-                    <filter name="group_partner" string="Vendor" domain="[]" context="{'group_by': 'partner_id'}"/>
-                    <filter name="group_charge_unit" string="Charge Unit" domain="[]" context="{'group_by': 'ff_charge_unit'}"/>
-                </group>
-            </search>
+            <field name="product_code" position="after">
+                <field name="ff_description" readonly="1" optional="show"/>
+                <field name="ff_uom_id" optional="show"/>
+                <field name="ff_vat_id" optional="show"/>
+                <field name="ff_charge_unit" optional="show"/>
+            </field>
         </field>
     </record>
 
     <!-- ============================================================
-         Actions: one model per pricing type (Charge Table / Cost Table),
-         Air vs Sea differentiated only by domain + default context
-         (`ff_type` is never shown to the user).
+         Actions: Air vs Sea differentiated only by domain + default
+         context (`ff_type` is never shown to the user). Native views are
+         used as-is (no view_ids override), so the full native Pricelist /
+         Vendor Pricelist experience (header + rules, chatter, etc.) is
+         preserved.
     ============================================================ -->
     <record id="action_freight_air_charge_table" model="ir.actions.act_window">
         <field name="name">Charge Table</field>
-        <field name="res_model">product.pricelist.item</field>
+        <field name="res_model">product.pricelist</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('ff_type', '=', 'air')]</field>
         <field name="context">{
@@ -143,17 +102,11 @@
             'default_applied_on': '1_product',
             'default_compute_price': 'fixed',
         }</field>
-        <field name="search_view_id" ref="view_pricelist_item_freight_charge_table_search"/>
-        <field name="view_ids" eval="[
-            (5, 0, 0),
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_pricelist_item_freight_charge_table_list')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('product.product_pricelist_item_form_view')}),
-        ]"/>
     </record>
 
     <record id="action_freight_sea_charge_table" model="ir.actions.act_window">
         <field name="name">Charge Table</field>
-        <field name="res_model">product.pricelist.item</field>
+        <field name="res_model">product.pricelist</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('ff_type', '=', 'sea')]</field>
         <field name="context">{
@@ -162,12 +115,6 @@
             'default_compute_price': 'fixed',
             'ff_cargo_visible': True,
         }</field>
-        <field name="search_view_id" ref="view_pricelist_item_freight_charge_table_search"/>
-        <field name="view_ids" eval="[
-            (5, 0, 0),
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_pricelist_item_freight_charge_table_list')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('product.product_pricelist_item_form_view')}),
-        ]"/>
     </record>
 
     <record id="action_freight_air_cost_table" model="ir.actions.act_window">
@@ -175,13 +122,7 @@
         <field name="res_model">product.supplierinfo</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('ff_type', '=', 'air')]</field>
-        <field name="context">{'default_ff_type': 'air'}</field>
-        <field name="search_view_id" ref="view_supplierinfo_freight_cost_table_search"/>
-        <field name="view_ids" eval="[
-            (5, 0, 0),
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_supplierinfo_freight_cost_table_list')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('product.product_supplierinfo_form_view')}),
-        ]"/>
+        <field name="context">{'default_ff_type': 'air', 'visible_product_tmpl_id': False}</field>
     </record>
 
     <record id="action_freight_sea_cost_table" model="ir.actions.act_window">
@@ -189,12 +130,10 @@
         <field name="res_model">product.supplierinfo</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('ff_type', '=', 'sea')]</field>
-        <field name="context">{'default_ff_type': 'sea', 'ff_cargo_visible': True}</field>
-        <field name="search_view_id" ref="view_supplierinfo_freight_cost_table_search"/>
-        <field name="view_ids" eval="[
-            (5, 0, 0),
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_supplierinfo_freight_cost_table_list')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('product.product_supplierinfo_form_view')}),
-        ]"/>
+        <field name="context">{
+            'default_ff_type': 'sea',
+            'visible_product_tmpl_id': False,
+            'ff_cargo_visible': True,
+        }</field>
     </record>
 </odoo>

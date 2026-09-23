@@ -1,6 +1,7 @@
-"""FF-81: Charge Table (product.pricelist.item) & Cost Table
-(product.supplierinfo) extension -- defaulting, Air/Sea isolation,
-editable override, and the documented Quantity Calculation formulas."""
+"""FF-81: Charge Table (product.pricelist header + product.pricelist.item
+rules) & Cost Table (flat product.supplierinfo) extension -- defaulting,
+Air/Sea isolation, editable override, and the documented Quantity
+Calculation formulas."""
 from odoo.tests.common import TransactionCase
 
 from odoo.addons.freight_forwarding.models.master_data.acct.charge_code import (
@@ -31,6 +32,7 @@ class TestFF81Pricing(TransactionCase):
         })
         cls.pricelist = cls.env['product.pricelist'].create({
             'name': 'FF-81 Test Pricelist',
+            'ff_type': 'sea',
         })
         cls.vendor = cls.env['res.partner'].create({'name': 'FF-81 Test Vendor'})
 
@@ -57,31 +59,30 @@ class TestFF81Pricing(TransactionCase):
     # -- Defaulting (server-side create, not just onchange) -------------
 
     def test_charge_table_defaults_from_product_on_create(self):
-        line = self._create_charge_line(ff_type='sea')
+        line = self._create_charge_line()
         self.assertEqual(line.ff_uom_id, self.uom_unit)
         self.assertEqual(line.ff_vat_id, self.tax_vat)
         self.assertEqual(line.ff_charge_unit, 'house')
-        self.assertEqual(line.ff_description, 'FF81-OF - Ocean Freight')
+        self.assertEqual(line.ff_description, 'Ocean Freight')
 
     def test_cost_table_defaults_from_product_on_create(self):
         line = self._create_cost_line(ff_type='air')
         self.assertEqual(line.ff_uom_id, self.uom_unit)
         self.assertEqual(line.ff_vat_id, self.tax_vat)
         self.assertEqual(line.ff_charge_unit, 'house')
+        self.assertEqual(line.ff_description, 'Ocean Freight')
 
     def test_charge_table_explicit_override_not_overwritten_on_create(self):
         other_tax = self.env['account.tax'].create({
             'name': 'FF-81 Override VAT', 'amount': 5.0, 'type_tax_use': 'sale',
         })
-        line = self._create_charge_line(
-            ff_type='sea', ff_vat_id=other_tax.id, ff_charge_unit='volume',
-        )
+        line = self._create_charge_line(ff_vat_id=other_tax.id, ff_charge_unit='volume')
         self.assertEqual(line.ff_vat_id, other_tax)
         self.assertEqual(line.ff_charge_unit, 'volume')
         # UoM was not overridden -> still defaults from the Charge Code.
         self.assertEqual(line.ff_uom_id, self.uom_unit)
 
-    def test_charge_table_defaults_reapplied_on_product_change_via_write(self):
+    def test_charge_table_defaults_refreshed_on_product_change_via_write(self):
         other_uom = self.env.ref('uom.product_uom_dozen')
         other_charge_code = self.env['product.template'].create({
             'name': 'Placeholder 2',
@@ -92,29 +93,53 @@ class TestFF81Pricing(TransactionCase):
             'cc_uom_id': other_uom.id,
             'cc_charge_unit': 'pcs',
         })
-        line = self._create_charge_line(ff_type='sea')
-        line.write({'product_tmpl_id': other_charge_code.id, 'ff_charge_unit': False, 'ff_uom_id': False})
+        line = self._create_charge_line()
+        # Switching Item Code alone (no manual clearing of the old
+        # defaults first) must refresh UoM/VAT/Charge Unit from the NEW
+        # product.
+        line.write({'product_tmpl_id': other_charge_code.id})
         self.assertEqual(line.ff_uom_id, other_uom)
         self.assertEqual(line.ff_charge_unit, 'pcs')
-        self.assertEqual(line.ff_description, 'FF81-HC - Handling Charge')
+        self.assertFalse(line.ff_vat_id)
+        self.assertEqual(line.ff_description, 'Handling Charge')
 
-    # -- Air/Sea isolation via ff_type ----------------------------------
+    def test_charge_table_explicit_override_not_overwritten_on_product_change_write(self):
+        other_charge_code = self.env['product.template'].create({
+            'name': 'Placeholder 3',
+            'is_charge_code': True,
+            'type': 'service',
+            'cc_item_code': 'FF81-HC2',
+            'cc_item_description': 'Handling Charge 2',
+            'cc_uom_id': self.env.ref('uom.product_uom_dozen').id,
+            'cc_charge_unit': 'pcs',
+        })
+        line = self._create_charge_line()
+        # Product change + an explicit Charge Unit supplied in the SAME
+        # write call -> Charge Unit override is preserved, UoM still
+        # refreshes from the new product.
+        line.write({'product_tmpl_id': other_charge_code.id, 'ff_charge_unit': 'weight'})
+        self.assertEqual(line.ff_charge_unit, 'weight')
+        self.assertEqual(line.ff_uom_id, self.env.ref('uom.product_uom_dozen'))
+
+    # -- Air/Sea isolation ------------------------------------------------
 
     def test_charge_table_air_sea_isolation(self):
-        air_line = self._create_charge_line(ff_type='air')
-        sea_line = self._create_charge_line(ff_type='sea')
+        # Charge Table isolation lives at the Pricelist (header) level.
+        air_pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Air Pricelist', 'ff_type': 'air',
+        })
         air_action = self.env.ref('freight_forwarding.action_freight_air_charge_table')
         sea_action = self.env.ref('freight_forwarding.action_freight_sea_charge_table')
-        air_domain = eval(air_action.domain)
-        sea_domain = eval(sea_action.domain)
-        air_result = self.env['product.pricelist.item'].search(air_domain)
-        sea_result = self.env['product.pricelist.item'].search(sea_domain)
-        self.assertIn(air_line, air_result)
-        self.assertNotIn(sea_line, air_result)
-        self.assertIn(sea_line, sea_result)
-        self.assertNotIn(air_line, sea_result)
+        air_result = self.env['product.pricelist'].search(eval(air_action.domain))
+        sea_result = self.env['product.pricelist'].search(eval(sea_action.domain))
+        self.assertIn(air_pricelist, air_result)
+        self.assertNotIn(self.pricelist, air_result)
+        self.assertIn(self.pricelist, sea_result)
+        self.assertNotIn(air_pricelist, sea_result)
 
     def test_cost_table_air_sea_isolation(self):
+        # Cost Table isolation stays on the flat product.supplierinfo
+        # record (not symmetrical with Charge Table).
         air_line = self._create_cost_line(ff_type='air')
         sea_line = self._create_cost_line(ff_type='sea')
         air_action = self.env.ref('freight_forwarding.action_freight_air_cost_table')
@@ -148,3 +173,13 @@ class TestFF81Pricing(TransactionCase):
         for unit in ('rev_ton_rnd', 'subhouse_bl', 'ccfee', 'block_4m3',
                      'block_3m3', 'invoice_charge_weight'):
             self.assertIsNone(compute_charge_quantity(unit, container_count=1, kgs=1, cm3=1))
+
+    # -- Explicitly out of scope ------------------------------------------
+
+    def test_cont_and_rate_charge_units_not_defined(self):
+        # "Cont" and "Rate" are not part of the documented Charge Unit
+        # selection (see FF-81 Out of Scope) -- confirm they remain absent.
+        charge_unit_field = self.env['product.pricelist.item']._fields['ff_charge_unit']
+        keys = dict(charge_unit_field.selection)
+        self.assertNotIn('cont', keys)
+        self.assertNotIn('rate', keys)
