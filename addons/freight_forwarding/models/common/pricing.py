@@ -5,7 +5,8 @@ fields instead of building a custom header/line model.
 
 Architecture:
 - Charge Table = native `product.pricelist` header (carries `ff_type`,
-  hidden, used only for Air/Sea action domain/context) with native
+  hidden, used only for Air/Sea action domain/context, plus the additive
+  "Freight Forwarding" header fields from the Jira ticket) with native
   `product.pricelist.item` rules (carry the FF pricing fields).
 - Cost Table = native flat `product.supplierinfo`, one record per
   vendor/product; NOT symmetrical with Charge Table, so it carries both
@@ -29,6 +30,13 @@ FF_PRICING_CARGO_SELECTION = [
     ('LCL', 'LCL'),
 ]
 
+# FF-81: Valid Flag / Standard Charge Flag / Freight Collect are storage-only
+# Y/N selections -- no business behaviour (see Jira "Field only" list).
+FF_YES_NO_SELECTION = [
+    ('Y', 'Y'),
+    ('N', 'N'),
+]
+
 # FF fields whose default comes from the Charge Code (product.template) and
 # that must be refreshed whenever the Product changes, unless the caller
 # explicitly supplied a value for that field in the same create/write call.
@@ -43,10 +51,9 @@ class FreightPricingMixin(models.AbstractModel):
     _name = 'freight.pricing.mixin'
     _description = 'Freight Forwarding Pricing Extension (Charge/Cost Table)'
 
+    # Cargo (FCL/LCL) is Sea-only; additive column, hidden on Air via
+    # context (see action definitions below) -- never shown/required on Air.
     ff_cargo = fields.Selection(FF_PRICING_CARGO_SELECTION, string='Cargo')
-    ff_description = fields.Char(
-        string='Description', compute='_compute_ff_description', store=True,
-    )
     ff_uom_id = fields.Many2one('uom.uom', string='UoM')
     ff_vat_id = fields.Many2one('account.tax', string='VAT')
     ff_charge_unit = fields.Selection(CHARGE_UNIT_SELECTION, string='Charge Unit')
@@ -54,15 +61,6 @@ class FreightPricingMixin(models.AbstractModel):
     def _ff_pricing_product_template(self):
         self.ensure_one()
         return self.product_tmpl_id or self.product_id.product_tmpl_id
-
-    @api.depends(
-        'product_tmpl_id', 'product_id',
-        'product_tmpl_id.cc_item_description', 'product_id.product_tmpl_id.cc_item_description',
-    )
-    def _compute_ff_description(self):
-        for rec in self:
-            product = rec._ff_pricing_product_template()
-            rec.ff_description = product.cc_item_description if product else False
 
     def _apply_ff_pricing_defaults(self, explicit_fields=()):
         """Default UoM/VAT/Charge Unit from the selected Charge Code.
@@ -122,10 +120,103 @@ class ProductSupplierinfoFreight(models.Model):
 
 
 class ProductPricelistFreight(models.Model):
-    """Charge Table header."""
+    """Charge Table header.
+
+    Native `name` remains the SOLE mandatory header field (Charge Table
+    No.). Native `currency_id`, `company_id`, `country_group_ids` and
+    `active` are unchanged. Everything below is additive/optional, grouped
+    under a "Freight Forwarding" section on the native Pricelist form.
+    """
     _name = 'product.pricelist'
     _inherit = ['product.pricelist']
 
     # Not shown to the user -- only used by Air/Sea menus & actions to
     # create/filter Charge Tables (see FF-81).
     ff_type = fields.Selection(FF_PRICING_TYPE_SELECTION, string='Type')
+
+    # -- Common header fields (Air & Sea), all optional ---------------------
+    ff_description = fields.Char(string='Description')
+    ff_job_type_id = fields.Many2one('freight.job.type', string='Job Type')
+    # Module is NOT independently input -- it is a straight readonly
+    # reflection of the selected Job Type's Module Code (see Jira "Job
+    # Type/Module: dua field berbeda ... tidak diinput independen").
+    ff_module_code = fields.Char(
+        related='ff_job_type_id.module_code', string='Module', readonly=True,
+    )
+    ff_customer_id = fields.Many2one('res.partner', string='Customer')
+    ff_destination_city_id = fields.Many2one('res.city', string='Destination')
+
+    # Field-only, no business behaviour (Jira "Field only" list) -- storage
+    # only, must NOT drive `active`, pricing/rate matching, or billing.
+    ff_valid_flag = fields.Selection(FF_YES_NO_SELECTION, string='Valid Flag')
+    ff_standard_charge_flag = fields.Selection(FF_YES_NO_SELECTION, string='Standard Charge Flag')
+    ff_transit_time = fields.Integer(string='Est. Transit Time')
+    ff_frequency = fields.Char(string='Frequency')
+    ff_freight_collect = fields.Selection(FF_YES_NO_SELECTION, string='Freight Collect')
+    ff_note = fields.Char(string='Note')
+    ff_note_code = fields.Char(string='Note Code')
+
+    # Header validity -- see `_get_applicable_rules_domain` override below
+    # for the read-time precedence rule over native line date_start/date_end.
+    ff_effective_date = fields.Date(string='Effective Date')
+    ff_expiry_date = fields.Date(string='Expiry Date')
+
+    # -- Sea-specific route fields (ff_type == 'sea') ------------------------
+    ff_port_of_loading_id = fields.Many2one('freight.port', string='Port of Loading')
+    ff_port_of_discharge_id = fields.Many2one('freight.port', string='Port of Discharge')
+    ff_via_port_id = fields.Many2one('freight.port', string='Via Port')
+
+    # -- Air-specific route fields (ff_type == 'air') ------------------------
+    ff_airport_of_origin_id = fields.Many2one('freight.airport', string='Airport of Origin/Departure')
+    ff_airport_of_destination_id = fields.Many2one('freight.airport', string='Airport of Destination')
+    ff_via_airport_id = fields.Many2one('freight.airport', string='Via Airport')
+
+    # -- Header validity precedence over native line date_start/date_end ----
+    # Jira "Header Validity": if the header boundary (Effective/Expiry Date)
+    # is filled, it takes precedence over EVERY line's native date_start/
+    # date_end for that boundary; an empty header boundary falls back to
+    # each line's own native date. This is implemented purely as a read-time
+    # override of the rule-matching domain -- native line Start/End Date
+    # fields are never touched/copied/mutated.
+    def _get_applicable_rules_domain(self, products, date, **kwargs):
+        domain = super()._get_applicable_rules_domain(products, date, **kwargs)
+        if not self or not (self.ff_effective_date or self.ff_expiry_date):
+            return domain
+
+        check_date = fields.Date.to_date(date) if date else fields.Date.context_today(self)
+        domain = list(domain)
+
+        if self.ff_effective_date:
+            domain = self._ff_strip_date_domain_clause(domain, 'date_start')
+            if check_date < self.ff_effective_date:
+                # Whole Charge Table not yet effective -- no line can match.
+                domain.append(('id', '=', False))
+
+        if self.ff_expiry_date:
+            domain = self._ff_strip_date_domain_clause(domain, 'date_end')
+            if check_date > self.ff_expiry_date:
+                # Whole Charge Table expired -- no line can match.
+                domain.append(('id', '=', False))
+
+        return domain
+
+    @api.model
+    def _ff_strip_date_domain_clause(self, domain, field_name):
+        """Remove the native `'|', (field_name, '=', False), (field_name, OP, date)`
+        triple for `field_name` from a domain built by
+        `_get_applicable_rules_domain`, leaving every other clause intact."""
+        result = []
+        i = 0
+        while i < len(domain):
+            item = domain[i]
+            if (
+                item == '|'
+                and i + 2 < len(domain)
+                and isinstance(domain[i + 1], (tuple, list))
+                and domain[i + 1][0] == field_name
+            ):
+                i += 3
+                continue
+            result.append(item)
+            i += 1
+        return result

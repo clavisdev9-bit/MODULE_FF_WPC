@@ -15,7 +15,6 @@
             <group name="pricelist_rule_computation" position="after">
                 <group string="Freight Forwarding" name="freight_forwarding_charge_table">
                     <group>
-                        <field name="ff_description" readonly="1"/>
                         <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
                     </group>
                     <group>
@@ -37,11 +36,44 @@
         <field name="inherit_id" ref="product.product_pricelist_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='item_ids']/list/field[@name='min_quantity']" position="after">
-                <field name="ff_description" readonly="1" optional="show"/>
                 <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
                 <field name="ff_uom_id" optional="show"/>
                 <field name="ff_vat_id" optional="show"/>
                 <field name="ff_charge_unit" optional="show"/>
+            </xpath>
+            <!-- FF-81 additive header section: "Freight Forwarding". Sea vs
+                 Air route fields are mutually exclusive via `ff_type`
+                 (technical, never shown). Destination (res.city) is common
+                 to both. `ff_type` itself is added invisible only so the
+                 invisible conditions below can evaluate client-side. -->
+            <xpath expr="//notebook" position="before">
+                <field name="ff_type" invisible="1"/>
+                <group string="Freight Forwarding" name="freight_forwarding_pricelist_header">
+                    <group>
+                        <field name="ff_description"/>
+                        <field name="ff_job_type_id"/>
+                        <field name="ff_module_code"/>
+                        <field name="ff_customer_id"/>
+                        <field name="ff_destination_city_id"/>
+                        <field name="ff_port_of_loading_id" invisible="ff_type != 'sea'"/>
+                        <field name="ff_port_of_discharge_id" invisible="ff_type != 'sea'"/>
+                        <field name="ff_via_port_id" invisible="ff_type != 'sea'"/>
+                        <field name="ff_airport_of_origin_id" invisible="ff_type != 'air'"/>
+                        <field name="ff_airport_of_destination_id" invisible="ff_type != 'air'"/>
+                        <field name="ff_via_airport_id" invisible="ff_type != 'air'"/>
+                    </group>
+                    <group>
+                        <field name="ff_valid_flag"/>
+                        <field name="ff_standard_charge_flag"/>
+                        <field name="ff_effective_date"/>
+                        <field name="ff_expiry_date"/>
+                        <field name="ff_transit_time" string="Est. Transit Time (Day(s))"/>
+                        <field name="ff_frequency"/>
+                        <field name="ff_freight_collect"/>
+                        <field name="ff_note"/>
+                        <field name="ff_note_code"/>
+                    </group>
+                </group>
             </xpath>
         </field>
     </record>
@@ -57,7 +89,6 @@
             <xpath expr="//sheet/group" position="after">
                 <group string="Freight Forwarding" name="freight_forwarding_cost_table">
                     <group>
-                        <field name="ff_description" readonly="1"/>
                         <field name="ff_cargo" optional="show"
                             invisible="not context.get('ff_cargo_visible')" />
                     </group>
@@ -79,7 +110,6 @@
         <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
         <field name="arch" type="xml">
             <field name="product_code" position="after">
-                <field name="ff_description" readonly="1" optional="show"/>
                 <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
                 <field name="ff_uom_id" optional="show"/>
                 <field name="ff_vat_id" optional="show"/>

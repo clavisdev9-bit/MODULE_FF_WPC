@@ -1,7 +1,16 @@
 """FF-81: Charge Table (product.pricelist header + product.pricelist.item
 rules) & Cost Table (flat product.supplierinfo) extension -- defaulting,
-Air/Sea isolation, editable override, and the Cargo column."""
+Air/Sea isolation, editable override, header fields, and header validity
+precedence over native line date_start/date_end."""
+from datetime import date, timedelta
+
 from odoo.tests.common import TransactionCase
+
+
+def _datetime_str(a_date):
+    """Native date_start/date_end are Datetime; build a midnight timestamp
+    string for a given date() without relying on any FF-81 code."""
+    return f'{a_date.isoformat()} 00:00:00'
 
 
 class TestFF81Pricing(TransactionCase):
@@ -31,9 +40,9 @@ class TestFF81Pricing(TransactionCase):
         })
         cls.vendor = cls.env['res.partner'].create({'name': 'FF-81 Test Vendor'})
 
-    def _create_charge_line(self, **kwargs):
+    def _create_charge_line(self, pricelist=None, **kwargs):
         vals = {
-            'pricelist_id': self.pricelist.id,
+            'pricelist_id': (pricelist or self.pricelist).id,
             'product_tmpl_id': self.charge_code.id,
             'applied_on': '1_product',
             'compute_price': 'fixed',
@@ -58,14 +67,12 @@ class TestFF81Pricing(TransactionCase):
         self.assertEqual(line.ff_uom_id, self.uom_unit)
         self.assertEqual(line.ff_vat_id, self.tax_vat)
         self.assertEqual(line.ff_charge_unit, 'house')
-        self.assertEqual(line.ff_description, 'Ocean Freight')
 
     def test_cost_table_defaults_from_product_on_create(self):
         line = self._create_cost_line(ff_type='air')
         self.assertEqual(line.ff_uom_id, self.uom_unit)
         self.assertEqual(line.ff_vat_id, self.tax_vat)
         self.assertEqual(line.ff_charge_unit, 'house')
-        self.assertEqual(line.ff_description, 'Ocean Freight')
 
     def test_charge_table_explicit_override_not_overwritten_on_create(self):
         other_tax = self.env['account.tax'].create({
@@ -96,7 +103,6 @@ class TestFF81Pricing(TransactionCase):
         self.assertEqual(line.ff_uom_id, other_uom)
         self.assertEqual(line.ff_charge_unit, 'pcs')
         self.assertFalse(line.ff_vat_id)
-        self.assertEqual(line.ff_description, 'Handling Charge')
 
     def test_charge_table_explicit_override_not_overwritten_on_product_change_write(self):
         other_charge_code = self.env['product.template'].create({
@@ -187,3 +193,176 @@ class TestFF81Pricing(TransactionCase):
         sea_action = self.env.ref('freight_forwarding.action_freight_sea_cost_table')
         self.assertNotIn('ff_cargo_visible', air_action.context)
         self.assertIn("'ff_cargo_visible': True", sea_action.context)
+
+    # -- ff_description removed (was only a duplicate display column) -----
+
+    def test_ff_description_field_removed(self):
+        self.assertNotIn('ff_description', self.env['product.pricelist.item']._fields)
+        self.assertNotIn('ff_description', self.env['product.supplierinfo']._fields)
+
+    # -- Charge Table Header: name/currency/company/active/valid untouched -
+
+    def test_pricelist_name_is_the_only_mandatory_header_field(self):
+        name_field = self.env['product.pricelist']._fields['name']
+        self.assertTrue(name_field.required)
+        for optional_field in (
+            'ff_description', 'ff_job_type_id', 'ff_customer_id',
+            'ff_destination_city_id', 'ff_valid_flag', 'ff_standard_charge_flag',
+            'ff_effective_date', 'ff_expiry_date', 'ff_transit_time',
+            'ff_frequency', 'ff_freight_collect', 'ff_note', 'ff_note_code',
+        ):
+            self.assertFalse(
+                self.env['product.pricelist']._fields[optional_field].required,
+                f'{optional_field} must be optional',
+            )
+
+    def test_customer_separate_from_company(self):
+        customer = self.env['res.partner'].create({'name': 'FF-81 Customer'})
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Header Test', 'ff_type': 'sea', 'ff_customer_id': customer.id,
+        })
+        self.assertEqual(pricelist.ff_customer_id, customer)
+        # native company_id (internal Odoo company) is untouched/independent
+        # from ff_customer_id -- it must never resolve to the Customer.
+        self.assertNotEqual(pricelist.company_id, customer)
+
+    def test_valid_flag_does_not_affect_native_active(self):
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Valid Flag Test', 'ff_type': 'sea', 'ff_valid_flag': 'N',
+        })
+        self.assertTrue(pricelist.active)
+        pricelist.active = False
+        self.assertEqual(pricelist.ff_valid_flag, 'N')
+
+    def test_job_type_module_related_readonly(self):
+        job_type = self.env['freight.job.type'].create({
+            'code': 'FF81JT', 'name': 'FF-81 Job Type', 'module_code': 'SEA-EXP',
+        })
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Job Type Test', 'ff_type': 'sea', 'ff_job_type_id': job_type.id,
+        })
+        self.assertEqual(pricelist.ff_module_code, 'SEA-EXP')
+        self.assertTrue(self.env['product.pricelist']._fields['ff_module_code'].readonly)
+
+    def test_destination_uses_res_city_and_is_common(self):
+        city = self.env['res.city'].create({
+            'name': 'FF-81 City', 'country_id': self.env.ref('base.id').id,
+        })
+        air_pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Air Destination Test', 'ff_type': 'air',
+            'ff_destination_city_id': city.id,
+        })
+        sea_pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Sea Destination Test', 'ff_type': 'sea',
+            'ff_destination_city_id': city.id,
+        })
+        self.assertEqual(air_pricelist.ff_destination_city_id, city)
+        self.assertEqual(sea_pricelist.ff_destination_city_id, city)
+
+    def test_sea_route_fields_use_freight_port(self):
+        port = self.env['freight.port'].create({'code': 'FF81P', 'name': 'FF-81 Port'})
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Sea Route Test', 'ff_type': 'sea',
+            'ff_port_of_loading_id': port.id,
+            'ff_port_of_discharge_id': port.id,
+            'ff_via_port_id': port.id,
+        })
+        self.assertEqual(pricelist.ff_port_of_loading_id, port)
+        self.assertEqual(pricelist.ff_port_of_discharge_id, port)
+        self.assertEqual(pricelist.ff_via_port_id, port)
+
+    def test_air_route_fields_use_airport_master(self):
+        airport = self.env['freight.airport'].create({
+            'code': 'FFP', 'name': 'FF-81 Airport', 'country_id': self.env.ref('base.id').id,
+        })
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Air Route Test', 'ff_type': 'air',
+            'ff_airport_of_origin_id': airport.id,
+            'ff_airport_of_destination_id': airport.id,
+            'ff_via_airport_id': airport.id,
+        })
+        self.assertEqual(pricelist.ff_airport_of_origin_id, airport)
+        self.assertEqual(pricelist.ff_airport_of_destination_id, airport)
+        self.assertEqual(pricelist.ff_via_airport_id, airport)
+
+    def test_sea_route_fields_hidden_on_air_view_and_vice_versa(self):
+        view = self.env['product.pricelist'].get_view(
+            view_id=self.env.ref('freight_forwarding.view_pricelist_form_inherit_freight').id,
+            view_type='form',
+        )
+        arch = view['arch']
+        self.assertIn('ff_port_of_loading_id', arch)
+        self.assertIn('ff_airport_of_origin_id', arch)
+        self.assertIn("ff_type != 'sea'", arch)
+        self.assertIn("ff_type != 'air'", arch)
+
+    def test_storage_only_fields_do_not_affect_pricing(self):
+        # Valid Flag / Standard Charge Flag / Freight Collect / Transit Time
+        # / Frequency / Note / Note Code must have zero effect on the price
+        # actually computed for a rule -- only `fixed_price` matters here.
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Storage Only Test', 'ff_type': 'sea',
+            'ff_valid_flag': 'N',
+            'ff_standard_charge_flag': 'N',
+            'ff_freight_collect': 'N',
+            'ff_transit_time': 999,
+            'ff_frequency': 'irrelevant',
+            'ff_note': 'irrelevant',
+            'ff_note_code': 'irrelevant',
+        })
+        self._create_charge_line(pricelist=pricelist, fixed_price=77.0)
+        product = self.charge_code.product_variant_id
+        price, rule = pricelist._get_product_price_rule(product, 1.0)
+        self.assertEqual(price, 77.0)
+
+    # -- Header validity precedence over native line date_start/date_end ---
+
+    def test_header_effective_date_overrides_line_date_start(self):
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Header Validity Test', 'ff_type': 'sea',
+            'ff_effective_date': date.today() - timedelta(days=1),
+        })
+        # Line's own native date_start is in the FUTURE (would normally make
+        # it inapplicable today) -- header Effective Date must override it.
+        self._create_charge_line(
+            pricelist=pricelist,
+            date_start=_datetime_str(date.today() + timedelta(days=30)),
+        )
+        product = self.charge_code.product_variant_id
+        price, rule = pricelist._get_product_price_rule(product, 1.0)
+        self.assertEqual(price, 100.0)
+        self.assertTrue(rule)
+
+    def test_header_effective_date_in_future_blocks_all_lines(self):
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Future Header Test', 'ff_type': 'sea',
+            'ff_effective_date': date.today() + timedelta(days=30),
+        })
+        self._create_charge_line(pricelist=pricelist)
+        product = self.charge_code.product_variant_id
+        price, rule = pricelist._get_product_price_rule(product, 1.0)
+        self.assertFalse(rule)
+
+    def test_header_expiry_date_empty_falls_back_to_line_date_end(self):
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 No Header Expiry Test', 'ff_type': 'sea',
+            'ff_effective_date': date.today() - timedelta(days=1),
+            # ff_expiry_date left empty -> native line date_end still applies.
+        })
+        self._create_charge_line(
+            pricelist=pricelist,
+            date_end=_datetime_str(date.today() - timedelta(days=1)),
+        )
+        product = self.charge_code.product_variant_id
+        price, rule = pricelist._get_product_price_rule(product, 1.0)
+        self.assertFalse(rule)
+
+    def test_no_header_dates_keeps_native_line_date_behavior(self):
+        # No header boundary set at all -> pure native behaviour, unaffected
+        # by the FF-81 override.
+        self._create_charge_line(
+            date_start=_datetime_str(date.today() + timedelta(days=30)),
+        )
+        product = self.charge_code.product_variant_id
+        price, rule = self.pricelist._get_product_price_rule(product, 1.0)
+        self.assertFalse(rule)
