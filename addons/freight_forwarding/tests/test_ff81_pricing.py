@@ -194,6 +194,36 @@ class TestFF81Pricing(TransactionCase):
         self.assertNotIn('ff_cargo_visible', air_action.context)
         self.assertIn("'ff_cargo_visible': True", sea_action.context)
 
+    def test_supplierinfo_cost_table_actions_flag_ff_type_visible(self):
+        # Both Air and Sea Cost Table actions must mark ff_type_visible so
+        # the additive FF columns use column_invisible scoped to this
+        # context, and stay hidden on the native Vendor Pricelist list.
+        air_action = self.env.ref('freight_forwarding.action_freight_air_cost_table')
+        sea_action = self.env.ref('freight_forwarding.action_freight_sea_cost_table')
+        self.assertIn("'ff_type_visible': True", air_action.context)
+        self.assertIn("'ff_type_visible': True", sea_action.context)
+
+    def test_ff_columns_use_column_invisible_on_supplierinfo_list(self):
+        # Row-level `invisible` does not hide a column from the native
+        # list -- these must use `column_invisible` so the whole column
+        # disappears when opened outside the FF Cost Table actions.
+        view = self.env['product.supplierinfo'].get_view(
+            view_id=self.env.ref('freight_forwarding.view_supplierinfo_list_inherit_freight').id,
+            view_type='list',
+        )
+        arch = view['arch']
+        for field_name in ('ff_uom_id', 'ff_vat_id', 'ff_charge_unit'):
+            self.assertIn(
+                f'name="{field_name}" optional="show" column_invisible="not context.get(\'ff_type_visible\')"',
+                arch,
+            )
+        self.assertIn(
+            "name=\"ff_cargo\" optional=\"show\" "
+            "column_invisible=\"not context.get('ff_type_visible') or "
+            "not context.get('ff_cargo_visible')\"",
+            arch,
+        )
+
     # -- ff_description removed (was only a duplicate display column) -----
 
     def test_ff_description_field_removed(self):
