@@ -13,7 +13,8 @@
         <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
         <field name="arch" type="xml">
             <group name="pricelist_rule_computation" position="after">
-                <group string="Freight Forwarding" name="freight_forwarding_charge_table">
+                <group string="Freight Forwarding" name="freight_forwarding_charge_table"
+                    invisible="not context.get('ff_type_visible')">
                     <group>
                         <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
                     </group>
@@ -37,18 +38,22 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='item_ids']/list/field[@name='min_quantity']" position="after">
                 <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
-                <field name="ff_uom_id" optional="show"/>
-                <field name="ff_vat_id" optional="show"/>
-                <field name="ff_charge_unit" optional="show"/>
+                <field name="ff_uom_id" optional="show" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_vat_id" optional="show" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_charge_unit" optional="show" column_invisible="not context.get('ff_type_visible')"/>
             </xpath>
             <!-- FF-81 additive header section: "Freight Forwarding". Sea vs
                  Air route fields are mutually exclusive via `ff_type`
                  (technical, never shown). Destination (res.city) is common
                  to both. `ff_type` itself is added invisible only so the
-                 invisible conditions below can evaluate client-side. -->
+                 invisible conditions below can evaluate client-side.
+                 The whole section is hidden outright when `ff_type` is
+                 empty, i.e. when this is a plain native Pricelist, not an
+                 FF Air/Sea Charge Table. -->
             <xpath expr="//notebook" position="before">
                 <field name="ff_type" invisible="1"/>
-                <group string="Freight Forwarding" name="freight_forwarding_pricelist_header">
+                <group string="Freight Forwarding" name="freight_forwarding_pricelist_header"
+                    invisible="not ff_type">
                     <group>
                         <field name="ff_description"/>
                         <field name="ff_job_type_id"/>
@@ -87,7 +92,9 @@
         <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet/group" position="after">
-                <group string="Freight Forwarding" name="freight_forwarding_cost_table">
+                <field name="ff_type" invisible="1"/>
+                <group string="Freight Forwarding" name="freight_forwarding_cost_table"
+                    invisible="not ff_type">
                     <group>
                         <field name="ff_cargo" optional="show"
                             invisible="not context.get('ff_cargo_visible')" />
@@ -110,10 +117,11 @@
         <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
         <field name="arch" type="xml">
             <field name="product_code" position="after">
+                <field name="ff_type" column_invisible="1"/>
                 <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
-                <field name="ff_uom_id" optional="show"/>
-                <field name="ff_vat_id" optional="show"/>
-                <field name="ff_charge_unit" optional="show"/>
+                <field name="ff_uom_id" optional="show" invisible="not ff_type"/>
+                <field name="ff_vat_id" optional="show" invisible="not ff_type"/>
+                <field name="ff_charge_unit" optional="show" invisible="not ff_type"/>
             </field>
         </field>
     </record>
@@ -134,6 +142,7 @@
             'default_ff_type': 'air',
             'default_applied_on': '1_product',
             'default_compute_price': 'fixed',
+            'ff_type_visible': True,
         }</field>
     </record>
 
@@ -147,6 +156,7 @@
             'default_applied_on': '1_product',
             'default_compute_price': 'fixed',
             'ff_cargo_visible': True,
+            'ff_type_visible': True,
         }</field>
     </record>
 

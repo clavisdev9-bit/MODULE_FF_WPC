@@ -357,6 +357,39 @@ class TestFF81Pricing(TransactionCase):
         price, rule = pricelist._get_product_price_rule(product, 1.0)
         self.assertFalse(rule)
 
+    def test_header_expiry_date_valid_overrides_line_date_end(self):
+        # Line's own native date_end already passed (would normally make it
+        # inapplicable today) -- header Expiry Date, still in the future,
+        # must override it and keep the rule applicable.
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Header Expiry Override Test', 'ff_type': 'sea',
+            'ff_expiry_date': date.today() + timedelta(days=30),
+        })
+        self._create_charge_line(
+            pricelist=pricelist,
+            date_end=_datetime_str(date.today() - timedelta(days=1)),
+        )
+        product = self.charge_code.product_variant_id
+        price, rule = pricelist._get_product_price_rule(product, 1.0)
+        self.assertEqual(price, 100.0)
+        self.assertTrue(rule)
+
+    def test_header_expiry_date_expired_blocks_all_lines(self):
+        # Header Expiry Date already passed -> the whole Charge Table is
+        # expired, even though the line's own native date_end has not been
+        # reached yet.
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'FF-81 Header Expiry Expired Test', 'ff_type': 'sea',
+            'ff_expiry_date': date.today() - timedelta(days=1),
+        })
+        self._create_charge_line(
+            pricelist=pricelist,
+            date_end=_datetime_str(date.today() + timedelta(days=30)),
+        )
+        product = self.charge_code.product_variant_id
+        price, rule = pricelist._get_product_price_rule(product, 1.0)
+        self.assertFalse(rule)
+
     def test_no_header_dates_keeps_native_line_date_behavior(self):
         # No header boundary set at all -> pure native behaviour, unaffected
         # by the FF-81 override.
