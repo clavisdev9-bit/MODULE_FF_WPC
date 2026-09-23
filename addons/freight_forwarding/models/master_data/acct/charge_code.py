@@ -10,14 +10,14 @@ CHARGE_UNIT_SELECTION = [
     ('40ft', '40FT Container'),
     ('45ft', '45FT Container'),
     ('total_container', 'Total Container'),
-    ('rev_ton_cw', 'Rev Ton/ Charge Weight'),
+    ('rev_ton_cw', 'Rev Ton / Charge Weight'),
     ('rev_ton_rnd', 'Rev Ton Rnd Up'),
     ('shipment', 'Shipment'),
     ('house', 'House'),
     ('subhouse_bl', 'Subhouse B/L'),
     ('volume', 'Volume'),
     ('weight', 'Weight'),
-    ('pcs', 'Pcs'),
+    ('pcs', 'PCS'),
     ('ccfee', 'CCFEE'),
     ('block_4m3', 'Block of 4 M3'),
     ('block_3m3', 'Block of 3 M3'),
@@ -36,12 +36,12 @@ class ProductTemplateChargeCode(models.Model):
     cc_local_name = fields.Char(string='Local Name')
     cc_item_short_code = fields.Char(string='Item Short Code')
     cc_charge_type = fields.Selection([
-        ('F', 'FREIGHT'),
-        ('H', 'HANDLING'),
-        ('O', 'OTHER'),
-        ('P', 'PERMIT'),
-        ('S', 'STORAGE'),
-        ('T', 'TRUCKING'),
+        ('F', 'Freight'),
+        ('H', 'Handling'),
+        ('O', 'Other'),
+        ('P', 'Permit'),
+        ('S', 'Storage'),
+        ('T', 'Trucking'),
     ], string='Charge Type')
 
     # --- Scope / Behaviour ---
