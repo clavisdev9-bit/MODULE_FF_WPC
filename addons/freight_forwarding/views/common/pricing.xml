@@ -37,7 +37,7 @@
         <field name="inherit_id" ref="product.product_pricelist_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='item_ids']/list/field[@name='min_quantity']" position="after">
-                <field name="ff_cargo" optional="show" width="70px" invisible="not context.get('ff_cargo_visible')"/>
+                <field name="ff_cargo" optional="show" width="70px" column_invisible="not context.get('ff_cargo_visible')"/>
                 <field name="ff_uom_id" optional="show" width="70px" column_invisible="not context.get('ff_type_visible')"/>
                 <field name="ff_vat_id" optional="show" width="60px" column_invisible="not context.get('ff_type_visible')"/>
                 <field name="ff_charge_unit" optional="show" width="120px" column_invisible="not context.get('ff_type_visible')"/>

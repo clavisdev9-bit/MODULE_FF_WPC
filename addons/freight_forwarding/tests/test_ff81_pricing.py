@@ -203,6 +203,23 @@ class TestFF81Pricing(TransactionCase):
         self.assertIn("'ff_type_visible': True", air_action.context)
         self.assertIn("'ff_type_visible': True", sea_action.context)
 
+    def test_ff_cargo_uses_column_invisible_on_pricelist_rules_list(self):
+        # Row-level `invisible` on the embedded Price Rules list does not
+        # hide the whole column -- it left the Cargo header visible (with
+        # empty cells) on Air Charge Tables. Must use `column_invisible`
+        # so the column fully disappears outside `ff_cargo_visible`
+        # context (Air Charge Table, native Pricelist).
+        view = self.env['product.pricelist'].get_view(
+            view_id=self.env.ref('freight_forwarding.view_pricelist_form_inherit_freight').id,
+            view_type='form',
+        )
+        arch = view['arch']
+        self.assertIn(
+            "name=\"ff_cargo\" optional=\"show\" width=\"70px\" "
+            "column_invisible=\"not context.get('ff_cargo_visible')\"",
+            arch,
+        )
+
     def test_ff_columns_use_column_invisible_on_supplierinfo_list(self):
         # Row-level `invisible` does not hide a column from the native
         # list -- these must use `column_invisible` so the whole column
