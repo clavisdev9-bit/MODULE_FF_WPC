@@ -134,6 +134,15 @@ class FreightQuotation(models.AbstractModel):
     # FF-81: Freight Charge header -- Pricelist (Charge Table) eligibility
     # =========================================================
 
+    # Business reference date untuk eligibility Pricelist (Charge Table) --
+    # berdiri sendiri, SENGAJA tidak di-derive dari valid_from/date_order/
+    # create_date (lihat FF-81 koreksi). Source date ini bisa berubah
+    # setelah UAT/business confirmation lebih lanjut.
+    pricing_date = fields.Date(
+        string="Pricing Date",
+        default=fields.Date.context_today,
+    )
+
     eligible_pricelist_ids = fields.Many2many(
         "product.pricelist",
         compute="_compute_eligible_pricelist_ids",
@@ -142,7 +151,7 @@ class FreightQuotation(models.AbstractModel):
 
     @api.depends(
         "is_freight_quotation", "freight_business_type", "freight_type",
-        "partner_id", "destination_id", "valid_from",
+        "partner_id", "destination_id", "pricing_date",
         "port_of_loading_id", "port_of_discharge_id", "via_port_id", "sea_ship_mode",
         "airport_of_origin_id", "airport_of_destination_id", "via_airport_id",
     )
@@ -162,7 +171,7 @@ class FreightQuotation(models.AbstractModel):
 
     @api.onchange(
         "partner_id", "freight_business_type", "freight_type", "destination_id",
-        "valid_from", "port_of_loading_id", "port_of_discharge_id", "via_port_id",
+        "pricing_date", "port_of_loading_id", "port_of_discharge_id", "via_port_id",
         "sea_ship_mode", "airport_of_origin_id", "airport_of_destination_id", "via_airport_id",
     )
     def _onchange_ff_pricelist_eligibility(self):
@@ -206,11 +215,11 @@ class FreightQuotation(models.AbstractModel):
 
         Cardinality klasifikasi->Job Type TIDAK diasumsikan 1:1: hanya
         dikembalikan kalau resolusinya benar-benar tunggal (tepat 1
-        kandidat aktif). Kalau 0 atau >1 kandidat (ambiguous), dikembalikan
-        recordset kosong -- caller (`_get_eligible_pricelist_domain`) akan
-        SKIP filtering Job Type sama sekali untuk quotation ini, bukan
-        menebak salah satu kandidat atau memperlakukan Charge Table dengan
-        Job Type terisi sebagai otomatis tidak eligible."""
+        kandidat aktif). Kalau 0 atau >1 kandidat (ambiguous/unresolved),
+        dikembalikan recordset kosong -- caller
+        (`_get_eligible_pricelist_domain`) TIDAK PERNAH menebak salah satu
+        kandidat: lihat `_ff_job_type_eligibility_value` untuk bagaimana
+        hasil kosong ini diterjemahkan ke filtering (strict, BUKAN skip)."""
         self.ensure_one()
         business_type = self.freight_business_type
         sea_ship_mode = self.sea_ship_mode if business_type == "sea" else False
@@ -219,15 +228,37 @@ class FreightQuotation(models.AbstractModel):
         )
         return candidates if len(candidates) == 1 else self.env["freight.job.type"]
 
+    def _ff_job_type_eligibility_value(self):
+        """FF-81 koreksi: rule wildcard-or-exact-match yang sama dengan
+        dimensi lain (Customer/route/dst.) HARUS berlaku juga untuk Job
+        Type -- termasuk saat resolver ambiguous/unresolved (0 atau >1
+        kandidat).
+
+        - Resolver tunggal (tepat 1 kandidat) -> Charge Table dengan
+          ff_job_type_id kosong ATAU sama dengan kandidat itu eligible.
+        - Resolver ambiguous/unresolved (0 atau >1 kandidat) -> HANYA
+          Charge Table dengan ff_job_type_id kosong yang eligible; Charge
+          Table Job-Type-specific manapun (apa pun isinya) TIDAK eligible,
+          karena quotation tidak bisa membuktikan exact match-nya. Ini
+          BUKAN skip filtering (perilaku lama, terlalu permisif) dan BUKAN
+          menebak salah satu kandidat."""
+        self.ensure_one()
+        job_type = self._get_pricelist_job_type_candidate()
+        return job_type.id if job_type else False
+
     def _get_eligible_pricelist_domain(self):
         """FF-81: domain eligibility Pricelist (Charge Table) untuk konteks
         Freight Charge header quotation ini.
 
         - ff_type strict: Sea quotation hanya melihat Charge Table
           ff_type='sea', Air hanya 'air'.
-        - Setiap field header FF lain: wildcard-or-exact-match -- Charge
-          Table field kosong = wildcard (selalu match), field terisi wajib
-          exact match ke field quotation yang bersangkutan.
+        - Setiap field header FF lain (termasuk Job Type): wildcard-or-
+          exact-match -- Charge Table field kosong = wildcard (selalu
+          match), field terisi wajib exact match ke field quotation yang
+          bersangkutan (Job Type ambiguous/unresolved diperlakukan sebagai
+          TIDAK BISA membuktikan match, lihat `_ff_job_type_eligibility_value`).
+        - Validity date pakai `pricing_date` (business reference date
+          berdiri sendiri -- BUKAN valid_from/date_order/create_date).
         - Hanya Charge Table `active=True` yang eligible; field TBD (FF-81
           "Field only" list) TIDAK PERNAH ikut jadi kriteria di sini.
         """
@@ -245,11 +276,9 @@ class FreightQuotation(models.AbstractModel):
         for field_name, value in self._ff_pricelist_route_domain_fields():
             _wildcard_or_match(field_name, value)
 
-        job_type = self._get_pricelist_job_type_candidate()
-        if job_type:
-            _wildcard_or_match("ff_job_type_id", job_type.id)
+        _wildcard_or_match("ff_job_type_id", self._ff_job_type_eligibility_value())
 
-        check_date = self.valid_from or fields.Date.context_today(self)
+        check_date = self.pricing_date or fields.Date.context_today(self)
         domain.extend([
             "|", ("ff_effective_date", "=", False), ("ff_effective_date", "<=", check_date),
             "|", ("ff_expiry_date", "=", False), ("ff_expiry_date", ">=", check_date),

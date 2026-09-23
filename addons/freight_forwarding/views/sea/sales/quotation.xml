@@ -59,6 +59,7 @@
                     <field name="currency_id" />
                     <field name="currency_rate" />
                     <field name="eligible_pricelist_ids" invisible="1" />
+                    <field name="pricing_date" />
                     <field name="pricelist_id" domain="[('id', 'in', eligible_pricelist_ids)]" />
                     <field name="payment_term_id" />
                     <field name="service_level" />
