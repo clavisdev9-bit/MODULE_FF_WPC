@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================
+         FF-81: Charge Table = native product.pricelist header +
+         native product.pricelist.item rules. Native views (list, form,
+         search, and the embedded Price Rules list on the Pricelist form)
+         are only extended additively; no existing native field is
+         hidden/renamed/moved/rewritten.
+    ============================================================ -->
+    <record id="view_pricelist_item_form_inherit_freight" model="ir.ui.view">
+        <field name="name">product.pricelist.item.form.inherit.freight</field>
+        <field name="model">product.pricelist.item</field>
+        <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
+        <field name="arch" type="xml">
+            <group name="pricelist_rule_computation" position="after">
+                <group string="Freight Forwarding" name="freight_forwarding_charge_table"
+                    invisible="not context.get('ff_type_visible')">
+                    <group>
+                        <field name="ff_cargo" optional="show" invisible="not context.get('ff_cargo_visible')"/>
+                    </group>
+                    <group>
+                        <field name="ff_uom_id"/>
+                        <field name="ff_vat_id"/>
+                        <field name="ff_charge_unit"/>
+                    </group>
+                </group>
+            </group>
+        </field>
+    </record>
+
+    <!-- Additive: surface the FF fields as extra columns on the native
+         "Price Rules" list embedded in the Pricelist form. No native
+         column is touched. -->
+    <record id="view_pricelist_form_inherit_freight" model="ir.ui.view">
+        <field name="name">product.pricelist.form.inherit.freight</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='item_ids']/list/field[@name='min_quantity']" position="after">
+                <field name="ff_cargo" optional="show" width="70px" column_invisible="not context.get('ff_cargo_visible')"/>
+                <field name="ff_uom_id" optional="show" width="70px" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_vat_id" optional="show" width="60px" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_charge_unit" optional="show" width="120px" column_invisible="not context.get('ff_type_visible')"/>
+            </xpath>
+            <!-- FF-81 additive header section: "Freight Forwarding". Sea vs
+                 Air route fields are mutually exclusive via ff_type.
+                 Destination (res.city) is common to both. The whole section
+                 (including ff_type itself) is hidden outright when ff_type
+                 is empty, i.e. when this is a plain native Pricelist, not an
+                 FF Air/Sea Charge Table. Charge Table records are always
+                 created through the Air/Sea Charge Table menus, which
+                 default ff_type via context, so this never blocks setting it. -->
+            <xpath expr="//notebook" position="before">
+                <group string="Freight Forwarding" name="freight_forwarding_pricelist_header"
+                    invisible="not ff_type">
+                    <group>
+                        <field name="ff_type" string="Type"/>
+                        <field name="ff_description"/>
+                        <field name="ff_job_type_id"/>
+                        <field name="ff_module_code"/>
+                        <field name="ff_customer_id"/>
+                        <field name="ff_destination_city_id" invisible="ff_type != 'sea'" />
+                        <field name="ff_port_of_loading_id" invisible="ff_type != 'sea'"/>
+                        <field name="ff_port_of_discharge_id" invisible="ff_type != 'sea'"/>
+                        <field name="ff_via_port_id" invisible="ff_type != 'sea'"/>
+                        <field name="ff_airport_of_origin_id" invisible="ff_type != 'air'"/>
+                        <field name="ff_airport_of_destination_id" invisible="ff_type != 'air'"/>
+                        <field name="ff_via_airport_id" invisible="ff_type != 'air'"/>
+                    </group>
+                    <group>
+                        <field name="ff_valid_flag"/>
+                        <field name="ff_standard_charge_flag"/>
+                        <field name="ff_effective_date" string="Validity Period" widget="daterange"
+                            options="{'end_date_field': 'ff_expiry_date', 'show_time': False}"/>
+                        <field name="ff_expiry_date" invisible="1"/>
+                        <field name="ff_transit_time" string="Est. Transit Time (Day(s))"/>
+                        <field name="ff_frequency"/>
+                        <field name="ff_freight_collect"/>
+                        <field name="ff_note"/>
+                        <field name="ff_note_code"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         FF-81: Cost Table = native product.supplierinfo + FF fields.
+    ============================================================ -->
+    <record id="view_supplierinfo_form_inherit_freight" model="ir.ui.view">
+        <field name="name">product.supplierinfo.form.inherit.freight</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <group string="Freight Forwarding" name="freight_forwarding_cost_table"
+                    invisible="not ff_type">
+                    <group>
+                        <field name="ff_type" string="Type"/>
+                        <field name="ff_cargo" optional="show"
+                            invisible="not context.get('ff_cargo_visible')" />
+                    </group>
+                    <group>
+                        <field name="ff_uom_id"/>
+                        <field name="ff_vat_id"/>
+                        <field name="ff_charge_unit"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Additive: surface the FF fields as extra columns on the native
+         Vendor Pricelist list. No native column is touched/renamed. -->
+    <record id="view_supplierinfo_list_inherit_freight" model="ir.ui.view">
+        <field name="name">product.supplierinfo.list.inherit.freight</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="product_code" position="after">
+                <field name="ff_type" column_invisible="1"/>
+                <field name="ff_cargo" optional="show" width="70px" column_invisible="not context.get('ff_type_visible') or not context.get('ff_cargo_visible')"/>
+                <field name="ff_uom_id" optional="show" width="70px" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_vat_id" optional="show" width="60px" column_invisible="not context.get('ff_type_visible')"/>
+                <field name="ff_charge_unit" optional="show" width="120px" column_invisible="not context.get('ff_type_visible')"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Actions: Air vs Sea differentiated only by domain + default
+         context (`ff_type` is never shown to the user). Native views are
+         used as-is (no view_ids override), so the full native Pricelist /
+         Vendor Pricelist experience (header + rules, chatter, etc.) is
+         preserved.
+    ============================================================ -->
+    <record id="action_freight_air_charge_table" model="ir.actions.act_window">
+        <field name="name">Charge Table</field>
+        <field name="res_model">product.pricelist</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('ff_type', '=', 'air')]</field>
+        <field name="context">{
+            'default_ff_type': 'air',
+            'default_applied_on': '1_product',
+            'default_compute_price': 'fixed',
+            'ff_type_visible': True,
+        }</field>
+    </record>
+
+    <record id="action_freight_sea_charge_table" model="ir.actions.act_window">
+        <field name="name">Charge Table</field>
+        <field name="res_model">product.pricelist</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('ff_type', '=', 'sea')]</field>
+        <field name="context">{
+            'default_ff_type': 'sea',
+            'default_applied_on': '1_product',
+            'default_compute_price': 'fixed',
+            'ff_cargo_visible': True,
+            'ff_type_visible': True,
+        }</field>
+    </record>
+
+    <record id="action_freight_air_cost_table" model="ir.actions.act_window">
+        <field name="name">Cost Table</field>
+        <field name="res_model">product.supplierinfo</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('ff_type', '=', 'air')]</field>
+        <field name="context">{
+            'default_ff_type': 'air',
+            'visible_product_tmpl_id': False,
+            'ff_type_visible': True,
+        }</field>
+    </record>
+
+    <record id="action_freight_sea_cost_table" model="ir.actions.act_window">
+        <field name="name">Cost Table</field>
+        <field name="res_model">product.supplierinfo</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('ff_type', '=', 'sea')]</field>
+        <field name="context">{
+            'default_ff_type': 'sea',
+            'visible_product_tmpl_id': False,
+            'ff_cargo_visible': True,
+            'ff_type_visible': True,
+        }</field>
+    </record>
+</odoo>

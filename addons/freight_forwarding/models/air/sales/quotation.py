@@ -37,6 +37,18 @@ class AirQuotation(models.Model):
         "res.country", string="Destination Country"
     )
 
+    # FF-81: Freight Charge header route context (Air) -- reuse existing
+    # freight.airport master, mirror Sea's port_of_loading_id/
+    # port_of_discharge_id/via_port_id (models/sea/sales/quotation.py) used
+    # as Pricelist (Charge Table) eligibility matching dimensions.
+    airport_of_origin_id = fields.Many2one(
+        "freight.airport", string="Airport of Origin/Departure"
+    )
+    airport_of_destination_id = fields.Many2one(
+        "freight.airport", string="Airport of Destination"
+    )
+    via_airport_id = fields.Many2one("freight.airport", string="Via Airport")
+
     fumigation = fields.Char(string="Fumigation")
     # Nama field berbeda dari shipping_line_id milik Sea (res.partner) karena
     # comodel-nya berbeda (freight.carrier) — dua field beda tipe tidak bisa

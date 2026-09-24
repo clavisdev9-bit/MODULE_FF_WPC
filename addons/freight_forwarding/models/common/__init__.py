@@ -10,3 +10,4 @@ from . import partner_delivery_info
 from . import airline_partner
 from . import transport_document
 from . import transport_document_code
+from . import pricing

@@ -59,19 +59,45 @@
                 <group name="freight_order_details" invisible="not is_freight_quotation">
                     <field name="currency_id" />
                     <field name="currency_rate" />
-                    <field name="pricelist_id" />
+                    <field name="eligible_pricelist_ids" invisible="1" />
+                    <field name="pricing_date" readonly="state in ['sale', 'cancel']" />
+                    <field name="show_update_pricelist" invisible="1" />
+
+                    <label for="pricelist_id" />
+                    <div class="o_row">
+                        <field name="pricelist_id"
+                            domain="[('id', 'in', eligible_pricelist_ids)]"
+                            readonly="state in ['sale', 'cancel']"
+                            options="{'no_create': True}" />
+
+                        <button name="action_update_prices"
+                            type="object"
+                            string="Update Prices"
+                            class="btn-link mb-1 px-0"
+                            icon="fa-refresh"
+                            confirm="This will update the unit price of all products based on the new pricelist."
+                            invisible="not show_update_pricelist or state in ['sale', 'cancel']" />
+                    </div>
                     <field name="payment_term_id" />
                     <field name="service_level" />
-                    <field name="pricelist_id" readonly="state in ['cancel', 'sale']"
-                        groups="!product.group_product_pricelist" />
                     <field name="delivery_type_id" />
                     <field name="valid_from" />
                     <field name="validity_date" string="Valid To" />
                     <field name="reference_number" />
                     <field name="commodity_id" />
                 </group>
+                <group name="freight_charge" string="Freight Charge" invisible="not is_freight_quotation">
+                    <field name="airport_of_origin_id" />
+                    <field name="airport_of_destination_id" />
+                    <field name="via_airport_id" />
+                </group>
             </xpath>
 
+            <!-- FF-81: Address section is no longer the source of truth for Air route
+                 (Air uses the airport route in the Freight Charge group above). Kept
+                 commented (not deleted) because pickup_*/delivery_* fields are still
+                 used for backward compatibility / data migration. -->
+            <!--
             <xpath expr="//group[@name='sale_header']" position="after">
                 <group string="Address" invisible="not is_freight_quotation">
                     <group>
@@ -110,6 +136,7 @@
                     </group>
                 </group>
             </xpath>
+            -->
 
             <xpath expr="//header" position="inside">
                 <field name="original_quotation_id" invisible="1"/>

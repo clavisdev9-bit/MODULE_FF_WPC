@@ -1,15 +1,27 @@
 from odoo import api, fields, models
 from odoo.osv import expression
 
+# FF-81: shared Charge Unit definition -- reused by Charge Code
+# (product.template), Charge Table (product.pricelist.item) and Cost Table
+# (product.supplierinfo) so the three never drift apart. Existing keys are
+# kept as-is for backward compatibility with existing Charge Code data.
 CHARGE_UNIT_SELECTION = [
     ('20ft', '20FT Container'),
     ('40ft', '40FT Container'),
     ('45ft', '45FT Container'),
     ('total_container', 'Total Container'),
-    ('rev_ton_cw', 'Rev Ton/ Charge Weight'),
+    ('rev_ton_cw', 'Rev Ton / Charge Weight'),
     ('rev_ton_rnd', 'Rev Ton Rnd Up'),
     ('shipment', 'Shipment'),
     ('house', 'House'),
+    ('subhouse_bl', 'Subhouse B/L'),
+    ('volume', 'Volume'),
+    ('weight', 'Weight'),
+    ('pcs', 'PCS'),
+    ('ccfee', 'CCFEE'),
+    ('block_4m3', 'Block of 4 M3'),
+    ('block_3m3', 'Block of 3 M3'),
+    ('invoice_charge_weight', 'Invoice Charge Weight'),
 ]
 
 
@@ -24,12 +36,12 @@ class ProductTemplateChargeCode(models.Model):
     cc_local_name = fields.Char(string='Local Name')
     cc_item_short_code = fields.Char(string='Item Short Code')
     cc_charge_type = fields.Selection([
-        ('F', 'FREIGHT'),
-        ('H', 'HANDLING'),
-        ('O', 'OTHER'),
-        ('P', 'PERMIT'),
-        ('S', 'STORAGE'),
-        ('T', 'TRUCKING'),
+        ('F', 'Freight'),
+        ('H', 'Handling'),
+        ('O', 'Other'),
+        ('P', 'Permit'),
+        ('S', 'Storage'),
+        ('T', 'Trucking'),
     ], string='Charge Type')
 
     # --- Scope / Behaviour ---
@@ -57,9 +69,11 @@ class ProductTemplateChargeCode(models.Model):
 
     # --- Tax / Currency ---
     cc_billing_currency_id = fields.Many2one('res.currency', string='Billing Curr Code')
-    cc_vat_id = fields.Many2one('account.tax', string='Code')
-    cc_cost_vat_id = fields.Many2one('account.tax', string='Cost Code')
-    cc_wht_tax_id = fields.Many2one('account.tax', string='WHT Code')
+    # FF-81: UI label cleanup only (Code/Cost Code/WHT Code -> VAT/Cost
+    # VAT/WHT) -- technical field names are unchanged.
+    cc_vat_id = fields.Many2one('account.tax', string='VAT')
+    cc_cost_vat_id = fields.Many2one('account.tax', string='Cost VAT')
+    cc_wht_tax_id = fields.Many2one('account.tax', string='WHT')
 
     # --- Other Configuration ---
     cc_consolidation_item_id = fields.Many2one(

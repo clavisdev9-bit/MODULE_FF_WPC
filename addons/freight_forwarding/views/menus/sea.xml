@@ -27,6 +27,16 @@
         action="action_freight_sea_quotation"
         sequence="10" />
 
+    <!-- FF-81: Charge & Cost Table (native Sales/Vendor Pricelist) -->
+    <menuitem id="menu_sea_charge_table" name="Charge Table"
+        parent="menu_sub_parent_sea_sales"
+        action="action_freight_sea_charge_table"
+        sequence="20" />
+    <menuitem id="menu_sea_cost_table" name="Cost Table"
+        parent="menu_sub_parent_sea_sales"
+        action="action_freight_sea_cost_table"
+        sequence="30" />
+
     <!-- IMPORT -->
     <menuitem id="menu_sub_parent_sea_import" name="Import"
         parent="menu_parent_sea"
@@ -69,4 +79,5 @@
         parent="menu_sub_parent_sea_export_job"
         action="action_sea_hbl_export_lcl"
         sequence="20" />
+
 </odoo>

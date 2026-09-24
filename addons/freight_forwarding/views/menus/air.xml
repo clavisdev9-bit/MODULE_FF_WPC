@@ -25,6 +25,16 @@
         action="action_freight_air_quotation"
         sequence="20" />
 
+    <!-- FF-81: Charge & Cost Table (native Sales/Vendor Pricelist) -->
+    <menuitem id="menu_air_charge_table" name="Charge Table"
+        parent="menu_sub_parent_air_sales"
+        action="action_freight_air_charge_table"
+        sequence="30" />
+    <menuitem id="menu_air_cost_table" name="Cost Table"
+        parent="menu_sub_parent_air_sales"
+        action="action_freight_air_cost_table"
+        sequence="40" />
+
     <!-- IMPORT -->
     <menuitem id="menu_sub_parent_air_import" name="Import"
         parent="menu_parent_air"
@@ -62,4 +72,5 @@
         parent="menu_sub_parent_air_export_awb_preparation"
         action="action_freight_air_mawb_export"
         sequence="30" />
+
 </odoo>

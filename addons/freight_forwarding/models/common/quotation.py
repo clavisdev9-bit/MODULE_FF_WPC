@@ -129,6 +129,166 @@ class FreightQuotation(models.AbstractModel):
     # Shipment Info — Common
     origin_id = fields.Many2one("res.city", string="Origin")
     destination_id = fields.Many2one("res.city", string="Destination")
+
+    # =========================================================
+    # FF-81: Freight Charge header -- Pricelist (Charge Table) eligibility
+    # =========================================================
+
+    # Business reference date untuk eligibility Pricelist (Charge Table) --
+    # berdiri sendiri, SENGAJA tidak di-derive dari valid_from/date_order/
+    # create_date (lihat FF-81 koreksi). Source date ini bisa berubah
+    # setelah UAT/business confirmation lebih lanjut.
+    pricing_date = fields.Date(
+        string="Pricing Date",
+        default=fields.Date.context_today,
+    )
+
+    eligible_pricelist_ids = fields.Many2many(
+        "product.pricelist",
+        compute="_compute_eligible_pricelist_ids",
+        string="Eligible Charge Tables",
+    )
+
+    @api.depends(
+        "is_freight_quotation", "freight_business_type", "freight_type",
+        "partner_id", "destination_id", "pricing_date",
+        "port_of_loading_id", "port_of_discharge_id", "via_port_id", "sea_ship_mode",
+        "airport_of_origin_id", "airport_of_destination_id", "via_airport_id",
+    )
+    def _compute_eligible_pricelist_ids(self):
+        """FF-81: `port_of_loading_id`/`sea_ship_mode`/`airport_of_*_id` are
+        defined in the Sea/Air submodules (models/sea|air/sales/quotation.py),
+        not on this abstract mixin -- but since both submodules target the
+        SAME final model (sale.order), every sale.order record carries every
+        one of these columns regardless of business type, so depending on
+        them here is safe (mirrors the hasattr()-based cross-domain access
+        already used elsewhere in this file, e.g. _get_freight_job)."""
+        for rec in self:
+            rec.eligible_pricelist_ids = (
+                rec._get_eligible_pricelists() if rec.is_freight_quotation
+                else self.env["product.pricelist"]
+            )
+
+    @api.onchange(
+        "partner_id", "freight_business_type", "freight_type", "destination_id",
+        "pricing_date", "port_of_loading_id", "port_of_discharge_id", "via_port_id",
+        "sea_ship_mode", "airport_of_origin_id", "airport_of_destination_id", "via_airport_id",
+    )
+    def _onchange_ff_pricelist_eligibility(self):
+        """FF-81: Freight Charge header context berubah -> Pricelist yang
+        sedang dipilih tapi sudah tidak eligible (mismatch Customer/route/
+        Job Type/tanggal) dikosongkan lagi, bukan dibiarkan diam-diam
+        menunjuk Charge Table yang sudah tidak cocok."""
+        for rec in self:
+            if not rec.is_freight_quotation or not rec.pricelist_id:
+                continue
+            if rec.pricelist_id not in rec._get_eligible_pricelists():
+                rec.pricelist_id = False
+
+    def _ff_pricelist_route_domain_fields(self):
+        """FF-81: (Charge Table header field, quotation value) pairs untuk
+        dimensi route yang relevan dengan `freight_business_type` quotation
+        ini -- Sea pakai Port fields, Air pakai Airport fields; field yang
+        tidak relevan untuk business_type lain tidak pernah ikut jadi
+        kriteria (lihat ff_type strict di `_get_eligible_pricelist_domain`)."""
+        self.ensure_one()
+        if self.freight_business_type == "sea":
+            return [
+                ("ff_port_of_loading_id", self.port_of_loading_id.id),
+                ("ff_port_of_discharge_id", self.port_of_discharge_id.id),
+                ("ff_via_port_id", self.via_port_id.id),
+            ]
+        if self.freight_business_type == "air":
+            return [
+                ("ff_airport_of_origin_id", self.airport_of_origin_id.id),
+                ("ff_airport_of_destination_id", self.airport_of_destination_id.id),
+                ("ff_via_airport_id", self.via_airport_id.id),
+            ]
+        return []
+
+    def _get_pricelist_job_type_candidate(self):
+        """FF-81: resolve kandidat Job Type untuk eligibility Pricelist,
+        REUSE resolver classification yang sama dengan
+        `freight.job.type.resolver.mixin` (business_type/freight_type/
+        sea_ship_mode) -- bukan formula/matching terpisah berdasarkan
+        code/name Job Type.
+
+        Cardinality klasifikasi->Job Type TIDAK diasumsikan 1:1: hanya
+        dikembalikan kalau resolusinya benar-benar tunggal (tepat 1
+        kandidat aktif). Kalau 0 atau >1 kandidat (ambiguous/unresolved),
+        dikembalikan recordset kosong -- caller
+        (`_get_eligible_pricelist_domain`) TIDAK PERNAH menebak salah satu
+        kandidat: lihat `_ff_job_type_eligibility_value` untuk bagaimana
+        hasil kosong ini diterjemahkan ke filtering (strict, BUKAN skip)."""
+        self.ensure_one()
+        business_type = self.freight_business_type
+        sea_ship_mode = self.sea_ship_mode if business_type == "sea" else False
+        candidates = self.env["freight.job.type"]._get_matching_job_types(
+            business_type, self.freight_type, sea_ship_mode
+        )
+        return candidates if len(candidates) == 1 else self.env["freight.job.type"]
+
+    def _ff_job_type_eligibility_value(self):
+        """FF-81 koreksi: rule wildcard-or-exact-match yang sama dengan
+        dimensi lain (Customer/route/dst.) HARUS berlaku juga untuk Job
+        Type -- termasuk saat resolver ambiguous/unresolved (0 atau >1
+        kandidat).
+
+        - Resolver tunggal (tepat 1 kandidat) -> Charge Table dengan
+          ff_job_type_id kosong ATAU sama dengan kandidat itu eligible.
+        - Resolver ambiguous/unresolved (0 atau >1 kandidat) -> HANYA
+          Charge Table dengan ff_job_type_id kosong yang eligible; Charge
+          Table Job-Type-specific manapun (apa pun isinya) TIDAK eligible,
+          karena quotation tidak bisa membuktikan exact match-nya. Ini
+          BUKAN skip filtering (perilaku lama, terlalu permisif) dan BUKAN
+          menebak salah satu kandidat."""
+        self.ensure_one()
+        job_type = self._get_pricelist_job_type_candidate()
+        return job_type.id if job_type else False
+
+    def _get_eligible_pricelist_domain(self):
+        """FF-81: domain eligibility Pricelist (Charge Table) untuk konteks
+        Freight Charge header quotation ini.
+
+        - ff_type strict: Sea quotation hanya melihat Charge Table
+          ff_type='sea', Air hanya 'air'.
+        - Setiap field header FF lain (termasuk Job Type): wildcard-or-
+          exact-match -- Charge Table field kosong = wildcard (selalu
+          match), field terisi wajib exact match ke field quotation yang
+          bersangkutan (Job Type ambiguous/unresolved diperlakukan sebagai
+          TIDAK BISA membuktikan match, lihat `_ff_job_type_eligibility_value`).
+        - Validity date pakai `pricing_date` (business reference date
+          berdiri sendiri -- BUKAN valid_from/date_order/create_date).
+        - Hanya Charge Table `active=True` yang eligible; field TBD (FF-81
+          "Field only" list) TIDAK PERNAH ikut jadi kriteria di sini.
+        """
+        self.ensure_one()
+        if not self.is_freight_quotation or self.freight_business_type not in ("sea", "air"):
+            return [("id", "=", False)]
+
+        domain = [("active", "=", True), ("ff_type", "=", self.freight_business_type)]
+
+        def _wildcard_or_match(field_name, value):
+            domain.extend(["|", (field_name, "=", False), (field_name, "=", value or False)])
+
+        _wildcard_or_match("ff_customer_id", self.partner_id.id)
+        if self.freight_business_type == "sea":
+            _wildcard_or_match("ff_destination_city_id", self.destination_id.id)
+        for field_name, value in self._ff_pricelist_route_domain_fields():
+            _wildcard_or_match(field_name, value)
+
+        _wildcard_or_match("ff_job_type_id", self._ff_job_type_eligibility_value())
+
+        check_date = self.pricing_date or fields.Date.context_today(self)
+        domain.extend([
+            "|", ("ff_effective_date", "=", False), ("ff_effective_date", "<=", check_date),
+            "|", ("ff_expiry_date", "=", False), ("ff_expiry_date", ">=", check_date),
+        ])
+        return domain
+
+    def _get_eligible_pricelists(self):
+        self.ensure_one()
+        return self.env["product.pricelist"].search(self._get_eligible_pricelist_domain())
     est_transit_time_days = fields.Integer(string="Est. Transit Time (Days)", default=0)
     est_transit_time_note = fields.Char(string="Est. Transit Time Note")
     frequency = fields.Selection(

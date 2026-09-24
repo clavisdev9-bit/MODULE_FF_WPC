@@ -176,10 +176,10 @@ class SeaQuotation(models.Model):
         domain = ['|', ('id', '=', original_id), ('original_quotation_id', '=', original_id)]
         all_variants = self.env["sale.order"].search(domain)
         
+        origin_country = self.origin_id.country_id if self.origin_id else False
         destination_country = (
-            self.delivery_country_id or self.delivery_city.country_id
+            self.destination_id.country_id if self.destination_id else False
         )
-        origin_country = self.pickup_country_id or self.pickup_city.country_id
         booking_no = self.env["ir.sequence"].next_by_code("freight.sea.booking")
         booking_vals = {
             "name": booking_no,
@@ -193,8 +193,8 @@ class SeaQuotation(models.Model):
                 destination_country.id if destination_country else False
             ),
             "origin_country_id": origin_country.id if origin_country else False,
-            "from_city": self.pickup_city.id,
-            "to_city": self.delivery_city.id,
+            "from_city": self.origin_id.id,
+            "to_city": self.destination_id.id,
             "payment_term_id": self.payment_term_id.id,
             "ship_mode": self.sea_ship_mode,
             "commodity_id": self.commodity_id.id,
