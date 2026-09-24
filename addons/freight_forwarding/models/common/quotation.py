@@ -1034,7 +1034,6 @@ class SaleOrderLine(models.Model):
     _FF_BILLABLE_QTY_DEPENDS = (
         "product_id",
         "product_id.product_tmpl_id.cc_charge_unit",
-        "product_id.product_tmpl_id.cc_min_billable_qty",
         "product_uom_qty",
         "product_uom",
         "order_id.pricelist_id",
@@ -1090,14 +1089,15 @@ class SaleOrderLine(models.Model):
 
     def _ff_get_min_billable_qty(self):
         """FF-82: Minimum Billable Qty paired with
-        `_ff_get_effective_charge_unit` -- frozen `ff_min_billable_qty` once
-        confirmed and snapshotted, otherwise the Charge Code's current
-        `cc_min_billable_qty`."""
+        `_ff_get_effective_charge_unit`. Lives on the Charge Table line
+        (`pricelist_item_id.ff_min_billable_qty`) -- NOT the Charge Code,
+        so no fallback there. Frozen `ff_min_billable_qty` once confirmed
+        and snapshotted; otherwise the matched rule's current value
+        (blank/0 = minimum billing disabled)."""
         self.ensure_one()
         if self.state == "sale" and self.ff_effective_charge_unit:
             return self.ff_min_billable_qty or 0.0
-        product_tmpl = self.product_id.product_tmpl_id if self.product_id else False
-        return (product_tmpl.cc_min_billable_qty or 0.0) if product_tmpl else 0.0
+        return self.pricelist_item_id.ff_min_billable_qty or 0.0 if self.pricelist_item_id else 0.0
 
     def _ff_snapshot_billing_config(self):
         """FF-82: freeze effective Charge Unit + Minimum Billable Qty for FF
@@ -1112,8 +1112,13 @@ class SaleOrderLine(models.Model):
             charge_unit = line._ff_get_effective_charge_unit()
             if not charge_unit:
                 continue
+            # Read the live minimum BEFORE assigning ff_effective_charge_unit
+            # below -- _ff_get_min_billable_qty() switches to reading the
+            # (still-blank) snapshot field once it's truthy, which would
+            # freeze 0.0 instead of the rule's actual current value.
+            min_qty = line._ff_get_min_billable_qty()
             line.ff_effective_charge_unit = charge_unit
-            line.ff_min_billable_qty = line.product_id.product_tmpl_id.cc_min_billable_qty or 0.0
+            line.ff_min_billable_qty = min_qty
 
     @api.model_create_multi
     def create(self, vals_list):
