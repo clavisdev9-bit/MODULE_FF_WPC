@@ -272,7 +272,8 @@ class FreightQuotation(models.AbstractModel):
             domain.extend(["|", (field_name, "=", False), (field_name, "=", value or False)])
 
         _wildcard_or_match("ff_customer_id", self.partner_id.id)
-        _wildcard_or_match("ff_destination_city_id", self.destination_id.id)
+        if self.freight_business_type == "sea":
+            _wildcard_or_match("ff_destination_city_id", self.destination_id.id)
         for field_name, value in self._ff_pricelist_route_domain_fields():
             _wildcard_or_match(field_name, value)
 

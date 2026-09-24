@@ -43,18 +43,18 @@
                 <field name="ff_charge_unit" optional="show" width="120px" column_invisible="not context.get('ff_type_visible')"/>
             </xpath>
             <!-- FF-81 additive header section: "Freight Forwarding". Sea vs
-                 Air route fields are mutually exclusive via `ff_type`
-                 (technical, never shown). Destination (res.city) is common
-                 to both. `ff_type` itself is added invisible only so the
-                 invisible conditions below can evaluate client-side.
-                 The whole section is hidden outright when `ff_type` is
-                 empty, i.e. when this is a plain native Pricelist, not an
-                 FF Air/Sea Charge Table. -->
+                 Air route fields are mutually exclusive via ff_type.
+                 Destination (res.city) is common to both. The whole section
+                 (including ff_type itself) is hidden outright when ff_type
+                 is empty, i.e. when this is a plain native Pricelist, not an
+                 FF Air/Sea Charge Table. Charge Table records are always
+                 created through the Air/Sea Charge Table menus, which
+                 default ff_type via context, so this never blocks setting it. -->
             <xpath expr="//notebook" position="before">
-                <field name="ff_type" invisible="1"/>
                 <group string="Freight Forwarding" name="freight_forwarding_pricelist_header"
                     invisible="not ff_type">
                     <group>
+                        <field name="ff_type" string="Type"/>
                         <field name="ff_description"/>
                         <field name="ff_job_type_id"/>
                         <field name="ff_module_code"/>
@@ -93,10 +93,10 @@
         <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet/group" position="after">
-                <field name="ff_type" invisible="1"/>
                 <group string="Freight Forwarding" name="freight_forwarding_cost_table"
                     invisible="not ff_type">
                     <group>
+                        <field name="ff_type" string="Type"/>
                         <field name="ff_cargo" optional="show"
                             invisible="not context.get('ff_cargo_visible')" />
                     </group>
