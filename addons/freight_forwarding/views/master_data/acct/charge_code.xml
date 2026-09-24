@@ -35,6 +35,7 @@
                         <group>
                             <field name="cc_split_by_method"/>
                             <field name="cc_charge_unit"/>
+                            <field name="cc_min_billable_qty"/>
                             <field name="cc_uom_id"/>
                             <field name="cc_site_code"/>
                         </group>

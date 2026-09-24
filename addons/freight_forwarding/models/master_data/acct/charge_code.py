@@ -55,6 +55,12 @@ class ProductTemplateChargeCode(models.Model):
         ('W', 'Gross Weight'),
     ], string='Split By Method')
     cc_charge_unit = fields.Selection(CHARGE_UNIT_SELECTION, string='Charge Unit')
+    # FF-82: minimum quantity that stays billed regardless of the resolved
+    # Actual Qty (billable_qty = max(actual_qty, cc_min_billable_qty)).
+    # Optional; 0/empty means no minimum billing. Deliberately NOT the same
+    # as native product.pricelist.item.min_quantity (that's a pricing-rule
+    # eligibility threshold, unrelated to billing quantity) -- see Jira FF-82.
+    cc_min_billable_qty = fields.Float(string='Minimum Billable Qty')
     cc_uom_id = fields.Many2one('uom.uom', string='Unit Of Measurement')
     cc_site_code = fields.Char(string='Site Code')
 

@@ -987,6 +987,46 @@ class SaleOrderLine(models.Model):
             return self.order_id._get_freight_job_type()
         return self.env["freight.job.type"]
 
+    def _ff_resolve_billable_qty(self):
+        """FF-82: (has_value, billable_qty) for this line, from the linked
+        Job's operational data via the Charge Unit resolver, then Charge
+        Code Minimum Billable Qty. `has_value=False` means the Charge Code
+        has no Charge Unit, no Job is resolvable, or the Charge Unit has no
+        confirmed formula yet -- caller must leave quantity untouched.
+
+        Deliberately NOT stored/cached on `product_uom_qty` -- FF-82 requires
+        Job actual qty / quoted qty / billable qty to stay three distinct
+        numbers."""
+        self.ensure_one()
+        product_tmpl = self.product_id.product_tmpl_id if self.product_id else False
+        charge_unit = product_tmpl.cc_charge_unit if product_tmpl else False
+        if not charge_unit:
+            return False, 0.0
+        job = self.order_id._get_freight_job() if self.order_id else False
+        if not job:
+            return False, 0.0
+        actual_qty = self.env["freight.charge.quantity.resolver"]._ff_resolve_actual_qty(job, charge_unit)
+        if actual_qty is None:
+            return False, 0.0
+        min_qty = product_tmpl.cc_min_billable_qty or 0.0
+        billable_qty = max(actual_qty, min_qty) if min_qty else actual_qty
+        return True, billable_qty
+
+    ff_billable_qty = fields.Float(
+        string="FF Billable Qty",
+        compute="_compute_ff_billable_qty",
+        digits="Product Unit of Measure",
+        help="FF-82: quantity resolved from Job operational data (Charge Unit) "
+             "with Minimum Billable Qty applied. Falls back to the quoted "
+             "quantity when the Charge Unit has no confirmed formula yet.",
+    )
+
+    @api.depends("product_id", "order_id.sea_job_id", "order_id.air_job_id")
+    def _compute_ff_billable_qty(self):
+        for line in self:
+            has_value, qty = line._ff_resolve_billable_qty()
+            line.ff_billable_qty = qty if has_value else line.product_uom_qty
+
     @api.depends("product_id", "order_id.sea_job_id", "order_id.air_job_id")
     def _compute_analytic_distribution(self):
         super()._compute_analytic_distribution()
@@ -998,6 +1038,12 @@ class SaleOrderLine(models.Model):
 
     def _prepare_invoice_line(self, **optional_values):
         res = super()._prepare_invoice_line(**optional_values)
+        # FF-82: invoice quantity = Billable Qty when the Charge Unit
+        # resolves one; native qty_to_invoice is kept untouched otherwise
+        # (TBD Charge Unit, no Job, or no Charge Unit at all).
+        has_billable_qty, billable_qty = self._ff_resolve_billable_qty()
+        if has_billable_qty:
+            res["quantity"] = billable_qty
         if not res.get("analytic_distribution"):
             analytic_account = self._get_freight_analytic_account()
             if analytic_account:

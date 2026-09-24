@@ -201,6 +201,32 @@ class FreightAirHawb(models.Model):
     dimension_ids = fields.One2many('freight.air.job.dimension', 'job_id', string='Dimensions')
 
     # -------------------------------------------------------------
+    # FF-82: minimal Rate & Desc (Export uses Dimension's computed
+    # volumetric_weight; Import doesn't use Dimension at all, so it gets its
+    # own manual field instead of forcing the Export computed one editable).
+    # -------------------------------------------------------------
+    import_volumetric_weight = fields.Float(
+        string='Volumetric Weight',
+        help='Manual Volumetric Weight for Air Import (Dimension tab is not '
+             'used for Import). Does not affect the computed Export '
+             'volumetric_weight, and the Charge Unit resolver never reads it '
+             'directly -- Rev Ton/Charge Weight always reads charge_weight.',
+    )
+
+    # FF-82: Export Chargeable Weight = max(Gross Weight, Volumetric Weight),
+    # always recomputed. Import keeps charge_weight as a plain manual/final
+    # field (self-reassignment below preserves whatever was last written).
+    charge_weight = fields.Float(string='Charge Weight', compute='_compute_charge_weight', store=True, readonly=False)
+
+    @api.depends('gross_weight', 'volumetric_weight', 'freight_type')
+    def _compute_charge_weight(self):
+        for rec in self:
+            if rec.freight_type == 'export':
+                rec.charge_weight = max(rec.gross_weight or 0.0, rec.volumetric_weight or 0.0)
+            else:
+                rec.charge_weight = rec.charge_weight
+
+    # -------------------------------------------------------------
     # Document List & Job Costing
     # -------------------------------------------------------------
     invoice_ids = fields.One2many('freight.air.job.invoice', 'job_id', string='Invoice')
