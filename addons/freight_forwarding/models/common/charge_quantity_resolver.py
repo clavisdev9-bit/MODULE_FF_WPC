@@ -24,21 +24,6 @@ _TBD_CHARGE_UNITS = {
     'ccfee',
 }
 
-# FF-82 container size_code validation: checked freight.container.type
-# master data across every available environment (ff-82, ff-main, ff_dev) --
-# `size_code` is blank on almost every record (e.g. code='20 GP', '40'HQ',
-# '1x40HC' all have size_code=''), and the one record that does have it set
-# uses "1X40'HQ", not a clean "40FT". `code` reliably carries the size
-# digits though, so the matcher checks size_code first (in case it's ever
-# populated in a clean format) and falls back to code -- matching on the
-# digits only ('20'/'40'/'45'), not the full "20FT" string the original
-# Jira wording assumed.
-_SEA_CONTAINER_SIZE_DIGITS = {
-    '20ft': '20',
-    '40ft': '40',
-    '45ft': '45',
-}
-
 
 class FreightChargeQuantityResolver(models.AbstractModel):
     _name = 'freight.charge.quantity.resolver'
@@ -104,24 +89,19 @@ class FreightChargeQuantityResolver(models.AbstractModel):
     def _ff_sea_container_count(self, cargo_lines, charge_unit):
         """FF-82 section 4: distinct `container_no`, never `quantity` or line
         count -- the same container repeated on several cargo lines still
-        counts once."""
+        counts once. Container size source of truth is
+        `container_type_id.size_code` -- the Charge Unit's own technical
+        value ('20ft'/'40ft'/'45ft') is compared to it directly (case/
+        whitespace normalized only), no parsing of code/name/iso_size and
+        no other inferred mapping."""
         lines = cargo_lines.filtered(lambda line: line.container_no)
         if charge_unit == 'total_container':
             return float(len(set(lines.mapped('container_no'))))
-        size_digits = _SEA_CONTAINER_SIZE_DIGITS[charge_unit]
+        target_size = charge_unit.strip().upper()
         matched = lines.filtered(
-            lambda line: self._ff_sea_container_size_matches(line.container_type_id, size_digits)
+            lambda line: (line.container_type_id.size_code or '').strip().upper() == target_size
         )
         return float(len(set(matched.mapped('container_no'))))
-
-    def _ff_sea_container_size_matches(self, container_type, size_digits):
-        """FF-82: match by the size digits ('20'/'40'/'45') found in Container
-        Type's size_code, falling back to its code when size_code is blank
-        -- see the master-data note above `_SEA_CONTAINER_SIZE_DIGITS`."""
-        for text in (container_type.size_code, container_type.code):
-            if text and size_digits in text.upper():
-                return True
-        return False
 
     def _ff_sea_total_cbm(self, cargo_lines):
         """FF-82 section 4: aggregate CBM across cargo lines, per-line source
