@@ -1021,11 +1021,38 @@ class SaleOrderLine(models.Model):
              "quantity when the Charge Unit has no confirmed formula yet.",
     )
 
-    @api.depends("product_id", "order_id.sea_job_id", "order_id.air_job_id")
+    @api.depends(
+        "product_id",
+        "product_id.product_tmpl_id.cc_charge_unit",
+        "product_id.product_tmpl_id.cc_min_billable_qty",
+        "order_id.sea_job_id",
+        "order_id.air_job_id",
+    )
     def _compute_ff_billable_qty(self):
         for line in self:
             has_value, qty = line._ff_resolve_billable_qty()
             line.ff_billable_qty = qty if has_value else line.product_uom_qty
+
+    # FF-82 fix: override the native stored qty_to_invoice compute (instead
+    # of patching account.move.line quantity in _prepare_invoice_line) so
+    # remaining-to-invoice semantics stay correct across partial/multiple
+    # invoices -- remaining_billable_qty = ff_billable_qty - qty_invoiced,
+    # same depends as _compute_ff_billable_qty above (plus native
+    # qty_invoiced/state, already covered by the base compute this extends).
+    @api.depends(
+        "product_id.product_tmpl_id.cc_charge_unit",
+        "product_id.product_tmpl_id.cc_min_billable_qty",
+        "order_id.sea_job_id",
+        "order_id.air_job_id",
+    )
+    def _compute_qty_to_invoice(self):
+        super()._compute_qty_to_invoice()
+        for line in self:
+            if line.state != "sale" or line.display_type:
+                continue
+            has_billable_qty, billable_qty = line._ff_resolve_billable_qty()
+            if has_billable_qty:
+                line.qty_to_invoice = billable_qty - line.qty_invoiced
 
     @api.depends("product_id", "order_id.sea_job_id", "order_id.air_job_id")
     def _compute_analytic_distribution(self):
@@ -1037,13 +1064,13 @@ class SaleOrderLine(models.Model):
                     line.analytic_distribution = {str(analytic_account.id): 100.0}
 
     def _prepare_invoice_line(self, **optional_values):
+        # FF-82 fix: no direct quantity override here anymore -- native
+        # _prepare_invoice_line() already sets 'quantity': self.qty_to_invoice,
+        # and _compute_qty_to_invoice() above is what makes qty_to_invoice
+        # reflect Billable Qty (remaining_billable_qty = ff_billable_qty -
+        # qty_invoiced) for lines whose Charge Unit resolves. This keeps
+        # partial/multiple-invoice remaining-to-invoice tracking correct.
         res = super()._prepare_invoice_line(**optional_values)
-        # FF-82: invoice quantity = Billable Qty when the Charge Unit
-        # resolves one; native qty_to_invoice is kept untouched otherwise
-        # (TBD Charge Unit, no Job, or no Charge Unit at all).
-        has_billable_qty, billable_qty = self._ff_resolve_billable_qty()
-        if has_billable_qty:
-            res["quantity"] = billable_qty
         if not res.get("analytic_distribution"):
             analytic_account = self._get_freight_analytic_account()
             if analytic_account:
