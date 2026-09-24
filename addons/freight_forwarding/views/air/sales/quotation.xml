@@ -87,6 +87,8 @@
                     <field name="commodity_id" />
                 </group>
                 <group name="freight_charge" string="Freight Charge" invisible="not is_freight_quotation">
+                    <field name="origin_id" />
+                    <field name="destination_id" />
                     <field name="airport_of_origin_id" />
                     <field name="airport_of_destination_id" />
                     <field name="via_airport_id" />
