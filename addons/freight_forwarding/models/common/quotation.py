@@ -987,6 +987,69 @@ class SaleOrderLine(models.Model):
             return self.order_id._get_freight_job_type()
         return self.env["freight.job.type"]
 
+    # FF-82: dependency paths for the Job operational data the resolver
+    # actually reads (see freight.charge.quantity.resolver) -- kept as a
+    # single list so _compute_ff_billable_qty and _compute_qty_to_invoice
+    # (which both call _ff_resolve_billable_qty) stay in sync. Deliberately
+    # scoped to order_id.sea_job_id/air_job_id (the direct link) -- the
+    # commercial-group fallback in _get_freight_job() is a pre-existing
+    # compatibility path, not something FF-82 needs to track for freshness.
+    _FF_BILLABLE_QTY_DEPENDS = (
+        "product_id",
+        "product_id.product_tmpl_id.cc_charge_unit",
+        "product_id.product_tmpl_id.cc_min_billable_qty",
+        "order_id.order_line.product_id",
+        # Air
+        "order_id.air_job_id.freight_type",
+        "order_id.air_job_id.shipment_type",
+        "order_id.air_job_id.charge_weight",
+        "order_id.air_job_id.gross_weight",
+        "order_id.air_job_id.total_m3",
+        "order_id.air_job_id.total_pcs",
+        "order_id.air_job_id.pcs",
+        "order_id.air_job_id.house_job_ids",
+        "order_id.air_job_id.house_job_ids.state",
+        # Sea
+        "order_id.sea_job_id.record_level",
+        "order_id.sea_job_id.house_job_ids",
+        "order_id.sea_job_id.house_job_ids.state",
+        "order_id.sea_job_id.cargo_info_ids.quantity",
+        "order_id.sea_job_id.cargo_info_ids.container_no",
+        "order_id.sea_job_id.cargo_info_ids.container_type_id.size_code",
+        "order_id.sea_job_id.cargo_info_ids.total_volume",
+        "order_id.sea_job_id.cargo_info_ids.volume",
+        "order_id.sea_job_id.cargo_info_ids.length",
+        "order_id.sea_job_id.cargo_info_ids.width",
+        "order_id.sea_job_id.cargo_info_ids.height",
+        "order_id.sea_job_id.cargo_info_ids.gross_weight",
+    )
+
+    def _ff_is_primary_charge_code_line(self, product_tmpl):
+        """FF-82: guard against double-billing when the same Charge Code
+        appears on more than one line of the same order -- the resolver
+        always returns the FULL Job quantity for a given (job, charge_unit)
+        pair (it has no notion of "this line's share"), so if every
+        duplicate line got that value independently the order would bill
+        the Job qty N times over. Only the first (lowest id) line for a
+        given Charge Code is "primary" and carries the resolved Billable
+        Qty; every later duplicate resolves to 0 instead.
+
+        Real (saved) lines only -- unsaved/NewId lines (draft editing,
+        onchange preview) are always treated as primary so live editing
+        isn't affected; the guard only has to hold once lines are
+        persisted (confirm/invoice time)."""
+        self.ensure_one()
+        if not isinstance(self.id, int):
+            return True
+        siblings = self.order_id.order_line.filtered(
+            lambda l: l.product_id
+            and l.product_id.product_tmpl_id == product_tmpl
+            and isinstance(l.id, int)
+        )
+        if len(siblings) <= 1:
+            return True
+        return self.id == min(siblings.ids)
+
     def _ff_resolve_billable_qty(self):
         """FF-82: (has_value, billable_qty) for this line, from the linked
         Job's operational data via the Charge Unit resolver, then Charge
@@ -1010,6 +1073,10 @@ class SaleOrderLine(models.Model):
             return False, 0.0
         min_qty = product_tmpl.cc_min_billable_qty or 0.0
         billable_qty = max(actual_qty, min_qty) if min_qty else actual_qty
+        if not self._ff_is_primary_charge_code_line(product_tmpl):
+            # Same Charge Code already billed in full by an earlier line on
+            # this order -- don't re-apply the same actual/minimum qty.
+            return True, 0.0
         return True, billable_qty
 
     ff_billable_qty = fields.Float(
@@ -1018,16 +1085,12 @@ class SaleOrderLine(models.Model):
         digits="Product Unit of Measure",
         help="FF-82: quantity resolved from Job operational data (Charge Unit) "
              "with Minimum Billable Qty applied. Falls back to the quoted "
-             "quantity when the Charge Unit has no confirmed formula yet.",
+             "quantity when the Charge Unit has no confirmed formula yet. "
+             "0 on a duplicate line sharing the same Charge Code as an "
+             "earlier line on this order (see _ff_is_primary_charge_code_line).",
     )
 
-    @api.depends(
-        "product_id",
-        "product_id.product_tmpl_id.cc_charge_unit",
-        "product_id.product_tmpl_id.cc_min_billable_qty",
-        "order_id.sea_job_id",
-        "order_id.air_job_id",
-    )
+    @api.depends(*_FF_BILLABLE_QTY_DEPENDS)
     def _compute_ff_billable_qty(self):
         for line in self:
             has_value, qty = line._ff_resolve_billable_qty()
@@ -1039,12 +1102,7 @@ class SaleOrderLine(models.Model):
     # invoices -- remaining_billable_qty = ff_billable_qty - qty_invoiced,
     # same depends as _compute_ff_billable_qty above (plus native
     # qty_invoiced/state, already covered by the base compute this extends).
-    @api.depends(
-        "product_id.product_tmpl_id.cc_charge_unit",
-        "product_id.product_tmpl_id.cc_min_billable_qty",
-        "order_id.sea_job_id",
-        "order_id.air_job_id",
-    )
+    @api.depends(*_FF_BILLABLE_QTY_DEPENDS)
     def _compute_qty_to_invoice(self):
         super()._compute_qty_to_invoice()
         for line in self:
