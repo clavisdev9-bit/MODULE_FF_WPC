@@ -194,8 +194,9 @@
                             </group>
                         </page>
 
-                        <!-- TAB 3: DIMENSION -->
-                        <page string="Dimension" name="dimension">
+                        <!-- TAB 3: DIMENSION (FF-82: Import doesn't use Dimension as input,
+                             uses summary cargo + manual import_volumetric_weight instead) -->
+                        <page string="Dimension" name="dimension" invisible="freight_type == 'import'">
                             <group>
                                 <group>
                                     <field name="vol_weight_ratio"/>
@@ -228,6 +229,22 @@
                                 <field name="total_dimension" nolabel="1"/>
                                 <label for="volumetric_weight" class="fw-bold"/>
                                 <field name="volumetric_weight" nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <!-- TAB: RATE &amp; DESC (FF-82: minimal fields needed for Charge Unit
+                             Rev Ton/Charge Weight pricing only, not full SysFreight parity;
+                             Import already shows its own Cargo Summary on Shipment Info) -->
+                        <page string="Rate &amp; Desc" name="rate_desc" invisible="freight_type == 'import'">
+                            <group>
+                                <group>
+                                    <field name="total_pcs" string="Pcs/Rcp" readonly="1"/>
+                                    <field name="gross_weight"/>
+                                </group>
+                                <group>
+                                    <field name="volumetric_weight" string="Volume Weight" readonly="1"/>
+                                    <field name="charge_weight" string="Chargeable Weight" readonly="1"/>
+                                </group>
                             </group>
                         </page>
 
@@ -414,8 +431,8 @@
                     </group>
                     <group>
                         <field name="gross_weight"/>
+                        <field name="import_volumetric_weight"/>
                         <field name="charge_weight"/>
-                        <field name="volumetric_weight"/>
                     </group>
                 </group>
             </xpath>

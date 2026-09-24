@@ -99,6 +99,13 @@ class ProductPricelistItemFreight(models.Model):
     _name = 'product.pricelist.item'
     _inherit = ['product.pricelist.item', 'freight.pricing.mixin']
 
+    # FF-82: Minimum Billable Qty lives on the Charge Table line, NOT on
+    # `freight.pricing.mixin` (shared with Cost Table/product.supplierinfo,
+    # which this does not apply to) and NOT on the Charge Code -- a Charge
+    # Table rule can set a different minimum than another rule for the same
+    # Charge Code. Blank/0 = minimum billing disabled, no fallback anywhere.
+    ff_min_billable_qty = fields.Float(string='Minimum Billable Qty')
+
 
 class ProductSupplierinfoFreight(models.Model):
     """Cost Table (flat -- not symmetrical with Charge Table)."""
