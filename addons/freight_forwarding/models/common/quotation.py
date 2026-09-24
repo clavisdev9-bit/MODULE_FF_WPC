@@ -4,6 +4,9 @@ import os
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.modules.module import get_module_resource
+from odoo.tools import float_compare, float_is_zero
+
+from ..master_data.acct.charge_code import CHARGE_UNIT_SELECTION
 
 
 class FreightQuotation(models.AbstractModel):
@@ -934,6 +937,11 @@ class SaleOrderQuotation(models.Model):
 
     def action_confirm(self):
         res = super().action_confirm()
+        # FF-82: freeze effective Charge Unit + Minimum Billable Qty on
+        # confirm so a later Charge Table/Charge Code edit can't change an
+        # already-confirmed order's billing semantics (see
+        # SaleOrderLine._ff_snapshot_billing_config).
+        self.order_line._ff_snapshot_billing_config()
         for rec in self:
             if rec.is_freight_quotation:
                 original_id = rec.original_quotation_id.id if rec.original_quotation_id else rec.id
@@ -987,6 +995,24 @@ class SaleOrderLine(models.Model):
             return self.order_id._get_freight_job_type()
         return self.env["freight.job.type"]
 
+    # FF-82: Charge Unit + Minimum Billable Qty snapshot, frozen at order
+    # confirm (see _ff_snapshot_billing_config/action_confirm override
+    # below) so editing the Charge Table rule or the Charge Code afterward
+    # can never change an already-confirmed order's billing semantics.
+    # Empty while draft/sent -- live resolution is used instead (see
+    # _ff_get_effective_charge_unit/_ff_get_min_billable_qty) -- and also
+    # empty on orders confirmed before this field existed, which keeps
+    # falling back to live resolution (no behaviour change for those).
+    ff_effective_charge_unit = fields.Selection(
+        CHARGE_UNIT_SELECTION,
+        string="FF Effective Charge Unit (Snapshot)",
+        copy=False,
+    )
+    ff_min_billable_qty = fields.Float(
+        string="FF Minimum Billable Qty (Snapshot)",
+        copy=False,
+    )
+
     # FF-82: dependency paths for the Job operational data the resolver
     # actually reads (see freight.charge.quantity.resolver) -- kept as a
     # single list so _compute_ff_billable_qty and _compute_qty_to_invoice
@@ -994,6 +1020,17 @@ class SaleOrderLine(models.Model):
     # scoped to order_id.sea_job_id/air_job_id (the direct link) -- the
     # commercial-group fallback in _get_freight_job() is a pre-existing
     # compatibility path, not something FF-82 needs to track for freshness.
+    #
+    # NOTE: pricelist_item_id/pricelist_item_id.ff_charge_unit are
+    # deliberately NOT listed -- pricelist_item_id is a non-stored,
+    # non-searchable compute field, and depending on a field through it
+    # makes Odoo unable to build the recompute trigger (logged as a
+    # "should be searchable" warning). It's not needed anyway: once
+    # confirmed, billing reads the frozen snapshot fields below (plain
+    # stored fields, no cross-model hop); while draft/sent, product_id/
+    # product_uom_qty/product_uom/order_id.pricelist_id already cover every
+    # input that drives pricelist_item_id's own native recompute, so this
+    # field's compute reruns and reads the fresh pricelist_item_id anyway.
     _FF_BILLABLE_QTY_DEPENDS = (
         "product_id",
         "product_id.product_tmpl_id.cc_charge_unit",
@@ -1001,8 +1038,8 @@ class SaleOrderLine(models.Model):
         "product_uom_qty",
         "product_uom",
         "order_id.pricelist_id",
-        "pricelist_item_id",
-        "pricelist_item_id.ff_charge_unit",
+        "ff_effective_charge_unit",
+        "ff_min_billable_qty",
         "order_id.order_line.product_id",
         # Air
         "order_id.air_job_id.freight_type",
@@ -1031,16 +1068,58 @@ class SaleOrderLine(models.Model):
 
     def _ff_get_effective_charge_unit(self):
         """FF-82/FF-81 integration: the Charge Unit actually in effect for
-        this line -- the Charge Table rule that priced it
-        (`pricelist_item_id.ff_charge_unit`, FF-81) can override the Charge
-        Code's own default (`product.template.cc_charge_unit`). Falls back
-        to the Charge Code default when the rule doesn't set one (or no
-        rule matched)."""
+        this line.
+
+        Once the order is confirmed AND a snapshot was captured (see
+        `_ff_snapshot_billing_config`), this always returns the FROZEN
+        `ff_effective_charge_unit` -- a later edit to the Charge Table rule
+        or the Charge Code default must never change an already-confirmed
+        order's billing. Before confirm (or on a pre-FF-82 confirmed order
+        that never got a snapshot), it resolves live: the Charge Table rule
+        that priced this line (`pricelist_item_id.ff_charge_unit`, FF-81)
+        overrides the Charge Code's own default
+        (`product.template.cc_charge_unit`); falls back to the Charge Code
+        default when the rule doesn't set one (or no rule matched)."""
         self.ensure_one()
+        if self.state == "sale" and self.ff_effective_charge_unit:
+            return self.ff_effective_charge_unit
         if self.pricelist_item_id and self.pricelist_item_id.ff_charge_unit:
             return self.pricelist_item_id.ff_charge_unit
         product_tmpl = self.product_id.product_tmpl_id if self.product_id else False
         return product_tmpl.cc_charge_unit if product_tmpl else False
+
+    def _ff_get_min_billable_qty(self):
+        """FF-82: Minimum Billable Qty paired with
+        `_ff_get_effective_charge_unit` -- frozen `ff_min_billable_qty` once
+        confirmed and snapshotted, otherwise the Charge Code's current
+        `cc_min_billable_qty`."""
+        self.ensure_one()
+        if self.state == "sale" and self.ff_effective_charge_unit:
+            return self.ff_min_billable_qty or 0.0
+        product_tmpl = self.product_id.product_tmpl_id if self.product_id else False
+        return (product_tmpl.cc_min_billable_qty or 0.0) if product_tmpl else 0.0
+
+    def _ff_snapshot_billing_config(self):
+        """FF-82: freeze effective Charge Unit + Minimum Billable Qty for FF
+        freight lines, called once from `action_confirm()` (and from
+        `create()` for a line added directly onto an already-'sale' order).
+        Never overwrites an existing snapshot -- once frozen, a line keeps
+        its billing semantics for the rest of its life regardless of how
+        many times this is called again."""
+        for line in self:
+            if line.display_type or not line.product_id or line.ff_effective_charge_unit:
+                continue
+            charge_unit = line._ff_get_effective_charge_unit()
+            if not charge_unit:
+                continue
+            line.ff_effective_charge_unit = charge_unit
+            line.ff_min_billable_qty = line.product_id.product_tmpl_id.cc_min_billable_qty or 0.0
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        lines = super().create(vals_list)
+        lines.filtered(lambda l: l.order_id.state == "sale")._ff_snapshot_billing_config()
+        return lines
 
     def _ff_is_primary_charge_code_line(self, product_tmpl, charge_unit):
         """FF-82: guard against double-billing when the same Charge Code +
@@ -1094,7 +1173,7 @@ class SaleOrderLine(models.Model):
         actual_qty = self.env["freight.charge.quantity.resolver"]._ff_resolve_actual_qty(job, charge_unit)
         if actual_qty is None:
             return False, 0.0
-        min_qty = product_tmpl.cc_min_billable_qty or 0.0
+        min_qty = self._ff_get_min_billable_qty()
         billable_qty = max(actual_qty, min_qty) if min_qty else actual_qty
         if not self._ff_is_primary_charge_code_line(product_tmpl, charge_unit):
             # Same Charge Code + effective Charge Unit already billed in
@@ -1135,6 +1214,31 @@ class SaleOrderLine(models.Model):
             has_billable_qty, billable_qty = line._ff_resolve_billable_qty()
             if has_billable_qty:
                 line.qty_to_invoice = billable_qty - line.qty_invoiced
+
+    # FF-82: native _compute_invoice_status() falls back to comparing
+    # qty_invoiced against product_uom_qty (Ordered Qty) once qty_to_invoice
+    # is 0, so an FF line whose Billable Qty is lower than Ordered Qty
+    # (e.g. Ordered=10, Billable=8) stays 'no'/never 'invoiced' after being
+    # fully billed at 8. Post-process only the lines with a resolved FF
+    # Billable Qty: 'invoiced' once qty_to_invoice is back to 0 and
+    # qty_invoiced has caught up to ff_billable_qty (not product_uom_qty).
+    # TBD/unresolved Charge Units and non-FF lines are untouched --
+    # native result stands as-is.
+    @api.depends(*_FF_BILLABLE_QTY_DEPENDS)
+    def _compute_invoice_status(self):
+        super()._compute_invoice_status()
+        precision = self.env["decimal.precision"].precision_get("Product Unit of Measure")
+        for line in self:
+            if line.state != "sale" or line.display_type:
+                continue
+            has_billable_qty, billable_qty = line._ff_resolve_billable_qty()
+            if not has_billable_qty:
+                continue
+            if (
+                float_is_zero(line.qty_to_invoice, precision_digits=precision)
+                and float_compare(line.qty_invoiced, billable_qty, precision_digits=precision) >= 0
+            ):
+                line.invoice_status = "invoiced"
 
     @api.depends("product_id", "order_id.sea_job_id", "order_id.air_job_id")
     def _compute_analytic_distribution(self):
