@@ -998,6 +998,11 @@ class SaleOrderLine(models.Model):
         "product_id",
         "product_id.product_tmpl_id.cc_charge_unit",
         "product_id.product_tmpl_id.cc_min_billable_qty",
+        "product_uom_qty",
+        "product_uom",
+        "order_id.pricelist_id",
+        "pricelist_item_id",
+        "pricelist_item_id.ff_charge_unit",
         "order_id.order_line.product_id",
         # Air
         "order_id.air_job_id.freight_type",
@@ -1024,15 +1029,32 @@ class SaleOrderLine(models.Model):
         "order_id.sea_job_id.cargo_info_ids.gross_weight",
     )
 
-    def _ff_is_primary_charge_code_line(self, product_tmpl):
-        """FF-82: guard against double-billing when the same Charge Code
-        appears on more than one line of the same order -- the resolver
-        always returns the FULL Job quantity for a given (job, charge_unit)
-        pair (it has no notion of "this line's share"), so if every
-        duplicate line got that value independently the order would bill
-        the Job qty N times over. Only the first (lowest id) line for a
-        given Charge Code is "primary" and carries the resolved Billable
-        Qty; every later duplicate resolves to 0 instead.
+    def _ff_get_effective_charge_unit(self):
+        """FF-82/FF-81 integration: the Charge Unit actually in effect for
+        this line -- the Charge Table rule that priced it
+        (`pricelist_item_id.ff_charge_unit`, FF-81) can override the Charge
+        Code's own default (`product.template.cc_charge_unit`). Falls back
+        to the Charge Code default when the rule doesn't set one (or no
+        rule matched)."""
+        self.ensure_one()
+        if self.pricelist_item_id and self.pricelist_item_id.ff_charge_unit:
+            return self.pricelist_item_id.ff_charge_unit
+        product_tmpl = self.product_id.product_tmpl_id if self.product_id else False
+        return product_tmpl.cc_charge_unit if product_tmpl else False
+
+    def _ff_is_primary_charge_code_line(self, product_tmpl, charge_unit):
+        """FF-82: guard against double-billing when the same Charge Code +
+        effective Charge Unit appears on more than one line of the same
+        order -- the resolver always returns the FULL Job quantity for a
+        given (job, charge_unit) pair (it has no notion of "this line's
+        share"), so if every duplicate line got that value independently
+        the order would bill the Job qty N times over. Only the first
+        (lowest id) line for a given (Charge Code, effective Charge Unit)
+        pair is "primary" and carries the resolved Billable Qty; every
+        later duplicate resolves to 0 instead. Two lines of the same
+        Charge Code but a DIFFERENT effective Charge Unit (e.g. a
+        Pricelist rule override on one of them) are not duplicates of each
+        other and both resolve independently.
 
         Real (saved) lines only -- unsaved/NewId lines (draft editing,
         onchange preview) are always treated as primary so live editing
@@ -1045,6 +1067,7 @@ class SaleOrderLine(models.Model):
             lambda l: l.product_id
             and l.product_id.product_tmpl_id == product_tmpl
             and isinstance(l.id, int)
+            and l._ff_get_effective_charge_unit() == charge_unit
         )
         if len(siblings) <= 1:
             return True
@@ -1053,16 +1076,16 @@ class SaleOrderLine(models.Model):
     def _ff_resolve_billable_qty(self):
         """FF-82: (has_value, billable_qty) for this line, from the linked
         Job's operational data via the Charge Unit resolver, then Charge
-        Code Minimum Billable Qty. `has_value=False` means the Charge Code
-        has no Charge Unit, no Job is resolvable, or the Charge Unit has no
-        confirmed formula yet -- caller must leave quantity untouched.
+        Code Minimum Billable Qty. `has_value=False` means there's no
+        effective Charge Unit, no Job is resolvable, or the Charge Unit has
+        no confirmed formula yet -- caller must leave quantity untouched.
 
         Deliberately NOT stored/cached on `product_uom_qty` -- FF-82 requires
         Job actual qty / quoted qty / billable qty to stay three distinct
         numbers."""
         self.ensure_one()
         product_tmpl = self.product_id.product_tmpl_id if self.product_id else False
-        charge_unit = product_tmpl.cc_charge_unit if product_tmpl else False
+        charge_unit = self._ff_get_effective_charge_unit()
         if not charge_unit:
             return False, 0.0
         job = self.order_id._get_freight_job() if self.order_id else False
@@ -1073,9 +1096,10 @@ class SaleOrderLine(models.Model):
             return False, 0.0
         min_qty = product_tmpl.cc_min_billable_qty or 0.0
         billable_qty = max(actual_qty, min_qty) if min_qty else actual_qty
-        if not self._ff_is_primary_charge_code_line(product_tmpl):
-            # Same Charge Code already billed in full by an earlier line on
-            # this order -- don't re-apply the same actual/minimum qty.
+        if not self._ff_is_primary_charge_code_line(product_tmpl, charge_unit):
+            # Same Charge Code + effective Charge Unit already billed in
+            # full by an earlier line on this order -- don't re-apply the
+            # same actual/minimum qty.
             return True, 0.0
         return True, billable_qty
 
