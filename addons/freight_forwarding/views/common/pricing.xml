@@ -59,7 +59,7 @@
                         <field name="ff_job_type_id"/>
                         <field name="ff_module_code"/>
                         <field name="ff_customer_id"/>
-                        <field name="ff_destination_city_id"/>
+                        <field name="ff_destination_city_id" invisible="ff_type != 'sea'" />
                         <field name="ff_port_of_loading_id" invisible="ff_type != 'sea'"/>
                         <field name="ff_port_of_discharge_id" invisible="ff_type != 'sea'"/>
                         <field name="ff_via_port_id" invisible="ff_type != 'sea'"/>
