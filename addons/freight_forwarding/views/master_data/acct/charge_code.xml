@@ -89,9 +89,9 @@
                                     <field name="module_code"/>
                                     <field name="job_type_id"/>
                                     <field name="sales_account_id"/>
-                                    <field name="sales_description"/>
+                                    <!-- <field name="sales_description"/> -->
                                     <field name="cost_account_id"/>
-                                    <field name="cost_description"/>
+                                    <!-- <field name="cost_description"/> -->
                                     <field name="advance_account_id"/>
                                 </list>
                             </field>
